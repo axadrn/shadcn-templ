@@ -26,9 +26,10 @@ type Props struct {
 }
 
 type ctxState struct {
-	id         string
-	value      string
-	controlled bool
+	id          string
+	value       string
+	controlled  bool
+	orientation Orientation
 }
 
 type ctxKey string
@@ -108,11 +109,13 @@ templ Tabs(props ...Props) {
 		data-tui-tabs-value={ value }
 		{ p.Attributes... }
 	>
-		{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: tabsID, value: value, controlled: p.Value != nil}) }}
+		{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: tabsID, value: value, controlled: p.Value != nil, orientation: p.Orientation}) }}
 		{ children... }
 	</div>
 }
 
+// List is Base UI's Tabs.List: the tablist role and aria-orientation, so the
+// arrow keys tabs.js binds are announced as available.
 templ List(props ...ListProps) {
 	{{ var p ListProps }}
 	if len(props) > 0 {
@@ -123,6 +126,8 @@ templ List(props ...ListProps) {
 		if p.ID != "" {
 			id={ p.ID }
 		}
+		role="tablist"
+		aria-orientation={ string(orientation(ctx)) }
 		class={
 			utils.CN(
 				"cn-tabs-list group/tabs-list inline-flex w-fit items-center justify-center text-muted-foreground group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
@@ -139,6 +144,8 @@ templ List(props ...ListProps) {
 	</div>
 }
 
+// Trigger is Base UI's Tabs.Tab: the tab role, aria-selected, the panel it
+// controls and the roving tabindex that makes the list a single tab stop.
 templ Trigger(props ...TriggerProps) {
 	{{ var p TriggerProps }}
 	if len(props) > 0 {
@@ -151,11 +158,20 @@ templ Trigger(props ...TriggerProps) {
 	if p.Value == "" {
 		<span class="text-xs text-destructive">Error: Tab Trigger missing required 'Value' attribute.</span>
 	}
+	if p.ID == "" {
+		{{ p.ID = triggerID(tabsID, p.Value) }}
+	}
+	{{ active := tabsIsActive(ctx, p.Value) }}
 	<button
-		if p.ID != "" {
-			id={ p.ID }
-		}
+		id={ p.ID }
 		type="button"
+		role="tab"
+		aria-selected={ utils.IfElse(active, "true", "false") }
+		aria-controls={ contentID(tabsID, p.Value) }
+		tabindex={ utils.IfElse(active, "0", "-1") }
+		if p.Disabled {
+			aria-disabled="true"
+		}
 		class={
 			utils.CN(
 				"cn-tabs-trigger relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center whitespace-nowrap text-foreground/60 transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
@@ -177,6 +193,8 @@ templ Trigger(props ...TriggerProps) {
 	</button>
 }
 
+// Content is Base UI's Tabs.Panel: the tabpanel role labelled by its tab, and
+// tabindex="0" so panel content with nothing focusable is still reachable.
 templ Content(props ...ContentProps) {
 	{{ var p ContentProps }}
 	if len(props) > 0 {
@@ -190,10 +208,14 @@ templ Content(props ...ContentProps) {
 		<span class="text-xs text-destructive">Error: Tab Content missing required 'Value' attribute.</span>
 		return templ.NopComponent
 	}
+	if p.ID == "" {
+		{{ p.ID = contentID(tabsID, p.Value) }}
+	}
 	<div
-		if p.ID != "" {
-			id={ p.ID }
-		}
+		id={ p.ID }
+		role="tabpanel"
+		aria-labelledby={ triggerID(tabsID, p.Value) }
+		tabindex="0"
 		class={
 			utils.CN(
 				"cn-tabs-content flex-1 outline-none",
@@ -219,6 +241,26 @@ func tabsIsActive(ctx context.Context, value string) bool {
 
 func IDFromContext(ctx context.Context) string {
 	return state(ctx).id
+}
+
+// orientation reports the root's orientation, for the list's aria-orientation
+// and for the arrow keys tabs.js binds.
+func orientation(ctx context.Context) Orientation {
+	if o := state(ctx).orientation; o != "" {
+		return o
+	}
+	return OrientationHorizontal
+}
+
+// triggerID and contentID derive the aria-controls / aria-labelledby pair from
+// the tabs id and the tab's value, so a trigger and its panel resolve each
+// other without sharing state — an htmx swap of one half keeps the pairing.
+func triggerID(tabsID, value string) string {
+	return tabsID + "-tab-" + value
+}
+
+func contentID(tabsID, value string) string {
+	return tabsID + "-panel-" + value
 }
 
 func listVariant(v Variant) Variant {

@@ -19,6 +19,10 @@
         // Base UI marks the selected tab with a bare data-active attribute;
         // the cn-tabs-trigger styles select on it.
         trigger.toggleAttribute("data-active", isActive);
+        // The ARIA state moves with the visual one, and the roving tabindex
+        // keeps the list a single tab stop.
+        trigger.setAttribute("aria-selected", isActive ? "true" : "false");
+        trigger.setAttribute("tabindex", isActive ? "0" : "-1");
       });
 
     // Update all contents with this tabs-id
