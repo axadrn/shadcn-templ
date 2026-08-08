@@ -186,8 +186,8 @@ A richer example combining groups, icons, and submenus.
 
 The trigger opens the menu on `Enter`, `Space` and `ArrowDown` with the first
 item focused, and on `ArrowUp` with the last. Inside the menu the arrow keys
-walk the items, `Home` and `End` jump to its ends and disabled items are
-skipped.
+walk the items and wrap round at both ends, `Home` and `End` jump to its ends
+and disabled items are skipped.
 
 ## API Reference
 

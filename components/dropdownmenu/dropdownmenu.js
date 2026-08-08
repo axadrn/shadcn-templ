@@ -220,6 +220,11 @@
     if (item && document.activeElement !== item) item.focus({ preventScroll: false });
   }
 
+  // Wraps at both ends, the pendant of Menu.Root's loopFocus, which the
+  // reference defaults to true: ArrowDown on the last item returns to the
+  // first and ArrowUp on the first goes to the last. Disabled items stay out
+  // of the walk — itemsIn filters them, because ours are natively disabled
+  // buttons rather than the aria-disabled ones the reference keeps focusable.
   function moveFocus(container, delta) {
     const items = itemsIn(container);
     if (!items.length) return;
@@ -228,8 +233,7 @@
       focusItem(delta > 0 ? items[0] : items[items.length - 1]);
       return;
     }
-    const next = items[index + delta];
-    if (next) focusItem(next);
+    focusItem(items[(index + delta + items.length) % items.length]);
   }
 
   // ----- open / close --------------------------------------------------------
