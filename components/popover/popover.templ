@@ -41,11 +41,19 @@ func state(ctx context.Context) ctxState {
 	return ctxState{}
 }
 
+// triggerID derives the trigger's id from the id Root, Trigger and Content
+// already share. The popup names itself after its Title, so nothing points
+// here yet; a caller wiring their own aria-describedby needs it to exist.
+func triggerID(popoverID string) string {
+	return popoverID + "-trigger"
+}
+
 // Trigger returns the attributes that turn any element (usually a button)
 // into the popover trigger — the asChild equivalent: no wrapper element.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
 		"data-tui-popover-trigger": true,
+		"id":                       triggerID(state(ctx).id),
 		"aria-controls":            state(ctx).id,
 		"aria-haspopup":            "dialog",
 		"aria-expanded":            "false",
