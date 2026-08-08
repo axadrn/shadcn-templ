@@ -54,6 +54,7 @@ type rootState struct {
 type itemState struct {
 	open     bool
 	disabled bool
+	id       string
 }
 
 func root(ctx context.Context) rootState {
@@ -72,6 +73,21 @@ func itemOpen(ctx context.Context) bool {
 
 func itemDisabled(ctx context.Context) bool {
 	return item(ctx).disabled
+}
+
+func itemID(ctx context.Context) string {
+	return item(ctx).id
+}
+
+// triggerID and panelID derive the aria-controls / aria-labelledby pair from
+// the item's id. Pass ItemProps.ID to keep them stable across renders, as an
+// htmx swap of one half needs.
+func triggerID(itemID string) string {
+	return itemID + "-trigger"
+}
+
+func panelID(itemID string) string {
+	return itemID + "-panel"
 }
 
 templ Accordion(props ...Props) {
@@ -118,10 +134,14 @@ templ Item(props ...ItemProps) {
 	if p.Value == "" {
 		{{ p.Value = utils.RandomID() }}
 	}
+	{{ id := p.ID }}
+	if id == "" {
+		{{ id = utils.RandomID() }}
+	}
 	{{ r := root(ctx) }}
 	{{ open := r.values[p.Value] }}
 	{{ disabled := p.Disabled || r.disabled }}
-	{{ ctx = context.WithValue(ctx, itemKey, itemState{open: open, disabled: disabled}) }}
+	{{ ctx = context.WithValue(ctx, itemKey, itemState{open: open, disabled: disabled, id: id}) }}
 	<div
 		if p.ID != "" {
 			id={ p.ID }
@@ -143,22 +163,26 @@ templ Item(props ...ItemProps) {
 	</div>
 }
 
+// Trigger is Base UI's Accordion.Trigger: aria-expanded for the state and
+// aria-controls for the panel it discloses.
 templ Trigger(props ...TriggerProps) {
 	{{ var p TriggerProps }}
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
+	if p.ID == "" {
+		{{ p.ID = triggerID(itemID(ctx)) }}
+	}
 	<h3 class="flex">
 		<button
-			if p.ID != "" {
-				id={ p.ID }
-			}
+			id={ p.ID }
 			type="button"
 			if _, ok := p.Attributes["tabindex"]; !ok {
 				tabindex="0"
 			}
 			data-slot="accordion-trigger"
 			aria-expanded={ utils.IfElse(itemOpen(ctx), "true", "false") }
+			aria-controls={ panelID(itemID(ctx)) }
 			disabled?={ itemDisabled(ctx) }
 			if itemDisabled(ctx) {
 				aria-disabled="true"
@@ -184,15 +208,20 @@ templ Trigger(props ...TriggerProps) {
 	</h3>
 }
 
+// Content is Base UI's Accordion.Panel: the region role labelled by its
+// trigger, so what the button revealed can be reached directly.
 templ Content(props ...ContentProps) {
 	{{ var p ContentProps }}
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
+	if p.ID == "" {
+		{{ p.ID = panelID(itemID(ctx)) }}
+	}
 	<div
-		if p.ID != "" {
-			id={ p.ID }
-		}
+		id={ p.ID }
+		role="region"
+		aria-labelledby={ triggerID(itemID(ctx)) }
 		data-slot="accordion-content"
 		hidden?={ !itemOpen(ctx) }
 		class="cn-accordion-content overflow-hidden"
