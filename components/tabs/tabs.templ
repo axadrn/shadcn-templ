@@ -63,6 +63,11 @@ type ListProps struct {
 	Attributes templ.Attributes
 	// Variant of the list. Options: 'default' (filled), 'line' (underline).
 	Variant Variant
+	// ActivateOnFocus selects a tab as soon as the arrow keys move to it,
+	// the pendant of Base UI's TabsList activateOnFocus. Off by default like
+	// Base UI: with it on, a panel that fetches its content on activation
+	// would fire a request per keystroke.
+	ActivateOnFocus bool
 }
 
 type TriggerProps struct {
@@ -115,7 +120,8 @@ templ Tabs(props ...Props) {
 }
 
 // List is Base UI's Tabs.List: the tablist role and aria-orientation, so the
-// arrow keys tabs.js binds are announced as available.
+// arrow keys tabs.js binds are announced as available. The arrows move focus
+// and Enter or Space activates, unless ActivateOnFocus is set.
 templ List(props ...ListProps) {
 	{{ var p ListProps }}
 	if len(props) > 0 {
@@ -128,6 +134,7 @@ templ List(props ...ListProps) {
 		}
 		role="tablist"
 		aria-orientation={ string(orientation(ctx)) }
+		data-activate-on-focus?={ p.ActivateOnFocus }
 		class={
 			utils.CN(
 				"cn-tabs-list group/tabs-list inline-flex w-fit items-center justify-center text-muted-foreground group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
