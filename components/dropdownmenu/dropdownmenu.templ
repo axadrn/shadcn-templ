@@ -50,12 +50,19 @@ func state(ctx context.Context) ctxState {
 	return ctxState{}
 }
 
+// triggerID derives the id the menu is labelled by from the id Root, Trigger
+// and Content already share.
+func triggerID(menuID string) string {
+	return menuID + "-trigger"
+}
+
 // Trigger returns the attributes that turn any element (usually a button)
 // into the menu trigger — the asChild equivalent: no wrapper element, so the
 // trigger composes cleanly inside ButtonGroup and friends.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
 		"data-tui-dropdownmenu-trigger": true,
+		"id":                            triggerID(state(ctx).id),
 		"aria-controls":                 state(ctx).id,
 		"aria-haspopup":                 "menu",
 		"aria-expanded":                 "false",
@@ -307,6 +314,7 @@ templ Content(props ...ContentProps) {
 				data-tui-dropdownmenu-popup
 				data-closed
 				role="menu"
+				aria-labelledby={ triggerID(s.id) }
 				tabindex="-1"
 				class={
 					utils.CN(
