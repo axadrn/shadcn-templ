@@ -173,6 +173,9 @@ templ Trigger(props ...TriggerProps) {
 		if p.ID != "" {
 			id={ p.ID }
 		}
+		if _, ok := p.Attributes["tabindex"]; !ok {
+			tabindex="0"
+		}
 		data-slot="select-trigger"
 		data-tui-select-trigger
 		data-size={ string(p.Size) }

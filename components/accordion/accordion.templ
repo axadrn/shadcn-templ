@@ -154,6 +154,9 @@ templ Trigger(props ...TriggerProps) {
 				id={ p.ID }
 			}
 			type="button"
+			if _, ok := p.Attributes["tabindex"]; !ok {
+				tabindex="0"
+			}
 			data-slot="accordion-trigger"
 			aria-expanded={ utils.IfElse(itemOpen(ctx), "true", "false") }
 			disabled?={ itemDisabled(ctx) }
