@@ -3,6 +3,7 @@ package combobox
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	"github.com/axadrn/shadcn-templ/v2/components/button"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
@@ -45,6 +46,14 @@ type ctxState struct {
 	readOnly        bool
 	required        bool
 	form            string
+}
+
+// optionID derives an option's id from the combobox id and the option's
+// value, so aria-activedescendant has something to name and the id survives
+// an htmx swap of the list. Whitespace collapses because
+// aria-activedescendant reads a space as an id separator.
+func optionID(comboboxID, value string) string {
+	return comboboxID + "-option-" + strings.Join(strings.Fields(value), "-")
 }
 
 func state(ctx context.Context) ctxState {
@@ -491,10 +500,11 @@ templ Item(props ...ItemProps) {
 			selected = s.value != "" && s.value == p.Value
 		}
 	}}
+	if p.ID == "" {
+		{{ p.ID = optionID(s.id, p.Value) }}
+	}
 	<div
-		if p.ID != "" {
-			id={ p.ID }
-		}
+		id={ p.ID }
 		role="option"
 		data-slot="combobox-item"
 		data-tui-combobox-item
