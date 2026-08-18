@@ -155,6 +155,9 @@ templ Trigger(props ...TriggerProps) {
 		{{ p.Size = SizeDefault }}
 	}
 	{{ s := state(ctx) }}
+	if p.ID == "" {
+		{{ p.ID = s.id + "-trigger" }}
+	}
 	if s.name != "" {
 		<input
 			type="hidden"
@@ -170,8 +173,9 @@ templ Trigger(props ...TriggerProps) {
 	}
 	<button
 		type="button"
-		if p.ID != "" {
-			id={ p.ID }
+		id={ p.ID }
+		if _, ok := p.Attributes["tabindex"]; !ok {
+			tabindex="0"
 		}
 		data-slot="select-trigger"
 		data-tui-select-trigger

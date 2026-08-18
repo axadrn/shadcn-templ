@@ -31,6 +31,32 @@
     return prev && prev.hasAttribute("data-tui-select-input") ? prev : null;
   }
 
+  // Port of floating-ui-react's enqueueFocus, called the way
+  // FloatingFocusManager calls it: focus the element once the popup is up,
+  // with a guard so one that closed meanwhile does not pull focus back.
+  //
+  // The reference queues a single animation frame and that is enough, because
+  // it focuses from a React effect — already a task later than the handler
+  // that opened the popup. We have no effect to hide behind, and Safari
+  // refuses focus() for a short and *variable* window after it activates a
+  // button or shows a popover, so one shot is a race: microtask+frame and
+  // task+frame both land inside the window often enough to strand focus on
+  // the trigger and leave the arrow keys dead. Retrying across a few frames
+  // and stopping the moment it takes is immune to how long the window is.
+  // Chromium succeeds on the first attempt.
+  function enqueueFocus(el, shouldFocus, frames = 8) {
+    if (!el) return;
+    const attempt = (left) => {
+      if (shouldFocus && !shouldFocus()) return;
+      if (document.activeElement === el) return;
+      el.focus({ preventScroll: true });
+      if (document.activeElement !== el && left > 0) {
+        requestAnimationFrame(() => attempt(left - 1));
+      }
+    };
+    requestAnimationFrame(() => attempt(frames));
+  }
+
   function valueSpanFor(trigger) {
     return trigger.querySelector("[data-tui-select-value]");
   }
@@ -543,7 +569,7 @@
       const selected =
         content.querySelector('[data-tui-select-item][data-selected]') ||
         content.querySelector("[data-tui-select-item]");
-      if (selected) selected.focus({ preventScroll: true });
+      enqueueFocus(selected, () => isOpen(content));
     };
     startAutoPositioning(content, trigger).then(finish, finish);
   }

@@ -88,6 +88,9 @@ templ Button(props ...Props) {
 			if _, ok := p.Attributes["data-slot"]; !ok {
 				data-slot="button"
 			}
+			if _, ok := p.Attributes["tabindex"]; !ok {
+				tabindex="0"
+			}
 			class={ utils.CN(baseClasses, p.variantClasses(), p.sizeClasses(), p.Class) }
 			if p.Type != "" {
 				type={ string(p.Type) }

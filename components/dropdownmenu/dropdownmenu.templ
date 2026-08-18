@@ -35,6 +35,7 @@ const (
 type ctxKey string
 
 const stateKey ctxKey = "dropdownmenuState"
+const subStateKey ctxKey = "dropdownmenuSubState"
 const radioStateKey ctxKey = "dropdownmenuRadioState"
 
 type ctxState struct {
@@ -50,12 +51,32 @@ func state(ctx context.Context) ctxState {
 	return ctxState{}
 }
 
+// subState carries the id a Sub shares with its trigger and its content, the
+// pendant of the root's ctxState one level down.
+type ctxSubState struct {
+	id string
+}
+
+func subState(ctx context.Context) ctxSubState {
+	if s, ok := ctx.Value(subStateKey).(ctxSubState); ok {
+		return s
+	}
+	return ctxSubState{}
+}
+
+// triggerID derives the id the menu is labelled by from the id Root, Trigger
+// and Content already share.
+func triggerID(menuID string) string {
+	return menuID + "-trigger"
+}
+
 // Trigger returns the attributes that turn any element (usually a button)
 // into the menu trigger — the asChild equivalent: no wrapper element, so the
 // trigger composes cleanly inside ButtonGroup and friends.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
 		"data-tui-dropdownmenu-trigger": true,
+		"id":                            triggerID(state(ctx).id),
 		"aria-controls":                 state(ctx).id,
 		"aria-haspopup":                 "menu",
 		"aria-expanded":                 "false",
@@ -307,6 +328,7 @@ templ Content(props ...ContentProps) {
 				data-tui-dropdownmenu-popup
 				data-closed
 				role="menu"
+				aria-labelledby={ triggerID(s.id) }
 				tabindex="-1"
 				class={
 					utils.CN(
@@ -558,6 +580,11 @@ templ Sub(props ...SubProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
+	{{ subID := p.ID }}
+	if subID == "" {
+		{{ subID = utils.RandomID() }}
+	}
+	{{ ctx = context.WithValue(ctx, subStateKey, ctxSubState{id: subID}) }}
 	<div
 		if p.ID != "" {
 			id={ p.ID }
@@ -578,10 +605,11 @@ templ SubTrigger(props ...SubTriggerProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
+	if p.ID == "" {
+		{{ p.ID = triggerID(subState(ctx).id) }}
+	}
 	<button
-		if p.ID != "" {
-			id={ p.ID }
-		}
+		id={ p.ID }
 		type="button"
 		data-slot="dropdown-menu-sub-trigger"
 		data-inset?={ p.Inset }
@@ -619,6 +647,7 @@ templ SubContent(props ...SubContentProps) {
 		data-tui-dropdownmenu-sub-content
 		data-closed
 		role="menu"
+		aria-labelledby={ triggerID(subState(ctx).id) }
 		tabindex="-1"
 		class={
 			utils.CN(

@@ -144,10 +144,41 @@
     );
   }
 
+  // Port of floating-ui-react's enqueueFocus, called the way
+  // FloatingFocusManager calls it: focus the element once the popup is up,
+  // with a guard so one that closed meanwhile does not pull focus back.
+  //
+  // The reference queues a single animation frame and that is enough, because
+  // it focuses from a React effect — already a task later than the handler
+  // that opened the popup. We have no effect to hide behind, and Safari
+  // refuses focus() for a short and *variable* window after it activates a
+  // button or shows a popover, so one shot is a race: microtask+frame and
+  // task+frame both land inside the window often enough to strand focus on
+  // the trigger and leave the arrow keys dead. Retrying across a few frames
+  // and stopping the moment it takes is immune to how long the window is.
+  // Chromium succeeds on the first attempt.
+  function enqueueFocus(el, shouldFocus, frames = 8) {
+    if (!el) return;
+    const attempt = (left) => {
+      if (shouldFocus && !shouldFocus()) return;
+      if (document.activeElement === el) return;
+      el.focus({ preventScroll: true });
+      if (document.activeElement !== el && left > 0) {
+        requestAnimationFrame(() => attempt(left - 1));
+      }
+    };
+    requestAnimationFrame(() => attempt(frames));
+  }
+
   function focusItem(item) {
     if (item && document.activeElement !== item) item.focus({ preventScroll: false });
   }
 
+  // Wraps at both ends, the pendant of Menu.Root's loopFocus, which the
+  // reference defaults to true: ArrowDown on the last item returns to the
+  // first and ArrowUp on the first goes to the last. Disabled items stay out
+  // of the walk — itemsIn filters them, because ours are natively disabled
+  // buttons rather than the aria-disabled ones the reference keeps focusable.
   function moveFocus(container, delta) {
     const items = itemsIn(container);
     if (!items.length) return;
@@ -156,8 +187,7 @@
       focusItem(delta > 0 ? items[0] : items[items.length - 1]);
       return;
     }
-    const next = items[index + delta];
-    if (next) focusItem(next);
+    focusItem(items[(index + delta + items.length) % items.length]);
   }
 
   // ----- open / close --------------------------------------------------------
@@ -212,10 +242,13 @@
       content.style.transitionProperty = "";
       setState(content, "open");
       const popup = popupFor(content);
-	  if (popup) {
-		syncSubState(popup);
-		popup.focus({ preventScroll: true });
-	  }
+      if (popup) {
+        syncSubState(popup);
+        // Safari refuses focus() for a short window after the popup appears,
+        // so this retries across frames instead of the single call the
+        // reference gets away with from a React effect.
+        enqueueFocus(popup, () => content.hasAttribute("data-open"));
+      }
     });
   }
 

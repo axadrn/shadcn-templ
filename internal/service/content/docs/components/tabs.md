@@ -99,6 +99,24 @@ Use `Orientation: tabs.OrientationVertical` for vertical tabs.
 
 <ComponentPreview name="tabs-icons" />
 
+## Accessibility
+
+The list is a single tab stop. Once a tab has focus the left and right arrow
+keys walk the list — up and down when `Orientation` is vertical — `Home` and
+`End` jump to its ends, disabled tabs are skipped and the movement wraps.
+
+Moving focus does not change the active tab; `Enter` or `Space` does. Set
+`ActivateOnFocus` on the list to select as the arrows move instead:
+
+```templ
+@tabs.List(tabs.ListProps{ActivateOnFocus: true}) {
+	...
+}
+```
+
+Leave it off when a panel loads its content on activation, or every arrow
+press costs a request.
+
 ## API Reference
 
 ### Tabs
@@ -115,10 +133,11 @@ The `tabs.Tabs` component is the root, it shares the tabs id with list, triggers
 
 The `tabs.List` component wraps the triggers.
 
-| Prop      | Type                            | Default   |
-| --------- | ------------------------------- | --------- |
-| `Variant` | `VariantDefault \| VariantLine` | `default` |
-| `Class`   | `string`                        | -         |
+| Prop              | Type                            | Default   |
+| ----------------- | ------------------------------- | --------- |
+| `Variant`         | `VariantDefault \| VariantLine` | `default` |
+| `ActivateOnFocus` | `bool`                          | `false`   |
+| `Class`           | `string`                        | -         |
 
 ### TabsTrigger
 

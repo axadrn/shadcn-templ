@@ -248,6 +248,15 @@
       item.setAttribute("data-highlighted", "");
       item.scrollIntoView({ block: "nearest" });
     }
+    // Focus stays on the input while the highlight moves, so
+    // aria-activedescendant is the only thing naming the current option.
+    const input = inputFor(content);
+    if (!input) return;
+    if (item && item.id) {
+      input.setAttribute("aria-activedescendant", item.id);
+    } else {
+      input.removeAttribute("aria-activedescendant");
+    }
   }
 
   function moveHighlight(content, dir) {
