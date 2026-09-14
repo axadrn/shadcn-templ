@@ -125,3 +125,6 @@ docker-compose.override.yml
 
 # Ignore Yeoman files
 .yeoman/
+
+.env
+.env.*

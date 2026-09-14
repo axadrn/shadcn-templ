@@ -72,6 +72,7 @@ COPY --from=highlight /app/highlight-cache.json.gz ./assets/highlight-cache.json
 
 # Expose the port
 EXPOSE 8090
+HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=6 CMD wget -q --spider http://127.0.0.1:8090/healthz || exit 1
 
 # Command to run
 CMD ["./main"]

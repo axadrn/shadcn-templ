@@ -1,0 +1,22 @@
+services:
+  app:
+    image: ghcr.io/axadrn/shadcn-templ:${IMAGE_TAG:?IMAGE_TAG is required}
+    restart: unless-stopped
+    environment:
+      GO_ENV: production
+    networks:
+      - proxy
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.templui.rule: Host(`templui.io`) || Host(`www.templui.io`)
+      traefik.http.routers.templui.entrypoints: websecure
+      traefik.http.routers.templui.tls.certresolver: letsencrypt
+      traefik.http.routers.templui.middlewares: templui-www
+      traefik.http.middlewares.templui-www.redirectregex.regex: ^https?://www\.templui\.io/(.*)
+      traefik.http.middlewares.templui-www.redirectregex.replacement: https://templui.io/$${1}
+      traefik.http.middlewares.templui-www.redirectregex.permanent: "true"
+      traefik.http.services.templui.loadbalancer.server.port: "8090"
+
+networks:
+  proxy:
+    external: true

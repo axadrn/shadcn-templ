@@ -1,19 +1,25 @@
-# Off-host build for v1, the same pattern as the v2 branch: GitHub's
-# free ARM runners build the image, ghcr.io stores it, Dokploy only
-# pulls (Provider: Docker).
 name: deploy-v1
 
 on:
   push:
     branches: [v1]
+  workflow_dispatch:
 
 permissions:
   contents: read
   packages: write
+  id-token: write
+
+concurrency:
+  group: production-v1
+  cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-24.04-arm
+    environment: production
+    timeout-minutes: 30
+
     steps:
       - uses: actions/checkout@v4
 
@@ -30,12 +36,25 @@ jobs:
           context: .
           platforms: linux/arm64
           push: true
-          tags: |
-            ghcr.io/axadrn/shadcn-templ:v1
-            ghcr.io/axadrn/shadcn-templ:${{ github.sha }}
+          tags: ghcr.io/axadrn/shadcn-templ:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # The v1 app's deploy webhook (Deployments tab), its own secret.
-      - name: Trigger Dokploy deploy
-        run: curl -fsS -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL_V1 }}"
+      - name: Connect to prod-01 through Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ vars.TS_V1_CLIENT_ID }}
+          audience: api.tailscale.com/${{ vars.TS_V1_CLIENT_ID }}
+          tags: tag:ci
+          ping: prod-01
+
+      - name: Sync Compose file
+        run: |
+          tailscale ssh root@prod-01 \
+            'mkdir -p /opt/apps/templui.io && cat > /opt/apps/templui.io/compose.yml' \
+            < compose.yml
+
+      - name: Deploy and wait for health
+        run: |
+          tailscale ssh root@prod-01 \
+            "cd /opt/apps/templui.io && IMAGE_TAG=${GITHUB_SHA} docker compose up -d --pull always --wait --wait-timeout 120"

@@ -212,7 +212,12 @@ func main() {
 	mux.HandleFunc("/{path...}", notFoundHandler)
 
 	log.Println("Server is running on http://localhost:8090")
-	http.ListenAndServe(":8090", wrappedMux)
+	server := http.NewServeMux()
+	server.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})
+	server.Handle("/", wrappedMux)
+	http.ListenAndServe(":8090", server)
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
