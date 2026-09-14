@@ -10,14 +10,9 @@ published. `www.templui.io` redirects to `templui.io`.
 Point the domain's DNS records at prod-01. HTTP redirects to HTTPS through
 the shared Traefik configuration.
 
-The existing Tailscale credential only accepts `main`. Create a second GitHub
-OIDC trust credential for this branch:
+Uses the same Tailscale OIDC credential as the other apps. The client ID in
+the workflow is public, not a secret. No extra GitHub variable is needed.
 
-- Subject: `repo:axadrn/shadcn-templ:environment:production`
-- Claim `repository_owner`: `axadrn`
-- Claim `ref`: `refs/heads/v1`
-- Permission: Auth Keys Write, tag `tag:ci`
-
-Set its client ID as the GitHub repository variable `TS_V1_CLIENT_ID`.
-It is a public identifier, not a secret. The existing main credential stays
-unchanged.
+The credential accepts repositories owned by `axadrn` using the `production`
+environment. In GitHub Settings > Environments > production, allow only the
+`main` and `v1` branches. Keep this restriction when changing deployment setup.

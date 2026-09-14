@@ -43,8 +43,8 @@ jobs:
       - name: Connect to prod-01 through Tailscale
         uses: tailscale/github-action@v4
         with:
-          oauth-client-id: ${{ vars.TS_V1_CLIENT_ID }}
-          audience: api.tailscale.com/${{ vars.TS_V1_CLIENT_ID }}
+          oauth-client-id: TA5fRdgvFU11CNTRL-kNv89UsXK811CNTRL
+          audience: api.tailscale.com/TA5fRdgvFU11CNTRL-kNv89UsXK811CNTRL
           tags: tag:ci
           ping: prod-01
 
