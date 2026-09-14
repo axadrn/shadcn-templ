@@ -44,9 +44,9 @@ templ BaseLayout(title, description string) {
 			<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL("/components/js/textarea/textarea.min.js") }></script>
 			<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL("/components/js/timepicker/timepicker.min.js") }></script>
 			<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL("/components/js/toast/toast.min.js") }></script>
-			// Plausible Analytics
+			// Umami Analytics
 			if config.AppConfig.GoEnv == "production" {
-				<script defer data-domain="templui.io" src="https://plausible.axeladrian.com/js/script.js" nonce={ templ.GetNonce(ctx) }></script>
+				<script defer data-website-id="9a7cbc34-6611-4e9a-9ee1-30e397cc58ff" src="https://umami.axeladrian.com/script.js" nonce={ templ.GetNonce(ctx) }></script>
 			}
 			// Shiki Highlighter Script
 			@modules.CodeHighlightingScript()
