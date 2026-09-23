@@ -328,6 +328,8 @@ shadcn-templ bundle --watch
 
 The scaffold's `task dev` runs this watcher for you. For a one-off rebuild, run `shadcn-templ bundle`.
 
+The scripts watch the DOM, so components arriving through htmx, Datastar or Alpine swaps work without framework specific wiring. Overlays such as menus, popovers and dialogs stay where they were rendered and move to `<body>` when they open. One htmx edge: an overlay rendered already open inside a swapped fragment whose ids already exist in the target moves during htmx's settle delay and misses its `hx-*` attributes. Swap such fragments into a dedicated target.
+
 Commit `components/scripts_bundle.go` together with the component sources. Ignore `assets/js/shadcn-templ-*.js`, just like `assets/css/output.css`; both are build artifacts. **For production builds from a clean checkout, use [Build and Deploy](#build-and-deploy).** The same source files produce the same hash. After merging component changes, rerun `bundle` to update the manifest.
 
 Upgrading from runtime bundling: remove the old `components/scripts.go`, `components/embed.go` and `/components/{bundle}` route, update `scripts.templ` with `shadcn-templ add scripts --overwrite`, and run `shadcn-templ bundle`.

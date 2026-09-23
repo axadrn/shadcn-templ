@@ -190,7 +190,7 @@ func Content(props ...ContentProps) templ.Component {
 			p.Side = SideRight
 		}
 		s := state(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<template data-tui-dialog-portal><div data-tui-dialog-root hidden><div data-slot=\"sheet-overlay\" data-tui-dialog-backdrop role=\"presentation\" style=\"user-select: none; -webkit-user-select: none;\" class=\"cn-sheet-overlay fixed inset-0 z-50 transition-opacity duration-150 data-ending-style:opacity-0 data-starting-style:opacity-0\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div data-tui-dialog-portal hidden><div data-tui-dialog-root hidden><div data-slot=\"sheet-overlay\" data-tui-dialog-backdrop role=\"presentation\" style=\"user-select: none; -webkit-user-select: none;\" class=\"cn-sheet-overlay fixed inset-0 z-50 transition-opacity duration-150 data-ending-style:opacity-0 data-starting-style:opacity-0\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -328,7 +328,7 @@ func Content(props ...ContentProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div></template>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

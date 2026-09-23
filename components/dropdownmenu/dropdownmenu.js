@@ -534,36 +534,14 @@
     }
   });
 
-  // ----- init (portal up front, like React does on mount) --------------------
-
-  // Lift SSR'd contents out of their inert <template> wrappers into <body>,
-  // replacing a stale portaled copy on re-swaps (e.g. htmx).
-  function liftTemplates() {
-    document.querySelectorAll("template[data-tui-dropdownmenu-portal]").forEach((tpl) => {
-      const content = tpl.content.querySelector("[data-tui-dropdownmenu-content]");
-      if (content) {
-        const stale = document.getElementById(content.id);
-        if (stale) {
-          stopAutoPositioning(stale);
-          stale._tuiReleaseScroll?.();
-          stale._tuiReleaseScroll = null;
-          stale.remove();
-        }
-        content._tuiPortalOwner = tpl.parentElement;
-        document.body.appendChild(content);
-      }
-      tpl.remove();
-    });
-  }
+  // ----- init (portal on open) --------------------
 
   function init() {
-    liftTemplates();
     document.querySelectorAll("[data-tui-dropdownmenu-trigger]").forEach(listenForEscape);
     removeOrphanedContents();
     document.querySelectorAll("[data-tui-dropdownmenu-trigger]").forEach((trigger) => {
       const content = contentFor(trigger);
       if (!content) return;
-      portal(content);
       if (content.getAttribute("data-tui-dropdownmenu-initial-open") === "true") {
         content.removeAttribute("data-tui-dropdownmenu-initial-open");
         open(content, trigger, false);
@@ -578,7 +556,7 @@
   }
   // Re-init on any childList mutation, directly (never rAF-deferred: rAF
   // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // lifts and wires itself, removals release portaled content through the
+  // wires itself, removals release portaled content through the
   // ownership sweep.
   new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
 

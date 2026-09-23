@@ -64,14 +64,18 @@
   // as long as its SSR declaration site (_tuiPortalOwner) stays in the
   // document. Trigger-presence heuristics judged mid-swap moments wrongly -
   // multi-phase swap layers briefly disconnect the new triggers.
-  function portal(content) {
-    listenForEscape(content);
+  function removeOrphanedContents(content) {
     document.querySelectorAll("body > [data-tui-hovercard-content]").forEach((c) => {
       if (c !== content && c._tuiPortalOwner && !c._tuiPortalOwner.isConnected) {
         stopAutoPositioning(c);
         c.remove();
       }
     });
+  }
+
+  function portal(content) {
+    listenForEscape(content);
+    removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
       if (!content._tuiPortalOwner) content._tuiPortalOwner = content.parentElement;
       document.body.appendChild(content);
@@ -244,36 +248,15 @@
 
   document.addEventListener("keydown", closeOnEscapeKeyDown);
 
-  // Lift SSR'd contents out of their inert <template> wrappers into <body>,
-  // replacing a stale portaled copy on re-swaps (e.g. htmx).
-  function liftTemplates() {
-    document.querySelectorAll("template[data-tui-hovercard-portal]").forEach((tpl) => {
-      const content = tpl.content.querySelector("[data-tui-hovercard-content]");
-      if (content) {
-        const stale = document.getElementById(content.id);
-        if (stale) {
-          stopAutoPositioning(stale);
-          stale.remove();
-        }
-        content._tuiPortalOwner = tpl.parentElement;
-        document.body.appendChild(content);
-      }
-      tpl.remove();
-    });
-  }
-
-  // Portal all contents up front (React portals on mount too). Runs on load
-  // and whenever new cards appear in the DOM.
   function init() {
-    liftTemplates();
+    removeOrphanedContents();
     document.querySelectorAll("[data-tui-hovercard-trigger]").forEach(listenForEscape);
     allContents().forEach((content) => {
-      if (triggerFor(content)) portal(content);
-    if (content.getAttribute("data-tui-hovercard-initial-open") === "true") {
-    content.removeAttribute("data-tui-hovercard-initial-open");
-    const trigger = triggerFor(content);
-    if (trigger) open(content, trigger);
-    }
+      if (content.getAttribute("data-tui-hovercard-initial-open") === "true") {
+        content.removeAttribute("data-tui-hovercard-initial-open");
+        const trigger = triggerFor(content);
+        if (trigger) open(content, trigger);
+      }
     });
   }
 
@@ -284,7 +267,7 @@
   }
   // Re-init on any childList mutation, directly (never rAF-deferred: rAF
   // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // lifts and wires itself, removals release portaled content through the
+  // wires itself, removals release portaled content through the
   // ownership sweep.
   new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
 

@@ -558,6 +558,7 @@
         // native top layer (it would stack above the z-index portaled
         // popups). Modality - scroll lock, inert siblings, focus - is
         // built by hand, like Base UI does.
+        portal(dialog);
         dialog.show();
         if (dialog.getAttribute("data-tui-dialog-show-modal") === "true") {
           dialog._tuiReleaseScroll = window.tui.scrollLock.acquire(dialog);
@@ -1293,31 +1294,7 @@
     }
   }
 
-  // Lift SSR'd contents out of their inert <template> wrappers into <body>,
-  // replacing a stale portaled copy on re-swaps (e.g. htmx). The loop runs
-  // until no templates remain: lifting a parent drawer reveals the templates
-  // of its nested drawers.
-  function liftTemplates() {
-    let tpl;
-    while ((tpl = document.querySelector("template[data-tui-drawer-portal]"))) {
-      const content = tpl.content.querySelector("[data-tui-drawer-content]");
-      if (content) {
-        const stale = content.id && document.getElementById(content.id);
-        if (stale) {
-          unwatchSnapResize(stale);
-          stale._tuiReleaseScroll?.();
-          stale._tuiReleaseScroll = null;
-          stale.remove();
-        }
-        content._tuiPortalOwner = tpl.parentElement;
-        document.body.appendChild(content);
-      }
-      tpl.remove();
-    }
-  }
-
   function init(root = document) {
-    liftTemplates();
     root.querySelectorAll("[data-tui-drawer-trigger]").forEach(listenForEscape);
     // Self-healing modality: recompute the inert siblings on every DOM
     // change, so a swap or a missed close event never leaves stale inert.
@@ -1335,7 +1312,6 @@
       }
     });
     root.querySelectorAll("dialog[data-tui-drawer-content]").forEach((dialog) => {
-      portal(dialog);
       if (dialog.dataset.tuiDrawerInitialized === "true") return;
       ensureDrawer(dialog);
 
@@ -1371,7 +1347,7 @@
   }
 
   // Initialize drawers added later (e.g. swapped in via htmx), so a
-  // server-rendered drawer with Open true still gets showModal(). Also
+  // server-rendered drawer with Open true still opens. Also
   // release the scroll lock if an open drawer got swapped out of the DOM.
   new MutationObserver(() => {
     init();

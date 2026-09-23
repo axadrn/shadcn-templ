@@ -44,7 +44,7 @@ func TestControlledOpenOverridesDefaultOpen(t *testing.T) {
 	}
 }
 
-func TestClientConsumesInitialOpenAfterPortalMount(t *testing.T) {
+func TestClientConsumesInitialOpenState(t *testing.T) {
 	source, err := os.ReadFile("popover.js")
 	if err != nil {
 		t.Fatal(err)
@@ -52,7 +52,6 @@ func TestClientConsumesInitialOpenAfterPortalMount(t *testing.T) {
 
 	js := string(source)
 	for _, want := range []string{
-		`liftTemplates();`,
 		`content.getAttribute("data-tui-popover-initial-open") === "true"`,
 		`content.removeAttribute("data-tui-popover-initial-open")`,
 		`open(content);`,

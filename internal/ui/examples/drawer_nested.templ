@@ -102,25 +102,14 @@ templ DrawerNested() {
 		(() => {
 			// useIsMobile pendant (hooks/use-mobile.ts), like the drawer-demo:
 			// swipeSwipeDirection is down and the swipe handle shows below the md
-			// breakpoint, right and no handle from md up. The dialogs wait in
-			// nested portal <template>s until drawer.js lifts them, so the
-			// lookup searches template contents recursively; attributes set
-			// on the nodes survive the lift (same nodes).
-			const findDialog = (root, id) => {
-				const direct = root.getElementById?.(id) || root.querySelector?.("#" + CSS.escape(id));
-				if (direct) return direct;
-				for (const tpl of root.querySelectorAll("template[data-tui-drawer-portal]")) {
-					const found = findDialog(tpl.content, id);
-					if (found) return found;
-				}
-				return null;
-			};
+			// breakpoint, right and no handle from md up.
+			const findDialog = (id) => document.getElementById(id);
 
 			const ids = ["drawer-nested-1", "drawer-nested-2", "drawer-nested-3", "drawer-nested-4"];
 			const mq = window.matchMedia("(max-width: 767px)");
 			const apply = () => {
 				for (const id of ids) {
-					const dialog = findDialog(document, id);
+					const dialog = findDialog(id);
 					const popup = dialog?.querySelector('[data-tui-drawer-popup]');
 					if (!popup) continue;
 					popup.setAttribute("data-swipe-direction", mq.matches ? "down" : "right");

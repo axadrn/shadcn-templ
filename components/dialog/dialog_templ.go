@@ -156,8 +156,8 @@ type PortalProps struct {
 	Attributes templ.Attributes
 }
 
-// Portal is 1:1 base/ui/dialog.tsx DialogPortal. Inert until the script
-// portals it to <body> at init, so the SSRd content never participates in
+// Portal is 1:1 base/ui/dialog.tsx DialogPortal. Hidden until the script
+// portals it to <body> on open, so the SSRd content never participates in
 // layout or sibling CSS. The wrapper div is the FloatingPortal node: it
 // stays in <body>, [hidden] while the dialog is unmounted (Base UI removes
 // the portal subtree instead), and the script drives the Base UI
@@ -188,7 +188,7 @@ func Portal(props ...PortalProps) templ.Component {
 		if len(props) > 0 {
 			p = props[0]
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<template data-tui-dialog-portal><div data-tui-dialog-root data-tui-portal hidden")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div data-tui-dialog-portal hidden><div data-tui-dialog-root data-tui-portal hidden")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -204,7 +204,7 @@ func Portal(props ...PortalProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></template>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

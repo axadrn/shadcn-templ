@@ -700,34 +700,12 @@
   // value, the label lives in the item). Runs on load and whenever new selects
   // appear in the DOM (e.g. content swapped in by a library like htmx) — the
   // MutationObserver keeps this framework-agnostic.
-  // Lift SSR'd contents out of their inert <template> wrappers into <body>,
-  // replacing a stale portaled copy on re-swaps (e.g. htmx).
-  function liftTemplates() {
-    document.querySelectorAll("template[data-tui-select-portal]").forEach((tpl) => {
-      const content = tpl.content.querySelector("[data-tui-select-content]");
-      if (content) {
-        const stale = document.getElementById(content.id);
-        if (stale) {
-          stopAutoPositioning(stale);
-          stale._tuiReleaseScroll?.();
-          stale._tuiReleaseScroll = null;
-          stale.remove();
-        }
-        content._tuiPortalOwner = tpl.parentElement;
-        document.body.appendChild(content);
-      }
-      tpl.remove();
-    });
-  }
-
   function init() {
-    liftTemplates();
     document.querySelectorAll("[data-tui-select-trigger]").forEach(listenForEscape);
     removeOrphanedContents();
     document.querySelectorAll("[data-tui-select-trigger]").forEach((trigger) => {
       const content = contentFor(trigger);
       if (!content) return;
-      portal(content); // portal up front, like React does on mount
       const checked = content.querySelector('[data-tui-select-item][data-selected]');
       if (checked) {
         const label =
@@ -753,7 +731,7 @@
   }
   // Re-init on any childList mutation, directly (never rAF-deferred: rAF
   // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // lifts and wires itself, removals release portaled content through the
+  // wires itself, removals release portaled content through the
   // ownership sweep.
   new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
 

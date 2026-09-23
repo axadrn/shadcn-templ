@@ -140,9 +140,9 @@ templ Content(props ...ContentProps) {
 		}
 		s := state(ctx)
 	}}
-	// Inert until the script portals it to <body> at init, so the SSRd
+	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
-	<template data-tui-popover-portal>
+	<div data-tui-popover-portal hidden>
 		<div
 			id={ s.id }
 			data-tui-popover-content
@@ -181,7 +181,7 @@ templ Content(props ...ContentProps) {
 				{ children... }
 			</div>
 		</div>
-	</template>
+	</div>
 }
 
 templ Header(props ...HeaderProps) {

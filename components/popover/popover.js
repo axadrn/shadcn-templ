@@ -106,14 +106,18 @@
   // as long as its SSR declaration site (_tuiPortalOwner) stays in the
   // document. Trigger-presence heuristics judged mid-swap moments wrongly -
   // multi-phase swap layers briefly disconnect the new triggers.
-  function portal(content) {
-    listenForEscape(content);
+  function removeOrphanedContents(content) {
     document.querySelectorAll("body > [data-tui-popover-content]").forEach((c) => {
       if (c !== content && c._tuiPortalOwner && !c._tuiPortalOwner.isConnected) {
         stopAutoPositioning(c);
         c.remove();
       }
     });
+  }
+
+  function portal(content) {
+    listenForEscape(content);
+    removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
       if (!content._tuiPortalOwner) content._tuiPortalOwner = content.parentElement;
       document.body.appendChild(content);
@@ -342,33 +346,12 @@
   document.addEventListener("keydown", closeOnEscapeKeyDown);
 
 
-  // Portal all contents up front (React portals on mount too): popovers must
-  // not sit inside layout groups where hidden siblings break :last-child
-  // rules. Runs on load and whenever new popovers appear in the DOM.
-  // Lift SSR'd contents out of their inert <template> wrappers into <body>,
-  // replacing a stale portaled copy on re-swaps (e.g. htmx).
-  function liftTemplates() {
-    document.querySelectorAll("template[data-tui-popover-portal]").forEach((tpl) => {
-      const content = tpl.content.querySelector("[data-tui-popover-content]");
-      if (content) {
-        const stale = document.getElementById(content.id);
-        if (stale) {
-          stopAutoPositioning(stale);
-          stale.remove();
-        }
-        content._tuiPortalOwner = tpl.parentElement;
-        document.body.appendChild(content);
-      }
-      tpl.remove();
-    });
-  }
-
+  // Content stays in its hidden portal node until it opens.
   function init() {
-    liftTemplates();
+    removeOrphanedContents();
     document.querySelectorAll("[data-tui-popover-trigger]").forEach(listenForEscape);
     allContents().forEach((content) => {
       if (!triggerFor(content)) return;
-      portal(content);
       if (content.getAttribute("data-tui-popover-initial-open") === "true") {
         content.removeAttribute("data-tui-popover-initial-open");
         open(content);
@@ -383,7 +366,7 @@
   }
   // Re-init on any childList mutation, directly (never rAF-deferred: rAF
   // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // lifts and wires itself, removals release portaled content through the
+  // wires itself, removals release portaled content through the
   // ownership sweep.
   new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
 

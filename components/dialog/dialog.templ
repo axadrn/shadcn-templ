@@ -123,8 +123,8 @@ type PortalProps struct {
 	Attributes templ.Attributes
 }
 
-// Portal is 1:1 base/ui/dialog.tsx DialogPortal. Inert until the script
-// portals it to <body> at init, so the SSRd content never participates in
+// Portal is 1:1 base/ui/dialog.tsx DialogPortal. Hidden until the script
+// portals it to <body> on open, so the SSRd content never participates in
 // layout or sibling CSS. The wrapper div is the FloatingPortal node: it
 // stays in <body>, [hidden] while the dialog is unmounted (Base UI removes
 // the portal subtree instead), and the script drives the Base UI
@@ -135,11 +135,11 @@ templ Portal(props ...PortalProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	<template data-tui-dialog-portal>
+	<div data-tui-dialog-portal hidden>
 		<div data-tui-dialog-root data-tui-portal hidden { p.Attributes... }>
 			{ children... }
 		</div>
-	</template>
+	</div>
 }
 
 type OverlayProps struct {

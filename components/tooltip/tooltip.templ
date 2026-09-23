@@ -94,9 +94,10 @@ templ Content(props ...ContentProps) {
 		{{ p.SideOffset = 4 }}
 	}
 	{{ s := state(ctx) }}
-	// Inert until the script portals it to <body>: inline it would count as a
-	// layout sibling (e.g. button group's last-child rounding).
-	<template data-tui-tooltip-portal>
+	// Hidden until the script portals it to <body> on open. The wrapper
+	// carries no data-slot, so sibling rules such as the button group's
+	// rounding ignore it.
+	<div data-tui-tooltip-portal hidden>
 		<div
 			id={ s.id }
 			data-slot="tooltip-content"
@@ -129,5 +130,5 @@ templ Content(props ...ContentProps) {
 				class="cn-tooltip-arrow cn-tooltip-arrow-logical absolute z-50 bg-foreground fill-foreground data-[side=bottom]:top-1 data-[side=left]:top-1/2! data-[side=left]:-right-1 data-[side=left]:-translate-y-1/2 data-[side=right]:top-1/2! data-[side=right]:-left-1 data-[side=right]:-translate-y-1/2 data-[side=top]:-bottom-2.5"
 			></span>
 		</div>
-	</template>
+	</div>
 }

@@ -137,9 +137,9 @@ templ Content(props ...ContentProps) {
 		{{ p.Side = SideRight }}
 	}
 	{{ s := state(ctx) }}
-	// Inert until the script portals it to <body> at init, so the SSRd
+	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
-	<template data-tui-dialog-portal>
+	<div data-tui-dialog-portal hidden>
 		<div data-tui-dialog-root hidden>
 			// 1:1 base/ui/sheet.tsx SheetOverlay (Dialog.Backdrop): the look
 			// comes from cn-sheet-overlay. user-select none is Base UI's
@@ -194,7 +194,7 @@ templ Content(props ...ContentProps) {
 				}
 			</div>
 		</div>
-	</template>
+	</div>
 }
 
 templ Header(props ...HeaderProps) {

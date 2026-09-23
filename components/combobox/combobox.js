@@ -155,14 +155,18 @@
   // as long as its SSR declaration site (_tuiPortalOwner) stays in the
   // document. Trigger-presence heuristics judged mid-swap moments wrongly -
   // multi-phase swap layers briefly disconnect the new triggers.
-  function portal(content) {
-    listenForEscape(content);
+  function removeOrphanedContents(content) {
     document.querySelectorAll("body > [data-tui-combobox-content]").forEach((c) => {
       if (c !== content && c._tuiPortalOwner && !c._tuiPortalOwner.isConnected) {
         stopAutoPositioning(c);
         c.remove();
       }
     });
+  }
+
+  function portal(content) {
+    listenForEscape(content);
+    removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
       if (!content._tuiPortalOwner) content._tuiPortalOwner = content.parentElement;
       document.body.appendChild(content);
@@ -529,33 +533,14 @@
   // value, the label lives in the item). Runs on load and whenever new
   // comboboxes appear in the DOM; the MutationObserver keeps this
   // framework-agnostic.
-  // Lift SSR'd contents out of their inert <template> wrappers into <body>,
-  // replacing a stale portaled copy on re-swaps (e.g. htmx).
-  function liftTemplates() {
-    document.querySelectorAll("template[data-tui-combobox-portal]").forEach((tpl) => {
-      const content = tpl.content.querySelector("[data-tui-combobox-content]");
-      if (content) {
-        const stale = document.getElementById(content.id);
-        if (stale) {
-          stopAutoPositioning(stale);
-          stale.remove();
-        }
-        content._tuiPortalOwner = tpl.parentElement;
-        document.body.appendChild(content);
-      }
-      tpl.remove();
-    });
-  }
-
   function init() {
-    liftTemplates();
+    removeOrphanedContents();
     document.querySelectorAll("[data-tui-combobox-input], [data-tui-combobox-trigger]").forEach(listenForEscape);
     allContents().forEach((content) => {
-      if (anchorFor(content)) portal(content); // portal up front, like React on mount
-    if (content.getAttribute("data-tui-combobox-initial-open") === "true") {
-    content.removeAttribute("data-tui-combobox-initial-open");
-    open(content);
-    }
+      if (content.getAttribute("data-tui-combobox-initial-open") === "true") {
+        content.removeAttribute("data-tui-combobox-initial-open");
+        open(content);
+      }
       if (isMultiple(content)) return;
       syncValueDisplay(content);
       const input = inputFor(content);
@@ -572,7 +557,7 @@
   }
   // Re-init on any childList mutation, directly (never rAF-deferred: rAF
   // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // lifts and wires itself, removals release portaled content through the
+  // wires itself, removals release portaled content through the
   // ownership sweep.
   new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
 

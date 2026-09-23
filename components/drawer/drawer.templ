@@ -187,7 +187,7 @@ func CloseFor(id string) templ.Attributes {
 //     data-nested-drawer-open, data-nested-drawer-swiping) on popup and
 //     overlay, so the blocks apply 1:1.
 //
-// The <template> keeps the SSRd content inert until drawer.js portals it
+// The hidden portal node keeps the SSRd content hidden until drawer.js portals it
 // (DrawerPortal pendant). data-tui-dialog-show-modal is shared with
 // dialog.js: both scripts key the body scroll lock release on
 // dialog[open][data-tui-dialog-show-modal="true"], so a closing dialog never
@@ -208,7 +208,7 @@ templ Content(props ...ContentProps) {
 		{{ axis = "x" }}
 	}
 	{{ hasSnapPoints := s.snapJSON != "" }}
-	<template data-tui-drawer-portal>
+	<div data-tui-drawer-portal hidden>
 		<dialog
 			id={ s.id }
 			data-tui-drawer-content
@@ -315,7 +315,7 @@ templ Content(props ...ContentProps) {
 				</div>
 			</div>
 		</dialog>
-	</template>
+	</div>
 }
 
 // SwipeHandle is the drag handle bar. Content renders it automatically when

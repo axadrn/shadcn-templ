@@ -13,7 +13,7 @@
 
   // Popup element -> per-dialog state. The open stack orders open dialogs by
   // open time (last = topmost), like Base UI's nested dialog counts.
-  const dialogs = new WeakMap();
+  const dialogs = new Map();
   const openStack = [];
 
   function getDialog(target) {
@@ -295,9 +295,9 @@
 
   // ----- nested dialog bookkeeping ------------------------------------------
 
-  // A dialog is nested when its template was SSRd inside another dialog's
-  // content — the DOM pendant of Base UI's parent DialogRootContext. The
-  // relation is recorded at lift time (see liftTemplates); parentOf resolves
+  // A dialog is nested when its hidden portal node was SSRd inside another
+  // dialog's content — the DOM pendant of Base UI's parent DialogRootContext. The
+  // relation is recorded at registration (see ensureDialog); parentOf resolves
   // it to the parent's live state.
   function parentOf(state) {
     const parentId = state.root.getAttribute("data-tui-dialog-parent");
@@ -349,11 +349,8 @@
     openStack.push(state);
     updateNestedAttributes();
 
-    // FloatingPortal appends the portal node at open time; re-appending the
-    // node keeps paint order = open order for stacked dialogs.
-    if (state.root.parentElement === document.body && document.body.lastElementChild !== state.root) {
-      document.body.appendChild(state.root);
-    }
+    // FloatingPortal appends at open time, keeping paint order = open order.
+    document.body.appendChild(state.root);
     state.root.hidden = false;
 
     wireAria(state);
@@ -589,6 +586,10 @@
     const popup = root.querySelector("[data-tui-dialog-content]");
     if (!popup || dialogs.has(popup)) return dialogs.get(popup) || null;
 
+    const parentPopup = root.parentElement?.closest("[data-tui-dialog-content]");
+    if (parentPopup?.id) root.setAttribute("data-tui-dialog-parent", parentPopup.id);
+    if (!root._tuiPortalOwner) root._tuiPortalOwner = root.parentElement;
+
     const state = {
       root,
       popup,
@@ -658,7 +659,7 @@
   // Fully retire a dialog: undo aria-hidden marking, release the scroll
   // lock and remove the portaled DOM. Used when an htmx/datastar swap
   // removed the dialog's source from the page or replaced it with a fresh
-  // template.
+  // hidden portal node.
   function destroyDialog(popup) {
     const state = dialogs.get(popup);
     if (!state) {
@@ -682,52 +683,24 @@
     dialogs.delete(popup);
   }
 
-  // Lift SSR'd portal nodes out of their inert <template> wrappers into
-  // <body>, replacing a stale portaled copy on re-swaps (e.g. htmx). A
-  // template found inside an already-lifted popup belongs to a dialog that
-  // was composed inside that dialog's content: Base UI's nested dialog. The
-  // relation is recorded on the root before the move to <body>.
-  function liftTemplates() {
-    let lifted = false;
-    document.querySelectorAll("template[data-tui-dialog-portal]").forEach((tpl) => {
-      const root = tpl.content.querySelector("[data-tui-dialog-root]");
-      const popup = root?.querySelector("[data-tui-dialog-content]");
-      if (root && popup) {
-        const parentPopup = tpl.closest("[data-tui-dialog-content]");
-        if (parentPopup?.id) root.setAttribute("data-tui-dialog-parent", parentPopup.id);
-        const stale = document.getElementById(popup.id);
-        if (stale) destroyDialog(stale);
-        root._tuiPortalOwner = tpl.parentElement;
-        document.body.appendChild(root);
-        lifted = true;
-      }
-      tpl.remove();
-    });
-    // Lifting can surface templates that were nested inside the moved
-    // content; lift again until the document is template-free.
-    if (lifted) liftTemplates();
-  }
-
   function init() {
-    liftTemplates();
     document.querySelectorAll("[data-tui-dialog-trigger]").forEach(listenForEscape);
-    document.querySelectorAll("body > [data-tui-dialog-root]").forEach((root) => {
+    // A dialog lives as long as its SSR declaration site (_tuiPortalOwner)
+    // stays in the document, including trigger-less programmatic dialogs.
+    // Retire registered dialogs even when their root itself was removed.
+    dialogs.forEach((state, popup) => {
+      if (!state.root.isConnected || (state.root._tuiPortalOwner && !state.root._tuiPortalOwner.isConnected)) {
+        destroyDialog(popup);
+      }
+    });
+    document.querySelectorAll("[data-tui-dialog-root]").forEach((root) => {
       const popup = root.querySelector("[data-tui-dialog-content]");
       if (!popup) {
         root.remove();
         return;
       }
 
-      // The unmount half of the React portal pendant: the dialog lives as
-      // long as its SSR declaration site (_tuiPortalOwner) stays in the
-      // document. Ownership keeps trigger-less programmatic dialogs
-      // (dialog.TriggerFor, the command menu) alive and judges swaps
-      // without mid-swap trigger heuristics.
-      const state = dialogs.get(popup);
-      if (state) {
-        if (root._tuiPortalOwner && !root._tuiPortalOwner.isConnected) destroyDialog(popup);
-        return;
-      }
+      if (dialogs.has(popup)) return;
 
       const fresh = ensureDialog(root);
       if (!fresh) return;

@@ -273,16 +273,16 @@ type PortalProps struct {
 	Attributes templ.Attributes
 }
 
-// Portal is 1:1 the reference Portal slot: inert until the script portals
-// the content to <body> at init.
+// Portal is 1:1 the reference Portal slot: a hidden node that holds the
+// content until the script portals it to <body> on open.
 templ Portal(props ...PortalProps) {
 	{{ var p PortalProps }}
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	<template data-tui-dropdownmenu-portal { p.Attributes... }>
+	<div data-tui-dropdownmenu-portal hidden { p.Attributes... }>
 		{ children... }
-	</template>
+	</div>
 }
 
 templ Content(props ...ContentProps) {
@@ -300,7 +300,7 @@ templ Content(props ...ContentProps) {
 		{{ p.SideOffset = 4 }}
 	}
 	{{ s := state(ctx) }}
-	// Inert until the script portals it to <body> at init, so the SSRd
+	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
 	@Portal() {
 		<div

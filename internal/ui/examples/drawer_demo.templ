@@ -74,17 +74,7 @@ templ DrawerDemo() {
 	}
 	<script nonce={ templ.GetNonce(ctx) }>
 		(() => {
-			// The dialog waits inside its portal <template> until drawer.js
-			// lifts it to <body>. The template copy wins over a stale portaled
-			// copy from a previous htmx swap; attributes and listeners set on
-			// it survive the lift (same node).
-			const drawerDemo = () => {
-				for (const tpl of document.querySelectorAll("template[data-tui-drawer-portal]")) {
-					const content = tpl.content.getElementById("drawer-demo");
-					if (content) return content;
-				}
-				return document.getElementById("drawer-demo");
-			};
+			const drawerDemo = () => document.getElementById("drawer-demo");
 
 			// useIsMobile pendant (hooks/use-mobile.ts): swipeSwipeDirection is
 			// down and the swipe handle shows below the md breakpoint, right

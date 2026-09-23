@@ -253,9 +253,9 @@ templ Content(props ...ContentProps) {
 		{{ p.Align = AlignCenter }}
 	}
 	{{ s := state(ctx) }}
-	// Inert until the script portals it to <body> at init, so the SSRd
+	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
-	<template data-tui-select-portal>
+	<div data-tui-select-portal hidden>
 		<div
 			id={ s.id }
 			data-tui-select-content
@@ -304,7 +304,7 @@ templ Content(props ...ContentProps) {
 				</div>
 			</div>
 		</div>
-	</template>
+	</div>
 }
 
 templ Group(props ...GroupProps) {

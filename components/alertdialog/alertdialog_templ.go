@@ -183,8 +183,8 @@ type PortalProps struct {
 	Attributes templ.Attributes
 }
 
-// Portal is 1:1 base/ui/alert-dialog.tsx AlertDialogPortal. Inert until the
-// script portals it to <body> at init; it shares the dialog machinery's
+// Portal is 1:1 base/ui/alert-dialog.tsx AlertDialogPortal. Hidden until the
+// script portals it to <body> on open; it shares the dialog machinery's
 // data attributes because Base UI's AlertDialog composes Dialog.
 func Portal(props ...PortalProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -211,7 +211,7 @@ func Portal(props ...PortalProps) templ.Component {
 		if len(props) > 0 {
 			p = props[0]
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<template data-tui-dialog-portal><div data-tui-dialog-root hidden")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div data-tui-dialog-portal hidden><div data-tui-dialog-root hidden")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -227,7 +227,7 @@ func Portal(props ...PortalProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></template>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -129,9 +129,9 @@ templ Content(props ...ContentProps) {
 	}
 	{{ d, _ := ctx.Value(delaysKey{}).(delays) }}
 	{{ s, _ := ctx.Value(stateKey).(ctxState) }}
-	// Inert until the script portals it to <body> at init, so the SSRd
+	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
-	<template data-tui-hovercard-portal>
+	<div data-tui-hovercard-portal hidden>
 		<div
 			id={ cardID(ctx) }
 			data-slot="hover-card-content"
@@ -163,5 +163,5 @@ templ Content(props ...ContentProps) {
 		>
 			{ children... }
 		</div>
-	</template>
+	</div>
 }

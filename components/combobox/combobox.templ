@@ -354,9 +354,9 @@ templ Content(props ...ContentProps) {
 		{{ p.SideOffset = 6 }}
 	}
 	{{ s := state(ctx) }}
-	// Inert until the script portals it to <body> at init, so the SSRd
+	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
-	<template data-tui-combobox-portal>
+	<div data-tui-combobox-portal hidden>
 		<div
 			id={ s.id }
 			data-tui-combobox-content
@@ -407,7 +407,7 @@ templ Content(props ...ContentProps) {
 				{ children... }
 			</div>
 		</div>
-	</template>
+	</div>
 }
 
 templ List(props ...ListProps) {

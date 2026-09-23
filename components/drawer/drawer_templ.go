@@ -218,7 +218,7 @@ func CloseFor(id string) templ.Attributes {
 //     data-nested-drawer-open, data-nested-drawer-swiping) on popup and
 //     overlay, so the blocks apply 1:1.
 //
-// The <template> keeps the SSRd content inert until drawer.js portals it
+// The hidden portal node keeps the SSRd content hidden until drawer.js portals it
 // (DrawerPortal pendant). data-tui-dialog-show-modal is shared with
 // dialog.js: both scripts key the body scroll lock release on
 // dialog[open][data-tui-dialog-show-modal="true"], so a closing dialog never
@@ -259,7 +259,7 @@ func Content(props ...ContentProps) templ.Component {
 			axis = "x"
 		}
 		hasSnapPoints := s.snapJSON != ""
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<template data-tui-drawer-portal>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div data-tui-drawer-portal hidden>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -539,7 +539,7 @@ func Content(props ...ContentProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</div></div></dialog></template>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</div></div></dialog></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

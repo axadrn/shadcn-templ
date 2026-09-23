@@ -69,14 +69,18 @@
   // as long as its SSR declaration site (_tuiPortalOwner) stays in the
   // document. Trigger-presence heuristics judged mid-swap moments wrongly -
   // multi-phase swap layers briefly disconnect the new triggers.
-  function portal(content) {
-    listenForEscape(content);
+  function removeOrphanedContents(content) {
     document.querySelectorAll("body > [data-tui-tooltip-content]").forEach((c) => {
       if (c !== content && c._tuiPortalOwner && !c._tuiPortalOwner.isConnected) {
         stopAutoPositioning(c);
         c.remove();
       }
     });
+  }
+
+  function portal(content) {
+    listenForEscape(content);
+    removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
       if (!content._tuiPortalOwner) content._tuiPortalOwner = content.parentElement;
       document.body.appendChild(content);
@@ -267,27 +271,11 @@
 
   document.addEventListener("keydown", closeOnEscapeKeyDown);
 
-  // Lift every content out of its inert <template> into <body>, shadcn's
-  // portal renders it there from the start.
+  // Content stays in its hidden portal node until it opens.
   function init() {
-    document
-      .querySelectorAll("template[data-tui-tooltip-portal]")
-      .forEach((tpl) => {
-        const content = tpl.content.querySelector("[data-tui-tooltip-content]");
-        if (content) {
-          const stale = document.getElementById(content.id);
-          if (stale) {
-            stopAutoPositioning(stale);
-            stale.remove(); // htmx re-swap of the same id
-          }
-          content._tuiPortalOwner = tpl.parentElement;
-          portal(content);
-        }
-        tpl.remove();
-      });
+    removeOrphanedContents();
     document.querySelectorAll("[data-tui-tooltip-trigger]").forEach(listenForEscape);
     allContents().forEach((content) => {
-      portal(content);
       if (content.getAttribute("data-tui-tooltip-initial-open") === "true") {
         content.removeAttribute("data-tui-tooltip-initial-open");
         const trigger = triggerFor(content);
@@ -302,7 +290,7 @@
   }
   // Re-init on any childList mutation, directly (never rAF-deferred: rAF
   // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // lifts and wires itself, removals release portaled content through the
+  // wires itself, removals release portaled content through the
   // ownership sweep.
   new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
 
