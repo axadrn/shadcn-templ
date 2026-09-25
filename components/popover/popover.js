@@ -1,7 +1,5 @@
-// Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
   // Constants from Base UI's popover, shadcn's reference implementation.
-  const COLLISION_PADDING = 5;
 
   // The popover's element is the positioner (shadcn's isolate z-50 wrapper,
   // no slot) around the [data-slot=popover-content] popup.
@@ -54,27 +52,9 @@
     return content.firstElementChild;
   }
 
-  // The parts that render the transition status.
+  // The popup renders the transition status, its positioner the open state.
   function partsOf(content) {
-    return [content, popupFor(content)];
-  }
-
-  function setSide(content, side) {
-    content.setAttribute("data-side", side);
-    const popup = popupFor(content);
-    if (popup) popup.setAttribute("data-side", side);
-  }
-
-  // Base UI zooms the popup out of the anchor's center point, not out of a
-  // placement corner.
-  function anchorOrigin(result, anchorRect, positionerRect, sideOffset) {
-    const side = result.placement.split("-")[0];
-    const centerX = anchorRect.left + anchorRect.width / 2 - positionerRect.left + "px";
-    const centerY = anchorRect.top + anchorRect.height / 2 - positionerRect.top + "px";
-    if (side === "bottom") return centerX + " " + -sideOffset + "px";
-    if (side === "top") return centerX + " calc(100% + " + sideOffset + "px)";
-    if (side === "right") return -sideOffset + "px " + centerY;
-    return "calc(100% + " + sideOffset + "px) " + centerY;
+    return { positioner: content, parts: [popupFor(content)] };
   }
 
   // Moves the content to <body> (shadcn portals it the same way).
@@ -100,57 +80,23 @@
     }
   }
 
-  function position(content) {
-    const trigger = triggerFor(content);
-    if (!trigger) return Promise.resolve();
-    const { computePosition, offset, flip, shift } = window.FloatingUIDOM;
-    const side = content.getAttribute("data-templ-side") || "bottom";
-    const align = content.getAttribute("data-templ-align") || "center";
-    const sideOffset = parseFloat(content.getAttribute("data-templ-side-offset")) || 0;
-    const alignOffset = parseFloat(content.getAttribute("data-templ-align-offset")) || 0;
-    const placement = align === "center" ? side : side + "-" + align;
-
-    return computePosition(trigger, content, {
-      placement: placement,
-      strategy: "absolute",
-      middleware: [
-        offset({ mainAxis: sideOffset, crossAxis: alignOffset }),
-        flip({ padding: COLLISION_PADDING }),
-        shift({ padding: COLLISION_PADDING }),
-      ],
-    }).then((result) => {
-      content.style.left = result.x + "px";
-      content.style.top = result.y + "px";
-      setSide(content, result.placement.split("-")[0]);
-      const popup = popupFor(content);
-      if (popup) {
-        popup.style.setProperty(
-          "--transform-origin",
-          anchorOrigin(
-            result,
-            trigger.getBoundingClientRect(),
-            content.getBoundingClientRect(),
-            sideOffset,
-          ),
-        );
-      }
-    });
-  }
-
+  // PopoverPositioner: useAnchorPositioning with the popup collision
+  // avoidance, while the popup is mounted.
   function startAutoPositioning(content) {
+    stopAutoPositioning(content);
     const trigger = triggerFor(content);
     if (!trigger) return Promise.resolve();
-    if (content._templPositionCleanup) content._templPositionCleanup();
-    let resolveFirst;
-    const firstPosition = new Promise((resolve) => {
-      resolveFirst = resolve;
+    const positioning = window.templ.anchorPositioning.useAnchorPositioning({
+      anchor: trigger,
+      positioner: content,
+      parts: [content, popupFor(content)],
+      side: content.getAttribute("data-templ-side") || "bottom",
+      align: content.getAttribute("data-templ-align") || "center",
+      sideOffset: parseFloat(content.getAttribute("data-templ-side-offset")) || 0,
+      alignOffset: parseFloat(content.getAttribute("data-templ-align-offset")) || 0,
     });
-    const update = () => position(content).then(resolveFirst, resolveFirst);
-    content._templPositionCleanup = window.FloatingUIDOM.autoUpdate(trigger, content, update, {
-      elementResize: typeof ResizeObserver !== "undefined",
-      layoutShift: typeof IntersectionObserver !== "undefined",
-    });
-    return firstPosition;
+    content._templPositionCleanup = positioning.cleanup;
+    return positioning.positioned;
   }
 
   function stopAutoPositioning(content) {
@@ -196,18 +142,9 @@
       onOpenChange: (open, reason) => requestOpenChange(content, open, reason !== "outside-press"),
     });
 
-    // Position it invisibly first, then play the enter animation in place.
-    content.style.visibility = "hidden";
+    // Positioned first, then the enter animation plays in place.
     const finish = () => {
-      // duration-100 transitions `all`; a visibility transition would
-      // freeze at hidden in background tabs - flip suppressed.
       const popup = popupFor(content);
-      content.style.transitionProperty = "none";
-      if (popup) popup.style.transitionProperty = "none";
-      content.style.visibility = "";
-      void content.offsetWidth;
-      content.style.transitionProperty = "";
-      if (popup) popup.style.transitionProperty = "";
       if (content.hidden) return;
       window.templ.transition.open(partsOf(content));
       const trigger = triggerFor(content);
@@ -231,13 +168,13 @@
     if (!content || content.hidden) return;
     content._templDismiss?.();
     content._templDismiss = null;
-    stopAutoPositioning(content);
     if (returnFocus !== false && content.contains(document.activeElement)) {
       const focusTrigger = triggerFor(content);
       if (focusTrigger) focusTrigger.focus({ preventScroll: true });
     }
-    content.style.visibility = "";
+    // Positioned until it unmounts, like Base UI.
     window.templ.transition.close(partsOf(content), popupFor(content), () => {
+      stopAutoPositioning(content);
       content.hidden = true;
     });
     const trigger = triggerFor(content);

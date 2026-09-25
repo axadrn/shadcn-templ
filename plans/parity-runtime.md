@@ -100,7 +100,7 @@ Done when: `grep -l "data-ending-style" components/*/*.js` lists only the block,
 
 ### 6. Anchor positioning
 
-- [ ] Done
+- [x] Done
 
 `components/baseui/use_anchor_positioning.js`, `useAnchorPositioning.ts` over `floatingui`: side and align from `data-templ-side`/`-align`, offsets, `flip`/`shift`/`size`, the Base UI variables (`--available-width`, `--available-height`, `--anchor-width`, `--transform-origin`), `data-side`/`data-align` on positioner and popup, `autoUpdate` with cleanup. The 7 consumers switch; select keeps its item-aligned mode as its own code, it has no Base UI counterpart in the block.
 
@@ -124,7 +124,9 @@ Done when: `dialog.js` has no `tabbable`, no guard creation and no `aria-hidden`
 
 `components/baseui/use_list_navigation.js` and `use_typeahead.js` from their sources: arrows, Home, End, loop, disabled items, orientation, RTL, highlight by focus or `aria-activedescendant` as each consumer uses it, typeahead with Base UI's timeout. Consumers: dropdownmenu, contextmenu, select, combobox (command stays cmdk).
 
-Done when: none of the four consumers handles `ArrowDown` itself, typeahead works in menus as in Base UI, `check.sh` and `compare.mjs` green.
+Also from task 6: the submenus of both menus get a positioner there but stay nested in the root popup, positioned fixed, because the keyboard handling of the menus still finds them inside the root content. Base UI portals every submenu like a menu (`DropdownMenuSubContent` is a `DropdownMenuContent`), positions it absolute and renders `data-nested` on positioner and popup. With the list navigation rewritten here the submenu portals on open like its root, and `tmp/parity-runtime/position.mjs chromium --offset dropdown-menu-submenu context-menu-submenu` shows shadcn's positioner.
+
+Done when: none of the four consumers handles `ArrowDown` itself, typeahead works in menus as in Base UI, the submenus portal and render `data-nested` like upstream, `check.sh` and `compare.mjs` green.
 
 ### 9. Composite roving tab stop
 
@@ -247,5 +249,26 @@ The toast keeps its own status, since Base UI's toast manager drives it and rend
 Found on the way: the bundler's comment said lexical order puts `baseui` before its consumers, which is wrong for `accordion`, `alertdialog`, `aspectratio` and `avatar`. `update_scripts.go` now puts `baseui` first explicitly, covered in its test. The watcher had to restart once to pick it up.
 
 Checks: `check.sh` in chromium and webkit, a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 37). The DOM against rt4 differs by the new code blocks on the docs pages and by the accordion state above. `escape.mjs` 0 failures, `compare.mjs dismiss` unchanged, `compare.mjs` against the task 1 baseline 304 pass instead of 292 and nothing new, `htmx.mjs` 110 of 110 in both engines.
+
+### Task 6
+
+`components/baseui/use_anchor_positioning.js` ports `useAnchorPositioning` with the `floatingStyles` of `@floating-ui/react`'s `useFloating`, Base UI's fork of the `arrow` middleware (it measures against the positioner) and its `hide` middleware (an empty anchor rect counts as hidden). It runs while the popup is mounted and returns `{ cleanup, positioned }`. The positioner gets `position` with `left: 0; top: 0` and `transform: translate(x, y)` rounded to device pixels, `--available-width`, `--available-height`, `--anchor-width`, `--anchor-height` and `--transform-origin`, `data-side` (logical for `inline-start` and `inline-end`, direction from the nearest `dir`) and `data-align` on the positioner, popup and arrow, `data-anchor-hidden`, and the arrow its offset and `data-uncentered`. Until the first position it is fixed and transparent, like the source. `lazyFlip` locks the side after the first position, `applyPosition` lets a select aligned with its trigger keep its own position while the variables still update. Left out: `adaptiveOrigin`, which only popups with a viewport part use.
+
+All seven consumers use it with the options their Base UI positioner passes: popover, tooltip and hover card the popup collision avoidance, dropdown menu, combobox and select the dropdown one, combobox with `lazyFlip`, the context menu fixed against a virtual element at the cursor with `shiftCrossAxis` and no arrow padding, the submenus with the side and offsets of shadcn's `DropdownMenuSubContent` and `ContextMenuSubContent`. Each popup stays positioned until it unmounts, where it used to stop at the start of the close. The hover card has Base UI's `inline` middleware from `utils/popups/inlineRect.ts` for triggers that wrap over several lines, in `hovercard.js` since the preview card is its only consumer. The visibility dance each script had before the enter animation is gone, the transparent positioner does that job.
+
+Structure that moves to upstream's:
+
+- Tooltip and hover card get their positioner element, like shadcn renders it (`TooltipPrimitive.Positioner`, `PreviewCard.Positioner`). The positioner carries the position and `role="presentation"`, the popup keeps id, role and slot. The Base UI positioner props (`side`, `align`, their offsets) moved onto it as `data-templ-*`.
+- The submenus of both menus get a positioner too, but stay nested in the root popup and position fixed, which task 8 changes (written into its Done when). Their popups get shadcn's merged classes back, including `max-h-(--available-height)`, which our copies had dropped.
+- `use_transition_status.js` now knows what Base UI renders where: the popup and backdrop the transition status, the positioner and arrow only `data-open` or `data-closed` (`popupStateMapping`), the positioner `transition: none` while starting (`getDisabledMountTransitionStyles`) and `pointer-events: none` while closed (`usePositioner`). Task 5 had put the starting and ending style on the positioners too.
+- The select's `data-align-trigger` is the static prop value like shadcn renders it, the script no longer switches it off when the aligned mode falls back to the popper mode. That was the task 5 finding: shadcn's `select-demo` falls back too, its trigger sits at the top edge. The fallback now works like `SelectPopup`, one aligned pass per open, and the fallback holds until the popup unmounts.
+
+`components/floatingui` vendored `@floating-ui/dom` 1.7.0 with core 1.7.0. Base UI resolves dom 1.7.6 with core 1.7.5, whose `flip` with `crossAxis: "alignment"` only leaves the main axis once every placement on it overflows it. With 1.7.0 the tooltip in `tooltip-demo` went to the right where shadcn's goes below. Both files are now the UMD builds of those versions, and `plans/UPSTREAM.md` names them next to the pin.
+
+`tmp/parity-runtime/position.mjs <engine> [--offset] [example...]` opens each positioned popup on both sides and prints the positioner and popup. Our preview renders the demo inside the site layout, a flex column that stretches a lone trigger to the full width, so the probe sets that wrapper to `display: block`. That the preview itself should render like upstream is now a decision in `plans/parity-components.md`, along with the tooltip positioner and the example content. Every value is equal in both engines for popover, dropdown menu, tooltip, hover card, combobox, context menu and select, down to the fraction in `--transform-origin`, and with `--offset` the select aligns with its trigger like upstream (`data-side="none"`, fixed, same `top` and `left`). Left: the submenus' transform is relative to the root positioner, the visual position is the same (context menu 160 + 140 = 300, 94 + 64 = 158), and the aligned select is one item shorter, since shadcn's demo has a sixth item "Select a fruit" with `value: null`.
+
+The Go tests that looked for the old positioning code in the scripts check the block now: `components/floatingui/positioning_test.go` pins the vendored versions and fails when a script other than the block talks to Floating UI, the component tests look for their block call and options, and the select test fails when the script sets `data-align-trigger`. `behavior.mjs` reads the tooltip, hover card and context menu from their positioner.
+
+Checks: `check.sh` in chromium and webkit, a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 38). The DOM against rt5 differs on the pages with a tooltip, hover card or submenu by the new positioner element, on the docs pages by the new code block, and by `data-align` on positioners and popups. `escape.mjs` 0 failures, `compare.mjs dismiss` unchanged, `compare.mjs` 304 pass and 163 fail, the same lines as after task 5, `transition.mjs` unchanged, `htmx.mjs` 110 of 110 in both engines. One chromium run of `compare.mjs` died once in the context menu family on a page without a body mid load, two reruns of the family and a full rerun were clean.
 
 ## Planner review

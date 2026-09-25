@@ -1,604 +1,981 @@
-// https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.7.0
-!(function (t, e) {
-  "object" == typeof exports && "undefined" != typeof module
-    ? e(exports, require("./floating_ui_core"))
-    : "function" == typeof define && define.amd
-    ? define(["exports", "./floatingUICore"], e)
-    : e(
-        ((t =
-          "undefined" != typeof globalThis
-            ? globalThis
-            : t || self).FloatingUIDOM = {}),
-        t.FloatingUICore
-      );
-})(this, function (t, e) {
-  "use strict";
-  const n = Math.min,
-    o = Math.max,
-    i = Math.round,
-    r = Math.floor,
-    c = (t) => ({ x: t, y: t });
-  function l() {
-    return "undefined" != typeof window;
+// @floating-ui/dom 1.7.6, dist/floating-ui.dom.umd.js, the version @base-ui/react
+// 1.6.0 resolves at the pin in plans/UPSTREAM.md.
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@floating-ui/core')) :
+  typeof define === 'function' && define.amd ? define(['exports', '@floating-ui/core'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.FloatingUIDOM = {}, global.FloatingUICore));
+})(this, (function (exports, core) { 'use strict';
+
+  /**
+   * Custom positioning reference element.
+   * @see https://floating-ui.com/docs/virtual-elements
+   */
+
+  const min = Math.min;
+  const max = Math.max;
+  const round = Math.round;
+  const floor = Math.floor;
+  const createCoords = v => ({
+    x: v,
+    y: v
+  });
+
+  function hasWindow() {
+    return typeof window !== 'undefined';
   }
-  function s(t) {
-    return a(t) ? (t.nodeName || "").toLowerCase() : "#document";
+  function getNodeName(node) {
+    if (isNode(node)) {
+      return (node.nodeName || '').toLowerCase();
+    }
+    // Mocked nodes in testing environments may not be instances of Node. By
+    // returning `#document` an infinite loop won't occur.
+    // https://github.com/floating-ui/floating-ui/issues/2317
+    return '#document';
   }
-  function f(t) {
-    var e;
-    return (
-      (null == t || null == (e = t.ownerDocument) ? void 0 : e.defaultView) ||
-      window
-    );
+  function getWindow(node) {
+    var _node$ownerDocument;
+    return (node == null || (_node$ownerDocument = node.ownerDocument) == null ? void 0 : _node$ownerDocument.defaultView) || window;
   }
-  function u(t) {
-    var e;
-    return null ==
-      (e = (a(t) ? t.ownerDocument : t.document) || window.document)
-      ? void 0
-      : e.documentElement;
+  function getDocumentElement(node) {
+    var _ref;
+    return (_ref = (isNode(node) ? node.ownerDocument : node.document) || window.document) == null ? void 0 : _ref.documentElement;
   }
-  function a(t) {
-    return !!l() && (t instanceof Node || t instanceof f(t).Node);
+  function isNode(value) {
+    if (!hasWindow()) {
+      return false;
+    }
+    return value instanceof Node || value instanceof getWindow(value).Node;
   }
-  function d(t) {
-    return !!l() && (t instanceof Element || t instanceof f(t).Element);
+  function isElement(value) {
+    if (!hasWindow()) {
+      return false;
+    }
+    return value instanceof Element || value instanceof getWindow(value).Element;
   }
-  function h(t) {
-    return !!l() && (t instanceof HTMLElement || t instanceof f(t).HTMLElement);
+  function isHTMLElement(value) {
+    if (!hasWindow()) {
+      return false;
+    }
+    return value instanceof HTMLElement || value instanceof getWindow(value).HTMLElement;
   }
-  function p(t) {
-    return (
-      !(!l() || "undefined" == typeof ShadowRoot) &&
-      (t instanceof ShadowRoot || t instanceof f(t).ShadowRoot)
-    );
+  function isShadowRoot(value) {
+    if (!hasWindow() || typeof ShadowRoot === 'undefined') {
+      return false;
+    }
+    return value instanceof ShadowRoot || value instanceof getWindow(value).ShadowRoot;
   }
-  function g(t) {
-    const { overflow: e, overflowX: n, overflowY: o, display: i } = b(t);
-    return (
-      /auto|scroll|overlay|hidden|clip/.test(e + o + n) &&
-      !["inline", "contents"].includes(i)
-    );
+  function isOverflowElement(element) {
+    const {
+      overflow,
+      overflowX,
+      overflowY,
+      display
+    } = getComputedStyle$1(element);
+    return /auto|scroll|overlay|hidden|clip/.test(overflow + overflowY + overflowX) && display !== 'inline' && display !== 'contents';
   }
-  function m(t) {
-    return ["table", "td", "th"].includes(s(t));
+  function isTableElement(element) {
+    return /^(table|td|th)$/.test(getNodeName(element));
   }
-  function y(t) {
-    return [":popover-open", ":modal"].some((e) => {
-      try {
-        return t.matches(e);
-      } catch (t) {
-        return !1;
+  function isTopLayer(element) {
+    try {
+      if (element.matches(':popover-open')) {
+        return true;
       }
+    } catch (_e) {
+      // no-op
+    }
+    try {
+      return element.matches(':modal');
+    } catch (_e) {
+      return false;
+    }
+  }
+  const willChangeRe = /transform|translate|scale|rotate|perspective|filter/;
+  const containRe = /paint|layout|strict|content/;
+  const isNotNone = value => !!value && value !== 'none';
+  let isWebKitValue;
+  function isContainingBlock(elementOrCss) {
+    const css = isElement(elementOrCss) ? getComputedStyle$1(elementOrCss) : elementOrCss;
+
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
+    // https://drafts.csswg.org/css-transforms-2/#individual-transforms
+    return isNotNone(css.transform) || isNotNone(css.translate) || isNotNone(css.scale) || isNotNone(css.rotate) || isNotNone(css.perspective) || !isWebKit() && (isNotNone(css.backdropFilter) || isNotNone(css.filter)) || willChangeRe.test(css.willChange || '') || containRe.test(css.contain || '');
+  }
+  function getContainingBlock(element) {
+    let currentNode = getParentNode(element);
+    while (isHTMLElement(currentNode) && !isLastTraversableNode(currentNode)) {
+      if (isContainingBlock(currentNode)) {
+        return currentNode;
+      } else if (isTopLayer(currentNode)) {
+        return null;
+      }
+      currentNode = getParentNode(currentNode);
+    }
+    return null;
+  }
+  function isWebKit() {
+    if (isWebKitValue == null) {
+      isWebKitValue = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('-webkit-backdrop-filter', 'none');
+    }
+    return isWebKitValue;
+  }
+  function isLastTraversableNode(node) {
+    return /^(html|body|#document)$/.test(getNodeName(node));
+  }
+  function getComputedStyle$1(element) {
+    return getWindow(element).getComputedStyle(element);
+  }
+  function getNodeScroll(element) {
+    if (isElement(element)) {
+      return {
+        scrollLeft: element.scrollLeft,
+        scrollTop: element.scrollTop
+      };
+    }
+    return {
+      scrollLeft: element.scrollX,
+      scrollTop: element.scrollY
+    };
+  }
+  function getParentNode(node) {
+    if (getNodeName(node) === 'html') {
+      return node;
+    }
+    const result =
+    // Step into the shadow DOM of the parent of a slotted node.
+    node.assignedSlot ||
+    // DOM Element detected.
+    node.parentNode ||
+    // ShadowRoot detected.
+    isShadowRoot(node) && node.host ||
+    // Fallback.
+    getDocumentElement(node);
+    return isShadowRoot(result) ? result.host : result;
+  }
+  function getNearestOverflowAncestor(node) {
+    const parentNode = getParentNode(node);
+    if (isLastTraversableNode(parentNode)) {
+      return node.ownerDocument ? node.ownerDocument.body : node.body;
+    }
+    if (isHTMLElement(parentNode) && isOverflowElement(parentNode)) {
+      return parentNode;
+    }
+    return getNearestOverflowAncestor(parentNode);
+  }
+  function getOverflowAncestors(node, list, traverseIframes) {
+    var _node$ownerDocument2;
+    if (list === void 0) {
+      list = [];
+    }
+    if (traverseIframes === void 0) {
+      traverseIframes = true;
+    }
+    const scrollableAncestor = getNearestOverflowAncestor(node);
+    const isBody = scrollableAncestor === ((_node$ownerDocument2 = node.ownerDocument) == null ? void 0 : _node$ownerDocument2.body);
+    const win = getWindow(scrollableAncestor);
+    if (isBody) {
+      const frameElement = getFrameElement(win);
+      return list.concat(win, win.visualViewport || [], isOverflowElement(scrollableAncestor) ? scrollableAncestor : [], frameElement && traverseIframes ? getOverflowAncestors(frameElement) : []);
+    } else {
+      return list.concat(scrollableAncestor, getOverflowAncestors(scrollableAncestor, [], traverseIframes));
+    }
+  }
+  function getFrameElement(win) {
+    return win.parent && Object.getPrototypeOf(win.parent) ? win.frameElement : null;
+  }
+
+  function getCssDimensions(element) {
+    const css = getComputedStyle$1(element);
+    // In testing environments, the `width` and `height` properties are empty
+    // strings for SVG elements, returning NaN. Fallback to `0` in this case.
+    let width = parseFloat(css.width) || 0;
+    let height = parseFloat(css.height) || 0;
+    const hasOffset = isHTMLElement(element);
+    const offsetWidth = hasOffset ? element.offsetWidth : width;
+    const offsetHeight = hasOffset ? element.offsetHeight : height;
+    const shouldFallback = round(width) !== offsetWidth || round(height) !== offsetHeight;
+    if (shouldFallback) {
+      width = offsetWidth;
+      height = offsetHeight;
+    }
+    return {
+      width,
+      height,
+      $: shouldFallback
+    };
+  }
+
+  function unwrapElement(element) {
+    return !isElement(element) ? element.contextElement : element;
+  }
+
+  function getScale(element) {
+    const domElement = unwrapElement(element);
+    if (!isHTMLElement(domElement)) {
+      return createCoords(1);
+    }
+    const rect = domElement.getBoundingClientRect();
+    const {
+      width,
+      height,
+      $
+    } = getCssDimensions(domElement);
+    let x = ($ ? round(rect.width) : rect.width) / width;
+    let y = ($ ? round(rect.height) : rect.height) / height;
+
+    // 0, NaN, or Infinity should always fallback to 1.
+
+    if (!x || !Number.isFinite(x)) {
+      x = 1;
+    }
+    if (!y || !Number.isFinite(y)) {
+      y = 1;
+    }
+    return {
+      x,
+      y
+    };
+  }
+
+  const noOffsets = /*#__PURE__*/createCoords(0);
+  function getVisualOffsets(element) {
+    const win = getWindow(element);
+    if (!isWebKit() || !win.visualViewport) {
+      return noOffsets;
+    }
+    return {
+      x: win.visualViewport.offsetLeft,
+      y: win.visualViewport.offsetTop
+    };
+  }
+  function shouldAddVisualOffsets(element, isFixed, floatingOffsetParent) {
+    if (isFixed === void 0) {
+      isFixed = false;
+    }
+    if (!floatingOffsetParent || isFixed && floatingOffsetParent !== getWindow(element)) {
+      return false;
+    }
+    return isFixed;
+  }
+
+  function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetParent) {
+    if (includeScale === void 0) {
+      includeScale = false;
+    }
+    if (isFixedStrategy === void 0) {
+      isFixedStrategy = false;
+    }
+    const clientRect = element.getBoundingClientRect();
+    const domElement = unwrapElement(element);
+    let scale = createCoords(1);
+    if (includeScale) {
+      if (offsetParent) {
+        if (isElement(offsetParent)) {
+          scale = getScale(offsetParent);
+        }
+      } else {
+        scale = getScale(element);
+      }
+    }
+    const visualOffsets = shouldAddVisualOffsets(domElement, isFixedStrategy, offsetParent) ? getVisualOffsets(domElement) : createCoords(0);
+    let x = (clientRect.left + visualOffsets.x) / scale.x;
+    let y = (clientRect.top + visualOffsets.y) / scale.y;
+    let width = clientRect.width / scale.x;
+    let height = clientRect.height / scale.y;
+    if (domElement) {
+      const win = getWindow(domElement);
+      const offsetWin = offsetParent && isElement(offsetParent) ? getWindow(offsetParent) : offsetParent;
+      let currentWin = win;
+      let currentIFrame = getFrameElement(currentWin);
+      while (currentIFrame && offsetParent && offsetWin !== currentWin) {
+        const iframeScale = getScale(currentIFrame);
+        const iframeRect = currentIFrame.getBoundingClientRect();
+        const css = getComputedStyle$1(currentIFrame);
+        const left = iframeRect.left + (currentIFrame.clientLeft + parseFloat(css.paddingLeft)) * iframeScale.x;
+        const top = iframeRect.top + (currentIFrame.clientTop + parseFloat(css.paddingTop)) * iframeScale.y;
+        x *= iframeScale.x;
+        y *= iframeScale.y;
+        width *= iframeScale.x;
+        height *= iframeScale.y;
+        x += left;
+        y += top;
+        currentWin = getWindow(currentIFrame);
+        currentIFrame = getFrameElement(currentWin);
+      }
+    }
+    return core.rectToClientRect({
+      width,
+      height,
+      x,
+      y
     });
   }
-  function w(t) {
-    const e = x(),
-      n = d(t) ? b(t) : t;
-    return (
-      ["transform", "translate", "scale", "rotate", "perspective"].some(
-        (t) => !!n[t] && "none" !== n[t]
-      ) ||
-      (!!n.containerType && "normal" !== n.containerType) ||
-      (!e && !!n.backdropFilter && "none" !== n.backdropFilter) ||
-      (!e && !!n.filter && "none" !== n.filter) ||
-      [
-        "transform",
-        "translate",
-        "scale",
-        "rotate",
-        "perspective",
-        "filter",
-      ].some((t) => (n.willChange || "").includes(t)) ||
-      ["paint", "layout", "strict", "content"].some((t) =>
-        (n.contain || "").includes(t)
-      )
-    );
-  }
-  function x() {
-    return (
-      !("undefined" == typeof CSS || !CSS.supports) &&
-      CSS.supports("-webkit-backdrop-filter", "none")
-    );
-  }
-  function v(t) {
-    return ["html", "body", "#document"].includes(s(t));
-  }
-  function b(t) {
-    return f(t).getComputedStyle(t);
-  }
-  function T(t) {
-    return d(t)
-      ? { scrollLeft: t.scrollLeft, scrollTop: t.scrollTop }
-      : { scrollLeft: t.scrollX, scrollTop: t.scrollY };
-  }
-  function L(t) {
-    if ("html" === s(t)) return t;
-    const e = t.assignedSlot || t.parentNode || (p(t) && t.host) || u(t);
-    return p(e) ? e.host : e;
-  }
-  function R(t) {
-    const e = L(t);
-    return v(e)
-      ? t.ownerDocument
-        ? t.ownerDocument.body
-        : t.body
-      : h(e) && g(e)
-      ? e
-      : R(e);
-  }
-  function C(t, e, n) {
-    var o;
-    void 0 === e && (e = []), void 0 === n && (n = !0);
-    const i = R(t),
-      r = i === (null == (o = t.ownerDocument) ? void 0 : o.body),
-      c = f(i);
-    if (r) {
-      const t = E(c);
-      return e.concat(
-        c,
-        c.visualViewport || [],
-        g(i) ? i : [],
-        t && n ? C(t) : []
-      );
-    }
-    return e.concat(i, C(i, [], n));
-  }
-  function E(t) {
-    return t.parent && Object.getPrototypeOf(t.parent) ? t.frameElement : null;
-  }
-  function S(t) {
-    const e = b(t);
-    let n = parseFloat(e.width) || 0,
-      o = parseFloat(e.height) || 0;
-    const r = h(t),
-      c = r ? t.offsetWidth : n,
-      l = r ? t.offsetHeight : o,
-      s = i(n) !== c || i(o) !== l;
-    return s && ((n = c), (o = l)), { width: n, height: o, $: s };
-  }
-  function F(t) {
-    return d(t) ? t : t.contextElement;
-  }
-  function O(t) {
-    const e = F(t);
-    if (!h(e)) return c(1);
-    const n = e.getBoundingClientRect(),
-      { width: o, height: r, $: l } = S(e);
-    let s = (l ? i(n.width) : n.width) / o,
-      f = (l ? i(n.height) : n.height) / r;
-    return (
-      (s && Number.isFinite(s)) || (s = 1),
-      (f && Number.isFinite(f)) || (f = 1),
-      { x: s, y: f }
-    );
-  }
-  const D = c(0);
-  function H(t) {
-    const e = f(t);
-    return x() && e.visualViewport
-      ? { x: e.visualViewport.offsetLeft, y: e.visualViewport.offsetTop }
-      : D;
-  }
-  function P(t, n, o, i) {
-    void 0 === n && (n = !1), void 0 === o && (o = !1);
-    const r = t.getBoundingClientRect(),
-      l = F(t);
-    let s = c(1);
-    n && (i ? d(i) && (s = O(i)) : (s = O(t)));
-    const u = (function (t, e, n) {
-      return void 0 === e && (e = !1), !(!n || (e && n !== f(t))) && e;
-    })(l, o, i)
-      ? H(l)
-      : c(0);
-    let a = (r.left + u.x) / s.x,
-      h = (r.top + u.y) / s.y,
-      p = r.width / s.x,
-      g = r.height / s.y;
-    if (l) {
-      const t = f(l),
-        e = i && d(i) ? f(i) : i;
-      let n = t,
-        o = E(n);
-      for (; o && i && e !== n; ) {
-        const t = O(o),
-          e = o.getBoundingClientRect(),
-          i = b(o),
-          r = e.left + (o.clientLeft + parseFloat(i.paddingLeft)) * t.x,
-          c = e.top + (o.clientTop + parseFloat(i.paddingTop)) * t.y;
-        (a *= t.x),
-          (h *= t.y),
-          (p *= t.x),
-          (g *= t.y),
-          (a += r),
-          (h += c),
-          (n = f(o)),
-          (o = E(n));
-      }
-    }
-    return e.rectToClientRect({ width: p, height: g, x: a, y: h });
-  }
-  function W(t, e) {
-    const n = T(t).scrollLeft;
-    return e ? e.left + n : P(u(t)).left + n;
-  }
-  function M(t, e, n) {
-    void 0 === n && (n = !1);
-    const o = t.getBoundingClientRect();
-    return {
-      x: o.left + e.scrollLeft - (n ? 0 : W(t, o)),
-      y: o.top + e.scrollTop,
-    };
-  }
-  function z(t, n, i) {
-    let r;
-    if ("viewport" === n)
-      r = (function (t, e) {
-        const n = f(t),
-          o = u(t),
-          i = n.visualViewport;
-        let r = o.clientWidth,
-          c = o.clientHeight,
-          l = 0,
-          s = 0;
-        if (i) {
-          (r = i.width), (c = i.height);
-          const t = x();
-          (!t || (t && "fixed" === e)) &&
-            ((l = i.offsetLeft), (s = i.offsetTop));
-        }
-        return { width: r, height: c, x: l, y: s };
-      })(t, i);
-    else if ("document" === n)
-      r = (function (t) {
-        const e = u(t),
-          n = T(t),
-          i = t.ownerDocument.body,
-          r = o(e.scrollWidth, e.clientWidth, i.scrollWidth, i.clientWidth),
-          c = o(e.scrollHeight, e.clientHeight, i.scrollHeight, i.clientHeight);
-        let l = -n.scrollLeft + W(t);
-        const s = -n.scrollTop;
-        return (
-          "rtl" === b(i).direction &&
-            (l += o(e.clientWidth, i.clientWidth) - r),
-          { width: r, height: c, x: l, y: s }
-        );
-      })(u(t));
-    else if (d(n))
-      r = (function (t, e) {
-        const n = P(t, !0, "fixed" === e),
-          o = n.top + t.clientTop,
-          i = n.left + t.clientLeft,
-          r = h(t) ? O(t) : c(1);
-        return {
-          width: t.clientWidth * r.x,
-          height: t.clientHeight * r.y,
-          x: i * r.x,
-          y: o * r.y,
-        };
-      })(n, i);
-    else {
-      const e = H(t);
-      r = { x: n.x - e.x, y: n.y - e.y, width: n.width, height: n.height };
-    }
-    return e.rectToClientRect(r);
-  }
-  function A(t, e) {
-    const n = L(t);
-    return (
-      !(n === e || !d(n) || v(n)) && ("fixed" === b(n).position || A(n, e))
-    );
-  }
-  function B(t, e, n) {
-    const o = h(e),
-      i = u(e),
-      r = "fixed" === n,
-      l = P(t, !0, r, e);
-    let f = { scrollLeft: 0, scrollTop: 0 };
-    const a = c(0);
-    function d() {
-      a.x = W(i);
-    }
-    if (o || (!o && !r))
-      if ((("body" !== s(e) || g(i)) && (f = T(e)), o)) {
-        const t = P(e, !0, r, e);
-        (a.x = t.x + e.clientLeft), (a.y = t.y + e.clientTop);
-      } else i && d();
-    r && !o && i && d();
-    const p = !i || o || r ? c(0) : M(i, f);
-    return {
-      x: l.left + f.scrollLeft - a.x - p.x,
-      y: l.top + f.scrollTop - a.y - p.y,
-      width: l.width,
-      height: l.height,
-    };
-  }
-  function V(t) {
-    return "static" === b(t).position;
-  }
-  function N(t, e) {
-    if (!h(t) || "fixed" === b(t).position) return null;
-    if (e) return e(t);
-    let n = t.offsetParent;
-    return u(t) === n && (n = n.ownerDocument.body), n;
-  }
-  function I(t, e) {
-    const n = f(t);
-    if (y(t)) return n;
-    if (!h(t)) {
-      let e = L(t);
-      for (; e && !v(e); ) {
-        if (d(e) && !V(e)) return e;
-        e = L(e);
-      }
-      return n;
-    }
-    let o = N(t, e);
-    for (; o && m(o) && V(o); ) o = N(o, e);
-    return o && v(o) && V(o) && !w(o)
-      ? n
-      : o ||
-          (function (t) {
-            let e = L(t);
-            for (; h(e) && !v(e); ) {
-              if (w(e)) return e;
-              if (y(e)) return null;
-              e = L(e);
-            }
-            return null;
-          })(t) ||
-          n;
-  }
-  const k = {
-    convertOffsetParentRelativeRectToViewportRelativeRect: function (t) {
-      let { elements: e, rect: n, offsetParent: o, strategy: i } = t;
-      const r = "fixed" === i,
-        l = u(o),
-        f = !!e && y(e.floating);
-      if (o === l || (f && r)) return n;
-      let a = { scrollLeft: 0, scrollTop: 0 },
-        d = c(1);
-      const p = c(0),
-        m = h(o);
-      if (
-        (m || (!m && !r)) &&
-        (("body" !== s(o) || g(l)) && (a = T(o)), h(o))
-      ) {
-        const t = P(o);
-        (d = O(o)), (p.x = t.x + o.clientLeft), (p.y = t.y + o.clientTop);
-      }
-      const w = !l || m || r ? c(0) : M(l, a, !0);
-      return {
-        width: n.width * d.x,
-        height: n.height * d.y,
-        x: n.x * d.x - a.scrollLeft * d.x + p.x + w.x,
-        y: n.y * d.y - a.scrollTop * d.y + p.y + w.y,
-      };
-    },
-    getDocumentElement: u,
-    getClippingRect: function (t) {
-      let { element: e, boundary: i, rootBoundary: r, strategy: c } = t;
-      const l = [
-          ...("clippingAncestors" === i
-            ? y(e)
-              ? []
-              : (function (t, e) {
-                  const n = e.get(t);
-                  if (n) return n;
-                  let o = C(t, [], !1).filter((t) => d(t) && "body" !== s(t)),
-                    i = null;
-                  const r = "fixed" === b(t).position;
-                  let c = r ? L(t) : t;
-                  for (; d(c) && !v(c); ) {
-                    const e = b(c),
-                      n = w(c);
-                    n || "fixed" !== e.position || (i = null),
-                      (
-                        r
-                          ? !n && !i
-                          : (!n &&
-                              "static" === e.position &&
-                              i &&
-                              ["absolute", "fixed"].includes(i.position)) ||
-                            (g(c) && !n && A(t, c))
-                      )
-                        ? (o = o.filter((t) => t !== c))
-                        : (i = e),
-                      (c = L(c));
-                  }
-                  return e.set(t, o), o;
-                })(e, this._c)
-            : [].concat(i)),
-          r,
-        ],
-        f = l[0],
-        u = l.reduce((t, i) => {
-          const r = z(e, i, c);
-          return (
-            (t.top = o(r.top, t.top)),
-            (t.right = n(r.right, t.right)),
-            (t.bottom = n(r.bottom, t.bottom)),
-            (t.left = o(r.left, t.left)),
-            t
-          );
-        }, z(e, f, c));
-      return {
-        width: u.right - u.left,
-        height: u.bottom - u.top,
-        x: u.left,
-        y: u.top,
-      };
-    },
-    getOffsetParent: I,
-    getElementRects: async function (t) {
-      const e = this.getOffsetParent || I,
-        n = this.getDimensions,
-        o = await n(t.floating);
-      return {
-        reference: B(t.reference, await e(t.floating), t.strategy),
-        floating: { x: 0, y: 0, width: o.width, height: o.height },
-      };
-    },
-    getClientRects: function (t) {
-      return Array.from(t.getClientRects());
-    },
-    getDimensions: function (t) {
-      const { width: e, height: n } = S(t);
-      return { width: e, height: n };
-    },
-    getScale: O,
-    isElement: d,
-    isRTL: function (t) {
-      return "rtl" === b(t).direction;
-    },
-  };
-  function q(t, e) {
-    return (
-      t.x === e.x && t.y === e.y && t.width === e.width && t.height === e.height
-    );
-  }
-  const U = e.detectOverflow,
-    j = e.offset,
-    X = e.autoPlacement,
-    Y = e.shift,
-    $ = e.flip,
-    _ = e.size,
-    G = e.hide,
-    J = e.arrow,
-    K = e.inline,
-    Q = e.limitShift;
-  (t.arrow = J),
-    (t.autoPlacement = X),
-    (t.autoUpdate = function (t, e, i, c) {
-      void 0 === c && (c = {});
-      const {
-          ancestorScroll: l = !0,
-          ancestorResize: s = !0,
-          elementResize: f = "function" == typeof ResizeObserver,
-          layoutShift: a = "function" == typeof IntersectionObserver,
-          animationFrame: d = !1,
-        } = c,
-        h = F(t),
-        p = l || s ? [...(h ? C(h) : []), ...C(e)] : [];
-      p.forEach((t) => {
-        l && t.addEventListener("scroll", i, { passive: !0 }),
-          s && t.addEventListener("resize", i);
-      });
-      const g =
-        h && a
-          ? (function (t, e) {
-              let i,
-                c = null;
-              const l = u(t);
-              function s() {
-                var t;
-                clearTimeout(i), null == (t = c) || t.disconnect(), (c = null);
-              }
-              return (
-                (function f(u, a) {
-                  void 0 === u && (u = !1), void 0 === a && (a = 1), s();
-                  const d = t.getBoundingClientRect(),
-                    { left: h, top: p, width: g, height: m } = d;
-                  if ((u || e(), !g || !m)) return;
-                  const y = {
-                    rootMargin:
-                      -r(p) +
-                      "px " +
-                      -r(l.clientWidth - (h + g)) +
-                      "px " +
-                      -r(l.clientHeight - (p + m)) +
-                      "px " +
-                      -r(h) +
-                      "px",
-                    threshold: o(0, n(1, a)) || 1,
-                  };
-                  let w = !0;
-                  function x(e) {
-                    const n = e[0].intersectionRatio;
-                    if (n !== a) {
-                      if (!w) return f();
-                      n
-                        ? f(!1, n)
-                        : (i = setTimeout(() => {
-                            f(!1, 1e-7);
-                          }, 1e3));
-                    }
-                    1 !== n || q(d, t.getBoundingClientRect()) || f(), (w = !1);
-                  }
-                  try {
-                    c = new IntersectionObserver(x, {
-                      ...y,
-                      root: l.ownerDocument,
-                    });
-                  } catch (t) {
-                    c = new IntersectionObserver(x, y);
-                  }
-                  c.observe(t);
-                })(!0),
-                s
-              );
-            })(h, i)
-          : null;
-      let m,
-        y = -1,
-        w = null;
-      f &&
-        ((w = new ResizeObserver((t) => {
-          let [n] = t;
-          n &&
-            n.target === h &&
-            w &&
-            (w.unobserve(e),
-            cancelAnimationFrame(y),
-            (y = requestAnimationFrame(() => {
-              var t;
-              null == (t = w) || t.observe(e);
-            }))),
-            i();
-        })),
-        h && !d && w.observe(h),
-        w.observe(e));
-      let x = d ? P(t) : null;
-      return (
-        d &&
-          (function e() {
-            const n = P(t);
-            x && !q(x, n) && i();
-            (x = n), (m = requestAnimationFrame(e));
-          })(),
-        i(),
-        () => {
-          var t;
-          p.forEach((t) => {
-            l && t.removeEventListener("scroll", i),
-              s && t.removeEventListener("resize", i);
-          }),
-            null == g || g(),
-            null == (t = w) || t.disconnect(),
-            (w = null),
-            d && cancelAnimationFrame(m);
-        }
-      );
-    }),
-    (t.computePosition = (t, n, o) => {
-      const i = new Map(),
-        r = { platform: k, ...o },
-        c = { ...r.platform, _c: i };
-      return e.computePosition(t, n, { ...r, platform: c });
-    }),
-    (t.detectOverflow = U),
-    (t.flip = $),
-    (t.getOverflowAncestors = C),
-    (t.hide = G),
-    (t.inline = K),
-    (t.limitShift = Q),
-    (t.offset = j),
-    (t.platform = k),
-    (t.shift = Y),
-    (t.size = _);
 
-  // We put this manually here because we need to make sure it's available
-  // before the popover component is initialized.
-  window.FloatingUIDOM = t;
-  return t;
-});
+  // If <html> has a CSS width greater than the viewport, then this will be
+  // incorrect for RTL.
+  function getWindowScrollBarX(element, rect) {
+    const leftScroll = getNodeScroll(element).scrollLeft;
+    if (!rect) {
+      return getBoundingClientRect(getDocumentElement(element)).left + leftScroll;
+    }
+    return rect.left + leftScroll;
+  }
+
+  function getHTMLOffset(documentElement, scroll) {
+    const htmlRect = documentElement.getBoundingClientRect();
+    const x = htmlRect.left + scroll.scrollLeft - getWindowScrollBarX(documentElement, htmlRect);
+    const y = htmlRect.top + scroll.scrollTop;
+    return {
+      x,
+      y
+    };
+  }
+
+  function convertOffsetParentRelativeRectToViewportRelativeRect(_ref) {
+    let {
+      elements,
+      rect,
+      offsetParent,
+      strategy
+    } = _ref;
+    const isFixed = strategy === 'fixed';
+    const documentElement = getDocumentElement(offsetParent);
+    const topLayer = elements ? isTopLayer(elements.floating) : false;
+    if (offsetParent === documentElement || topLayer && isFixed) {
+      return rect;
+    }
+    let scroll = {
+      scrollLeft: 0,
+      scrollTop: 0
+    };
+    let scale = createCoords(1);
+    const offsets = createCoords(0);
+    const isOffsetParentAnElement = isHTMLElement(offsetParent);
+    if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
+      if (getNodeName(offsetParent) !== 'body' || isOverflowElement(documentElement)) {
+        scroll = getNodeScroll(offsetParent);
+      }
+      if (isOffsetParentAnElement) {
+        const offsetRect = getBoundingClientRect(offsetParent);
+        scale = getScale(offsetParent);
+        offsets.x = offsetRect.x + offsetParent.clientLeft;
+        offsets.y = offsetRect.y + offsetParent.clientTop;
+      }
+    }
+    const htmlOffset = documentElement && !isOffsetParentAnElement && !isFixed ? getHTMLOffset(documentElement, scroll) : createCoords(0);
+    return {
+      width: rect.width * scale.x,
+      height: rect.height * scale.y,
+      x: rect.x * scale.x - scroll.scrollLeft * scale.x + offsets.x + htmlOffset.x,
+      y: rect.y * scale.y - scroll.scrollTop * scale.y + offsets.y + htmlOffset.y
+    };
+  }
+
+  function getClientRects(element) {
+    return Array.from(element.getClientRects());
+  }
+
+  // Gets the entire size of the scrollable document area, even extending outside
+  // of the `<html>` and `<body>` rect bounds if horizontally scrollable.
+  function getDocumentRect(element) {
+    const html = getDocumentElement(element);
+    const scroll = getNodeScroll(element);
+    const body = element.ownerDocument.body;
+    const width = max(html.scrollWidth, html.clientWidth, body.scrollWidth, body.clientWidth);
+    const height = max(html.scrollHeight, html.clientHeight, body.scrollHeight, body.clientHeight);
+    let x = -scroll.scrollLeft + getWindowScrollBarX(element);
+    const y = -scroll.scrollTop;
+    if (getComputedStyle$1(body).direction === 'rtl') {
+      x += max(html.clientWidth, body.clientWidth) - width;
+    }
+    return {
+      width,
+      height,
+      x,
+      y
+    };
+  }
+
+  // Safety check: ensure the scrollbar space is reasonable in case this
+  // calculation is affected by unusual styles.
+  // Most scrollbars leave 15-18px of space.
+  const SCROLLBAR_MAX = 25;
+  function getViewportRect(element, strategy) {
+    const win = getWindow(element);
+    const html = getDocumentElement(element);
+    const visualViewport = win.visualViewport;
+    let width = html.clientWidth;
+    let height = html.clientHeight;
+    let x = 0;
+    let y = 0;
+    if (visualViewport) {
+      width = visualViewport.width;
+      height = visualViewport.height;
+      const visualViewportBased = isWebKit();
+      if (!visualViewportBased || visualViewportBased && strategy === 'fixed') {
+        x = visualViewport.offsetLeft;
+        y = visualViewport.offsetTop;
+      }
+    }
+    const windowScrollbarX = getWindowScrollBarX(html);
+    // <html> `overflow: hidden` + `scrollbar-gutter: stable` reduces the
+    // visual width of the <html> but this is not considered in the size
+    // of `html.clientWidth`.
+    if (windowScrollbarX <= 0) {
+      const doc = html.ownerDocument;
+      const body = doc.body;
+      const bodyStyles = getComputedStyle(body);
+      const bodyMarginInline = doc.compatMode === 'CSS1Compat' ? parseFloat(bodyStyles.marginLeft) + parseFloat(bodyStyles.marginRight) || 0 : 0;
+      const clippingStableScrollbarWidth = Math.abs(html.clientWidth - body.clientWidth - bodyMarginInline);
+      if (clippingStableScrollbarWidth <= SCROLLBAR_MAX) {
+        width -= clippingStableScrollbarWidth;
+      }
+    } else if (windowScrollbarX <= SCROLLBAR_MAX) {
+      // If the <body> scrollbar is on the left, the width needs to be extended
+      // by the scrollbar amount so there isn't extra space on the right.
+      width += windowScrollbarX;
+    }
+    return {
+      width,
+      height,
+      x,
+      y
+    };
+  }
+
+  // Returns the inner client rect, subtracting scrollbars if present.
+  function getInnerBoundingClientRect(element, strategy) {
+    const clientRect = getBoundingClientRect(element, true, strategy === 'fixed');
+    const top = clientRect.top + element.clientTop;
+    const left = clientRect.left + element.clientLeft;
+    const scale = isHTMLElement(element) ? getScale(element) : createCoords(1);
+    const width = element.clientWidth * scale.x;
+    const height = element.clientHeight * scale.y;
+    const x = left * scale.x;
+    const y = top * scale.y;
+    return {
+      width,
+      height,
+      x,
+      y
+    };
+  }
+  function getClientRectFromClippingAncestor(element, clippingAncestor, strategy) {
+    let rect;
+    if (clippingAncestor === 'viewport') {
+      rect = getViewportRect(element, strategy);
+    } else if (clippingAncestor === 'document') {
+      rect = getDocumentRect(getDocumentElement(element));
+    } else if (isElement(clippingAncestor)) {
+      rect = getInnerBoundingClientRect(clippingAncestor, strategy);
+    } else {
+      const visualOffsets = getVisualOffsets(element);
+      rect = {
+        x: clippingAncestor.x - visualOffsets.x,
+        y: clippingAncestor.y - visualOffsets.y,
+        width: clippingAncestor.width,
+        height: clippingAncestor.height
+      };
+    }
+    return core.rectToClientRect(rect);
+  }
+  function hasFixedPositionAncestor(element, stopNode) {
+    const parentNode = getParentNode(element);
+    if (parentNode === stopNode || !isElement(parentNode) || isLastTraversableNode(parentNode)) {
+      return false;
+    }
+    return getComputedStyle$1(parentNode).position === 'fixed' || hasFixedPositionAncestor(parentNode, stopNode);
+  }
+
+  // A "clipping ancestor" is an `overflow` element with the characteristic of
+  // clipping (or hiding) child elements. This returns all clipping ancestors
+  // of the given element up the tree.
+  function getClippingElementAncestors(element, cache) {
+    const cachedResult = cache.get(element);
+    if (cachedResult) {
+      return cachedResult;
+    }
+    let result = getOverflowAncestors(element, [], false).filter(el => isElement(el) && getNodeName(el) !== 'body');
+    let currentContainingBlockComputedStyle = null;
+    const elementIsFixed = getComputedStyle$1(element).position === 'fixed';
+    let currentNode = elementIsFixed ? getParentNode(element) : element;
+
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
+    while (isElement(currentNode) && !isLastTraversableNode(currentNode)) {
+      const computedStyle = getComputedStyle$1(currentNode);
+      const currentNodeIsContaining = isContainingBlock(currentNode);
+      if (!currentNodeIsContaining && computedStyle.position === 'fixed') {
+        currentContainingBlockComputedStyle = null;
+      }
+      const shouldDropCurrentNode = elementIsFixed ? !currentNodeIsContaining && !currentContainingBlockComputedStyle : !currentNodeIsContaining && computedStyle.position === 'static' && !!currentContainingBlockComputedStyle && (currentContainingBlockComputedStyle.position === 'absolute' || currentContainingBlockComputedStyle.position === 'fixed') || isOverflowElement(currentNode) && !currentNodeIsContaining && hasFixedPositionAncestor(element, currentNode);
+      if (shouldDropCurrentNode) {
+        // Drop non-containing blocks.
+        result = result.filter(ancestor => ancestor !== currentNode);
+      } else {
+        // Record last containing block for next iteration.
+        currentContainingBlockComputedStyle = computedStyle;
+      }
+      currentNode = getParentNode(currentNode);
+    }
+    cache.set(element, result);
+    return result;
+  }
+
+  // Gets the maximum area that the element is visible in due to any number of
+  // clipping ancestors.
+  function getClippingRect(_ref) {
+    let {
+      element,
+      boundary,
+      rootBoundary,
+      strategy
+    } = _ref;
+    const elementClippingAncestors = boundary === 'clippingAncestors' ? isTopLayer(element) ? [] : getClippingElementAncestors(element, this._c) : [].concat(boundary);
+    const clippingAncestors = [...elementClippingAncestors, rootBoundary];
+    const firstRect = getClientRectFromClippingAncestor(element, clippingAncestors[0], strategy);
+    let top = firstRect.top;
+    let right = firstRect.right;
+    let bottom = firstRect.bottom;
+    let left = firstRect.left;
+    for (let i = 1; i < clippingAncestors.length; i++) {
+      const rect = getClientRectFromClippingAncestor(element, clippingAncestors[i], strategy);
+      top = max(rect.top, top);
+      right = min(rect.right, right);
+      bottom = min(rect.bottom, bottom);
+      left = max(rect.left, left);
+    }
+    return {
+      width: right - left,
+      height: bottom - top,
+      x: left,
+      y: top
+    };
+  }
+
+  function getDimensions(element) {
+    const {
+      width,
+      height
+    } = getCssDimensions(element);
+    return {
+      width,
+      height
+    };
+  }
+
+  function getRectRelativeToOffsetParent(element, offsetParent, strategy) {
+    const isOffsetParentAnElement = isHTMLElement(offsetParent);
+    const documentElement = getDocumentElement(offsetParent);
+    const isFixed = strategy === 'fixed';
+    const rect = getBoundingClientRect(element, true, isFixed, offsetParent);
+    let scroll = {
+      scrollLeft: 0,
+      scrollTop: 0
+    };
+    const offsets = createCoords(0);
+
+    // If the <body> scrollbar appears on the left (e.g. RTL systems). Use
+    // Firefox with layout.scrollbar.side = 3 in about:config to test this.
+    function setLeftRTLScrollbarOffset() {
+      offsets.x = getWindowScrollBarX(documentElement);
+    }
+    if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
+      if (getNodeName(offsetParent) !== 'body' || isOverflowElement(documentElement)) {
+        scroll = getNodeScroll(offsetParent);
+      }
+      if (isOffsetParentAnElement) {
+        const offsetRect = getBoundingClientRect(offsetParent, true, isFixed, offsetParent);
+        offsets.x = offsetRect.x + offsetParent.clientLeft;
+        offsets.y = offsetRect.y + offsetParent.clientTop;
+      } else if (documentElement) {
+        setLeftRTLScrollbarOffset();
+      }
+    }
+    if (isFixed && !isOffsetParentAnElement && documentElement) {
+      setLeftRTLScrollbarOffset();
+    }
+    const htmlOffset = documentElement && !isOffsetParentAnElement && !isFixed ? getHTMLOffset(documentElement, scroll) : createCoords(0);
+    const x = rect.left + scroll.scrollLeft - offsets.x - htmlOffset.x;
+    const y = rect.top + scroll.scrollTop - offsets.y - htmlOffset.y;
+    return {
+      x,
+      y,
+      width: rect.width,
+      height: rect.height
+    };
+  }
+
+  function isStaticPositioned(element) {
+    return getComputedStyle$1(element).position === 'static';
+  }
+
+  function getTrueOffsetParent(element, polyfill) {
+    if (!isHTMLElement(element) || getComputedStyle$1(element).position === 'fixed') {
+      return null;
+    }
+    if (polyfill) {
+      return polyfill(element);
+    }
+    let rawOffsetParent = element.offsetParent;
+
+    // Firefox returns the <html> element as the offsetParent if it's non-static,
+    // while Chrome and Safari return the <body> element. The <body> element must
+    // be used to perform the correct calculations even if the <html> element is
+    // non-static.
+    if (getDocumentElement(element) === rawOffsetParent) {
+      rawOffsetParent = rawOffsetParent.ownerDocument.body;
+    }
+    return rawOffsetParent;
+  }
+
+  // Gets the closest ancestor positioned element. Handles some edge cases,
+  // such as table ancestors and cross browser bugs.
+  function getOffsetParent(element, polyfill) {
+    const win = getWindow(element);
+    if (isTopLayer(element)) {
+      return win;
+    }
+    if (!isHTMLElement(element)) {
+      let svgOffsetParent = getParentNode(element);
+      while (svgOffsetParent && !isLastTraversableNode(svgOffsetParent)) {
+        if (isElement(svgOffsetParent) && !isStaticPositioned(svgOffsetParent)) {
+          return svgOffsetParent;
+        }
+        svgOffsetParent = getParentNode(svgOffsetParent);
+      }
+      return win;
+    }
+    let offsetParent = getTrueOffsetParent(element, polyfill);
+    while (offsetParent && isTableElement(offsetParent) && isStaticPositioned(offsetParent)) {
+      offsetParent = getTrueOffsetParent(offsetParent, polyfill);
+    }
+    if (offsetParent && isLastTraversableNode(offsetParent) && isStaticPositioned(offsetParent) && !isContainingBlock(offsetParent)) {
+      return win;
+    }
+    return offsetParent || getContainingBlock(element) || win;
+  }
+
+  const getElementRects = async function (data) {
+    const getOffsetParentFn = this.getOffsetParent || getOffsetParent;
+    const getDimensionsFn = this.getDimensions;
+    const floatingDimensions = await getDimensionsFn(data.floating);
+    return {
+      reference: getRectRelativeToOffsetParent(data.reference, await getOffsetParentFn(data.floating), data.strategy),
+      floating: {
+        x: 0,
+        y: 0,
+        width: floatingDimensions.width,
+        height: floatingDimensions.height
+      }
+    };
+  };
+
+  function isRTL(element) {
+    return getComputedStyle$1(element).direction === 'rtl';
+  }
+
+  const platform = {
+    convertOffsetParentRelativeRectToViewportRelativeRect,
+    getDocumentElement,
+    getClippingRect,
+    getOffsetParent,
+    getElementRects,
+    getClientRects,
+    getDimensions,
+    getScale,
+    isElement,
+    isRTL
+  };
+
+  function rectsAreEqual(a, b) {
+    return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+  }
+
+  // https://samthor.au/2021/observing-dom/
+  function observeMove(element, onMove) {
+    let io = null;
+    let timeoutId;
+    const root = getDocumentElement(element);
+    function cleanup() {
+      var _io;
+      clearTimeout(timeoutId);
+      (_io = io) == null || _io.disconnect();
+      io = null;
+    }
+    function refresh(skip, threshold) {
+      if (skip === void 0) {
+        skip = false;
+      }
+      if (threshold === void 0) {
+        threshold = 1;
+      }
+      cleanup();
+      const elementRectForRootMargin = element.getBoundingClientRect();
+      const {
+        left,
+        top,
+        width,
+        height
+      } = elementRectForRootMargin;
+      if (!skip) {
+        onMove();
+      }
+      if (!width || !height) {
+        return;
+      }
+      const insetTop = floor(top);
+      const insetRight = floor(root.clientWidth - (left + width));
+      const insetBottom = floor(root.clientHeight - (top + height));
+      const insetLeft = floor(left);
+      const rootMargin = -insetTop + "px " + -insetRight + "px " + -insetBottom + "px " + -insetLeft + "px";
+      const options = {
+        rootMargin,
+        threshold: max(0, min(1, threshold)) || 1
+      };
+      let isFirstUpdate = true;
+      function handleObserve(entries) {
+        const ratio = entries[0].intersectionRatio;
+        if (ratio !== threshold) {
+          if (!isFirstUpdate) {
+            return refresh();
+          }
+          if (!ratio) {
+            // If the reference is clipped, the ratio is 0. Throttle the refresh
+            // to prevent an infinite loop of updates.
+            timeoutId = setTimeout(() => {
+              refresh(false, 1e-7);
+            }, 1000);
+          } else {
+            refresh(false, ratio);
+          }
+        }
+        if (ratio === 1 && !rectsAreEqual(elementRectForRootMargin, element.getBoundingClientRect())) {
+          // It's possible that even though the ratio is reported as 1, the
+          // element is not actually fully within the IntersectionObserver's root
+          // area anymore. This can happen under performance constraints. This may
+          // be a bug in the browser's IntersectionObserver implementation. To
+          // work around this, we compare the element's bounding rect now with
+          // what it was at the time we created the IntersectionObserver. If they
+          // are not equal then the element moved, so we refresh.
+          refresh();
+        }
+        isFirstUpdate = false;
+      }
+
+      // Older browsers don't support a `document` as the root and will throw an
+      // error.
+      try {
+        io = new IntersectionObserver(handleObserve, {
+          ...options,
+          // Handle <iframe>s
+          root: root.ownerDocument
+        });
+      } catch (_e) {
+        io = new IntersectionObserver(handleObserve, options);
+      }
+      io.observe(element);
+    }
+    refresh(true);
+    return cleanup;
+  }
+
+  /**
+   * Automatically updates the position of the floating element when necessary.
+   * Should only be called when the floating element is mounted on the DOM or
+   * visible on the screen.
+   * @returns cleanup function that should be invoked when the floating element is
+   * removed from the DOM or hidden from the screen.
+   * @see https://floating-ui.com/docs/autoUpdate
+   */
+  function autoUpdate(reference, floating, update, options) {
+    if (options === void 0) {
+      options = {};
+    }
+    const {
+      ancestorScroll = true,
+      ancestorResize = true,
+      elementResize = typeof ResizeObserver === 'function',
+      layoutShift = typeof IntersectionObserver === 'function',
+      animationFrame = false
+    } = options;
+    const referenceEl = unwrapElement(reference);
+    const ancestors = ancestorScroll || ancestorResize ? [...(referenceEl ? getOverflowAncestors(referenceEl) : []), ...(floating ? getOverflowAncestors(floating) : [])] : [];
+    ancestors.forEach(ancestor => {
+      ancestorScroll && ancestor.addEventListener('scroll', update, {
+        passive: true
+      });
+      ancestorResize && ancestor.addEventListener('resize', update);
+    });
+    const cleanupIo = referenceEl && layoutShift ? observeMove(referenceEl, update) : null;
+    let reobserveFrame = -1;
+    let resizeObserver = null;
+    if (elementResize) {
+      resizeObserver = new ResizeObserver(_ref => {
+        let [firstEntry] = _ref;
+        if (firstEntry && firstEntry.target === referenceEl && resizeObserver && floating) {
+          // Prevent update loops when using the `size` middleware.
+          // https://github.com/floating-ui/floating-ui/issues/1740
+          resizeObserver.unobserve(floating);
+          cancelAnimationFrame(reobserveFrame);
+          reobserveFrame = requestAnimationFrame(() => {
+            var _resizeObserver;
+            (_resizeObserver = resizeObserver) == null || _resizeObserver.observe(floating);
+          });
+        }
+        update();
+      });
+      if (referenceEl && !animationFrame) {
+        resizeObserver.observe(referenceEl);
+      }
+      if (floating) {
+        resizeObserver.observe(floating);
+      }
+    }
+    let frameId;
+    let prevRefRect = animationFrame ? getBoundingClientRect(reference) : null;
+    if (animationFrame) {
+      frameLoop();
+    }
+    function frameLoop() {
+      const nextRefRect = getBoundingClientRect(reference);
+      if (prevRefRect && !rectsAreEqual(prevRefRect, nextRefRect)) {
+        update();
+      }
+      prevRefRect = nextRefRect;
+      frameId = requestAnimationFrame(frameLoop);
+    }
+    update();
+    return () => {
+      var _resizeObserver2;
+      ancestors.forEach(ancestor => {
+        ancestorScroll && ancestor.removeEventListener('scroll', update);
+        ancestorResize && ancestor.removeEventListener('resize', update);
+      });
+      cleanupIo == null || cleanupIo();
+      (_resizeObserver2 = resizeObserver) == null || _resizeObserver2.disconnect();
+      resizeObserver = null;
+      if (animationFrame) {
+        cancelAnimationFrame(frameId);
+      }
+    };
+  }
+
+  /**
+   * Resolves with an object of overflow side offsets that determine how much the
+   * element is overflowing a given clipping boundary on each side.
+   * - positive = overflowing the boundary by that number of pixels
+   * - negative = how many pixels left before it will overflow
+   * - 0 = lies flush with the boundary
+   * @see https://floating-ui.com/docs/detectOverflow
+   */
+  const detectOverflow = core.detectOverflow;
+
+  /**
+   * Modifies the placement by translating the floating element along the
+   * specified axes.
+   * A number (shorthand for `mainAxis` or distance), or an axes configuration
+   * object may be passed.
+   * @see https://floating-ui.com/docs/offset
+   */
+  const offset = core.offset;
+
+  /**
+   * Optimizes the visibility of the floating element by choosing the placement
+   * that has the most space available automatically, without needing to specify a
+   * preferred placement. Alternative to `flip`.
+   * @see https://floating-ui.com/docs/autoPlacement
+   */
+  const autoPlacement = core.autoPlacement;
+
+  /**
+   * Optimizes the visibility of the floating element by shifting it in order to
+   * keep it in view when it will overflow the clipping boundary.
+   * @see https://floating-ui.com/docs/shift
+   */
+  const shift = core.shift;
+
+  /**
+   * Optimizes the visibility of the floating element by flipping the `placement`
+   * in order to keep it in view when the preferred placement(s) will overflow the
+   * clipping boundary. Alternative to `autoPlacement`.
+   * @see https://floating-ui.com/docs/flip
+   */
+  const flip = core.flip;
+
+  /**
+   * Provides data that allows you to change the size of the floating element —
+   * for instance, prevent it from overflowing the clipping boundary or match the
+   * width of the reference element.
+   * @see https://floating-ui.com/docs/size
+   */
+  const size = core.size;
+
+  /**
+   * Provides data to hide the floating element in applicable situations, such as
+   * when it is not in the same clipping context as the reference element.
+   * @see https://floating-ui.com/docs/hide
+   */
+  const hide = core.hide;
+
+  /**
+   * Provides data to position an inner element of the floating element so that it
+   * appears centered to the reference element.
+   * @see https://floating-ui.com/docs/arrow
+   */
+  const arrow = core.arrow;
+
+  /**
+   * Provides improved positioning for inline reference elements that can span
+   * over multiple lines, such as hyperlinks or range selections.
+   * @see https://floating-ui.com/docs/inline
+   */
+  const inline = core.inline;
+
+  /**
+   * Built-in `limiter` that will stop `shift()` at a certain point.
+   */
+  const limitShift = core.limitShift;
+
+  /**
+   * Computes the `x` and `y` coordinates that will place the floating element
+   * next to a given reference element.
+   */
+  const computePosition = (reference, floating, options) => {
+    // This caches the expensive `getClippingElementAncestors` function so that
+    // multiple lifecycle resets re-use the same result. It only lives for a
+    // single call. If other functions become expensive, we can add them as well.
+    const cache = new Map();
+    const mergedOptions = {
+      platform,
+      ...options
+    };
+    const platformWithCache = {
+      ...mergedOptions.platform,
+      _c: cache
+    };
+    return core.computePosition(reference, floating, {
+      ...mergedOptions,
+      platform: platformWithCache
+    });
+  };
+
+  exports.arrow = arrow;
+  exports.autoPlacement = autoPlacement;
+  exports.autoUpdate = autoUpdate;
+  exports.computePosition = computePosition;
+  exports.detectOverflow = detectOverflow;
+  exports.flip = flip;
+  exports.getOverflowAncestors = getOverflowAncestors;
+  exports.hide = hide;
+  exports.inline = inline;
+  exports.limitShift = limitShift;
+  exports.offset = offset;
+  exports.platform = platform;
+  exports.shift = shift;
+  exports.size = size;
+
+  // Set here as well, so the component scripts find it on pages with an AMD
+  // loader.
+  window.FloatingUIDOM = exports;
+
+}));

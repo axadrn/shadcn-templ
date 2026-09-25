@@ -1,4 +1,3 @@
-// Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
   const CONTENT = '[data-slot="tooltip-content"]';
   // Base UI's TooltipTrigger identifier; a disabled trigger renders
@@ -15,6 +14,16 @@
     return content.querySelector(':scope > [aria-hidden="true"]:last-child');
   }
 
+  // Base UI's TooltipPositioner, the popup's parent: it is portaled and
+  // positioned and renders the open state.
+  function positionerOf(content) {
+    return content.parentElement;
+  }
+
+  function statusOf(content) {
+    return { positioner: positionerOf(content), parts: [content], stateParts: [arrowOf(content)] };
+  }
+
   function contentFor(trigger) {
     return document.getElementById(trigger.getAttribute("aria-describedby"));
   }
@@ -25,82 +34,29 @@
     );
   }
 
-  // Base UI zooms the popup out of the anchor's center point (e.g.
-  // "96px -4px"), not out of a placement corner.
-  function anchorOrigin(result, anchorRect, positionerRect, sideOffset) {
-    const side = result.placement.split("-")[0];
-    const centerX = anchorRect.left + anchorRect.width / 2 - positionerRect.left + "px";
-    const centerY = anchorRect.top + anchorRect.height / 2 - positionerRect.top + "px";
-    if (side === "bottom") return centerX + " " + -sideOffset + "px";
-    if (side === "top") return centerX + " calc(100% + " + sideOffset + "px)";
-    if (side === "right") return -sideOffset + "px " + centerY;
-    return "calc(100% + " + sideOffset + "px) " + centerY;
-  }
-
-  // The arrow styles itself per side (data-side classes, like Base UI's
-  // Arrow); the script only feeds it the side and the centered coordinate.
-  function placeArrow(content, side, arrowData) {
-    const arrowEl = arrowOf(content);
-    if (!arrowEl) return;
-    arrowEl.setAttribute("data-side", side);
-    arrowEl.style.left = arrowData && arrowData.x != null ? arrowData.x + "px" : "";
-    arrowEl.style.top = arrowData && arrowData.y != null ? arrowData.y + "px" : "";
-  }
-
-  // Moves the content to <body> (shadcn portals it the same way).
+  // Moves the positioner to <body> (shadcn portals it the same way).
   function portal(content) {
-    window.templ.portal.render(content);
+    window.templ.portal.render(positionerOf(content));
   }
 
-  function positionContent(content, trigger) {
-    const { computePosition, offset, flip, shift, arrow } = window.FloatingUIDOM;
-    const side = content.getAttribute("data-templ-side") || "top";
-    const sideOffset =
-      parseInt(content.getAttribute("data-templ-side-offset"), 10) || 4;
-    const arrowEl = arrowOf(content);
-
-    return computePosition(trigger, content, {
-      placement: side,
-      strategy: "absolute",
-      middleware: [
-        offset(sideOffset),
-        flip(),
-        shift({ padding: 5 }),
-        arrowEl ? arrow({ element: arrowEl, padding: 5 }) : undefined,
-      ].filter(Boolean),
-    }).then((result) => {
-      content.style.transition = "none";
-      content.style.left = result.x + "px";
-      content.style.top = result.y + "px";
-      content.style.setProperty(
-        "--transform-origin",
-        anchorOrigin(
-          result,
-          trigger.getBoundingClientRect(),
-          content.getBoundingClientRect(),
-          sideOffset,
-        ),
-      );
-      const finalSide = result.placement.split("-")[0];
-      content.setAttribute("data-side", finalSide);
-      placeArrow(content, finalSide, result.middlewareData.arrow);
-      content.offsetHeight; // flush styles before re-enabling transitions
-      content.style.transition = "";
-    });
-  }
-
+  // TooltipPositioner: useAnchorPositioning with the popup collision
+  // avoidance, while the tooltip is mounted.
   function startAutoPositioning(content, trigger) {
-    if (content._templPositionCleanup) content._templPositionCleanup();
-    let resolveFirst;
-    const firstPosition = new Promise((resolve) => {
-      resolveFirst = resolve;
+    stopAutoPositioning(content);
+    const positioner = positionerOf(content);
+    const arrow = arrowOf(content);
+    const positioning = window.templ.anchorPositioning.useAnchorPositioning({
+      anchor: trigger,
+      positioner,
+      parts: [positioner, content, arrow],
+      arrow,
+      side: positioner.getAttribute("data-templ-side") || "top",
+      align: positioner.getAttribute("data-templ-align") || "center",
+      sideOffset: parseFloat(positioner.getAttribute("data-templ-side-offset")) || 0,
+      alignOffset: parseFloat(positioner.getAttribute("data-templ-align-offset")) || 0,
     });
-    const update = () => positionContent(content, trigger).then(resolveFirst, resolveFirst);
-    content._templPositionCleanup = window.FloatingUIDOM.autoUpdate(trigger, content, update, {
-      elementResize: typeof ResizeObserver !== "undefined",
-      layoutShift: typeof IntersectionObserver !== "undefined",
-    });
-    return firstPosition;
+    content._templPositionCleanup = positioning.cleanup;
+    return positioning.positioned;
   }
 
   function stopAutoPositioning(content) {
@@ -116,35 +72,29 @@
     const content = contentFor(trigger);
     if (!content) return;
     portal(content);
-    content.hidden = false;
+    positionerOf(content).hidden = false;
     content._templDismiss ??= window.templ.dismiss.useDismiss({
-      floating: content,
+      floating: positionerOf(content),
       reference: trigger,
       onOpenChange: (open) => requestOpenChange(trigger, open),
     });
 
-    // Position it invisibly first, then play the enter animation in place.
-    content.style.visibility = "hidden";
+    // Positioned first, then the enter animation plays in place.
     startAutoPositioning(content, trigger).then(() => {
-      if (content.hidden) return; // closed meanwhile
-      // duration-100 transitions `all`; a visibility transition would
-      // freeze at hidden in background tabs - flip suppressed.
-      content.style.transitionProperty = "none";
-      content.style.visibility = "";
-      void content.offsetWidth;
-      content.style.transitionProperty = "";
-      window.templ.transition.open([content, arrowOf(content)]);
+      if (positionerOf(content).hidden) return; // closed meanwhile
+      window.templ.transition.open(statusOf(content));
       trigger.setAttribute("data-popup-open", "");
     });
   }
 
   function close(content) {
-    if (content.hidden) return;
+    if (positionerOf(content).hidden) return;
     content._templDismiss?.();
     content._templDismiss = null;
-    stopAutoPositioning(content);
-    window.templ.transition.close([content, arrowOf(content)], content, () => {
-      content.hidden = true;
+    // Positioned until it unmounts, like Base UI.
+    window.templ.transition.close(statusOf(content), content, () => {
+      stopAutoPositioning(content);
+      positionerOf(content).hidden = true;
     });
     const trigger = triggerFor(content);
     if (trigger) trigger.removeAttribute("data-popup-open");
@@ -219,7 +169,8 @@
     destroy(content) {
       stopAutoPositioning(content);
       content._templDismiss?.();
-      if (content.isConnected) content.remove();
+      const positioner = positionerOf(content);
+      if (positioner?.isConnected) positioner.remove();
     },
   });
 })();

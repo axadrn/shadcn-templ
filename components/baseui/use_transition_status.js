@@ -1,16 +1,36 @@
 // Port of @base-ui/react internals/useTransitionStatus.ts with
 // useOpenChangeComplete.ts and useAnimationsFinished.ts (1.6.0).
 //
-// A popup's parts (positioner, popup, arrow, backdrop) render the same status:
-// data-open or data-closed, plus data-starting-style for the first frame of an
-// open and data-ending-style while it closes. The close completes once every
-// animation on the animated element finished, which is when Base UI unmounts.
-// Opening again before that cancels the pending close.
+// The popup and its backdrop render the status: data-open or data-closed,
+// plus data-starting-style for the first frame of an open and
+// data-ending-style while it closes. The positioner and the arrow render only
+// data-open or data-closed (popupStateMapping), and the positioner has its
+// transitions off while starting (getDisabledMountTransitionStyles) and no
+// pointer events while closed (usePositioner's inert). The close
+// completes once every animation on the animated element finished, which is
+// when Base UI unmounts. Opening again before that cancels the pending close.
+//
+// status is an array of the parts that render the status, or
+// { parts, positioner, stateParts }. parts[0] carries the pending status.
 (function () {
   "use strict";
 
   function set(parts, name, present) {
     parts.forEach((part) => part?.toggleAttribute(name, present));
+  }
+
+  function resolve(status) {
+    const { parts, positioner = null, stateParts = [] } = Array.isArray(status) ? { parts: status } : status;
+    return { parts: parts.filter(Boolean), open: [positioner, ...stateParts].filter(Boolean), positioner };
+  }
+
+  // usePositioner's inert: a closed positioner takes no pointer events, also
+  // during its exit animation.
+  function setOpen(status, isOpen) {
+    const all = [...status.parts, ...status.open];
+    set(all, "data-open", isOpen);
+    set(all, "data-closed", !isOpen);
+    if (status.positioner) status.positioner.style.pointerEvents = isOpen ? "" : "none";
   }
 
   // useAnimationsFinished: runs fn once every animation on the element
@@ -33,22 +53,24 @@
     requestAnimationFrame(exec);
   }
 
-  // parts[0] carries the pending status, so an open cancels a close in flight.
   // onComplete, when given, runs once the open animations on animated
   // finished (useOpenChangeComplete with open true).
-  function open(parts, animated, onComplete) {
+  function open(statusParam, animated, onComplete) {
+    const status = resolve(statusParam);
+    const { parts, positioner } = status;
     const main = parts[0];
     const token = {};
     main._templTransition = token;
-    set(parts, "data-closed", false);
     set(parts, "data-ending-style", false);
-    set(parts, "data-open", true);
+    setOpen(status, true);
     set(parts, "data-starting-style", true);
+    if (positioner) positioner.style.transition = "none";
     // Compute the starting style once, so transitions start from it.
     void main.offsetWidth;
     requestAnimationFrame(() => {
       if (main._templTransition !== token) return;
       set(parts, "data-starting-style", false);
+      if (positioner) positioner.style.transition = "";
       if (onComplete) whenAnimationsFinish(animated, () => main._templTransition === token, onComplete);
     });
   }
@@ -56,13 +78,15 @@
   // deferEnding sets data-ending-style one frame after data-closed, Base UI's
   // deferEndingState, and calls onEnding then. onEnding returning false
   // completes the close at once.
-  function close(parts, animated, onComplete, { deferEnding = false, onEnding } = {}) {
+  function close(statusParam, animated, onComplete, { deferEnding = false, onEnding } = {}) {
+    const status = resolve(statusParam);
+    const { parts, positioner } = status;
     const main = parts[0];
     const token = {};
     main._templTransition = token;
-    set(parts, "data-open", false);
     set(parts, "data-starting-style", false);
-    set(parts, "data-closed", true);
+    if (positioner) positioner.style.transition = "";
+    setOpen(status, false);
 
     const done = () => {
       if (main._templTransition !== token) return;
@@ -83,12 +107,13 @@
 
   // Sets the state without a transition, like an unmount without exit
   // animation, and cancels one in flight.
-  function reset(parts, isOpen) {
-    parts[0]._templTransition = null;
-    set(parts, "data-starting-style", false);
-    set(parts, "data-ending-style", false);
-    set(parts, "data-open", isOpen);
-    set(parts, "data-closed", !isOpen);
+  function reset(statusParam, isOpen) {
+    const status = resolve(statusParam);
+    status.parts[0]._templTransition = null;
+    set(status.parts, "data-starting-style", false);
+    set(status.parts, "data-ending-style", false);
+    if (status.positioner) status.positioner.style.transition = "";
+    setOpen(status, isOpen);
   }
 
   // Whether a close is in flight, Base UI's transitionStatus === "ending".

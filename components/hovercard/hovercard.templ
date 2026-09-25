@@ -128,36 +128,43 @@ templ Content(props ...ContentProps) {
 	}
 	{{ s, _ := ctx.Value(stateKey).(ctxState) }}
 	// Hidden until the script portals it to <body> on open, so the SSRd
-	// content never participates in layout or sibling CSS.
+	// content never participates in layout or sibling CSS. Inside it Base
+	// UI's positioner, which carries the position, around the popup.
 	<div data-templ-portal hidden>
 		<div
-			id={ cardID(ctx) }
-			data-slot="hover-card-content"
 			data-templ-side={ string(p.Side) }
 			data-templ-align={ string(p.Align) }
 			data-templ-side-offset={ strconv.Itoa(p.SideOffset) }
 			data-templ-align-offset={ strconv.Itoa(p.AlignOffset) }
-			if s.open != nil {
-				data-templ-open={ strconv.FormatBool(*s.open) }
-			}
-			data-templ-default-open?={ s.open == nil && s.defaultOpen }
 			data-closed
 			hidden
 			data-base-ui-portal
-			class={
-				utils.CN(
-					// 1:1 base/ui/hover-card.tsx HoverCardContent, the look comes from
-					// cn-hover-card-content (animations key on Base UI's data-open/data-closed attributes).
-					"cn-hover-card-content cn-hover-card-content-logical z-50 origin-(--transform-origin) outline-hidden",
-					// Native [popover] resets plus JS wiring: the popup stays mounted
-					// after animate-out until hidePopover runs.
-					"absolute inset-auto left-0 top-0 m-0 overflow-visible data-closed:fill-mode-forwards",
-					p.Class,
-				),
-			}
-			{ p.Attributes... }
+			role="presentation"
+			class="pointer-events-none isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
-			{ children... }
+			<div
+				id={ cardID(ctx) }
+				data-slot="hover-card-content"
+				if s.open != nil {
+					data-templ-open={ strconv.FormatBool(*s.open) }
+				}
+				data-templ-default-open?={ s.open == nil && s.defaultOpen }
+				data-closed
+				class={
+					utils.CN(
+						// 1:1 base/ui/hover-card.tsx HoverCardContent, the look comes from
+						// cn-hover-card-content (animations key on Base UI's data-open/data-closed attributes).
+						"cn-hover-card-content cn-hover-card-content-logical z-50 origin-(--transform-origin) outline-hidden",
+						// The positioner takes no pointer events, the popup does, and it
+						// stays mounted after animate-out until it unmounts.
+						"pointer-events-auto data-closed:fill-mode-forwards",
+						p.Class,
+					),
+				}
+				{ p.Attributes... }
+			>
+				{ children... }
+			</div>
 		</div>
 	</div>
 }

@@ -1,858 +1,1205 @@
-// https://cdn.jsdelivr.net/npm/@floating-ui/core@1.7.0
-!(function (t, e) {
-  "object" == typeof exports && "undefined" != typeof module
-    ? e(exports)
-    : "function" == typeof define && define.amd
-    ? define(["exports"], e)
-    : e(
-        ((t =
-          "undefined" != typeof globalThis
-            ? globalThis
-            : t || self).FloatingUICore = {})
-      );
-})(this, function (t) {
-  "use strict";
-  const e = ["top", "right", "bottom", "left"],
-    n = ["start", "end"],
-    i = e.reduce((t, e) => t.concat(e, e + "-" + n[0], e + "-" + n[1]), []),
-    o = Math.min,
-    r = Math.max,
-    a = { left: "right", right: "left", bottom: "top", top: "bottom" },
-    l = { start: "end", end: "start" };
-  function s(t, e, n) {
-    return r(t, o(e, n));
+// @floating-ui/core 1.7.5, dist/floating-ui.core.umd.js, the version @base-ui/react
+// 1.6.0 resolves at the pin in plans/UPSTREAM.md.
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.FloatingUICore = {}));
+})(this, (function (exports) { 'use strict';
+
+  /**
+   * Custom positioning reference element.
+   * @see https://floating-ui.com/docs/virtual-elements
+   */
+
+  const sides = ['top', 'right', 'bottom', 'left'];
+  const alignments = ['start', 'end'];
+  const placements = /*#__PURE__*/sides.reduce((acc, side) => acc.concat(side, side + "-" + alignments[0], side + "-" + alignments[1]), []);
+  const min = Math.min;
+  const max = Math.max;
+  const oppositeSideMap = {
+    left: 'right',
+    right: 'left',
+    bottom: 'top',
+    top: 'bottom'
+  };
+  function clamp(start, value, end) {
+    return max(start, min(value, end));
   }
-  function f(t, e) {
-    return "function" == typeof t ? t(e) : t;
+  function evaluate(value, param) {
+    return typeof value === 'function' ? value(param) : value;
   }
-  function c(t) {
-    return t.split("-")[0];
+  function getSide(placement) {
+    return placement.split('-')[0];
   }
-  function u(t) {
-    return t.split("-")[1];
+  function getAlignment(placement) {
+    return placement.split('-')[1];
   }
-  function m(t) {
-    return "x" === t ? "y" : "x";
+  function getOppositeAxis(axis) {
+    return axis === 'x' ? 'y' : 'x';
   }
-  function d(t) {
-    return "y" === t ? "height" : "width";
+  function getAxisLength(axis) {
+    return axis === 'y' ? 'height' : 'width';
   }
-  function g(t) {
-    return ["top", "bottom"].includes(c(t)) ? "y" : "x";
+  function getSideAxis(placement) {
+    const firstChar = placement[0];
+    return firstChar === 't' || firstChar === 'b' ? 'y' : 'x';
   }
-  function p(t) {
-    return m(g(t));
+  function getAlignmentAxis(placement) {
+    return getOppositeAxis(getSideAxis(placement));
   }
-  function h(t, e, n) {
-    void 0 === n && (n = !1);
-    const i = u(t),
-      o = p(t),
-      r = d(o);
-    let a =
-      "x" === o
-        ? i === (n ? "end" : "start")
-          ? "right"
-          : "left"
-        : "start" === i
-        ? "bottom"
-        : "top";
-    return e.reference[r] > e.floating[r] && (a = w(a)), [a, w(a)];
+  function getAlignmentSides(placement, rects, rtl) {
+    if (rtl === void 0) {
+      rtl = false;
+    }
+    const alignment = getAlignment(placement);
+    const alignmentAxis = getAlignmentAxis(placement);
+    const length = getAxisLength(alignmentAxis);
+    let mainAlignmentSide = alignmentAxis === 'x' ? alignment === (rtl ? 'end' : 'start') ? 'right' : 'left' : alignment === 'start' ? 'bottom' : 'top';
+    if (rects.reference[length] > rects.floating[length]) {
+      mainAlignmentSide = getOppositePlacement(mainAlignmentSide);
+    }
+    return [mainAlignmentSide, getOppositePlacement(mainAlignmentSide)];
   }
-  function y(t) {
-    return t.replace(/start|end/g, (t) => l[t]);
+  function getExpandedPlacements(placement) {
+    const oppositePlacement = getOppositePlacement(placement);
+    return [getOppositeAlignmentPlacement(placement), oppositePlacement, getOppositeAlignmentPlacement(oppositePlacement)];
   }
-  function w(t) {
-    return t.replace(/left|right|bottom|top/g, (t) => a[t]);
+  function getOppositeAlignmentPlacement(placement) {
+    return placement.includes('start') ? placement.replace('start', 'end') : placement.replace('end', 'start');
   }
-  function x(t) {
-    return "number" != typeof t
-      ? (function (t) {
-          return { top: 0, right: 0, bottom: 0, left: 0, ...t };
-        })(t)
-      : { top: t, right: t, bottom: t, left: t };
+  const lrPlacement = ['left', 'right'];
+  const rlPlacement = ['right', 'left'];
+  const tbPlacement = ['top', 'bottom'];
+  const btPlacement = ['bottom', 'top'];
+  function getSideList(side, isStart, rtl) {
+    switch (side) {
+      case 'top':
+      case 'bottom':
+        if (rtl) return isStart ? rlPlacement : lrPlacement;
+        return isStart ? lrPlacement : rlPlacement;
+      case 'left':
+      case 'right':
+        return isStart ? tbPlacement : btPlacement;
+      default:
+        return [];
+    }
   }
-  function v(t) {
-    const { x: e, y: n, width: i, height: o } = t;
+  function getOppositeAxisPlacements(placement, flipAlignment, direction, rtl) {
+    const alignment = getAlignment(placement);
+    let list = getSideList(getSide(placement), direction === 'start', rtl);
+    if (alignment) {
+      list = list.map(side => side + "-" + alignment);
+      if (flipAlignment) {
+        list = list.concat(list.map(getOppositeAlignmentPlacement));
+      }
+    }
+    return list;
+  }
+  function getOppositePlacement(placement) {
+    const side = getSide(placement);
+    return oppositeSideMap[side] + placement.slice(side.length);
+  }
+  function expandPaddingObject(padding) {
     return {
-      width: i,
-      height: o,
-      top: n,
-      left: e,
-      right: e + i,
-      bottom: n + o,
-      x: e,
-      y: n,
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      ...padding
     };
   }
-  function b(t, e, n) {
-    let { reference: i, floating: o } = t;
-    const r = g(e),
-      a = p(e),
-      l = d(a),
-      s = c(e),
-      f = "y" === r,
-      m = i.x + i.width / 2 - o.width / 2,
-      h = i.y + i.height / 2 - o.height / 2,
-      y = i[l] / 2 - o[l] / 2;
-    let w;
-    switch (s) {
-      case "top":
-        w = { x: m, y: i.y - o.height };
+  function getPaddingObject(padding) {
+    return typeof padding !== 'number' ? expandPaddingObject(padding) : {
+      top: padding,
+      right: padding,
+      bottom: padding,
+      left: padding
+    };
+  }
+  function rectToClientRect(rect) {
+    const {
+      x,
+      y,
+      width,
+      height
+    } = rect;
+    return {
+      width,
+      height,
+      top: y,
+      left: x,
+      right: x + width,
+      bottom: y + height,
+      x,
+      y
+    };
+  }
+
+  function computeCoordsFromPlacement(_ref, placement, rtl) {
+    let {
+      reference,
+      floating
+    } = _ref;
+    const sideAxis = getSideAxis(placement);
+    const alignmentAxis = getAlignmentAxis(placement);
+    const alignLength = getAxisLength(alignmentAxis);
+    const side = getSide(placement);
+    const isVertical = sideAxis === 'y';
+    const commonX = reference.x + reference.width / 2 - floating.width / 2;
+    const commonY = reference.y + reference.height / 2 - floating.height / 2;
+    const commonAlign = reference[alignLength] / 2 - floating[alignLength] / 2;
+    let coords;
+    switch (side) {
+      case 'top':
+        coords = {
+          x: commonX,
+          y: reference.y - floating.height
+        };
         break;
-      case "bottom":
-        w = { x: m, y: i.y + i.height };
+      case 'bottom':
+        coords = {
+          x: commonX,
+          y: reference.y + reference.height
+        };
         break;
-      case "right":
-        w = { x: i.x + i.width, y: h };
+      case 'right':
+        coords = {
+          x: reference.x + reference.width,
+          y: commonY
+        };
         break;
-      case "left":
-        w = { x: i.x - o.width, y: h };
+      case 'left':
+        coords = {
+          x: reference.x - floating.width,
+          y: commonY
+        };
         break;
       default:
-        w = { x: i.x, y: i.y };
+        coords = {
+          x: reference.x,
+          y: reference.y
+        };
     }
-    switch (u(e)) {
-      case "start":
-        w[a] -= y * (n && f ? -1 : 1);
+    switch (getAlignment(placement)) {
+      case 'start':
+        coords[alignmentAxis] -= commonAlign * (rtl && isVertical ? -1 : 1);
         break;
-      case "end":
-        w[a] += y * (n && f ? -1 : 1);
+      case 'end':
+        coords[alignmentAxis] += commonAlign * (rtl && isVertical ? -1 : 1);
+        break;
     }
-    return w;
+    return coords;
   }
-  async function A(t, e) {
-    var n;
-    void 0 === e && (e = {});
-    const { x: i, y: o, platform: r, rects: a, elements: l, strategy: s } = t,
-      {
-        boundary: c = "clippingAncestors",
-        rootBoundary: u = "viewport",
-        elementContext: m = "floating",
-        altBoundary: d = !1,
-        padding: g = 0,
-      } = f(e, t),
-      p = x(g),
-      h = l[d ? ("floating" === m ? "reference" : "floating") : m],
-      y = v(
-        await r.getClippingRect({
-          element:
-            null ==
-              (n = await (null == r.isElement ? void 0 : r.isElement(h))) || n
-              ? h
-              : h.contextElement ||
-                (await (null == r.getDocumentElement
-                  ? void 0
-                  : r.getDocumentElement(l.floating))),
-          boundary: c,
-          rootBoundary: u,
-          strategy: s,
-        })
-      ),
-      w =
-        "floating" === m
-          ? { x: i, y: o, width: a.floating.width, height: a.floating.height }
-          : a.reference,
-      b = await (null == r.getOffsetParent
-        ? void 0
-        : r.getOffsetParent(l.floating)),
-      A = ((await (null == r.isElement ? void 0 : r.isElement(b))) &&
-        (await (null == r.getScale ? void 0 : r.getScale(b)))) || {
-        x: 1,
-        y: 1,
-      },
-      R = v(
-        r.convertOffsetParentRelativeRectToViewportRelativeRect
-          ? await r.convertOffsetParentRelativeRectToViewportRelativeRect({
-              elements: l,
-              rect: w,
-              offsetParent: b,
-              strategy: s,
-            })
-          : w
-      );
+
+  /**
+   * Resolves with an object of overflow side offsets that determine how much the
+   * element is overflowing a given clipping boundary on each side.
+   * - positive = overflowing the boundary by that number of pixels
+   * - negative = how many pixels left before it will overflow
+   * - 0 = lies flush with the boundary
+   * @see https://floating-ui.com/docs/detectOverflow
+   */
+  async function detectOverflow(state, options) {
+    var _await$platform$isEle;
+    if (options === void 0) {
+      options = {};
+    }
+    const {
+      x,
+      y,
+      platform,
+      rects,
+      elements,
+      strategy
+    } = state;
+    const {
+      boundary = 'clippingAncestors',
+      rootBoundary = 'viewport',
+      elementContext = 'floating',
+      altBoundary = false,
+      padding = 0
+    } = evaluate(options, state);
+    const paddingObject = getPaddingObject(padding);
+    const altContext = elementContext === 'floating' ? 'reference' : 'floating';
+    const element = elements[altBoundary ? altContext : elementContext];
+    const clippingClientRect = rectToClientRect(await platform.getClippingRect({
+      element: ((_await$platform$isEle = await (platform.isElement == null ? void 0 : platform.isElement(element))) != null ? _await$platform$isEle : true) ? element : element.contextElement || (await (platform.getDocumentElement == null ? void 0 : platform.getDocumentElement(elements.floating))),
+      boundary,
+      rootBoundary,
+      strategy
+    }));
+    const rect = elementContext === 'floating' ? {
+      x,
+      y,
+      width: rects.floating.width,
+      height: rects.floating.height
+    } : rects.reference;
+    const offsetParent = await (platform.getOffsetParent == null ? void 0 : platform.getOffsetParent(elements.floating));
+    const offsetScale = (await (platform.isElement == null ? void 0 : platform.isElement(offsetParent))) ? (await (platform.getScale == null ? void 0 : platform.getScale(offsetParent))) || {
+      x: 1,
+      y: 1
+    } : {
+      x: 1,
+      y: 1
+    };
+    const elementClientRect = rectToClientRect(platform.convertOffsetParentRelativeRectToViewportRelativeRect ? await platform.convertOffsetParentRelativeRectToViewportRelativeRect({
+      elements,
+      rect,
+      offsetParent,
+      strategy
+    }) : rect);
     return {
-      top: (y.top - R.top + p.top) / A.y,
-      bottom: (R.bottom - y.bottom + p.bottom) / A.y,
-      left: (y.left - R.left + p.left) / A.x,
-      right: (R.right - y.right + p.right) / A.x,
+      top: (clippingClientRect.top - elementClientRect.top + paddingObject.top) / offsetScale.y,
+      bottom: (elementClientRect.bottom - clippingClientRect.bottom + paddingObject.bottom) / offsetScale.y,
+      left: (clippingClientRect.left - elementClientRect.left + paddingObject.left) / offsetScale.x,
+      right: (elementClientRect.right - clippingClientRect.right + paddingObject.right) / offsetScale.x
     };
   }
-  function R(t, e) {
-    return {
-      top: t.top - e.height,
-      right: t.right - e.width,
-      bottom: t.bottom - e.height,
-      left: t.left - e.width,
+
+  // Maximum number of resets that can occur before bailing to avoid infinite reset loops.
+  const MAX_RESET_COUNT = 50;
+
+  /**
+   * Computes the `x` and `y` coordinates that will place the floating element
+   * next to a given reference element.
+   *
+   * This export does not have any `platform` interface logic. You will need to
+   * write one for the platform you are using Floating UI with.
+   */
+  const computePosition = async (reference, floating, config) => {
+    const {
+      placement = 'bottom',
+      strategy = 'absolute',
+      middleware = [],
+      platform
+    } = config;
+    const platformWithDetectOverflow = platform.detectOverflow ? platform : {
+      ...platform,
+      detectOverflow
     };
-  }
-  function P(t) {
-    return e.some((e) => t[e] >= 0);
-  }
-  function D(t) {
-    const e = o(...t.map((t) => t.left)),
-      n = o(...t.map((t) => t.top));
-    return {
-      x: e,
-      y: n,
-      width: r(...t.map((t) => t.right)) - e,
-      height: r(...t.map((t) => t.bottom)) - n,
-    };
-  }
-  (t.arrow = (t) => ({
-    name: "arrow",
-    options: t,
-    async fn(e) {
-      const {
-          x: n,
-          y: i,
-          placement: r,
-          rects: a,
-          platform: l,
-          elements: c,
-          middlewareData: m,
-        } = e,
-        { element: g, padding: h = 0 } = f(t, e) || {};
-      if (null == g) return {};
-      const y = x(h),
-        w = { x: n, y: i },
-        v = p(r),
-        b = d(v),
-        A = await l.getDimensions(g),
-        R = "y" === v,
-        P = R ? "top" : "left",
-        D = R ? "bottom" : "right",
-        T = R ? "clientHeight" : "clientWidth",
-        O = a.reference[b] + a.reference[v] - w[v] - a.floating[b],
-        E = w[v] - a.reference[v],
-        L = await (null == l.getOffsetParent ? void 0 : l.getOffsetParent(g));
-      let k = L ? L[T] : 0;
-      (k && (await (null == l.isElement ? void 0 : l.isElement(L)))) ||
-        (k = c.floating[T] || a.floating[b]);
-      const C = O / 2 - E / 2,
-        B = k / 2 - A[b] / 2 - 1,
-        H = o(y[P], B),
-        S = o(y[D], B),
-        F = H,
-        j = k - A[b] - S,
-        z = k / 2 - A[b] / 2 + C,
-        M = s(F, z, j),
-        V =
-          !m.arrow &&
-          null != u(r) &&
-          z !== M &&
-          a.reference[b] / 2 - (z < F ? H : S) - A[b] / 2 < 0,
-        W = V ? (z < F ? z - F : z - j) : 0;
-      return {
-        [v]: w[v] + W,
-        data: {
-          [v]: M,
-          centerOffset: z - M - W,
-          ...(V && { alignmentOffset: W }),
-        },
-        reset: V,
-      };
-    },
-  })),
-    (t.autoPlacement = function (t) {
-      return (
-        void 0 === t && (t = {}),
-        {
-          name: "autoPlacement",
-          options: t,
-          async fn(e) {
-            var n, o, r;
-            const {
-                rects: a,
-                middlewareData: l,
-                placement: s,
-                platform: m,
-                elements: d,
-              } = e,
-              {
-                crossAxis: g = !1,
-                alignment: p,
-                allowedPlacements: w = i,
-                autoAlignment: x = !0,
-                ...v
-              } = f(t, e),
-              b =
-                void 0 !== p || w === i
-                  ? (function (t, e, n) {
-                      return (
-                        t
-                          ? [
-                              ...n.filter((e) => u(e) === t),
-                              ...n.filter((e) => u(e) !== t),
-                            ]
-                          : n.filter((t) => c(t) === t)
-                      ).filter((n) => !t || u(n) === t || (!!e && y(n) !== n));
-                    })(p || null, x, w)
-                  : w,
-              R = await A(e, v),
-              P = (null == (n = l.autoPlacement) ? void 0 : n.index) || 0,
-              D = b[P];
-            if (null == D) return {};
-            const T = h(
-              D,
-              a,
-              await (null == m.isRTL ? void 0 : m.isRTL(d.floating))
-            );
-            if (s !== D) return { reset: { placement: b[0] } };
-            const O = [R[c(D)], R[T[0]], R[T[1]]],
-              E = [
-                ...((null == (o = l.autoPlacement) ? void 0 : o.overflows) ||
-                  []),
-                { placement: D, overflows: O },
-              ],
-              L = b[P + 1];
-            if (L)
-              return {
-                data: { index: P + 1, overflows: E },
-                reset: { placement: L },
-              };
-            const k = E.map((t) => {
-                const e = u(t.placement);
-                return [
-                  t.placement,
-                  e && g
-                    ? t.overflows.slice(0, 2).reduce((t, e) => t + e, 0)
-                    : t.overflows[0],
-                  t.overflows,
-                ];
-              }).sort((t, e) => t[1] - e[1]),
-              C =
-                (null ==
-                (r = k.filter((t) =>
-                  t[2].slice(0, u(t[0]) ? 2 : 3).every((t) => t <= 0)
-                )[0])
-                  ? void 0
-                  : r[0]) || k[0][0];
-            return C !== s
-              ? {
-                  data: { index: P + 1, overflows: E },
-                  reset: { placement: C },
-                }
-              : {};
-          },
-        }
-      );
-    }),
-    (t.computePosition = async (t, e, n) => {
-      const {
-          placement: i = "bottom",
-          strategy: o = "absolute",
-          middleware: r = [],
-          platform: a,
-        } = n,
-        l = r.filter(Boolean),
-        s = await (null == a.isRTL ? void 0 : a.isRTL(e));
-      let f = await a.getElementRects({
-          reference: t,
-          floating: e,
-          strategy: o,
-        }),
-        { x: c, y: u } = b(f, i, s),
-        m = i,
-        d = {},
-        g = 0;
-      for (let n = 0; n < l.length; n++) {
-        const { name: r, fn: p } = l[n],
-          {
-            x: h,
-            y: y,
-            data: w,
-            reset: x,
-          } = await p({
-            x: c,
-            y: u,
-            initialPlacement: i,
-            placement: m,
-            strategy: o,
-            middlewareData: d,
-            rects: f,
-            platform: a,
-            elements: { reference: t, floating: e },
-          });
-        (c = null != h ? h : c),
-          (u = null != y ? y : u),
-          (d = { ...d, [r]: { ...d[r], ...w } }),
-          x &&
-            g <= 50 &&
-            (g++,
-            "object" == typeof x &&
-              (x.placement && (m = x.placement),
-              x.rects &&
-                (f =
-                  !0 === x.rects
-                    ? await a.getElementRects({
-                        reference: t,
-                        floating: e,
-                        strategy: o,
-                      })
-                    : x.rects),
-              ({ x: c, y: u } = b(f, m, s))),
-            (n = -1));
-      }
-      return { x: c, y: u, placement: m, strategy: o, middlewareData: d };
-    }),
-    (t.detectOverflow = A),
-    (t.flip = function (t) {
-      return (
-        void 0 === t && (t = {}),
-        {
-          name: "flip",
-          options: t,
-          async fn(e) {
-            var n, i;
-            const {
-                placement: o,
-                middlewareData: r,
-                rects: a,
-                initialPlacement: l,
-                platform: s,
-                elements: m,
-              } = e,
-              {
-                mainAxis: d = !0,
-                crossAxis: p = !0,
-                fallbackPlacements: x,
-                fallbackStrategy: v = "bestFit",
-                fallbackAxisSideDirection: b = "none",
-                flipAlignment: R = !0,
-                ...P
-              } = f(t, e);
-            if (null != (n = r.arrow) && n.alignmentOffset) return {};
-            const D = c(o),
-              T = g(l),
-              O = c(l) === l,
-              E = await (null == s.isRTL ? void 0 : s.isRTL(m.floating)),
-              L =
-                x ||
-                (O || !R
-                  ? [w(l)]
-                  : (function (t) {
-                      const e = w(t);
-                      return [y(t), e, y(e)];
-                    })(l)),
-              k = "none" !== b;
-            !x &&
-              k &&
-              L.push(
-                ...(function (t, e, n, i) {
-                  const o = u(t);
-                  let r = (function (t, e, n) {
-                    const i = ["left", "right"],
-                      o = ["right", "left"],
-                      r = ["top", "bottom"],
-                      a = ["bottom", "top"];
-                    switch (t) {
-                      case "top":
-                      case "bottom":
-                        return n ? (e ? o : i) : e ? i : o;
-                      case "left":
-                      case "right":
-                        return e ? r : a;
-                      default:
-                        return [];
-                    }
-                  })(c(t), "start" === n, i);
-                  return (
-                    o &&
-                      ((r = r.map((t) => t + "-" + o)),
-                      e && (r = r.concat(r.map(y)))),
-                    r
-                  );
-                })(l, R, b, E)
-              );
-            const C = [l, ...L],
-              B = await A(e, P),
-              H = [];
-            let S = (null == (i = r.flip) ? void 0 : i.overflows) || [];
-            if ((d && H.push(B[D]), p)) {
-              const t = h(o, a, E);
-              H.push(B[t[0]], B[t[1]]);
-            }
-            if (
-              ((S = [...S, { placement: o, overflows: H }]),
-              !H.every((t) => t <= 0))
-            ) {
-              var F, j;
-              const t = ((null == (F = r.flip) ? void 0 : F.index) || 0) + 1,
-                e = C[t];
-              if (e) {
-                var z;
-                const n = "alignment" === p && T !== g(e),
-                  i = (null == (z = S[0]) ? void 0 : z.overflows[0]) > 0;
-                if (!n || i)
-                  return {
-                    data: { index: t, overflows: S },
-                    reset: { placement: e },
-                  };
-              }
-              let n =
-                null ==
-                (j = S.filter((t) => t.overflows[0] <= 0).sort(
-                  (t, e) => t.overflows[1] - e.overflows[1]
-                )[0])
-                  ? void 0
-                  : j.placement;
-              if (!n)
-                switch (v) {
-                  case "bestFit": {
-                    var M;
-                    const t =
-                      null ==
-                      (M = S.filter((t) => {
-                        if (k) {
-                          const e = g(t.placement);
-                          return e === T || "y" === e;
-                        }
-                        return !0;
-                      })
-                        .map((t) => [
-                          t.placement,
-                          t.overflows
-                            .filter((t) => t > 0)
-                            .reduce((t, e) => t + e, 0),
-                        ])
-                        .sort((t, e) => t[1] - e[1])[0])
-                        ? void 0
-                        : M[0];
-                    t && (n = t);
-                    break;
-                  }
-                  case "initialPlacement":
-                    n = l;
-                }
-              if (o !== n) return { reset: { placement: n } };
-            }
-            return {};
-          },
-        }
-      );
-    }),
-    (t.hide = function (t) {
-      return (
-        void 0 === t && (t = {}),
-        {
-          name: "hide",
-          options: t,
-          async fn(e) {
-            const { rects: n } = e,
-              { strategy: i = "referenceHidden", ...o } = f(t, e);
-            switch (i) {
-              case "referenceHidden": {
-                const t = R(
-                  await A(e, { ...o, elementContext: "reference" }),
-                  n.reference
-                );
-                return {
-                  data: { referenceHiddenOffsets: t, referenceHidden: P(t) },
-                };
-              }
-              case "escaped": {
-                const t = R(await A(e, { ...o, altBoundary: !0 }), n.floating);
-                return { data: { escapedOffsets: t, escaped: P(t) } };
-              }
-              default:
-                return {};
-            }
-          },
-        }
-      );
-    }),
-    (t.inline = function (t) {
-      return (
-        void 0 === t && (t = {}),
-        {
-          name: "inline",
-          options: t,
-          async fn(e) {
-            const {
-                placement: n,
-                elements: i,
-                rects: a,
-                platform: l,
-                strategy: s,
-              } = e,
-              { padding: u = 2, x: m, y: d } = f(t, e),
-              p = Array.from(
-                (await (null == l.getClientRects
-                  ? void 0
-                  : l.getClientRects(i.reference))) || []
-              ),
-              h = (function (t) {
-                const e = t.slice().sort((t, e) => t.y - e.y),
-                  n = [];
-                let i = null;
-                for (let t = 0; t < e.length; t++) {
-                  const o = e[t];
-                  !i || o.y - i.y > i.height / 2
-                    ? n.push([o])
-                    : n[n.length - 1].push(o),
-                    (i = o);
-                }
-                return n.map((t) => v(D(t)));
-              })(p),
-              y = v(D(p)),
-              w = x(u);
-            const b = await l.getElementRects({
-              reference: {
-                getBoundingClientRect: function () {
-                  if (
-                    2 === h.length &&
-                    h[0].left > h[1].right &&
-                    null != m &&
-                    null != d
-                  )
-                    return (
-                      h.find(
-                        (t) =>
-                          m > t.left - w.left &&
-                          m < t.right + w.right &&
-                          d > t.top - w.top &&
-                          d < t.bottom + w.bottom
-                      ) || y
-                    );
-                  if (h.length >= 2) {
-                    if ("y" === g(n)) {
-                      const t = h[0],
-                        e = h[h.length - 1],
-                        i = "top" === c(n),
-                        o = t.top,
-                        r = e.bottom,
-                        a = i ? t.left : e.left,
-                        l = i ? t.right : e.right;
-                      return {
-                        top: o,
-                        bottom: r,
-                        left: a,
-                        right: l,
-                        width: l - a,
-                        height: r - o,
-                        x: a,
-                        y: o,
-                      };
-                    }
-                    const t = "left" === c(n),
-                      e = r(...h.map((t) => t.right)),
-                      i = o(...h.map((t) => t.left)),
-                      a = h.filter((n) => (t ? n.left === i : n.right === e)),
-                      l = a[0].top,
-                      s = a[a.length - 1].bottom;
-                    return {
-                      top: l,
-                      bottom: s,
-                      left: i,
-                      right: e,
-                      width: e - i,
-                      height: s - l,
-                      x: i,
-                      y: l,
-                    };
-                  }
-                  return y;
-                },
-              },
-              floating: i.floating,
-              strategy: s,
-            });
-            return a.reference.x !== b.reference.x ||
-              a.reference.y !== b.reference.y ||
-              a.reference.width !== b.reference.width ||
-              a.reference.height !== b.reference.height
-              ? { reset: { rects: b } }
-              : {};
-          },
-        }
-      );
-    }),
-    (t.limitShift = function (t) {
-      return (
-        void 0 === t && (t = {}),
-        {
-          options: t,
-          fn(e) {
-            const { x: n, y: i, placement: o, rects: r, middlewareData: a } = e,
-              { offset: l = 0, mainAxis: s = !0, crossAxis: u = !0 } = f(t, e),
-              d = { x: n, y: i },
-              p = g(o),
-              h = m(p);
-            let y = d[h],
-              w = d[p];
-            const x = f(l, e),
-              v =
-                "number" == typeof x
-                  ? { mainAxis: x, crossAxis: 0 }
-                  : { mainAxis: 0, crossAxis: 0, ...x };
-            if (s) {
-              const t = "y" === h ? "height" : "width",
-                e = r.reference[h] - r.floating[t] + v.mainAxis,
-                n = r.reference[h] + r.reference[t] - v.mainAxis;
-              y < e ? (y = e) : y > n && (y = n);
-            }
-            if (u) {
-              var b, A;
-              const t = "y" === h ? "width" : "height",
-                e = ["top", "left"].includes(c(o)),
-                n =
-                  r.reference[p] -
-                  r.floating[t] +
-                  ((e && (null == (b = a.offset) ? void 0 : b[p])) || 0) +
-                  (e ? 0 : v.crossAxis),
-                i =
-                  r.reference[p] +
-                  r.reference[t] +
-                  (e ? 0 : (null == (A = a.offset) ? void 0 : A[p]) || 0) -
-                  (e ? v.crossAxis : 0);
-              w < n ? (w = n) : w > i && (w = i);
-            }
-            return { [h]: y, [p]: w };
-          },
-        }
-      );
-    }),
-    (t.offset = function (t) {
-      return (
-        void 0 === t && (t = 0),
-        {
-          name: "offset",
-          options: t,
-          async fn(e) {
-            var n, i;
-            const { x: o, y: r, placement: a, middlewareData: l } = e,
-              s = await (async function (t, e) {
-                const { placement: n, platform: i, elements: o } = t,
-                  r = await (null == i.isRTL ? void 0 : i.isRTL(o.floating)),
-                  a = c(n),
-                  l = u(n),
-                  s = "y" === g(n),
-                  m = ["left", "top"].includes(a) ? -1 : 1,
-                  d = r && s ? -1 : 1,
-                  p = f(e, t);
-                let {
-                  mainAxis: h,
-                  crossAxis: y,
-                  alignmentAxis: w,
-                } = "number" == typeof p
-                  ? { mainAxis: p, crossAxis: 0, alignmentAxis: null }
-                  : {
-                      mainAxis: p.mainAxis || 0,
-                      crossAxis: p.crossAxis || 0,
-                      alignmentAxis: p.alignmentAxis,
-                    };
-                return (
-                  l && "number" == typeof w && (y = "end" === l ? -1 * w : w),
-                  s ? { x: y * d, y: h * m } : { x: h * m, y: y * d }
-                );
-              })(e, t);
-            return a === (null == (n = l.offset) ? void 0 : n.placement) &&
-              null != (i = l.arrow) &&
-              i.alignmentOffset
-              ? {}
-              : { x: o + s.x, y: r + s.y, data: { ...s, placement: a } };
-          },
-        }
-      );
-    }),
-    (t.rectToClientRect = v),
-    (t.shift = function (t) {
-      return (
-        void 0 === t && (t = {}),
-        {
-          name: "shift",
-          options: t,
-          async fn(e) {
-            const { x: n, y: i, placement: o } = e,
-              {
-                mainAxis: r = !0,
-                crossAxis: a = !1,
-                limiter: l = {
-                  fn: (t) => {
-                    let { x: e, y: n } = t;
-                    return { x: e, y: n };
-                  },
-                },
-                ...u
-              } = f(t, e),
-              d = { x: n, y: i },
-              p = await A(e, u),
-              h = g(c(o)),
-              y = m(h);
-            let w = d[y],
-              x = d[h];
-            if (r) {
-              const t = "y" === y ? "bottom" : "right";
-              w = s(w + p["y" === y ? "top" : "left"], w, w - p[t]);
-            }
-            if (a) {
-              const t = "y" === h ? "bottom" : "right";
-              x = s(x + p["y" === h ? "top" : "left"], x, x - p[t]);
-            }
-            const v = l.fn({ ...e, [y]: w, [h]: x });
-            return {
-              ...v,
-              data: { x: v.x - n, y: v.y - i, enabled: { [y]: r, [h]: a } },
-            };
-          },
-        }
-      );
-    }),
-    (t.size = function (t) {
-      return (
-        void 0 === t && (t = {}),
-        {
-          name: "size",
-          options: t,
-          async fn(e) {
-            var n, i;
-            const { placement: a, rects: l, platform: s, elements: m } = e,
-              { apply: d = () => {}, ...p } = f(t, e),
-              h = await A(e, p),
-              y = c(a),
-              w = u(a),
-              x = "y" === g(a),
-              { width: v, height: b } = l.floating;
-            let R, P;
-            "top" === y || "bottom" === y
-              ? ((R = y),
-                (P =
-                  w ===
-                  ((await (null == s.isRTL ? void 0 : s.isRTL(m.floating)))
-                    ? "start"
-                    : "end")
-                    ? "left"
-                    : "right"))
-              : ((P = y), (R = "end" === w ? "top" : "bottom"));
-            const D = b - h.top - h.bottom,
-              T = v - h.left - h.right,
-              O = o(b - h[R], D),
-              E = o(v - h[P], T),
-              L = !e.middlewareData.shift;
-            let k = O,
-              C = E;
-            if (
-              (null != (n = e.middlewareData.shift) && n.enabled.x && (C = T),
-              null != (i = e.middlewareData.shift) && i.enabled.y && (k = D),
-              L && !w)
-            ) {
-              const t = r(h.left, 0),
-                e = r(h.right, 0),
-                n = r(h.top, 0),
-                i = r(h.bottom, 0);
-              x
-                ? (C =
-                    v - 2 * (0 !== t || 0 !== e ? t + e : r(h.left, h.right)))
-                : (k =
-                    b - 2 * (0 !== n || 0 !== i ? n + i : r(h.top, h.bottom)));
-            }
-            await d({ ...e, availableWidth: C, availableHeight: k });
-            const B = await s.getDimensions(m.floating);
-            return v !== B.width || b !== B.height
-              ? { reset: { rects: !0 } }
-              : {};
-          },
-        }
-      );
+    const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(floating));
+    let rects = await platform.getElementRects({
+      reference,
+      floating,
+      strategy
     });
-});
+    let {
+      x,
+      y
+    } = computeCoordsFromPlacement(rects, placement, rtl);
+    let statefulPlacement = placement;
+    let resetCount = 0;
+    const middlewareData = {};
+    for (let i = 0; i < middleware.length; i++) {
+      const currentMiddleware = middleware[i];
+      if (!currentMiddleware) {
+        continue;
+      }
+      const {
+        name,
+        fn
+      } = currentMiddleware;
+      const {
+        x: nextX,
+        y: nextY,
+        data,
+        reset
+      } = await fn({
+        x,
+        y,
+        initialPlacement: placement,
+        placement: statefulPlacement,
+        strategy,
+        middlewareData,
+        rects,
+        platform: platformWithDetectOverflow,
+        elements: {
+          reference,
+          floating
+        }
+      });
+      x = nextX != null ? nextX : x;
+      y = nextY != null ? nextY : y;
+      middlewareData[name] = {
+        ...middlewareData[name],
+        ...data
+      };
+      if (reset && resetCount < MAX_RESET_COUNT) {
+        resetCount++;
+        if (typeof reset === 'object') {
+          if (reset.placement) {
+            statefulPlacement = reset.placement;
+          }
+          if (reset.rects) {
+            rects = reset.rects === true ? await platform.getElementRects({
+              reference,
+              floating,
+              strategy
+            }) : reset.rects;
+          }
+          ({
+            x,
+            y
+          } = computeCoordsFromPlacement(rects, statefulPlacement, rtl));
+        }
+        i = -1;
+      }
+    }
+    return {
+      x,
+      y,
+      placement: statefulPlacement,
+      strategy,
+      middlewareData
+    };
+  };
+
+  /**
+   * Provides data to position an inner element of the floating element so that it
+   * appears centered to the reference element.
+   * @see https://floating-ui.com/docs/arrow
+   */
+  const arrow = options => ({
+    name: 'arrow',
+    options,
+    async fn(state) {
+      const {
+        x,
+        y,
+        placement,
+        rects,
+        platform,
+        elements,
+        middlewareData
+      } = state;
+      // Since `element` is required, we don't Partial<> the type.
+      const {
+        element,
+        padding = 0
+      } = evaluate(options, state) || {};
+      if (element == null) {
+        return {};
+      }
+      const paddingObject = getPaddingObject(padding);
+      const coords = {
+        x,
+        y
+      };
+      const axis = getAlignmentAxis(placement);
+      const length = getAxisLength(axis);
+      const arrowDimensions = await platform.getDimensions(element);
+      const isYAxis = axis === 'y';
+      const minProp = isYAxis ? 'top' : 'left';
+      const maxProp = isYAxis ? 'bottom' : 'right';
+      const clientProp = isYAxis ? 'clientHeight' : 'clientWidth';
+      const endDiff = rects.reference[length] + rects.reference[axis] - coords[axis] - rects.floating[length];
+      const startDiff = coords[axis] - rects.reference[axis];
+      const arrowOffsetParent = await (platform.getOffsetParent == null ? void 0 : platform.getOffsetParent(element));
+      let clientSize = arrowOffsetParent ? arrowOffsetParent[clientProp] : 0;
+
+      // DOM platform can return `window` as the `offsetParent`.
+      if (!clientSize || !(await (platform.isElement == null ? void 0 : platform.isElement(arrowOffsetParent)))) {
+        clientSize = elements.floating[clientProp] || rects.floating[length];
+      }
+      const centerToReference = endDiff / 2 - startDiff / 2;
+
+      // If the padding is large enough that it causes the arrow to no longer be
+      // centered, modify the padding so that it is centered.
+      const largestPossiblePadding = clientSize / 2 - arrowDimensions[length] / 2 - 1;
+      const minPadding = min(paddingObject[minProp], largestPossiblePadding);
+      const maxPadding = min(paddingObject[maxProp], largestPossiblePadding);
+
+      // Make sure the arrow doesn't overflow the floating element if the center
+      // point is outside the floating element's bounds.
+      const min$1 = minPadding;
+      const max = clientSize - arrowDimensions[length] - maxPadding;
+      const center = clientSize / 2 - arrowDimensions[length] / 2 + centerToReference;
+      const offset = clamp(min$1, center, max);
+
+      // If the reference is small enough that the arrow's padding causes it to
+      // to point to nothing for an aligned placement, adjust the offset of the
+      // floating element itself. To ensure `shift()` continues to take action,
+      // a single reset is performed when this is true.
+      const shouldAddOffset = !middlewareData.arrow && getAlignment(placement) != null && center !== offset && rects.reference[length] / 2 - (center < min$1 ? minPadding : maxPadding) - arrowDimensions[length] / 2 < 0;
+      const alignmentOffset = shouldAddOffset ? center < min$1 ? center - min$1 : center - max : 0;
+      return {
+        [axis]: coords[axis] + alignmentOffset,
+        data: {
+          [axis]: offset,
+          centerOffset: center - offset - alignmentOffset,
+          ...(shouldAddOffset && {
+            alignmentOffset
+          })
+        },
+        reset: shouldAddOffset
+      };
+    }
+  });
+
+  function getPlacementList(alignment, autoAlignment, allowedPlacements) {
+    const allowedPlacementsSortedByAlignment = alignment ? [...allowedPlacements.filter(placement => getAlignment(placement) === alignment), ...allowedPlacements.filter(placement => getAlignment(placement) !== alignment)] : allowedPlacements.filter(placement => getSide(placement) === placement);
+    return allowedPlacementsSortedByAlignment.filter(placement => {
+      if (alignment) {
+        return getAlignment(placement) === alignment || (autoAlignment ? getOppositeAlignmentPlacement(placement) !== placement : false);
+      }
+      return true;
+    });
+  }
+  /**
+   * Optimizes the visibility of the floating element by choosing the placement
+   * that has the most space available automatically, without needing to specify a
+   * preferred placement. Alternative to `flip`.
+   * @see https://floating-ui.com/docs/autoPlacement
+   */
+  const autoPlacement = function (options) {
+    if (options === void 0) {
+      options = {};
+    }
+    return {
+      name: 'autoPlacement',
+      options,
+      async fn(state) {
+        var _middlewareData$autoP, _middlewareData$autoP2, _placementsThatFitOnE;
+        const {
+          rects,
+          middlewareData,
+          placement,
+          platform,
+          elements
+        } = state;
+        const {
+          crossAxis = false,
+          alignment,
+          allowedPlacements = placements,
+          autoAlignment = true,
+          ...detectOverflowOptions
+        } = evaluate(options, state);
+        const placements$1 = alignment !== undefined || allowedPlacements === placements ? getPlacementList(alignment || null, autoAlignment, allowedPlacements) : allowedPlacements;
+        const overflow = await platform.detectOverflow(state, detectOverflowOptions);
+        const currentIndex = ((_middlewareData$autoP = middlewareData.autoPlacement) == null ? void 0 : _middlewareData$autoP.index) || 0;
+        const currentPlacement = placements$1[currentIndex];
+        if (currentPlacement == null) {
+          return {};
+        }
+        const alignmentSides = getAlignmentSides(currentPlacement, rects, await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating)));
+
+        // Make `computeCoords` start from the right place.
+        if (placement !== currentPlacement) {
+          return {
+            reset: {
+              placement: placements$1[0]
+            }
+          };
+        }
+        const currentOverflows = [overflow[getSide(currentPlacement)], overflow[alignmentSides[0]], overflow[alignmentSides[1]]];
+        const allOverflows = [...(((_middlewareData$autoP2 = middlewareData.autoPlacement) == null ? void 0 : _middlewareData$autoP2.overflows) || []), {
+          placement: currentPlacement,
+          overflows: currentOverflows
+        }];
+        const nextPlacement = placements$1[currentIndex + 1];
+
+        // There are more placements to check.
+        if (nextPlacement) {
+          return {
+            data: {
+              index: currentIndex + 1,
+              overflows: allOverflows
+            },
+            reset: {
+              placement: nextPlacement
+            }
+          };
+        }
+        const placementsSortedByMostSpace = allOverflows.map(d => {
+          const alignment = getAlignment(d.placement);
+          return [d.placement, alignment && crossAxis ?
+          // Check along the mainAxis and main crossAxis side.
+          d.overflows.slice(0, 2).reduce((acc, v) => acc + v, 0) :
+          // Check only the mainAxis.
+          d.overflows[0], d.overflows];
+        }).sort((a, b) => a[1] - b[1]);
+        const placementsThatFitOnEachSide = placementsSortedByMostSpace.filter(d => d[2].slice(0,
+        // Aligned placements should not check their opposite crossAxis
+        // side.
+        getAlignment(d[0]) ? 2 : 3).every(v => v <= 0));
+        const resetPlacement = ((_placementsThatFitOnE = placementsThatFitOnEachSide[0]) == null ? void 0 : _placementsThatFitOnE[0]) || placementsSortedByMostSpace[0][0];
+        if (resetPlacement !== placement) {
+          return {
+            data: {
+              index: currentIndex + 1,
+              overflows: allOverflows
+            },
+            reset: {
+              placement: resetPlacement
+            }
+          };
+        }
+        return {};
+      }
+    };
+  };
+
+  /**
+   * Optimizes the visibility of the floating element by flipping the `placement`
+   * in order to keep it in view when the preferred placement(s) will overflow the
+   * clipping boundary. Alternative to `autoPlacement`.
+   * @see https://floating-ui.com/docs/flip
+   */
+  const flip = function (options) {
+    if (options === void 0) {
+      options = {};
+    }
+    return {
+      name: 'flip',
+      options,
+      async fn(state) {
+        var _middlewareData$arrow, _middlewareData$flip;
+        const {
+          placement,
+          middlewareData,
+          rects,
+          initialPlacement,
+          platform,
+          elements
+        } = state;
+        const {
+          mainAxis: checkMainAxis = true,
+          crossAxis: checkCrossAxis = true,
+          fallbackPlacements: specifiedFallbackPlacements,
+          fallbackStrategy = 'bestFit',
+          fallbackAxisSideDirection = 'none',
+          flipAlignment = true,
+          ...detectOverflowOptions
+        } = evaluate(options, state);
+
+        // If a reset by the arrow was caused due to an alignment offset being
+        // added, we should skip any logic now since `flip()` has already done its
+        // work.
+        // https://github.com/floating-ui/floating-ui/issues/2549#issuecomment-1719601643
+        if ((_middlewareData$arrow = middlewareData.arrow) != null && _middlewareData$arrow.alignmentOffset) {
+          return {};
+        }
+        const side = getSide(placement);
+        const initialSideAxis = getSideAxis(initialPlacement);
+        const isBasePlacement = getSide(initialPlacement) === initialPlacement;
+        const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating));
+        const fallbackPlacements = specifiedFallbackPlacements || (isBasePlacement || !flipAlignment ? [getOppositePlacement(initialPlacement)] : getExpandedPlacements(initialPlacement));
+        const hasFallbackAxisSideDirection = fallbackAxisSideDirection !== 'none';
+        if (!specifiedFallbackPlacements && hasFallbackAxisSideDirection) {
+          fallbackPlacements.push(...getOppositeAxisPlacements(initialPlacement, flipAlignment, fallbackAxisSideDirection, rtl));
+        }
+        const placements = [initialPlacement, ...fallbackPlacements];
+        const overflow = await platform.detectOverflow(state, detectOverflowOptions);
+        const overflows = [];
+        let overflowsData = ((_middlewareData$flip = middlewareData.flip) == null ? void 0 : _middlewareData$flip.overflows) || [];
+        if (checkMainAxis) {
+          overflows.push(overflow[side]);
+        }
+        if (checkCrossAxis) {
+          const sides = getAlignmentSides(placement, rects, rtl);
+          overflows.push(overflow[sides[0]], overflow[sides[1]]);
+        }
+        overflowsData = [...overflowsData, {
+          placement,
+          overflows
+        }];
+
+        // One or more sides is overflowing.
+        if (!overflows.every(side => side <= 0)) {
+          var _middlewareData$flip2, _overflowsData$filter;
+          const nextIndex = (((_middlewareData$flip2 = middlewareData.flip) == null ? void 0 : _middlewareData$flip2.index) || 0) + 1;
+          const nextPlacement = placements[nextIndex];
+          if (nextPlacement) {
+            const ignoreCrossAxisOverflow = checkCrossAxis === 'alignment' ? initialSideAxis !== getSideAxis(nextPlacement) : false;
+            if (!ignoreCrossAxisOverflow ||
+            // We leave the current main axis only if every placement on that axis
+            // overflows the main axis.
+            overflowsData.every(d => getSideAxis(d.placement) === initialSideAxis ? d.overflows[0] > 0 : true)) {
+              // Try next placement and re-run the lifecycle.
+              return {
+                data: {
+                  index: nextIndex,
+                  overflows: overflowsData
+                },
+                reset: {
+                  placement: nextPlacement
+                }
+              };
+            }
+          }
+
+          // First, find the candidates that fit on the mainAxis side of overflow,
+          // then find the placement that fits the best on the main crossAxis side.
+          let resetPlacement = (_overflowsData$filter = overflowsData.filter(d => d.overflows[0] <= 0).sort((a, b) => a.overflows[1] - b.overflows[1])[0]) == null ? void 0 : _overflowsData$filter.placement;
+
+          // Otherwise fallback.
+          if (!resetPlacement) {
+            switch (fallbackStrategy) {
+              case 'bestFit':
+                {
+                  var _overflowsData$filter2;
+                  const placement = (_overflowsData$filter2 = overflowsData.filter(d => {
+                    if (hasFallbackAxisSideDirection) {
+                      const currentSideAxis = getSideAxis(d.placement);
+                      return currentSideAxis === initialSideAxis ||
+                      // Create a bias to the `y` side axis due to horizontal
+                      // reading directions favoring greater width.
+                      currentSideAxis === 'y';
+                    }
+                    return true;
+                  }).map(d => [d.placement, d.overflows.filter(overflow => overflow > 0).reduce((acc, overflow) => acc + overflow, 0)]).sort((a, b) => a[1] - b[1])[0]) == null ? void 0 : _overflowsData$filter2[0];
+                  if (placement) {
+                    resetPlacement = placement;
+                  }
+                  break;
+                }
+              case 'initialPlacement':
+                resetPlacement = initialPlacement;
+                break;
+            }
+          }
+          if (placement !== resetPlacement) {
+            return {
+              reset: {
+                placement: resetPlacement
+              }
+            };
+          }
+        }
+        return {};
+      }
+    };
+  };
+
+  function getSideOffsets(overflow, rect) {
+    return {
+      top: overflow.top - rect.height,
+      right: overflow.right - rect.width,
+      bottom: overflow.bottom - rect.height,
+      left: overflow.left - rect.width
+    };
+  }
+  function isAnySideFullyClipped(overflow) {
+    return sides.some(side => overflow[side] >= 0);
+  }
+  /**
+   * Provides data to hide the floating element in applicable situations, such as
+   * when it is not in the same clipping context as the reference element.
+   * @see https://floating-ui.com/docs/hide
+   */
+  const hide = function (options) {
+    if (options === void 0) {
+      options = {};
+    }
+    return {
+      name: 'hide',
+      options,
+      async fn(state) {
+        const {
+          rects,
+          platform
+        } = state;
+        const {
+          strategy = 'referenceHidden',
+          ...detectOverflowOptions
+        } = evaluate(options, state);
+        switch (strategy) {
+          case 'referenceHidden':
+            {
+              const overflow = await platform.detectOverflow(state, {
+                ...detectOverflowOptions,
+                elementContext: 'reference'
+              });
+              const offsets = getSideOffsets(overflow, rects.reference);
+              return {
+                data: {
+                  referenceHiddenOffsets: offsets,
+                  referenceHidden: isAnySideFullyClipped(offsets)
+                }
+              };
+            }
+          case 'escaped':
+            {
+              const overflow = await platform.detectOverflow(state, {
+                ...detectOverflowOptions,
+                altBoundary: true
+              });
+              const offsets = getSideOffsets(overflow, rects.floating);
+              return {
+                data: {
+                  escapedOffsets: offsets,
+                  escaped: isAnySideFullyClipped(offsets)
+                }
+              };
+            }
+          default:
+            {
+              return {};
+            }
+        }
+      }
+    };
+  };
+
+  function getBoundingRect(rects) {
+    const minX = min(...rects.map(rect => rect.left));
+    const minY = min(...rects.map(rect => rect.top));
+    const maxX = max(...rects.map(rect => rect.right));
+    const maxY = max(...rects.map(rect => rect.bottom));
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY
+    };
+  }
+  function getRectsByLine(rects) {
+    const sortedRects = rects.slice().sort((a, b) => a.y - b.y);
+    const groups = [];
+    let prevRect = null;
+    for (let i = 0; i < sortedRects.length; i++) {
+      const rect = sortedRects[i];
+      if (!prevRect || rect.y - prevRect.y > prevRect.height / 2) {
+        groups.push([rect]);
+      } else {
+        groups[groups.length - 1].push(rect);
+      }
+      prevRect = rect;
+    }
+    return groups.map(rect => rectToClientRect(getBoundingRect(rect)));
+  }
+  /**
+   * Provides improved positioning for inline reference elements that can span
+   * over multiple lines, such as hyperlinks or range selections.
+   * @see https://floating-ui.com/docs/inline
+   */
+  const inline = function (options) {
+    if (options === void 0) {
+      options = {};
+    }
+    return {
+      name: 'inline',
+      options,
+      async fn(state) {
+        const {
+          placement,
+          elements,
+          rects,
+          platform,
+          strategy
+        } = state;
+        // A MouseEvent's client{X,Y} coords can be up to 2 pixels off a
+        // ClientRect's bounds, despite the event listener being triggered. A
+        // padding of 2 seems to handle this issue.
+        const {
+          padding = 2,
+          x,
+          y
+        } = evaluate(options, state);
+        const nativeClientRects = Array.from((await (platform.getClientRects == null ? void 0 : platform.getClientRects(elements.reference))) || []);
+        const clientRects = getRectsByLine(nativeClientRects);
+        const fallback = rectToClientRect(getBoundingRect(nativeClientRects));
+        const paddingObject = getPaddingObject(padding);
+        function getBoundingClientRect() {
+          // There are two rects and they are disjoined.
+          if (clientRects.length === 2 && clientRects[0].left > clientRects[1].right && x != null && y != null) {
+            // Find the first rect in which the point is fully inside.
+            return clientRects.find(rect => x > rect.left - paddingObject.left && x < rect.right + paddingObject.right && y > rect.top - paddingObject.top && y < rect.bottom + paddingObject.bottom) || fallback;
+          }
+
+          // There are 2 or more connected rects.
+          if (clientRects.length >= 2) {
+            if (getSideAxis(placement) === 'y') {
+              const firstRect = clientRects[0];
+              const lastRect = clientRects[clientRects.length - 1];
+              const isTop = getSide(placement) === 'top';
+              const top = firstRect.top;
+              const bottom = lastRect.bottom;
+              const left = isTop ? firstRect.left : lastRect.left;
+              const right = isTop ? firstRect.right : lastRect.right;
+              const width = right - left;
+              const height = bottom - top;
+              return {
+                top,
+                bottom,
+                left,
+                right,
+                width,
+                height,
+                x: left,
+                y: top
+              };
+            }
+            const isLeftSide = getSide(placement) === 'left';
+            const maxRight = max(...clientRects.map(rect => rect.right));
+            const minLeft = min(...clientRects.map(rect => rect.left));
+            const measureRects = clientRects.filter(rect => isLeftSide ? rect.left === minLeft : rect.right === maxRight);
+            const top = measureRects[0].top;
+            const bottom = measureRects[measureRects.length - 1].bottom;
+            const left = minLeft;
+            const right = maxRight;
+            const width = right - left;
+            const height = bottom - top;
+            return {
+              top,
+              bottom,
+              left,
+              right,
+              width,
+              height,
+              x: left,
+              y: top
+            };
+          }
+          return fallback;
+        }
+        const resetRects = await platform.getElementRects({
+          reference: {
+            getBoundingClientRect
+          },
+          floating: elements.floating,
+          strategy
+        });
+        if (rects.reference.x !== resetRects.reference.x || rects.reference.y !== resetRects.reference.y || rects.reference.width !== resetRects.reference.width || rects.reference.height !== resetRects.reference.height) {
+          return {
+            reset: {
+              rects: resetRects
+            }
+          };
+        }
+        return {};
+      }
+    };
+  };
+
+  const originSides = /*#__PURE__*/new Set(['left', 'top']);
+
+  // For type backwards-compatibility, the `OffsetOptions` type was also
+  // Derivable.
+
+  async function convertValueToCoords(state, options) {
+    const {
+      placement,
+      platform,
+      elements
+    } = state;
+    const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating));
+    const side = getSide(placement);
+    const alignment = getAlignment(placement);
+    const isVertical = getSideAxis(placement) === 'y';
+    const mainAxisMulti = originSides.has(side) ? -1 : 1;
+    const crossAxisMulti = rtl && isVertical ? -1 : 1;
+    const rawValue = evaluate(options, state);
+
+    // eslint-disable-next-line prefer-const
+    let {
+      mainAxis,
+      crossAxis,
+      alignmentAxis
+    } = typeof rawValue === 'number' ? {
+      mainAxis: rawValue,
+      crossAxis: 0,
+      alignmentAxis: null
+    } : {
+      mainAxis: rawValue.mainAxis || 0,
+      crossAxis: rawValue.crossAxis || 0,
+      alignmentAxis: rawValue.alignmentAxis
+    };
+    if (alignment && typeof alignmentAxis === 'number') {
+      crossAxis = alignment === 'end' ? alignmentAxis * -1 : alignmentAxis;
+    }
+    return isVertical ? {
+      x: crossAxis * crossAxisMulti,
+      y: mainAxis * mainAxisMulti
+    } : {
+      x: mainAxis * mainAxisMulti,
+      y: crossAxis * crossAxisMulti
+    };
+  }
+
+  /**
+   * Modifies the placement by translating the floating element along the
+   * specified axes.
+   * A number (shorthand for `mainAxis` or distance), or an axes configuration
+   * object may be passed.
+   * @see https://floating-ui.com/docs/offset
+   */
+  const offset = function (options) {
+    if (options === void 0) {
+      options = 0;
+    }
+    return {
+      name: 'offset',
+      options,
+      async fn(state) {
+        var _middlewareData$offse, _middlewareData$arrow;
+        const {
+          x,
+          y,
+          placement,
+          middlewareData
+        } = state;
+        const diffCoords = await convertValueToCoords(state, options);
+
+        // If the placement is the same and the arrow caused an alignment offset
+        // then we don't need to change the positioning coordinates.
+        if (placement === ((_middlewareData$offse = middlewareData.offset) == null ? void 0 : _middlewareData$offse.placement) && (_middlewareData$arrow = middlewareData.arrow) != null && _middlewareData$arrow.alignmentOffset) {
+          return {};
+        }
+        return {
+          x: x + diffCoords.x,
+          y: y + diffCoords.y,
+          data: {
+            ...diffCoords,
+            placement
+          }
+        };
+      }
+    };
+  };
+
+  /**
+   * Optimizes the visibility of the floating element by shifting it in order to
+   * keep it in view when it will overflow the clipping boundary.
+   * @see https://floating-ui.com/docs/shift
+   */
+  const shift = function (options) {
+    if (options === void 0) {
+      options = {};
+    }
+    return {
+      name: 'shift',
+      options,
+      async fn(state) {
+        const {
+          x,
+          y,
+          placement,
+          platform
+        } = state;
+        const {
+          mainAxis: checkMainAxis = true,
+          crossAxis: checkCrossAxis = false,
+          limiter = {
+            fn: _ref => {
+              let {
+                x,
+                y
+              } = _ref;
+              return {
+                x,
+                y
+              };
+            }
+          },
+          ...detectOverflowOptions
+        } = evaluate(options, state);
+        const coords = {
+          x,
+          y
+        };
+        const overflow = await platform.detectOverflow(state, detectOverflowOptions);
+        const crossAxis = getSideAxis(getSide(placement));
+        const mainAxis = getOppositeAxis(crossAxis);
+        let mainAxisCoord = coords[mainAxis];
+        let crossAxisCoord = coords[crossAxis];
+        if (checkMainAxis) {
+          const minSide = mainAxis === 'y' ? 'top' : 'left';
+          const maxSide = mainAxis === 'y' ? 'bottom' : 'right';
+          const min = mainAxisCoord + overflow[minSide];
+          const max = mainAxisCoord - overflow[maxSide];
+          mainAxisCoord = clamp(min, mainAxisCoord, max);
+        }
+        if (checkCrossAxis) {
+          const minSide = crossAxis === 'y' ? 'top' : 'left';
+          const maxSide = crossAxis === 'y' ? 'bottom' : 'right';
+          const min = crossAxisCoord + overflow[minSide];
+          const max = crossAxisCoord - overflow[maxSide];
+          crossAxisCoord = clamp(min, crossAxisCoord, max);
+        }
+        const limitedCoords = limiter.fn({
+          ...state,
+          [mainAxis]: mainAxisCoord,
+          [crossAxis]: crossAxisCoord
+        });
+        return {
+          ...limitedCoords,
+          data: {
+            x: limitedCoords.x - x,
+            y: limitedCoords.y - y,
+            enabled: {
+              [mainAxis]: checkMainAxis,
+              [crossAxis]: checkCrossAxis
+            }
+          }
+        };
+      }
+    };
+  };
+  /**
+   * Built-in `limiter` that will stop `shift()` at a certain point.
+   */
+  const limitShift = function (options) {
+    if (options === void 0) {
+      options = {};
+    }
+    return {
+      options,
+      fn(state) {
+        const {
+          x,
+          y,
+          placement,
+          rects,
+          middlewareData
+        } = state;
+        const {
+          offset = 0,
+          mainAxis: checkMainAxis = true,
+          crossAxis: checkCrossAxis = true
+        } = evaluate(options, state);
+        const coords = {
+          x,
+          y
+        };
+        const crossAxis = getSideAxis(placement);
+        const mainAxis = getOppositeAxis(crossAxis);
+        let mainAxisCoord = coords[mainAxis];
+        let crossAxisCoord = coords[crossAxis];
+        const rawOffset = evaluate(offset, state);
+        const computedOffset = typeof rawOffset === 'number' ? {
+          mainAxis: rawOffset,
+          crossAxis: 0
+        } : {
+          mainAxis: 0,
+          crossAxis: 0,
+          ...rawOffset
+        };
+        if (checkMainAxis) {
+          const len = mainAxis === 'y' ? 'height' : 'width';
+          const limitMin = rects.reference[mainAxis] - rects.floating[len] + computedOffset.mainAxis;
+          const limitMax = rects.reference[mainAxis] + rects.reference[len] - computedOffset.mainAxis;
+          if (mainAxisCoord < limitMin) {
+            mainAxisCoord = limitMin;
+          } else if (mainAxisCoord > limitMax) {
+            mainAxisCoord = limitMax;
+          }
+        }
+        if (checkCrossAxis) {
+          var _middlewareData$offse, _middlewareData$offse2;
+          const len = mainAxis === 'y' ? 'width' : 'height';
+          const isOriginSide = originSides.has(getSide(placement));
+          const limitMin = rects.reference[crossAxis] - rects.floating[len] + (isOriginSide ? ((_middlewareData$offse = middlewareData.offset) == null ? void 0 : _middlewareData$offse[crossAxis]) || 0 : 0) + (isOriginSide ? 0 : computedOffset.crossAxis);
+          const limitMax = rects.reference[crossAxis] + rects.reference[len] + (isOriginSide ? 0 : ((_middlewareData$offse2 = middlewareData.offset) == null ? void 0 : _middlewareData$offse2[crossAxis]) || 0) - (isOriginSide ? computedOffset.crossAxis : 0);
+          if (crossAxisCoord < limitMin) {
+            crossAxisCoord = limitMin;
+          } else if (crossAxisCoord > limitMax) {
+            crossAxisCoord = limitMax;
+          }
+        }
+        return {
+          [mainAxis]: mainAxisCoord,
+          [crossAxis]: crossAxisCoord
+        };
+      }
+    };
+  };
+
+  /**
+   * Provides data that allows you to change the size of the floating element —
+   * for instance, prevent it from overflowing the clipping boundary or match the
+   * width of the reference element.
+   * @see https://floating-ui.com/docs/size
+   */
+  const size = function (options) {
+    if (options === void 0) {
+      options = {};
+    }
+    return {
+      name: 'size',
+      options,
+      async fn(state) {
+        var _state$middlewareData, _state$middlewareData2;
+        const {
+          placement,
+          rects,
+          platform,
+          elements
+        } = state;
+        const {
+          apply = () => {},
+          ...detectOverflowOptions
+        } = evaluate(options, state);
+        const overflow = await platform.detectOverflow(state, detectOverflowOptions);
+        const side = getSide(placement);
+        const alignment = getAlignment(placement);
+        const isYAxis = getSideAxis(placement) === 'y';
+        const {
+          width,
+          height
+        } = rects.floating;
+        let heightSide;
+        let widthSide;
+        if (side === 'top' || side === 'bottom') {
+          heightSide = side;
+          widthSide = alignment === ((await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating))) ? 'start' : 'end') ? 'left' : 'right';
+        } else {
+          widthSide = side;
+          heightSide = alignment === 'end' ? 'top' : 'bottom';
+        }
+        const maximumClippingHeight = height - overflow.top - overflow.bottom;
+        const maximumClippingWidth = width - overflow.left - overflow.right;
+        const overflowAvailableHeight = min(height - overflow[heightSide], maximumClippingHeight);
+        const overflowAvailableWidth = min(width - overflow[widthSide], maximumClippingWidth);
+        const noShift = !state.middlewareData.shift;
+        let availableHeight = overflowAvailableHeight;
+        let availableWidth = overflowAvailableWidth;
+        if ((_state$middlewareData = state.middlewareData.shift) != null && _state$middlewareData.enabled.x) {
+          availableWidth = maximumClippingWidth;
+        }
+        if ((_state$middlewareData2 = state.middlewareData.shift) != null && _state$middlewareData2.enabled.y) {
+          availableHeight = maximumClippingHeight;
+        }
+        if (noShift && !alignment) {
+          const xMin = max(overflow.left, 0);
+          const xMax = max(overflow.right, 0);
+          const yMin = max(overflow.top, 0);
+          const yMax = max(overflow.bottom, 0);
+          if (isYAxis) {
+            availableWidth = width - 2 * (xMin !== 0 || xMax !== 0 ? xMin + xMax : max(overflow.left, overflow.right));
+          } else {
+            availableHeight = height - 2 * (yMin !== 0 || yMax !== 0 ? yMin + yMax : max(overflow.top, overflow.bottom));
+          }
+        }
+        await apply({
+          ...state,
+          availableWidth,
+          availableHeight
+        });
+        const nextDimensions = await platform.getDimensions(elements.floating);
+        if (width !== nextDimensions.width || height !== nextDimensions.height) {
+          return {
+            reset: {
+              rects: true
+            }
+          };
+        }
+        return {};
+      }
+    };
+  };
+
+  exports.arrow = arrow;
+  exports.autoPlacement = autoPlacement;
+  exports.computePosition = computePosition;
+  exports.detectOverflow = detectOverflow;
+  exports.flip = flip;
+  exports.hide = hide;
+  exports.inline = inline;
+  exports.limitShift = limitShift;
+  exports.offset = offset;
+  exports.rectToClientRect = rectToClientRect;
+  exports.shift = shift;
+  exports.size = size;
+
+}));

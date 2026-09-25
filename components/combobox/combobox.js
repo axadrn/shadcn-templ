@@ -1,8 +1,6 @@
-// Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
   // Constants from Base UI's combobox, shadcn's reference implementation.
   const SIDE_OFFSET = 6;
-  const COLLISION_PADDING = 5;
 
   // The combobox's element is the positioner (no slot upstream) around the
   // [data-slot=combobox-content] popup.
@@ -121,98 +119,43 @@
     return itemsOf(content).filter((i) => i.hasAttribute("data-selected"));
   }
 
-  // The parts that render the transition status.
+  // The popup renders the transition status, its positioner the open state.
   function partsOf(content) {
-    return [content, popupFor(content)];
+    return { positioner: content, parts: [popupFor(content)] };
   }
 
-  function setSide(content, side) {
-    content.setAttribute("data-side", side);
-    const popup = popupFor(content);
-    if (popup) popup.setAttribute("data-side", side);
-  }
 
   function sideOffsetOf(content) {
     const v = parseFloat(content.getAttribute("data-templ-side-offset"));
     return isNaN(v) ? SIDE_OFFSET : v;
   }
 
-  // Base UI zooms the popup out of the anchor's center point (e.g.
-  // "128px -4px"), not out of a placement corner.
-  function anchorOrigin(result, anchorRect, positionerRect, sideOffset) {
-    const side = result.placement.split("-")[0];
-    const centerX = anchorRect.left + anchorRect.width / 2 - positionerRect.left + "px";
-    const centerY = anchorRect.top + anchorRect.height / 2 - positionerRect.top + "px";
-    if (side === "bottom") return centerX + " " + -sideOffset + "px";
-    if (side === "top") return centerX + " calc(100% + " + sideOffset + "px)";
-    if (side === "right") return -sideOffset + "px " + centerY;
-    return "calc(100% + " + sideOffset + "px) " + centerY;
-  }
 
   // Moves the content to <body> (shadcn portals it the same way).
   function portal(content) {
     window.templ.portal.render(content);
   }
 
-  function position(content) {
-    const anchor = positionAnchorFor(content);
-    if (!anchor) return Promise.resolve();
-    const { computePosition, offset, flip, shift, size } = window.FloatingUIDOM;
-    const side = content.getAttribute("data-templ-side") || "bottom";
-    const align = content.getAttribute("data-templ-align") || "start";
-    const alignOffset = parseFloat(content.getAttribute("data-templ-align-offset")) || 0;
-    const sideOffset = sideOffsetOf(content);
-    const placement = align === "center" ? side : side + "-" + align;
-
-    return computePosition(anchor, content, {
-      placement: placement,
-      strategy: "absolute",
-      middleware: [
-        offset({ mainAxis: sideOffset, crossAxis: alignOffset }),
-        flip({ padding: COLLISION_PADDING }),
-        shift({ padding: COLLISION_PADDING }),
-        size({
-          padding: COLLISION_PADDING,
-          apply(args) {
-            content.style.setProperty("--available-height", args.availableHeight + "px");
-            content.style.setProperty("--available-width", args.availableWidth + "px");
-            content.style.setProperty("--anchor-width", args.rects.reference.width + "px");
-          },
-        }),
-      ],
-    }).then((result) => {
-      content.style.left = result.x + "px";
-      content.style.top = result.y + "px";
-      setSide(content, result.placement.split("-")[0]);
-      const popup = popupFor(content);
-      if (popup) {
-        popup.style.setProperty(
-          "--transform-origin",
-          anchorOrigin(
-            result,
-            anchor.getBoundingClientRect(),
-            content.getBoundingClientRect(),
-            sideOffset,
-          ),
-        );
-      }
-    });
-  }
-
+  // ComboboxPositioner: useAnchorPositioning with the dropdown collision
+  // avoidance and a lazy flip, so a filtered list that resizes does not flip
+  // back and forth. autoUpdate follows the chips and the list resizing.
   function startAutoPositioning(content) {
+    stopAutoPositioning(content);
     const anchor = positionAnchorFor(content);
     if (!anchor) return Promise.resolve();
-    if (content._templPositionCleanup) content._templPositionCleanup();
-    let resolveFirst;
-    const firstPosition = new Promise((resolve) => {
-      resolveFirst = resolve;
+    const positioning = window.templ.anchorPositioning.useAnchorPositioning({
+      anchor,
+      positioner: content,
+      parts: [content, popupFor(content)],
+      side: content.getAttribute("data-templ-side") || "bottom",
+      align: content.getAttribute("data-templ-align") || "start",
+      sideOffset: sideOffsetOf(content),
+      alignOffset: parseFloat(content.getAttribute("data-templ-align-offset")) || 0,
+      collisionAvoidance: { fallbackAxisSide: "none" },
+      lazyFlip: true,
     });
-    const update = () => position(content).then(resolveFirst, resolveFirst);
-    content._templPositionCleanup = window.FloatingUIDOM.autoUpdate(anchor, content, update, {
-      elementResize: typeof ResizeObserver !== "undefined",
-      layoutShift: typeof IntersectionObserver !== "undefined",
-    });
-    return firstPosition;
+    content._templPositionCleanup = positioning.cleanup;
+    return positioning.positioned;
   }
 
   function stopAutoPositioning(content) {
@@ -317,15 +260,8 @@
       setHighlight(content, visibleItems(content)[0] || null);
     }
 
-    // Position it invisibly first, then play the enter animation in place.
-    content.style.visibility = "hidden";
+    // Positioned first, then the enter animation plays in place.
     const finish = () => {
-      // duration-100 transitions `all`; a visibility transition would
-      // freeze at hidden in background tabs - flip suppressed.
-      content.style.transitionProperty = "none";
-      content.style.visibility = "";
-      void content.offsetWidth;
-      content.style.transitionProperty = "";
       if (content.hidden) return;
       window.templ.transition.open(partsOf(content));
       setExpanded(content, true);
@@ -337,9 +273,9 @@
     if (content.hidden) return;
     content._templDismiss?.();
     content._templDismiss = null;
-    stopAutoPositioning(content);
-    content.style.visibility = "";
+    // Positioned until it unmounts, like Base UI.
     window.templ.transition.close(partsOf(content), popupFor(content), () => {
+      stopAutoPositioning(content);
       content.hidden = true;
     });
     setExpanded(content, false);
@@ -478,7 +414,6 @@
         input.focus();
       }
       applyFilter(content, "");
-      position(content); // the chips anchor may have grown or shrunk
       return;
     }
   const nextValue = item.getAttribute("data-templ-value") || "";
@@ -628,7 +563,6 @@
     if (!isPositioner(content)) return;
   if (!content.hasAttribute("data-open")) requestOpenChange(content, true);
     applyFilter(content, e.target.value);
-    if (content.hasAttribute("data-open")) position(content);
   });
 
   document.addEventListener("keydown", (e) => {

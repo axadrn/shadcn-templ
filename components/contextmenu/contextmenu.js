@@ -1,6 +1,4 @@
-// Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
-  const COLLISION_PADDING = 5;
   // Submenu hover intent, like Base UI: open fast, close with a grace delay so
   // moving the mouse diagonally into the submenu does not flicker.
   const SUB_OPEN_DELAY = 100;
@@ -46,9 +44,9 @@
     element.toggleAttribute("data-closed", !open);
   }
 
-  // The parts that render the transition status.
+  // The popup renders the transition status, its positioner the open state.
   function partsOf(content) {
-    return [content, popupFor(content)];
+    return { positioner: content, parts: [popupFor(content)] };
   }
 
   function setChecked(item, checked) {
@@ -57,23 +55,7 @@
     item.setAttribute("aria-checked", checked ? "true" : "false");
   }
 
-  function setSide(content, side) {
-    content.setAttribute("data-side", side);
-    const popup = popupFor(content);
-    if (popup) popup.setAttribute("data-side", side);
-  }
 
-  // Base UI zooms the popup out of the anchor's center point, not out of a
-  // placement corner. The anchor here is the cursor (a zero-size rect).
-  function anchorOrigin(result, anchorRect, positionerRect, sideOffset) {
-    const side = result.placement.split("-")[0];
-    const centerX = anchorRect.left + anchorRect.width / 2 - positionerRect.left + "px";
-    const centerY = anchorRect.top + anchorRect.height / 2 - positionerRect.top + "px";
-    if (side === "bottom") return centerX + " " + -sideOffset + "px";
-    if (side === "top") return centerX + " calc(100% + " + sideOffset + "px)";
-    if (side === "right") return -sideOffset + "px " + centerY;
-    return "calc(100% + " + sideOffset + "px) " + centerY;
-  }
 
   // Moves the content to <body> (shadcn portals it the same way).
   function portal(content) {
@@ -89,51 +71,30 @@
     };
   }
 
-  function positionMenu(content, x, y) {
-    const { computePosition, offset, flip, shift, size } = window.FloatingUIDOM;
-    // Base UI context menu placement: right-start against the cursor,
-    // sideOffset 0, alignOffset 4.
-    const side = content.getAttribute("data-templ-side") || "right";
-    const sideOffset =
-      parseInt(content.getAttribute("data-templ-side-offset"), 10) || 0;
-    const alignOffset =
-      parseInt(content.getAttribute("data-templ-align-offset"), 10) || 0;
-    const anchor = cursorAnchor(x, y);
-
-    return computePosition(anchor, content, {
-      placement: side + "-start",
-      strategy: "fixed",
-      middleware: [
-        offset({ mainAxis: sideOffset, alignmentAxis: alignOffset }),
-        flip({ padding: COLLISION_PADDING }),
-        shift({ padding: COLLISION_PADDING }),
-        size({
-          padding: COLLISION_PADDING,
-          apply(args) {
-            content.style.setProperty(
-              "--available-height",
-              args.availableHeight + "px",
-            );
-          },
-        }),
-      ],
-    }).then((result) => {
-      content.style.left = result.x + "px";
-      content.style.top = result.y + "px";
-      setSide(content, result.placement.split("-")[0]);
-      const popup = popupFor(content);
-      if (popup) {
-        popup.style.setProperty(
-          "--transform-origin",
-          anchorOrigin(
-            result,
-            anchor.getBoundingClientRect(),
-            content.getBoundingClientRect(),
-            sideOffset,
-          ),
-        );
-      }
+  // The context menu's MenuPositioner: fixed against the cursor, the
+  // dropdown collision avoidance with the cross axis shift, no arrow padding.
+  function positionAt(content, x, y) {
+    stopAutoPositioning(content);
+    const positioning = window.templ.anchorPositioning.useAnchorPositioning({
+      anchor: cursorAnchor(x, y),
+      positioner: content,
+      parts: [content, popupFor(content)],
+      positionMethod: "fixed",
+      side: content.getAttribute("data-templ-side") || "right",
+      align: content.getAttribute("data-templ-align") || "start",
+      sideOffset: parseFloat(content.getAttribute("data-templ-side-offset")) || 0,
+      alignOffset: parseFloat(content.getAttribute("data-templ-align-offset")) || 0,
+      arrowPadding: 0,
+      collisionAvoidance: { fallbackAxisSide: "none" },
+      shiftCrossAxis: true,
     });
+    content._templPositionCleanup = positioning.cleanup;
+    return positioning.positioned;
+  }
+
+  function stopAutoPositioning(content) {
+    content._templPositionCleanup?.();
+    content._templPositionCleanup = null;
   }
 
   // ----- focus highlighting (Base UI moves real focus to menu items) --------
@@ -202,7 +163,7 @@
     if (alreadyOpen) {
       // Right-click somewhere else while open: move over to the new spot.
       content.querySelectorAll(SUB).forEach(closeSubNow);
-      positionMenu(content, x, y).then(() => {
+      positionAt(content, x, y).then(() => {
         if (!content.isConnected || !content.hasAttribute("data-open")) return;
         content._templReleaseScroll?.();
         content._templReleaseScroll = window.templ.scrollLock.anchoredPopup(
@@ -212,20 +173,11 @@
       return;
     }
 
-    // Fresh open: position it invisibly first, then play the enter animation
-    // at the cursor.
-    content.style.visibility = "hidden";
-    positionMenu(content, x, y).then(() => {
+    // Fresh open: positioned first, then the enter animation plays at the
+    // cursor.
+    positionAt(content, x, y).then(() => {
       if (content.hidden || !content.isConnected) return; // closed or removed meanwhile
-      // duration-100 transitions `all`; a visibility transition would
-      // freeze at hidden in background tabs - flip suppressed.
       const popup = popupFor(content);
-      content.style.transitionProperty = "none";
-      if (popup) popup.style.transitionProperty = "none";
-      content.style.visibility = "";
-      void content.offsetWidth;
-      content.style.transitionProperty = "";
-      if (popup) popup.style.transitionProperty = "";
       // useAnchoredPopupScrollLock: a native touch context menu follows the touch rule.
       content._templReleaseScroll?.();
       content._templReleaseScroll = window.templ.scrollLock.anchoredPopup(
@@ -243,7 +195,9 @@
     if (content.hidden) return;
     content._templDismiss?.();
     content._templDismiss = null;
+    // Positioned until it unmounts, like Base UI.
     window.templ.transition.close(partsOf(content), popupFor(content), () => {
+      stopAutoPositioning(content);
       content.hidden = true;
     });
     content.querySelectorAll(SUB).forEach(closeSubNow);
@@ -285,38 +239,26 @@
   function openSub(sub, focusFirst) {
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
-    content.classList.remove("hidden");
-    content.style.visibility = "hidden";
-
-    const { computePosition, offset, flip, shift } = window.FloatingUIDOM;
-    // Base UI submenu placement: right-start, sideOffset 0, alignOffset -3.
-    computePosition(trigger, content, {
-      placement: "right-start",
-      strategy: "fixed",
-      middleware: [
-        offset({ mainAxis: 0, alignmentAxis: -3 }),
-        flip({ padding: COLLISION_PADDING }),
-        shift({ padding: COLLISION_PADDING }),
-      ],
-    }).then((result) => {
-      if (content.classList.contains("hidden")) return; // closed meanwhile
-      content.style.transition = "none";
-      content.style.left = result.x + "px";
-      content.style.top = result.y + "px";
-      content.setAttribute("data-side", result.placement.split("-")[0]);
-      content.style.setProperty(
-        "--transform-origin",
-        anchorOrigin(result, trigger.getBoundingClientRect(), content.getBoundingClientRect(), 0),
-      );
-      content.offsetHeight; // flush styles before re-enabling transitions
-      content.style.transition = "";
-      // duration-100 transitions `all`; a visibility transition would
-      // freeze at hidden in background tabs - flip suppressed.
-      content.style.transitionProperty = "none";
-      content.style.visibility = "";
-      void content.offsetWidth;
-      content.style.transitionProperty = "";
-      window.templ.transition.open([content]);
+    const positioner = content.parentElement;
+    positioner.hidden = false;
+    // The sub menu's MenuPositioner with the side and offsets of shadcn's
+    // ContextMenuSubContent and the popup collision avoidance. Fixed, since it stays
+    // nested in the root popup.
+    stopAutoPositioning(content);
+    const positioning = window.templ.anchorPositioning.useAnchorPositioning({
+      anchor: trigger,
+      positioner,
+      parts: [positioner, content],
+      positionMethod: "fixed",
+      side: "right",
+      align: "start",
+      sideOffset: 0,
+      alignOffset: 4,
+    });
+    content._templPositionCleanup = positioning.cleanup;
+    positioning.positioned.then(() => {
+      if (positioner.hidden) return; // closed meanwhile
+      window.templ.transition.open({ positioner, parts: [content] });
       setOpenState(trigger, true);
 	  trigger.setAttribute("aria-expanded", "true");
       if (focusFirst) focusItem(itemsIn(content)[0] || content);
@@ -327,7 +269,10 @@
   function closeSub(sub) {
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
-    window.templ.transition.close([content], content, () => content.classList.add("hidden"));
+    window.templ.transition.close({ positioner: content.parentElement, parts: [content] }, content, () => {
+      stopAutoPositioning(content);
+      content.parentElement.hidden = true;
+    });
     setOpenState(trigger, false);
 	trigger.setAttribute("aria-expanded", "false");
   }
@@ -340,8 +285,9 @@
     sub._templClose = null;
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
-    content.classList.add("hidden");
-    window.templ.transition.reset([content], false);
+    stopAutoPositioning(content);
+    content.parentElement.hidden = true;
+    window.templ.transition.reset({ positioner: content.parentElement, parts: [content] }, false);
     setOpenState(trigger, false);
 	trigger.setAttribute("aria-expanded", "false");
   }
@@ -447,6 +393,7 @@
     destroy(popup) {
       const content = popup.parentElement;
       if (!isPositioner(content)) return;
+      stopAutoPositioning(content);
       content._templReleaseScroll?.();
       content._templReleaseScroll = null;
       content._templDismiss?.();

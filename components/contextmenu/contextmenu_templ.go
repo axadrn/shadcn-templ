@@ -1840,16 +1840,17 @@ func SubContent(props ...SubContentProps) templ.Component {
 		if len(props) > 0 {
 			p = props[0]
 		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 134, "<div data-closed hidden role=\"presentation\" class=\"pointer-events-none isolate z-50 outline-none fixed inset-auto left-0 top-0\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		var templ_7745c5c3_Var68 = []any{utils.CN(
-			// 1:1 base/ui/context-menu.tsx ContextMenuSubContent: the sub content
-			// is the content plus cn-context-menu-subcontent, the look comes from
-			// the cn classes (animations key on Base UI's state attributes). max-h
-			// drops out because our JS only sets the available-height variable on
-			// the root positioner.
-			"cn-context-menu-content cn-context-menu-content-logical cn-menu-target cn-menu-translucent cn-context-menu-subcontent z-50 origin-(--transform-origin) overflow-x-hidden overflow-y-auto outline-none",
-			// JS wiring: floatingui positions the sub content as a fixed layer and
-			// toggles the hidden class around the exit animation.
-			"hidden fixed inset-auto left-0 top-0 data-closed:fill-mode-forwards",
+			// 1:1 base/ui/context-menu.tsx ContextMenuSubContent: the content's
+			// classes merged with cn-context-menu-subcontent.
+			"cn-context-menu-content cn-context-menu-content-logical cn-menu-target cn-menu-translucent z-50 max-h-(--available-height) origin-(--transform-origin) overflow-x-hidden overflow-y-auto outline-none cn-context-menu-subcontent",
+			// The positioner takes no pointer events, the popup does, and it
+			// stays mounted after animate-out until it unmounts.
+			"pointer-events-auto data-closed:fill-mode-forwards",
 			p.Class,
 		),
 		}
@@ -1857,30 +1858,30 @@ func SubContent(props ...SubContentProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 134, "<div")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 135, "<div")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if p.ID != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 135, " id=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 136, " id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var69 string
 			templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 584, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 592, Col: 13}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var69))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 136, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 137, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 137, " data-slot=\"context-menu-sub-content\" data-closed role=\"menu\" tabindex=\"-1\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 138, " data-slot=\"context-menu-sub-content\" data-closed role=\"menu\" tabindex=\"-1\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1893,7 +1894,7 @@ func SubContent(props ...SubContentProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 138, "\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 139, "\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1901,7 +1902,7 @@ func SubContent(props ...SubContentProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 139, ">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 140, ">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1909,7 +1910,7 @@ func SubContent(props ...SubContentProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 140, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 141, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

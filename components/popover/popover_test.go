@@ -55,8 +55,7 @@ func TestClientConsumesInitialOpenState(t *testing.T) {
 	for _, want := range []string{
 		`content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")`,
 		`open(content);`,
-		`FloatingUIDOM.autoUpdate(trigger, content, update`,
-		`layoutShift: typeof IntersectionObserver !== "undefined"`,
+		`window.templ.anchorPositioning.useAnchorPositioning(`,
 	} {
 		if !strings.Contains(js, want) {
 			t.Fatalf("client behavior is missing %q", want)

@@ -2,70 +2,52 @@ package floatingui
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
 
-func requireSource(t *testing.T, path string, wants ...string) {
+func read(t *testing.T, path string) string {
 	t.Helper()
 	source, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range wants {
-		if !strings.Contains(string(source), want) {
-			t.Fatalf("%s is missing %q", path, want)
+	return string(source)
+}
+
+// The vendored builds are the versions @base-ui/react resolves at the pin in
+// plans/UPSTREAM.md, so flip, shift and size behave like upstream.
+func TestVendoredVersionsMatchBaseUI(t *testing.T) {
+	for path, want := range map[string]string{
+		"floating_ui_core.js": "// @floating-ui/core 1.7.5,",
+		"floating_ui_dom.js":  "// @floating-ui/dom 1.7.6,",
+	} {
+		if !strings.HasPrefix(read(t, path), want) {
+			t.Errorf("%s does not start with %q", path, want)
 		}
 	}
 }
 
-func requireSourceCount(t *testing.T, path, want string, count int) {
-	t.Helper()
-	source, err := os.ReadFile(path)
+// Positioning is one block, the port of Base UI's useAnchorPositioning. No
+// component script talks to Floating UI itself.
+func TestOnlyTheAnchorPositioningBlockUsesFloatingUI(t *testing.T) {
+	scripts, err := filepath.Glob("../*/*.js")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := strings.Count(string(source), want); got != count {
-		t.Fatalf("%s contains %q %d times, want %d", path, want, got, count)
+	for _, path := range scripts {
+		if strings.HasSuffix(path, ".min.js") || strings.Contains(path, "/floatingui/") || strings.HasSuffix(path, "/baseui/use_anchor_positioning.js") {
+			continue
+		}
+		if source := read(t, path); strings.Contains(source, "FloatingUIDOM") || strings.Contains(source, "computePosition") {
+			t.Errorf("%s positions with Floating UI itself instead of window.templ.anchorPositioning", path)
+		}
 	}
-}
-
-func TestPortaledPositioningStrategiesMatchTheirCoordinateSystems(t *testing.T) {
-	absoluteComponents := map[string]string{
-		"combobox":     `class="pointer-events-none isolate absolute inset-auto`,
-		"dropdownmenu": `class="pointer-events-none isolate absolute inset-auto`,
-		"popover":      `class="pointer-events-none isolate absolute inset-auto`,
-		"hovercard":    `"absolute inset-auto left-0 top-0`,
-		"tooltip":      `"pointer-events-none absolute inset-auto left-0 top-0`,
-	}
-	for component, positionerClass := range absoluteComponents {
-		requireSource(t, "../"+component+"/"+component+".js", `strategy: "absolute"`)
-		requireSource(t, "../"+component+"/"+component+".templ", positionerClass)
-	}
-	// The dropdown's root popup is portaled to <body> and positions absolute.
-	// Its sub content stays nested inside that popup, so it positions fixed
-	// to escape the popup's overflow clip, the context menu's pattern.
-	requireSourceCount(t, "../dropdownmenu/dropdownmenu.js", `strategy: "absolute"`, 1)
-	requireSourceCount(t, "../dropdownmenu/dropdownmenu.js", `strategy: "fixed"`, 1)
-	requireSource(t, "../dropdownmenu/dropdownmenu.templ", `"hidden fixed inset-auto left-0 top-0`)
-
-	requireSourceCount(t, "../contextmenu/contextmenu.js", `strategy: "fixed"`, 2)
-	requireSource(t, "../contextmenu/contextmenu.templ", `class="pointer-events-none isolate fixed inset-auto`)
-
-	requireSource(t, "../select/select.js",
-		`content.style.position = strategy`,
-		`positionPopper(content, trigger, alignMode ? "fixed" : "absolute")`,
-		`positionPopper(content, trigger, "absolute")`,
-	)
-	requireSource(t, "../select/select.templ", `class="pointer-events-none isolate fixed inset-auto`)
-
-	originComponents := []string{
-		"combobox", "dropdownmenu", "popover", "hovercard", "tooltip", "contextmenu", "select",
-	}
-	for _, component := range originComponents {
-		requireSource(t, "../"+component+"/"+component+".js",
-			"anchorRect.left + anchorRect.width / 2 - positionerRect.left",
-			"anchorRect.top + anchorRect.height / 2 - positionerRect.top",
-		)
+	for _, component := range []string{"combobox", "contextmenu", "dropdownmenu", "hovercard", "popover", "select", "tooltip"} {
+		path := "../" + component + "/" + component + ".js"
+		if !strings.Contains(read(t, path), "window.templ.anchorPositioning.useAnchorPositioning(") {
+			t.Errorf("%s does not use the anchor positioning block", path)
+		}
 	}
 }

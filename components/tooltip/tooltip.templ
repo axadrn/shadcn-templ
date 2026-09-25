@@ -99,40 +99,46 @@ templ Content(props ...ContentProps) {
 	{{ s := state(ctx) }}
 	// Hidden until the script portals it to <body> on open. The wrapper
 	// carries no data-slot, so sibling rules such as the button group's
-	// rounding ignore it.
+	// rounding ignore it. Inside it Base UI's positioner, which carries the
+	// position, around the popup.
 	<div data-templ-portal hidden>
 		<div
-			id={ s.id }
-			data-slot="tooltip-content"
 			data-templ-side={ string(p.Side) }
 			data-templ-side-offset={ strconv.Itoa(p.SideOffset) }
-			if s.open != nil {
-				data-templ-open={ strconv.FormatBool(*s.open) }
-			}
-			data-templ-default-open?={ s.open == nil && s.defaultOpen }
 			data-closed
 			hidden
 			data-base-ui-portal
-			role="tooltip"
-			class={
-				utils.CN(
-					// 1:1 base/ui/tooltip.tsx TooltipContent, the look comes from
-					// cn-tooltip-content and Base UI's standard transform-origin variable.
-					"cn-tooltip-content cn-tooltip-content-logical z-50 w-fit max-w-xs origin-(--transform-origin) bg-foreground text-background",
-					// Native [popover] resets plus JS wiring: the popup stays mounted
-					// after animate-out until hidePopover runs.
-					"pointer-events-none absolute inset-auto left-0 top-0 m-0 overflow-visible data-closed:fill-mode-forwards",
-					p.Class,
-				),
-			}
-			{ p.Attributes... }
+			role="presentation"
+			class="pointer-events-none isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
-			{ children... }
-			<span
-				aria-hidden="true"
+			<div
+				id={ s.id }
+				data-slot="tooltip-content"
+				if s.open != nil {
+					data-templ-open={ strconv.FormatBool(*s.open) }
+				}
+				data-templ-default-open?={ s.open == nil && s.defaultOpen }
 				data-closed
-				class="cn-tooltip-arrow cn-tooltip-arrow-logical absolute z-50 bg-foreground fill-foreground data-[side=bottom]:top-1 data-[side=left]:top-1/2! data-[side=left]:-right-1 data-[side=left]:-translate-y-1/2 data-[side=right]:top-1/2! data-[side=right]:-left-1 data-[side=right]:-translate-y-1/2 data-[side=top]:-bottom-2.5"
-			></span>
+				role="tooltip"
+				class={
+					utils.CN(
+						// 1:1 base/ui/tooltip.tsx TooltipContent, the look comes from
+						// cn-tooltip-content and Base UI's standard transform-origin variable.
+						"cn-tooltip-content cn-tooltip-content-logical z-50 w-fit max-w-xs origin-(--transform-origin) bg-foreground text-background",
+						// The popup stays mounted after animate-out until it unmounts.
+						"data-closed:fill-mode-forwards",
+						p.Class,
+					),
+				}
+				{ p.Attributes... }
+			>
+				{ children... }
+				<span
+					aria-hidden="true"
+					data-closed
+					class="cn-tooltip-arrow cn-tooltip-arrow-logical absolute z-50 bg-foreground fill-foreground data-[side=bottom]:top-1 data-[side=left]:top-1/2! data-[side=left]:-right-1 data-[side=left]:-translate-y-1/2 data-[side=right]:top-1/2! data-[side=right]:-left-1 data-[side=right]:-translate-y-1/2 data-[side=top]:-bottom-2.5"
+				></span>
+			</div>
 		</div>
 	</div>
 }
