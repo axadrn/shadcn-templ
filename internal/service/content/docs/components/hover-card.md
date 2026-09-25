@@ -39,6 +39,8 @@ shadcn-templ add hover-card
 
 <ComponentSource name="hover-card" title="components/baseui/use_transition_status.js" />
 
+<ComponentSource name="hover-card" title="components/baseui/use_anchor_positioning.js" />
+
 <ComponentSource name="hover-card" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="hover-card" title="components/floatingui/floating_ui_dom.js" />

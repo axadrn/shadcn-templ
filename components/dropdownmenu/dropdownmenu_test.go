@@ -57,10 +57,8 @@ func TestClientUsesCollisionAvoidance(t *testing.T) {
 	}
 	js := string(source)
 	for _, want := range []string{
-		`flip({ padding: COLLISION_PADDING })`,
-		`shift({ padding: COLLISION_PADDING })`,
-		`FloatingUIDOM.autoUpdate(trigger, content, update`,
-		`layoutShift: typeof IntersectionObserver !== "undefined"`,
+		`collisionAvoidance: { fallbackAxisSide: "none" }`,
+		`window.templ.anchorPositioning.useAnchorPositioning(`,
 		`new CustomEvent("dropdownmenu-open-change"`,
 		`new CustomEvent("dropdownmenu-sub-open-change"`,
 		`new CustomEvent("dropdownmenu-checked-change"`,

@@ -16,8 +16,7 @@ func TestClientUsesBaseUIOpenStateAndAnchorTracking(t *testing.T) {
 		`new CustomEvent("tooltip-open-change"`,
 		`cancelable: true`,
 		`data-templ-open`,
-		`FloatingUIDOM.autoUpdate(trigger, content, update`,
-		`layoutShift: typeof IntersectionObserver !== "undefined"`,
+		`window.templ.anchorPositioning.useAnchorPositioning(`,
 	} {
 		if !strings.Contains(js, want) {
 			t.Fatalf("client behavior is missing %q", want)

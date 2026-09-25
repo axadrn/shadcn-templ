@@ -1,4 +1,3 @@
-// Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
   // Constants from Base UI's select, shadcn's reference implementation.
   const SIDE_OFFSET = 4;
@@ -94,34 +93,16 @@
     return content.getAttribute("data-templ-align-item-with-trigger") !== "false";
   }
 
-  // The parts that render the transition status.
+  // The popup renders the transition status, its positioner the open state.
   function partsOf(content) {
-    return [content, popupFor(content)];
+    return { positioner: content, parts: [popupFor(content)] };
   }
 
   function isOpen(content) {
     return !!content && content.hasAttribute("data-open");
   }
 
-  function setSide(content, side) {
-    content.setAttribute("data-side", side);
-    const popup = popupFor(content);
-    if (popup) popup.setAttribute("data-side", side);
-    const trigger = triggerFor(content);
-    if (trigger) trigger.setAttribute("data-popup-side", side);
-  }
 
-  // Base UI zooms the popup out of the anchor's center point (e.g.
-  // "96px -4px"), not out of a placement corner.
-  function anchorOrigin(result, anchorRect, positionerRect) {
-    const side = result.placement.split("-")[0];
-    const centerX = anchorRect.left + anchorRect.width / 2 - positionerRect.left + "px";
-    const centerY = anchorRect.top + anchorRect.height / 2 - positionerRect.top + "px";
-    if (side === "bottom") return centerX + " " + -SIDE_OFFSET + "px";
-    if (side === "top") return centerX + " calc(100% + " + SIDE_OFFSET + "px)";
-    if (side === "right") return -SIDE_OFFSET + "px " + centerY;
-    return "calc(100% + " + SIDE_OFFSET + "px) " + centerY;
-  }
 
   // Moves the content to <body> (shadcn portals it the same way).
   function portal(content) {
@@ -137,53 +118,11 @@
     if (popup) popup.style.height = "";
   }
 
-  // Regular anchored placement below/above the trigger (Base UI's positioner).
-  function positionPopper(content, trigger, strategy) {
-    const { computePosition, offset, flip, shift, size } = window.FloatingUIDOM;
-    const align = content.getAttribute("data-templ-align") || "center";
-    const placement = align === "center" ? "bottom" : "bottom-" + align;
-
-    content.style.position = strategy;
-
-    return computePosition(trigger, content, {
-      placement: placement,
-      strategy: strategy,
-      middleware: [
-        offset(SIDE_OFFSET),
-        flip({ padding: COLLISION_PADDING }),
-        shift({ padding: COLLISION_PADDING }),
-        size({
-          padding: COLLISION_PADDING,
-          apply(args) {
-            content.style.setProperty(
-              "--available-height",
-              args.availableHeight + "px",
-            );
-            content.style.setProperty(
-              "--anchor-width",
-              args.rects.reference.width + "px",
-            );
-          },
-        }),
-      ],
-    }).then((result) => {
-      content.style.left = result.x + "px";
-      content.style.top = result.y + "px";
-      setSide(content, result.placement.split("-")[0]);
-      const popup = popupFor(content);
-      if (popup) {
-        popup.style.setProperty(
-          "--transform-origin",
-          anchorOrigin(result, trigger.getBoundingClientRect(), content.getBoundingClientRect()),
-        );
-      }
-    });
-  }
 
   // Overlays the menu so the selected item sits on the trigger with its text
   // aligned to the trigger text. Port of Base UI's SelectPopup align logic.
-  // Runs after the popper pass (which sets the CSS vars and fallback coords);
-  // returns false when Base UI would fall back to popper positioning.
+  // Runs after the first positioning pass, which sets the CSS variables;
+  // returns false when Base UI falls back to popper positioning.
   function positionAligned(content, trigger) {
     const popup = popupFor(content);
     const viewport = viewportFor(content);
@@ -273,53 +212,57 @@
       popup.style.setProperty("--transform-origin", "50% " + clampedY + "%");
     }
 
-    setSide(content, "none");
     if (height >= viewportHeight || height >= maxPopupHeight) {
       content._templReachedMax = true;
     }
     return true;
   }
 
-  function position(content, trigger) {
+  // SelectPositioner: useAnchorPositioning with the dropdown collision
+  // avoidance for the popper mode. While the popup is aligned with the trigger
+  // (alignItemWithTrigger, not for touch opens) the positioner is fixed, its
+  // side is "none", anchor tracking is off and positionAligned places it,
+  // once per open. When that does not fit, the select falls back to the
+  // popper mode until it unmounts.
+  function startAutoPositioning(content, trigger) {
+    stopAutoPositioning(content);
     const popup = popupFor(content);
-    const viewport = viewportFor(content);
-    if (!popup || !viewport) return Promise.resolve();
-    // Base UI uses viewport positioning while the selected item is aligned
-    // with the trigger. Touch and regular popper positioning use Floating
-    // UI's standard absolute positioning instead.
-    const alignMode = isAlignMode(content) && content._templOpenMethod !== "touch";
-    popup.setAttribute("data-align-trigger", alignMode ? "true" : "false");
-    resetInlineStyles(content);
+    if (!popup || !viewportFor(content)) return Promise.resolve();
+    const alignActive = isAlignMode(content) && content._templOpenMethod !== "touch" && !content._templAlignFallback;
     content._templAligned = false;
-
-    return positionPopper(content, trigger, alignMode ? "fixed" : "absolute")
-      .then(() => {
-        if (!alignMode) return undefined;
+    resetInlineStyles(content);
+    let placed = false;
+    const positioning = window.templ.anchorPositioning.useAnchorPositioning({
+      anchor: trigger,
+      positioner: content,
+      parts: [content, popup],
+      side: content.getAttribute("data-templ-side") || "bottom",
+      align: content.getAttribute("data-templ-align") || "center",
+      sideOffset: parseFloat(content.getAttribute("data-templ-side-offset")) || SIDE_OFFSET,
+      alignOffset: parseFloat(content.getAttribute("data-templ-align-offset")) || 0,
+      collisionAvoidance: { fallbackAxisSide: "none" },
+      disableAnchorTracking: alignActive,
+      applyPosition: () => !alignActive,
+      onPosition(result, side) {
+        trigger.setAttribute("data-popup-side", side);
+        if (!alignActive) {
+          updateScrollArrows(content);
+          return;
+        }
+        if (placed) return;
+        placed = true;
+        [content, popup].forEach((part) => part.setAttribute("data-side", "none"));
         if (positionAligned(content, trigger)) {
           content._templAligned = true;
-          return undefined;
+          updateScrollArrows(content);
+          return;
         }
-        // Not enough room: redo the plain popper pass (the aligned attempt
-        // dirtied the inline styles).
-        popup.setAttribute("data-align-trigger", "false");
-        resetInlineStyles(content);
-        return positionPopper(content, trigger, "absolute");
-      })
-      .then(() => updateScrollArrows(content));
-  }
-
-  function startAutoPositioning(content, trigger) {
-    if (content._templPositionCleanup) content._templPositionCleanup();
-    let resolveFirst;
-    const firstPosition = new Promise((resolve) => {
-      resolveFirst = resolve;
+        content._templAlignFallback = true;
+        startAutoPositioning(content, trigger);
+      },
     });
-    const update = () => position(content, trigger).then(resolveFirst, resolveFirst);
-    content._templPositionCleanup = window.FloatingUIDOM.autoUpdate(trigger, content, update, {
-      elementResize: typeof ResizeObserver !== "undefined",
-      layoutShift: typeof IntersectionObserver !== "undefined",
-    });
-    return firstPosition;
+    content._templPositionCleanup = positioning.cleanup;
+    return positioning.positioned;
   }
 
   function stopAutoPositioning(content) {
@@ -520,23 +463,9 @@
     });
     content.hidden = false;
 
-    // Position it invisibly first, then play the enter animation in place.
-    content.style.visibility = "hidden";
+    // Positioned first, then the enter animation plays in place.
     const finish = () => {
-      // The popup transitions `all` (duration-100), so clearing the
-      // measuring visibility would animate visibility itself - and in
-      // background tabs and throttled iframes that transition freezes at
-      // its hidden start value. Flip with transitions suppressed.
       const popup = popupFor(content);
-      content.style.transitionProperty = "none";
-      if (popup) popup.style.transitionProperty = "none";
-      content.style.visibility = "";
-      void content.offsetWidth;
-      content.style.transitionProperty = "";
-      if (popup) {
-        void popup.offsetWidth;
-        popup.style.transitionProperty = "";
-      }
       if (content.hidden || !content.isConnected) return;
       // useAnchoredPopupScrollLock measures the positioned popup for touch opens.
       content._templReleaseScroll?.();
@@ -560,7 +489,6 @@
     if (content.hidden) return;
     content._templDismiss?.();
     content._templDismiss = null;
-    stopAutoPositioning(content);
     stopArrowScroll();
     clearTimeout(content._templSelectedDelay);
     content._templSelection = {
@@ -568,10 +496,12 @@
       allowUnselectedMouseUp: false,
       dragY: 0,
     };
-    content.style.visibility = "";
     // Aligned mode has no exit animation (animate-none, like shadcn), so
-    // the close completes on the next frame.
+    // the close completes on the next frame. Positioned until it unmounts,
+    // and the alignment fallback holds until then too.
     window.templ.transition.close(partsOf(content), popupFor(content), () => {
+      stopAutoPositioning(content);
+      content._templAlignFallback = false;
       content.hidden = true;
     });
     content._templReleaseScroll?.();

@@ -612,29 +612,37 @@ templ SubContent(props ...SubContentProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
+	// Base UI's positioner around the sub popup. It stays nested in the root
+	// popup and positions fixed, which escapes the popup's overflow clip.
 	<div
-		if p.ID != "" {
-			id={ p.ID }
-		}
-		data-slot="dropdown-menu-sub-content"
 		data-closed
-		role="menu"
-		aria-labelledby={ triggerID(subState(ctx).id) }
-		tabindex="-1"
-		class={
-			utils.CN(
-				// 1:1 base/ui/dropdown-menu.tsx DropdownMenuSubContent: the sub content
-				// is the content plus cn-dropdown-menu-sub-content and w-auto, the look
-				// comes from the cn classes and Base UI's standard positioner variables.
-				"cn-dropdown-menu-content cn-dropdown-menu-content-logical cn-menu-target cn-menu-translucent cn-dropdown-menu-sub-content z-50 w-auto origin-(--transform-origin) overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden",
-				// JS wiring: floatingui positions the sub content as a fixed layer and
-				// toggles the hidden class around the exit animation.
-				"hidden fixed inset-auto left-0 top-0 data-closed:fill-mode-forwards",
-				p.Class,
-			),
-		}
-		{ p.Attributes... }
+		hidden
+		role="presentation"
+		class="pointer-events-none isolate z-50 outline-none fixed inset-auto left-0 top-0"
 	>
-		{ children... }
+		<div
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			data-slot="dropdown-menu-sub-content"
+			data-closed
+			role="menu"
+			aria-labelledby={ triggerID(subState(ctx).id) }
+			tabindex="-1"
+			class={
+				utils.CN(
+					// 1:1 base/ui/dropdown-menu.tsx DropdownMenuSubContent: the content's
+					// classes merged with cn-dropdown-menu-sub-content and w-auto.
+					"cn-dropdown-menu-content cn-dropdown-menu-content-logical cn-menu-target cn-menu-translucent z-50 max-h-(--available-height) origin-(--transform-origin) overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden cn-dropdown-menu-sub-content w-auto",
+					// The positioner takes no pointer events, the popup does, and it
+					// stays mounted after animate-out until it unmounts.
+					"pointer-events-auto data-closed:fill-mode-forwards",
+					p.Class,
+				),
+			}
+			{ p.Attributes... }
+		>
+			{ children... }
+		</div>
 	</div>
 }

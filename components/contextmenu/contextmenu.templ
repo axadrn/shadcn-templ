@@ -579,30 +579,36 @@ templ SubContent(props ...SubContentProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
+	// Base UI's positioner around the sub popup. It stays nested in the root
+	// popup and positions fixed, which escapes the popup's overflow clip.
 	<div
-		if p.ID != "" {
-			id={ p.ID }
-		}
-		data-slot="context-menu-sub-content"
 		data-closed
-		role="menu"
-		tabindex="-1"
-		class={
-			utils.CN(
-				// 1:1 base/ui/context-menu.tsx ContextMenuSubContent: the sub content
-				// is the content plus cn-context-menu-subcontent, the look comes from
-				// the cn classes (animations key on Base UI's state attributes). max-h
-				// drops out because our JS only sets the available-height variable on
-				// the root positioner.
-				"cn-context-menu-content cn-context-menu-content-logical cn-menu-target cn-menu-translucent cn-context-menu-subcontent z-50 origin-(--transform-origin) overflow-x-hidden overflow-y-auto outline-none",
-				// JS wiring: floatingui positions the sub content as a fixed layer and
-				// toggles the hidden class around the exit animation.
-				"hidden fixed inset-auto left-0 top-0 data-closed:fill-mode-forwards",
-				p.Class,
-			),
-		}
-		{ p.Attributes... }
+		hidden
+		role="presentation"
+		class="pointer-events-none isolate z-50 outline-none fixed inset-auto left-0 top-0"
 	>
-		{ children... }
+		<div
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			data-slot="context-menu-sub-content"
+			data-closed
+			role="menu"
+			tabindex="-1"
+			class={
+				utils.CN(
+					// 1:1 base/ui/context-menu.tsx ContextMenuSubContent: the content's
+					// classes merged with cn-context-menu-subcontent.
+					"cn-context-menu-content cn-context-menu-content-logical cn-menu-target cn-menu-translucent z-50 max-h-(--available-height) origin-(--transform-origin) overflow-x-hidden overflow-y-auto outline-none cn-context-menu-subcontent",
+					// The positioner takes no pointer events, the popup does, and it
+					// stays mounted after animate-out until it unmounts.
+					"pointer-events-auto data-closed:fill-mode-forwards",
+					p.Class,
+				),
+			}
+			{ p.Attributes... }
+		>
+			{ children... }
+		</div>
 	</div>
 }

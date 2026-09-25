@@ -361,6 +361,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/use_anchor_positioning.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/floatingui/floating_ui_core.js",
           "type": "registry:ui"
         },
@@ -471,6 +475,10 @@
         },
         {
           "path": "components/baseui/use_transition_status.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/use_anchor_positioning.js",
           "type": "registry:ui"
         },
         {
@@ -697,6 +705,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/use_anchor_positioning.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/floatingui/floating_ui_core.js",
           "type": "registry:ui"
         },
@@ -737,6 +749,10 @@
         },
         {
           "path": "components/baseui/use_transition_status.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/use_anchor_positioning.js",
           "type": "registry:ui"
         },
         {
@@ -921,6 +937,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/use_anchor_positioning.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/floatingui/floating_ui_core.js",
           "type": "registry:ui"
         },
@@ -1037,6 +1057,10 @@
         },
         {
           "path": "components/baseui/use_transition_status.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/use_anchor_positioning.js",
           "type": "registry:ui"
         },
         {
@@ -1266,6 +1290,10 @@
         },
         {
           "path": "components/baseui/use_transition_status.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/use_anchor_positioning.js",
           "type": "registry:ui"
         },
         {

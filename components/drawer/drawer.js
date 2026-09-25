@@ -64,9 +64,10 @@
     return dialog.querySelector(':scope > [data-slot="drawer-overlay"]');
   }
 
-  // The parts that render the open state and transition status, popup first.
+  // The popup and the overlay render the transition status, the viewport
+  // the open state.
   function partsOf(dialog) {
-    return [popupOf(dialog), overlayOf(dialog), dialog];
+    return { parts: [popupOf(dialog), overlayOf(dialog)], stateParts: [dialog] };
   }
 
   function setPartsAttr(dialog, name, on) {

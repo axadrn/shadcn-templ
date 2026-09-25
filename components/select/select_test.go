@@ -52,15 +52,13 @@ func TestClientRequestsCancelableValueAndOpenChanges(t *testing.T) {
 		`cancelable: true`,
 		`trigger.hasAttribute("data-templ-value")`,
 		`content.hasAttribute("data-templ-open")`,
-		`FloatingUIDOM.autoUpdate(trigger, content, update`,
-		`layoutShift: typeof IntersectionObserver !== "undefined"`,
-		`positionPopper(content, trigger, alignMode ? "fixed" : "absolute")`,
-		`positionPopper(content, trigger, "absolute")`,
+		`window.templ.anchorPositioning.useAnchorPositioning(`,
+		`applyPosition: () => !alignActive`,
+		`disableAnchorTracking: alignActive`,
 		`content._templOpenMethod !== "touch"`,
 		`openMethod: nextOpen ? openMethod || "programmatic" : null`,
 		`open(content, trigger, "programmatic")`,
 		`document.addEventListener("pointercancel"`,
-		`popup.setAttribute("data-align-trigger", "false")`,
 		`requestOpenChange(content, true, "keyboard")`,
 		`const SELECTED_DELAY = 400`,
 		`item._templAllowMouseSelection = true`,
@@ -73,6 +71,11 @@ func TestClientRequestsCancelableValueAndOpenChanges(t *testing.T) {
 		if !strings.Contains(js, want) {
 			t.Fatalf("client behavior is missing %q", want)
 		}
+	}
+	// shadcn renders data-align-trigger from the alignItemWithTrigger prop, it
+	// does not follow the fallback to the popper mode.
+	if strings.Contains(js, `setAttribute("data-align-trigger"`) {
+		t.Fatal("select client changes data-align-trigger, which shadcn renders from the prop")
 	}
 }
 

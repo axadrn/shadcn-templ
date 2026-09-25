@@ -38,8 +38,7 @@ func TestClientRequestsCancelableValueAndOpenChanges(t *testing.T) {
 		`cancelable: true`,
 		`content.hasAttribute("data-templ-value")`,
 		`content.hasAttribute("data-templ-open")`,
-		`FloatingUIDOM.autoUpdate(anchor, content, update`,
-		`layoutShift: typeof IntersectionObserver !== "undefined"`,
+		`window.templ.anchorPositioning.useAnchorPositioning(`,
 	} {
 		if !strings.Contains(js, want) {
 			t.Fatalf("client behavior is missing %q", want)

@@ -1,4 +1,3 @@
-// Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
   const CONTENT = '[data-slot="hover-card-content"]';
   // Base UI links PreviewCard.Trigger to its card through context only; the
@@ -19,72 +18,151 @@
     );
   }
 
-  // Base UI zooms the popup out of the anchor's center point (e.g.
-  // "96px -4px"), not out of a placement corner.
-  function anchorOrigin(result, anchorRect, positionerRect, sideOffset) {
-    const side = result.placement.split("-")[0];
-    const centerX = anchorRect.left + anchorRect.width / 2 - positionerRect.left + "px";
-    const centerY = anchorRect.top + anchorRect.height / 2 - positionerRect.top + "px";
-    if (side === "bottom") return centerX + " " + -sideOffset + "px";
-    if (side === "top") return centerX + " calc(100% + " + sideOffset + "px)";
-    if (side === "right") return -sideOffset + "px " + centerY;
-    return "calc(100% + " + sideOffset + "px) " + centerY;
+  // Base UI's PreviewCardPositioner, the popup's parent: it is portaled and
+  // positioned and renders the open state.
+  function positionerOf(content) {
+    return content.parentElement;
   }
 
-  // Moves the content to <body> (shadcn portals it the same way).
+  function statusOf(content) {
+    return { positioner: positionerOf(content), parts: [content] };
+  }
+
+  // Moves the positioner to <body> (shadcn portals it the same way).
   function portal(content) {
-    window.templ.portal.render(content);
+    window.templ.portal.render(positionerOf(content));
   }
 
-  function positionContent(content, trigger) {
-    const { computePosition, offset, flip, shift } = window.FloatingUIDOM;
-    const side = content.getAttribute("data-templ-side") || "bottom";
-    const align = content.getAttribute("data-templ-align") || "center";
-    const sideOffset =
-      parseInt(content.getAttribute("data-templ-side-offset"), 10) || 4;
-    const alignOffset =
-      parseInt(content.getAttribute("data-templ-align-offset"), 10) || 0;
-    const placement = align === "center" ? side : side + "-" + align;
+  // ----- inline triggers (utils/popups/inlineRect.ts) ------------------------
+  // A trigger that wraps over several lines anchors the card to the line the
+  // pointer is on, like Floating UI's inline() with Base UI's line grouping.
 
-    return computePosition(trigger, content, {
-      placement: placement,
-      strategy: "absolute",
-      middleware: [
-        offset({ mainAxis: sideOffset, alignmentAxis: alignOffset }),
-        flip(),
-        shift({ padding: 5 }),
-      ],
-    }).then((result) => {
-      content.style.transition = "none";
-      content.style.left = result.x + "px";
-      content.style.top = result.y + "px";
-      content.style.setProperty(
-        "--transform-origin",
-        anchorOrigin(
-          result,
-          trigger.getBoundingClientRect(),
-          content.getBoundingClientRect(),
-          sideOffset,
-        ),
-      );
-      content.setAttribute("data-side", result.placement.split("-")[0]);
-      content.offsetHeight; // flush styles before re-enabling transitions
-      content.style.transition = "";
-    });
+  function createRect(left, top, right, bottom) {
+    return { left, top, right, bottom, x: left, y: top, width: right - left, height: bottom - top };
   }
 
+  function getLineRects(rects) {
+    const lines = [];
+    let previousRect;
+    let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
+    for (const rect of Array.from(rects).sort((a, b) => a.top - b.top)) {
+      left = Math.min(left, rect.left);
+      top = Math.min(top, rect.top);
+      right = Math.max(right, rect.right);
+      bottom = Math.max(bottom, rect.bottom);
+      if (!previousRect || rect.top - previousRect.top > previousRect.height / 2) {
+        lines.push({ left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height });
+      } else {
+        const line = lines[lines.length - 1];
+        line.left = Math.min(line.left, rect.left);
+        line.right = Math.max(line.right, rect.right);
+        line.bottom = Math.max(line.bottom, rect.bottom);
+        line.width = line.right - line.left;
+        line.height = line.bottom - line.top;
+      }
+      previousRect = rect;
+    }
+    return { lines, fallback: createRect(left, top, right, bottom) };
+  }
+
+  function findLineIndex(lines, x, y) {
+    return lines.findIndex((line) => x > line.left - 2 && x < line.right + 2 && y > line.top - 2 && y < line.bottom + 2);
+  }
+
+  function updateInlineRectCoords(content, element, clientX, clientY) {
+    const { lines } = getLineRects(element.getClientRects());
+    if (lines.length < 2) {
+      content._templInlineCoords = undefined;
+      return;
+    }
+    const lineIndex = findLineIndex(lines, clientX, clientY);
+    content._templInlineCoords = { x: clientX, y: clientY, lineIndex: lineIndex === -1 ? undefined : lineIndex, element };
+  }
+
+  function getInlineReferenceRect(reference, placement, coords) {
+    const { lines, fallback } = getLineRects(reference.getClientRects());
+    if (lines.length < 2) return null;
+    const x = coords?.x;
+    const y = coords?.y;
+    const side = placement[0];
+    if (coords?.lineIndex != null && lines[coords.lineIndex]) {
+      const line = lines[coords.lineIndex];
+      return createRect(line.left, line.top, line.right, line.bottom);
+    }
+    if (x != null && y != null) {
+      const lineIndex = findLineIndex(lines, x, y);
+      if (lineIndex !== -1) {
+        const line = lines[lineIndex];
+        return createRect(line.left, line.top, line.right, line.bottom);
+      }
+    }
+    if (lines.length === 2 && lines[0].left > lines[1].right && x != null && y != null) return fallback;
+    if (side === "t" || side === "b") {
+      const firstRect = lines[0];
+      const lastRect = lines[lines.length - 1];
+      const targetRect = side === "t" ? firstRect : lastRect;
+      return createRect(targetRect.left, firstRect.top, targetRect.right, lastRect.bottom);
+    }
+    const isLeft = side === "l";
+    let left = lines[0].left;
+    let right = lines[0].right;
+    let edge = isLeft ? Infinity : -Infinity;
+    let targetFirstRect = lines[0];
+    let targetLastRect = lines[0];
+    for (const rect of lines) {
+      left = Math.min(left, rect.left);
+      right = Math.max(right, rect.right);
+      const nextEdge = isLeft ? rect.left : rect.right;
+      if ((isLeft && nextEdge < edge) || (!isLeft && nextEdge > edge)) {
+        edge = nextEdge;
+        targetFirstRect = rect;
+        targetLastRect = rect;
+      } else if (nextEdge === edge) {
+        targetLastRect = rect;
+      }
+    }
+    return createRect(left, targetFirstRect.top, right, targetLastRect.bottom);
+  }
+
+  function inlineMiddleware(content) {
+    return {
+      name: "inline",
+      async fn(state) {
+        const reference = state.elements.reference;
+        if (typeof reference?.getClientRects !== "function") return {};
+        const coords = content._templInlineCoords;
+        const rect = getInlineReferenceRect(reference, state.placement, coords?.element === reference ? coords : undefined);
+        if (!rect) return {};
+        const resetRects = await state.platform.getElementRects({
+          reference: { contextElement: reference, getBoundingClientRect: () => rect },
+          floating: state.elements.floating,
+          strategy: state.strategy,
+        });
+        const r = state.rects.reference;
+        const n = resetRects.reference;
+        if (r.x === n.x && r.y === n.y && r.width === n.width && r.height === n.height) return {};
+        return { reset: { rects: resetRects } };
+      },
+    };
+  }
+
+  // PreviewCardPositioner: useAnchorPositioning with the popup collision
+  // avoidance and the inline middleware, while the card is mounted.
   function startAutoPositioning(content, trigger) {
-    if (content._templPositionCleanup) content._templPositionCleanup();
-    let resolveFirst;
-    const firstPosition = new Promise((resolve) => {
-      resolveFirst = resolve;
+    stopAutoPositioning(content);
+    const positioner = positionerOf(content);
+    const positioning = window.templ.anchorPositioning.useAnchorPositioning({
+      anchor: trigger,
+      positioner,
+      parts: [positioner, content],
+      side: positioner.getAttribute("data-templ-side") || "bottom",
+      align: positioner.getAttribute("data-templ-align") || "center",
+      sideOffset: parseFloat(positioner.getAttribute("data-templ-side-offset")) || 0,
+      alignOffset: parseFloat(positioner.getAttribute("data-templ-align-offset")) || 0,
+      inline: inlineMiddleware(content),
     });
-    const update = () => positionContent(content, trigger).then(resolveFirst, resolveFirst);
-    content._templPositionCleanup = window.FloatingUIDOM.autoUpdate(trigger, content, update, {
-      elementResize: typeof ResizeObserver !== "undefined",
-      layoutShift: typeof IntersectionObserver !== "undefined",
-    });
-    return firstPosition;
+    content._templPositionCleanup = positioning.cleanup;
+    return positioning.positioned;
   }
 
   function stopAutoPositioning(content) {
@@ -95,34 +173,29 @@
 
   function open(content, trigger) {
     portal(content);
-    content.hidden = false;
+    positionerOf(content).hidden = false;
     content._templDismiss ??= window.templ.dismiss.useDismiss({
-      floating: content,
+      floating: positionerOf(content),
       reference: trigger,
       onOpenChange: (open) => requestOpenChange(content, open),
     });
 
-    // Position it invisibly first, then play the enter animation in place.
-    content.style.visibility = "hidden";
+    // Positioned first, then the enter animation plays in place.
     startAutoPositioning(content, trigger).then(() => {
-      if (content.hidden) return; // closed meanwhile
-      // duration-100 transitions `all`; a visibility transition would
-      // freeze at hidden in background tabs - flip suppressed.
-      content.style.transitionProperty = "none";
-      content.style.visibility = "";
-      void content.offsetWidth;
-      content.style.transitionProperty = "";
-      window.templ.transition.open([content]);
+      if (positionerOf(content).hidden) return; // closed meanwhile
+      window.templ.transition.open(statusOf(content));
     });
   }
 
   function close(content) {
-    if (content.hidden) return;
+    if (positionerOf(content).hidden) return;
     content._templDismiss?.();
     content._templDismiss = null;
-    stopAutoPositioning(content);
-    window.templ.transition.close([content], content, () => {
-      content.hidden = true;
+    // Positioned until it unmounts, like Base UI.
+    window.templ.transition.close(statusOf(content), content, () => {
+      stopAutoPositioning(content);
+      positionerOf(content).hidden = true;
+      content._templInlineCoords = undefined;
     });
   }
 
@@ -170,7 +243,9 @@
     const trigger = e.target.closest(TRIGGER);
     if (trigger) {
       const content = contentFor(trigger);
-      if (content) scheduleOpen(content, trigger);
+      if (!content) return;
+      if (!content.hasAttribute("data-open")) updateInlineRectCoords(content, trigger, e.clientX, e.clientY);
+      scheduleOpen(content, trigger);
       return;
     }
     const content = e.target.closest(CONTENT);
@@ -178,6 +253,18 @@
       clearTimeout(content._templClose);
       content._templClose = null;
     }
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    const trigger = e.target instanceof Element && e.target.closest(TRIGGER);
+    const content = trigger && contentFor(trigger);
+    if (content && !content.hasAttribute("data-open")) updateInlineRectCoords(content, trigger, e.clientX, e.clientY);
+  });
+
+  document.addEventListener("focusin", (e) => {
+    const trigger = e.target instanceof Element && e.target.closest(TRIGGER);
+    const content = trigger && contentFor(trigger);
+    if (content) content._templInlineCoords = undefined;
   });
 
   document.addEventListener("mouseout", (e) => {
@@ -215,7 +302,8 @@
     destroy(content) {
       stopAutoPositioning(content);
       content._templDismiss?.();
-      if (content.isConnected) content.remove();
+      const positioner = positionerOf(content);
+      if (positioner?.isConnected) positioner.remove();
     },
   });
 })();
