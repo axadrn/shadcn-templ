@@ -24,7 +24,6 @@
   const IGNORE_SELECTOR = 'button,a,input,select,textarea,label,[role="button"]';
   // The ending transition is duration-450, or strength*400ms after a swipe;
   // the fallback timer only fires when no transform transition runs at all.
-  const CLOSE_FALLBACK_MS = 500;
 
   function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
@@ -63,6 +62,11 @@
 
   function overlayOf(dialog) {
     return dialog.querySelector(':scope > [data-slot="drawer-overlay"]');
+  }
+
+  // The parts that render the open state and transition status, popup first.
+  function partsOf(dialog) {
+    return [popupOf(dialog), overlayOf(dialog), dialog];
   }
 
   function setPartsAttr(dialog, name, on) {
@@ -138,6 +142,7 @@
   function updateState(dialog, isOpen) {
     triggersFor(dialog).forEach((trigger) => {
       trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      trigger.toggleAttribute("data-popup-open", isOpen);
     });
   }
 
@@ -203,7 +208,7 @@
     for (const d of dialogs) {
       const popup = popupOf(d);
       if (!popup) continue;
-      const closing = popup.hasAttribute("data-ending-style");
+      const closing = window.templ.transition.isEnding(popup);
       if (!d.open && !closing) continue;
       const chain = ancestorsOf(d);
       // A closing drawer no longer counts as open (Base UI flips `open`
@@ -229,7 +234,7 @@
       const popup = popupOf(d);
       if (!popup || !d.open) continue;
       const i = info.get(d);
-      const closing = popup.hasAttribute("data-ending-style");
+      const closing = window.templ.transition.isEnding(popup);
       if (i.openDesc === 0 && !closing) {
         // Measure while unobstructed; the cached value is what gets pinned
         // once a nested drawer opens (DrawerPopup keepHeightWhileNested).
@@ -460,8 +465,7 @@
 
   function cleanupClosed(dialog) {
     stopDismiss(dialog);
-    setPartsAttr(dialog, "data-ending-style", false);
-    setPartsAttr(dialog, "data-starting-style", false);
+    window.templ.transition.reset(partsOf(dialog), false);
     setPartsAttr(dialog, "data-swiping", false);
     const popup = popupOf(dialog);
     if (popup) {
@@ -512,7 +516,7 @@
         d.getAttribute("data-modal") === "true" &&
         // A closing drawer no longer counts (Base UI removes markOthers at
         // dismiss start, not after the exit transition).
-        !popupOf(d)?.hasAttribute("data-ending-style"),
+        !window.templ.transition.isEnding(popupOf(d)),
     );
     for (const node of document.body.children) {
       if (node.localName === "script" || node.matches("[data-base-ui-portal]")) continue;
@@ -557,16 +561,8 @@
     const popup = popupOf(dialog);
     if (!popup) return;
 
-    window.clearTimeout(dialog._templCloseTimer);
-    delete dialog._templCloseTimer;
-    setPartsAttr(dialog, "data-ending-style", false);
-
     if (!dialog.open) {
       resetSwipeVars(dialog);
-      // Base UI mounts the popup with its starting style (the off-screen
-      // --closed-transform); painting that state first makes the removal
-      // below transition the panel in (450ms cubic-bezier(0.22,1,0.36,1)).
-      setPartsAttr(dialog, "data-starting-style", true);
       try {
         // Modal drawers open non-modally too: shadcn/Base UI never use the
         // native top layer (it would stack above the z-index portaled
@@ -581,7 +577,6 @@
           (popupOf(dialog) || dialog).focus({ preventScroll: true });
         }
       } catch {
-        setPartsAttr(dialog, "data-starting-style", false);
         return;
       }
       // With layout available, resolve the snap points and seed the default
@@ -593,8 +588,10 @@
       }
     }
 
-    void popup.offsetWidth;
-    setPartsAttr(dialog, "data-starting-style", false);
+    // Base UI mounts the popup with its starting style (the off-screen
+    // --closed-transform), so the panel transitions in from there
+    // (450ms cubic-bezier(0.22,1,0.36,1)). Also cancels an exit in flight.
+    window.templ.transition.open(partsOf(dialog));
     updateState(dialog, true);
     // Also on a reopen during the exit, which stopped the dismissal.
     startDismiss(dialog);
@@ -612,7 +609,7 @@
       updateState(dialog, false);
       return;
     }
-    if (popup.hasAttribute("data-ending-style")) return;
+    if (window.templ.transition.isEnding(popup)) return;
     stopDismiss(dialog);
 
     // Pin the measured height for the exit (DrawerPopup sets --drawer-height
@@ -626,7 +623,11 @@
     popup.style.setProperty("--drawer-swipe-strength", String(value));
     const overlay = overlayOf(dialog);
     if (overlay) overlay.style.setProperty("--drawer-swipe-strength", String(value));
-    setPartsAttr(dialog, "data-ending-style", true);
+    // Unmounts once the exit transition finished.
+    window.templ.transition.close(partsOf(dialog), popup, () => {
+      if (dialog.open) dialog.close(); // the close handler runs cleanupClosed
+      else cleanupClosed(dialog);
+    });
     updateState(dialog, false);
     syncInert();
     if (
@@ -639,19 +640,6 @@
     // The stack treats a closing drawer as closed (Base UI flips `open`
     // before the exit transition), so the parent starts scaling forward now.
     syncStack();
-
-    const finish = () => {
-      popup.removeEventListener("transitionend", onTransitionEnd);
-      window.clearTimeout(dialog._templCloseTimer);
-      delete dialog._templCloseTimer;
-      if (dialog.open) dialog.close(); // the close handler runs cleanupClosed
-      else cleanupClosed(dialog);
-    };
-    const onTransitionEnd = (event) => {
-      if (event.target === popup && event.propertyName === "transform") finish();
-    };
-    popup.addEventListener("transitionend", onTransitionEnd);
-    dialog._templCloseTimer = window.setTimeout(finish, CLOSE_FALLBACK_MS);
   }
 
   function isDrawerOpen(target) {
@@ -1113,7 +1101,7 @@
       if (event.pointerType === "touch") return;
       if (event.button !== 0) return;
       const popup = popupOf(dialog);
-      if (!popup || popup.hasAttribute("data-ending-style") || hasOpenNested(dialog)) return;
+      if (!popup || window.templ.transition.isEnding(popup) || hasOpenNested(dialog)) return;
       const target = event.target instanceof Element ? event.target : null;
       if (!target || !popup.contains(target)) return;
       if (target.closest(IGNORE_SELECTOR) || target.closest('[data-slot="drawer-content"]')) {
@@ -1154,7 +1142,7 @@
       "touchstart",
       (event) => {
         const popup = popupOf(dialog);
-        if (!popup || popup.hasAttribute("data-ending-style") || hasOpenNested(dialog)) return;
+        if (!popup || window.templ.transition.isEnding(popup) || hasOpenNested(dialog)) return;
         if (event.touches.length !== 1) {
           state.touch = null;
           return;
@@ -1280,8 +1268,6 @@
     });
 
     dialog.addEventListener("close", () => {
-      window.clearTimeout(dialog._templCloseTimer);
-      delete dialog._templCloseTimer;
       cleanupClosed(dialog);
     });
 

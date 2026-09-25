@@ -37,10 +37,9 @@
   syncItemState(item, true);
     if (!panel) return;
     triggerOf(item).setAttribute("aria-controls", panel.id);
-    panel.removeAttribute("data-closed");
     panel.hidden = false;
     panel.style.setProperty("--accordion-panel-height", panel.scrollHeight + "px");
-    panel.setAttribute("data-open", "");
+    window.templ.transition.open([panel]);
   }
 
   function closeItem(item) {
@@ -49,19 +48,11 @@
     triggerOf(item).removeAttribute("aria-controls");
   syncItemState(item, false);
     if (!panel) return;
-    panel.removeAttribute("data-open");
     panel.style.setProperty("--accordion-panel-height", panel.scrollHeight + "px");
-    panel.setAttribute("data-closed", "");
-    panel.addEventListener(
-      "animationend",
-      () => {
-        if (panel.hasAttribute("data-closed")) {
-          panel.removeAttribute("data-closed");
-          panel.hidden = true;
-        }
-      },
-      { once: true }
-    );
+    // Hidden once the collapse animation finished.
+    window.templ.transition.close([panel], panel, () => {
+      panel.hidden = true;
+    });
   }
 
   function requestValueChange(accordion, item) {

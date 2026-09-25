@@ -1,6 +1,5 @@
 // Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
-  const EXIT_MS = 120; // exit animation (duration-100) + slack
   const COLLISION_PADDING = 5;
   // Submenu hover intent, like Base UI: open fast, close with a grace delay so
   // moving the mouse diagonally into the submenu does not flicker.
@@ -51,33 +50,13 @@
     return content.firstElementChild;
   }
 
-  function setState(content, state) {
-    const open = state === "open";
-    content.toggleAttribute("data-open", open);
-    content.toggleAttribute("data-closed", !open);
-    const popup = popupFor(content);
-    if (popup) {
-      popup.toggleAttribute("data-open", open);
-      popup.toggleAttribute("data-closed", !open);
-    }
+  // The parts that render the transition status.
+  function partsOf(content) {
+    return [content, popupFor(content)];
   }
 
   function isOpen(el) {
     return !!el && el.hasAttribute("data-open");
-  }
-
-  function setTransitionAttribute(content, name, present) {
-    content.toggleAttribute(name, present);
-    const popup = popupFor(content);
-    if (popup) popup.toggleAttribute(name, present);
-  }
-
-  function startTransition(content) {
-    setTransitionAttribute(content, "data-ending-style", false);
-    setTransitionAttribute(content, "data-starting-style", true);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => setTransitionAttribute(content, "data-starting-style", false));
-    });
   }
 
   function setChecked(item, checked) {
@@ -242,7 +221,6 @@
     allContents().forEach((c) => {
       if (c !== content) close(c);
     });
-    clearTimeout(content._templHide);
     content._templOpenMethod = trigger._templOpenMethod || "programmatic";
     portal(content);
     content.hidden = false;
@@ -270,8 +248,7 @@
       content._templReleaseScroll = window.templ.scrollLock.anchoredPopup(
         true, content._templOpenMethod === "touch", content, trigger,
       );
-      setState(content, "open");
-      startTransition(content);
+      window.templ.transition.open(partsOf(content));
       trigger.setAttribute("aria-expanded", "true");
       trigger.setAttribute("data-popup-open", "");
       trigger.setAttribute("data-pressed", "");
@@ -295,9 +272,9 @@
     content._templDismiss?.();
     content._templDismiss = null;
     stopAutoPositioning(content);
-    setTransitionAttribute(content, "data-starting-style", false);
-    setState(content, "closed");
-    setTransitionAttribute(content, "data-ending-style", true);
+    window.templ.transition.close(partsOf(content), popupFor(content), () => {
+      content.hidden = true;
+    });
     content.querySelectorAll(SUB).forEach(closeSubNow);
     const trigger = triggerFor(content);
     if (trigger) {
@@ -306,13 +283,6 @@
       trigger.removeAttribute("data-pressed");
       if (refocusTrigger) trigger.focus({ preventScroll: true });
     }
-    clearTimeout(content._templHide);
-    content._templHide = setTimeout(() => {
-      if (content.hasAttribute("data-closed") && !content.hidden) {
-        content.hidden = true;
-        setTransitionAttribute(content, "data-ending-style", false);
-      }
-    }, EXIT_MS);
     content._templReleaseScroll?.();
     content._templReleaseScroll = null;
   }
@@ -390,9 +360,7 @@
       content.style.visibility = "";
       void content.offsetWidth;
       content.style.transitionProperty = "";
-      content.setAttribute("data-open", "");
-      content.removeAttribute("data-closed");
-      startTransition(content);
+      window.templ.transition.open([content]);
       trigger.setAttribute("data-popup-open", "");
 	  trigger.setAttribute("aria-expanded", "true");
       if (focusFirst) focusItem(itemsIn(content)[0] || content);
@@ -403,18 +371,9 @@
   function closeSub(sub) {
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
-    content.removeAttribute("data-open");
-    content.setAttribute("data-closed", "");
-    setTransitionAttribute(content, "data-starting-style", false);
-    setTransitionAttribute(content, "data-ending-style", true);
+    window.templ.transition.close([content], content, () => content.classList.add("hidden"));
     trigger.removeAttribute("data-popup-open");
 	trigger.setAttribute("aria-expanded", "false");
-    setTimeout(() => {
-      if (content.hasAttribute("data-closed")) {
-        content.classList.add("hidden");
-        setTransitionAttribute(content, "data-ending-style", false);
-      }
-    }, EXIT_MS);
   }
 
   // Closes immediately (used when the whole menu goes away).
@@ -426,10 +385,7 @@
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
     content.classList.add("hidden");
-    content.removeAttribute("data-open");
-    content.setAttribute("data-closed", "");
-    setTransitionAttribute(content, "data-starting-style", false);
-    setTransitionAttribute(content, "data-ending-style", false);
+    window.templ.transition.reset([content], false);
     trigger.removeAttribute("data-popup-open");
 	trigger.setAttribute("aria-expanded", "false");
   }

@@ -37,6 +37,8 @@ shadcn-templ add combobox
 
 <ComponentSource name="combobox" title="components/baseui/use_dismiss.js" />
 
+<ComponentSource name="combobox" title="components/baseui/use_transition_status.js" />
+
 <ComponentSource name="combobox" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="combobox" title="components/floatingui/floating_ui_dom.js" />

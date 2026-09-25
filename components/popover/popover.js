@@ -1,7 +1,6 @@
 // Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
   // Constants from Base UI's popover, shadcn's reference implementation.
-  const EXIT_MS = 120; // exit animation (duration-100) + slack
   const COLLISION_PADDING = 5;
 
   // The popover's element is the positioner (shadcn's isolate z-50 wrapper,
@@ -55,29 +54,9 @@
     return content.firstElementChild;
   }
 
-  function setState(content, state) {
-    const open = state === "open";
-    content.toggleAttribute("data-open", open);
-    content.toggleAttribute("data-closed", !open);
-    const popup = popupFor(content);
-    if (popup) {
-      popup.toggleAttribute("data-open", open);
-      popup.toggleAttribute("data-closed", !open);
-    }
-  }
-
-  function setTransitionAttribute(content, name, present) {
-    content.toggleAttribute(name, present);
-    const popup = popupFor(content);
-    if (popup) popup.toggleAttribute(name, present);
-  }
-
-  function startTransition(content) {
-    setTransitionAttribute(content, "data-ending-style", false);
-    setTransitionAttribute(content, "data-starting-style", true);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => setTransitionAttribute(content, "data-starting-style", false));
-    });
+  // The parts that render the transition status.
+  function partsOf(content) {
+    return [content, popupFor(content)];
   }
 
   function setSide(content, side) {
@@ -205,7 +184,6 @@
     allContents().forEach((c) => {
       if (c !== content) close(c);
     });
-    clearTimeout(content._templHide);
     portal(content);
     content.hidden = false;
     // useDismiss runs while open. Base UI's non modal popover dismisses a
@@ -231,8 +209,7 @@
       content.style.transitionProperty = "";
       if (popup) popup.style.transitionProperty = "";
       if (content.hidden) return;
-      setState(content, "open");
-      startTransition(content);
+      window.templ.transition.open(partsOf(content));
       const trigger = triggerFor(content);
       if (trigger) {
         trigger.setAttribute("aria-expanded", "true");
@@ -260,22 +237,15 @@
       if (focusTrigger) focusTrigger.focus({ preventScroll: true });
     }
     content.style.visibility = "";
-    setTransitionAttribute(content, "data-starting-style", false);
-    setState(content, "closed");
-    setTransitionAttribute(content, "data-ending-style", true);
+    window.templ.transition.close(partsOf(content), popupFor(content), () => {
+      content.hidden = true;
+    });
     const trigger = triggerFor(content);
     if (trigger) {
       trigger.setAttribute("aria-expanded", "false");
       trigger.removeAttribute("data-popup-open");
       trigger.removeAttribute("data-pressed");
     }
-    clearTimeout(content._templHide);
-    content._templHide = setTimeout(() => {
-      if (content.hasAttribute("data-closed") && !content.hidden) {
-        content.hidden = true;
-        setTransitionAttribute(content, "data-ending-style", false);
-      }
-    }, EXIT_MS);
   }
 
   function closeAll(returnFocus) {
