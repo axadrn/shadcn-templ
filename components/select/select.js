@@ -105,8 +105,7 @@
   }
 
   // SelectPopup's FloatingFocusManager: non modal, focus returns to the
-  // trigger on unmount. The selected item takes the initial focus, which is
-  // the list navigation's selectedIndex until task 8 of plans/parity-runtime.md.
+  // trigger on unmount.
   function startFocusManager(content, trigger) {
     if (content._templFocus) {
       content._templFocus.open();
@@ -117,7 +116,6 @@
       reference: trigger,
       modal: false,
       openInteractionType: content._templOpenMethod === "programmatic" ? null : content._templOpenMethod,
-      initialFocus: () => content.querySelector(ITEM + "[data-selected]") || content.querySelector(ITEM) || true,
       restoreFocus: true,
       onOpenChange: (open) => requestOpenChange(content, open),
     });
@@ -126,6 +124,81 @@
   function stopFocusManager(content) {
     content._templFocus?.unmount();
     content._templFocus = null;
+  }
+
+  // ----- list navigation and typeahead ---------------------------------------
+
+  function itemsIn(content) {
+    return [...content.querySelectorAll(ITEM)];
+  }
+
+  function selectedIndexOf(content) {
+    const index = itemsIn(content).findIndex((item) => item.hasAttribute("data-selected"));
+    return index === -1 ? null : index;
+  }
+
+  // The item's highlight, with SelectItem's roving tabindex.
+  function highlight(content, index) {
+    content._templActiveIndex = index;
+    itemsIn(content).forEach((item, i) => {
+      item.toggleAttribute("data-highlighted", i === index);
+      item.tabIndex = i === index ? 0 : -1;
+    });
+  }
+
+  // SelectRoot's useListNavigation and useTypeahead. Disabled items are
+  // highlighted (an empty disabledIndices), typeahead skips them, and typing
+  // on the closed trigger selects the match.
+  function startListNavigation(content, trigger) {
+    const popup = popupFor(content);
+    const items = () => itemsIn(content);
+    const activeIndex = () => content._templActiveIndex ?? null;
+    const selectedIndex = () => selectedIndexOf(content);
+    const enabled = () => !trigger.disabled && trigger.getAttribute("aria-readonly") !== "true";
+    content._templNav = window.templ.listNavigation.useListNavigation({
+      floating: popup,
+      reference: trigger,
+      items,
+      activeIndex,
+      selectedIndex,
+      disabledIndices: [],
+      isOpen: () => isOpen(content),
+      onNavigate(index) {
+        // Retain the highlight while transitioning out.
+        if (index === null && !isOpen(content)) return;
+        highlight(content, index);
+      },
+      onOpenChange(open) {
+        if (enabled()) requestOpenChange(content, open, "keyboard");
+      },
+    });
+    content._templTypeahead = window.templ.typeahead.useTypeahead({
+      elements: [trigger, popup],
+      labels: () => items().map(labelOf),
+      activeIndex,
+      selectedIndex,
+      isOpen: () => isOpen(content),
+      disabledIndices: (index) => {
+        const item = items()[index];
+        return !item || item.hasAttribute("disabled") || item.getAttribute("aria-disabled") === "true";
+      },
+      onMatch(index) {
+        if (!enabled()) return;
+        if (isOpen(content)) {
+          highlight(content, index);
+          content._templNav.sync();
+        } else {
+          selectItem(content, items()[index]);
+        }
+      },
+    });
+  }
+
+  function stopListNavigation(content) {
+    content._templNav?.cleanup();
+    content._templTypeahead?.cleanup();
+    content._templNav = null;
+    content._templTypeahead = null;
   }
 
   // Clears everything a previous open left behind on the positioner and popup.
@@ -491,6 +564,8 @@
       trigger.setAttribute("aria-expanded", "true");
       trigger.setAttribute("data-popup-open", "");
       trigger.setAttribute("data-pressed", "");
+      content._templNav?.open();
+      content._templTypeahead?.reset();
     };
     startAutoPositioning(content, trigger).then(finish, finish);
   }
@@ -507,6 +582,8 @@
       dragY: 0,
     };
     content._templFocus?.close();
+    content._templNav?.close();
+    content._templTypeahead?.reset();
     // Aligned mode has no exit animation (animate-none, like shadcn), so
     // the close completes on the next frame. Positioned until it unmounts,
     // and the alignment fallback holds until then too. Unmounting the focus
@@ -514,6 +591,7 @@
     window.templ.transition.close(partsOf(content), popupFor(content), () => {
       stopAutoPositioning(content);
       stopFocusManager(content);
+      highlight(content, null);
       content._templAlignFallback = false;
       content.hidden = true;
     });
@@ -594,6 +672,7 @@
     init(trigger) {
       const content = contentFor(trigger);
       if (!isPositioner(content)) return;
+      startListNavigation(content, trigger);
       const checked = content.querySelector(ITEM + "[data-selected]");
       if (checked) {
         const label = labelOf(checked);
@@ -614,6 +693,7 @@
     destroy(popup) {
       const content = popup.parentElement;
       if (!isPositioner(content)) return;
+      stopListNavigation(content);
       stopAutoPositioning(content);
       content._templReleaseScroll?.();
       content._templReleaseScroll = null;
@@ -786,59 +866,26 @@
     item._templAllowMouseSelection = false;
   });
 
-  let typeBuffer = "";
-  let typeTimer;
-
   document.addEventListener("keydown", (e) => {
     if (!(e.target instanceof Element)) return;
-
-    // Closed trigger: arrow keys open the listbox (Enter/Space go through
-    // the native button click path).
     const trigger = e.target.closest(TRIGGER);
-    if (trigger && !trigger.disabled) {
+    if (trigger) {
       pressedTriggers.delete(trigger); // like useClick's onKeyDown reset
       trigger._templOpenMethod = null;
-      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-        e.preventDefault();
-        const content = contentFor(trigger);
-        if (content && !isOpen(content)) requestOpenChange(content, true, "keyboard");
-      }
       return;
     }
-
-    // Open listbox: roving focus on the items.
+    // SelectItem is a button: Enter and Space commit the item. A Space that
+    // continues a typeahead never gets here, useTypeahead stops it.
     const item = e.target.closest(ITEM);
-    if (!item) return;
+    if (!item || (e.key !== "Enter" && e.key !== " ")) return;
     const content = positionerOf(item);
     if (!content) return;
-    const items = [...content.querySelectorAll(ITEM)].filter(
-      (i) => !i.hasAttribute("data-disabled"),
-    );
-    const index = items.indexOf(item);
-
-    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-      e.preventDefault();
-      const next = items[index + (e.key === "ArrowDown" ? 1 : -1)];
-      if (next) next.focus();
-    } else if (e.key === "Home" || e.key === "End") {
-      e.preventDefault();
-      const edge = e.key === "Home" ? items[0] : items[items.length - 1];
-      if (edge) edge.focus();
-    } else if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      selectItem(content, item);
-    } else if (e.key.length === 1) {
-      clearTimeout(typeTimer);
-      typeBuffer += e.key.toLowerCase();
-      typeTimer = setTimeout(() => {
-        typeBuffer = "";
-      }, 500);
-      const match = items.find((i) => i.textContent.trim().toLowerCase().startsWith(typeBuffer));
-      if (match) match.focus();
-    }
+    e.preventDefault();
+    if (!item.hasAttribute("data-disabled")) selectItem(content, item);
   });
 
-  // The highlight follows the pointer, one highlighted item at a time.
+  // SelectItem's onPointerMove, the highlight itself follows the pointer
+  // through the list navigation.
   document.addEventListener("pointermove", (e) => {
     if (!(e.target instanceof Element)) return;
     const item = e.target.closest(ITEM);
@@ -853,9 +900,6 @@
           content._templSelection.allowUnselectedMouseUp = true;
         }
       }
-    }
-    if (!item.hasAttribute("data-disabled") && document.activeElement !== item) {
-      item.focus({ preventScroll: true });
     }
   });
 

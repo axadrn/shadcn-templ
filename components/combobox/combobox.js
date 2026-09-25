@@ -83,13 +83,21 @@
     return anchor ? anchor.querySelector('[data-slot="combobox-value"]') : null;
   }
 
+  // The input and every trigger of this combobox (ComboboxInput and
+  // ComboboxTrigger render aria-expanded, data-popup-open and data-pressed),
+  // the popup-pattern anchor and the input group button.
   function setExpanded(content, expanded) {
     const input = inputFor(content);
-    if (input) input.setAttribute("aria-expanded", expanded ? "true" : "false");
-    // Every trigger of this combobox (Base UI's ComboboxTrigger renders
-    // aria-expanded), the popup-pattern anchor and the input group button.
-    document.querySelectorAll('[aria-haspopup][aria-controls="' + content.id + '"]').forEach((t) => {
+    const triggers = document.querySelectorAll('[aria-haspopup][aria-controls="' + content.id + '"]');
+    [input, ...triggers].forEach((t) => {
+      if (!t) return;
       t.setAttribute("aria-expanded", expanded ? "true" : "false");
+      t.toggleAttribute("data-popup-open", expanded);
+      t.toggleAttribute("data-pressed", expanded);
+    });
+    // ComboboxClear renders the open state too.
+    anchorFor(content)?.querySelectorAll('[data-slot="combobox-clear"]').forEach((clear) => {
+      clear.toggleAttribute("data-popup-open", expanded);
     });
   }
 
@@ -241,13 +249,11 @@
 
     const highlighted = highlightedItem(content);
     if (highlighted && highlighted.hidden) setHighlight(content, null);
-    if (!highlightedItem(content) && content.hasAttribute("data-templ-auto-highlight")) {
-      setHighlight(content, visibleItems(content)[0] || null);
+    // autoHighlight is Base UI's "input-change" mode: a query highlights the
+    // first match, opening does not.
+    if (q !== "" && content.hasAttribute("data-templ-auto-highlight")) {
+      setHighlight(content, itemsOf(content).find((i) => !i.hidden) || null);
     }
-  }
-
-  function visibleItems(content) {
-    return itemsOf(content).filter((i) => !i.hidden && !i.hasAttribute("data-disabled"));
   }
 
   // ----- highlight ----------------------------------------------------------
@@ -275,14 +281,38 @@
     }
   }
 
-  function moveHighlight(content, dir) {
-    const items = visibleItems(content);
-    if (!items.length) return;
-    const current = highlightedItem(content);
-    let index = items.indexOf(current);
-    index = index === -1 ? (dir > 0 ? 0 : items.length - 1) : index + dir;
-    index = Math.max(0, Math.min(items.length - 1, index));
-    setHighlight(content, items[index]);
+  function indexOf(content, item) {
+    const index = item ? itemsOf(content).indexOf(item) : -1;
+    return index === -1 ? null : index;
+  }
+
+  // AriaCombobox's useListNavigation: virtual focus, the input keeps focus
+  // and names the highlighted item. Filtered out items are hidden, which the
+  // list navigation skips, disabled items are highlighted (an empty
+  // disabledIndices). Without autoHighlight the arrows escape the list back
+  // to the input.
+  function startListNavigation(content) {
+    content._templNav = window.templ.listNavigation.useListNavigation({
+      floating: popupFor(content),
+      reference: inputFor(content),
+      items: () => itemsOf(content),
+      activeIndex: () => indexOf(content, highlightedItem(content)),
+      selectedIndex: () => indexOf(content, selectedItems(content).find((i) => !i.hidden)),
+      virtual: true,
+      loopFocus: true,
+      allowEscape: !content.hasAttribute("data-templ-auto-highlight"),
+      disabledIndices: [],
+      isOpen: () => content.hasAttribute("data-open"),
+      onNavigate(index, event) {
+        // Retain the highlight while transitioning out or closed.
+        if ((!event && !content.hasAttribute("data-open")) || window.templ.transition.isEnding(popupFor(content))) return;
+        setHighlight(content, index == null ? null : itemsOf(content)[index]);
+      },
+      onOpenChange(open) {
+        const input = inputFor(content);
+        if (!input?.disabled) requestOpenChange(content, open);
+      },
+    });
   }
 
   // ----- open / close -------------------------------------------------------
@@ -309,20 +339,16 @@
     content.hidden = false;
     startFocusManager(content);
 
+    // With autoHighlight the first item is highlighted, the list navigation
+    // then highlights the current selection on open.
     applyFilter(content, "");
-    // Base UI highlights the current selection on open, else (with
-    // autoHighlight) the first item.
-    const selected = selectedItems(content).find((i) => !i.hidden);
-    setHighlight(content, selected || null);
-    if (!selected && content.hasAttribute("data-templ-auto-highlight")) {
-      setHighlight(content, visibleItems(content)[0] || null);
-    }
 
     // Positioned first, then the enter animation plays in place.
     const finish = () => {
       if (content.hidden) return;
       window.templ.transition.open(partsOf(content));
       setExpanded(content, true);
+      content._templNav?.open();
     };
     startAutoPositioning(content).then(finish, finish);
   }
@@ -332,11 +358,13 @@
     content._templDismiss?.();
     content._templDismiss = null;
     content._templFocus?.close();
+    content._templNav?.close();
     // Positioned until it unmounts, like Base UI. Unmounting the focus
-    // manager returns focus.
+    // manager returns focus and resets the highlight.
     window.templ.transition.close(partsOf(content), popupFor(content), () => {
       stopAutoPositioning(content);
       stopFocusManager(content);
+      setHighlight(content, null);
       content.hidden = true;
     });
     setExpanded(content, false);
@@ -518,6 +546,7 @@
     init(popup) {
       const content = popup.parentElement;
       if (!isPositioner(content)) return;
+      startListNavigation(content);
       // Server-side open state (Base UI open or defaultOpen).
       if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
         open(content);
@@ -532,6 +561,8 @@
     destroy(popup) {
       const content = popup.parentElement;
       if (!isPositioner(content)) return;
+      content._templNav?.cleanup();
+      content._templNav = null;
       stopAutoPositioning(content);
       content._templDismiss?.();
       stopFocusManager(content);
@@ -636,15 +667,6 @@
     if (!isPositioner(content)) return;
     const isOpen = content.hasAttribute("data-open");
 
-    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-      e.preventDefault();
-      if (!isOpen) {
-    requestOpenChange(content, true);
-        return;
-      }
-      moveHighlight(content, e.key === "ArrowDown" ? 1 : -1);
-      return;
-    }
     if (e.key === "Enter") {
       const highlighted = isOpen && highlightedItem(content);
       if (highlighted) {
@@ -662,15 +684,6 @@
       }
       return;
     }
-  });
-
-  // Hovering an item highlights it, exactly like Base UI.
-  document.addEventListener("mousemove", (e) => {
-    if (!(e.target instanceof Element)) return;
-    const item = e.target.closest(ITEM);
-    if (!item || item.hasAttribute("data-disabled") || item.hasAttribute("data-highlighted")) return;
-    const content = positionerOf(item);
-    if (content && content.hasAttribute("data-open")) setHighlight(content, item);
   });
 
 })();

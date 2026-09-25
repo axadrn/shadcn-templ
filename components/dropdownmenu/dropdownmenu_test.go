@@ -10,8 +10,8 @@ import (
 
 func TestNativeMenuItemsFillTheirRows(t *testing.T) {
 	for name, classes := range map[string]string{
-		"item":       itemClasses(false),
-		"check item": checkItemClasses("cn-dropdown-menu-checkbox-item", false),
+		"item":       itemClasses(),
+		"check item": checkItemClasses("cn-dropdown-menu-checkbox-item"),
 	} {
 		if !strings.Contains(classes, "w-full") || !strings.Contains(classes, "text-left") {
 			t.Fatalf("%s classes must preserve Base UI row layout: %q", name, classes)

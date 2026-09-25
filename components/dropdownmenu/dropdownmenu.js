@@ -39,10 +39,13 @@
     return trigger && !trigger.matches(SUB_TRIGGER) && contentFor(trigger) ? trigger : null;
   }
 
-  // The dropdown positioner an element sits in, if any.
+  // The root positioner of the menu an element sits in, portaled submenus
+  // included.
   function positionerOf(target) {
-    const popup = target && target.closest && target.closest(POPUP);
-    return popup && isPositioner(popup.parentElement) ? popup.parentElement : null;
+    for (let node = target; node; node = node._templPortalOwner || node.parentNode) {
+      if (node.matches?.(POPUP) && isPositioner(node.parentElement)) return node.parentElement;
+    }
+    return null;
   }
 
   function popupFor(content) {
@@ -104,59 +107,105 @@
     content._templPositionCleanup = null;
   }
 
-  // ----- focus highlighting (Base UI moves real focus to menu items) --------
+  // ----- list navigation and typeahead ---------------------------------------
 
   const ITEM_SELECTOR = '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]';
 
-  // The menu container the keyboard navigates in: the deepest open submenu
-  // holding focus, otherwise the root popup.
+  // The React tree pendant: up through the DOM, and from a portaled node to
+  // where it was declared.
+  function withinTree(root, target) {
+    for (let node = target; node; node = node._templPortalOwner || node.parentNode) {
+      if (node === root) return true;
+    }
+    return false;
+  }
+
+  // The menu an item belongs to: the root popup or a submenu's popup.
   function containerOf(el) {
     return el.closest(SUB_CONTENT + ", " + POPUP);
   }
 
-  function itemsIn(container) {
-    return [...container.querySelectorAll(ITEM_SELECTOR)].filter(
-      (item) =>
-        containerOf(item) === container &&
-        !item.disabled &&
-        item.getAttribute("aria-disabled") !== "true",
-    );
+  // The menu's list, disabled items included (Base UI's menus pass an empty
+  // disabledIndices, so disabled items are highlighted too).
+  function itemsIn(popup) {
+    return [...popup.querySelectorAll(ITEM_SELECTOR)].filter((item) => containerOf(item) === popup);
   }
 
-  function focusItem(item) {
-    if (item && document.activeElement !== item) item.focus({ preventScroll: false });
+  // The item's highlight, with the roving tabindex of useMenuItemCommonProps.
+  // A submenu trigger also stays in the tab order while its submenu is open.
+  function highlight(popup, index) {
+    popup._templActiveIndex = index;
+    itemsIn(popup).forEach((item, i) => {
+      item.toggleAttribute("data-highlighted", i === index);
+      item.tabIndex = i === index || isOpenSubTrigger(item) ? 0 : -1;
+    });
   }
 
-  // Wraps at both ends, the pendant of Menu.Root's loopFocus, which the
-  // reference defaults to true: ArrowDown on the last item returns to the
-  // first and ArrowUp on the first goes to the last. Disabled items stay out
-  // of the walk — itemsIn filters them, because ours are natively disabled
-  // buttons rather than the aria-disabled ones the reference keeps focusable.
-  function moveFocus(container, delta) {
-    const items = itemsIn(container);
-    if (!items.length) return;
-    const index = items.indexOf(document.activeElement);
-    if (index === -1) {
-      focusItem(delta > 0 ? items[0] : items[items.length - 1]);
-      return;
-    }
-    focusItem(items[(index + delta + items.length) % items.length]);
+  function isOpenSubTrigger(item) {
+    return item.matches(SUB_TRIGGER) && item.getAttribute("aria-expanded") === "true";
+  }
+
+  // MenuSubmenuTrigger's onBlur: focus that leaves it, into its submenu too,
+  // clears the parent menu's highlight.
+  function onSubTriggerBlur(event) {
+    const trigger = event.currentTarget;
+    if (trigger.hasAttribute("data-highlighted")) highlight(containerOf(trigger), null);
+  }
+
+  function setSubTriggerOpen(trigger, open) {
+    trigger.setAttribute("aria-expanded", open ? "true" : "false");
+    trigger.tabIndex = open || trigger.hasAttribute("data-highlighted") ? 0 : -1;
+  }
+
+  // MenuRoot's useListNavigation and useTypeahead for one menu popup.
+  function startListNavigation(popup, reference, isPopupOpen, onOpenChange, nested) {
+    const items = () => itemsIn(popup);
+    const activeIndex = () => popup._templActiveIndex ?? null;
+    popup._templNav = window.templ.listNavigation.useListNavigation({
+      floating: popup,
+      reference,
+      items,
+      activeIndex,
+      onNavigate: (index) => highlight(popup, index),
+      onOpenChange,
+      isOpen: isPopupOpen,
+      loopFocus: true,
+      nested,
+      parentOrientation: nested ? "vertical" : undefined,
+      disabledIndices: [],
+    });
+    popup._templTypeahead = window.templ.typeahead.useTypeahead({
+      elements: [reference, popup],
+      labels: () => items().map((item) => item.textContent.trim()),
+      items,
+      activeIndex,
+      isOpen: isPopupOpen,
+      onMatch(index) {
+        if (!isPopupOpen() || index === activeIndex()) return;
+        highlight(popup, index);
+        popup._templNav.sync();
+      },
+      resetMs: 500,
+    });
+  }
+
+  function stopListNavigation(popup) {
+    popup._templNav?.cleanup();
+    popup._templTypeahead?.cleanup();
+    popup._templNav = null;
+    popup._templTypeahead = null;
   }
 
   // ----- open / close --------------------------------------------------------
 
   // MenuPopup's FloatingFocusManager for a dropdown menu: non modal, with
   // MenuTrigger's focus guards around the trigger while it is open.
-  // focusOn "first" or "last" lands focus on that item, anything falsy on the
-  // popup, which is the list navigation's focusItemOnOpen until task 8 of
-  // plans/parity-runtime.md moves it there.
-  function startFocusManager(content, trigger, focusOn) {
-    const popup = popupFor(content);
+  function startFocusManager(content, trigger) {
     if (content._templFocus) {
       content._templFocus.open();
       return;
     }
-    const onOpenChange = (open, reason, event) => requestOpenChange(content, open, false, { reason, event });
+    const onOpenChange = (open, reason, event) => requestOpenChange(content, open, { reason, event });
     content._templTriggerGuards = window.templ.triggerFocusGuards.attach(trigger, {
       positioner: content,
       beforeContentFocusGuard: () => content._templFocus?.beforeGuard,
@@ -167,14 +216,6 @@
       reference: trigger,
       modal: false,
       openInteractionType: content._templOpenMethod === "programmatic" ? null : content._templOpenMethod,
-      // Base UI's items are out of the tab order (tabindex -1), so its
-      // default initial focus is the popup; ours are tabbable buttons until
-      // task 8, so the popup is named here.
-      initialFocus() {
-        if (!focusOn) return popup;
-        const items = itemsIn(popup);
-        return (focusOn === "last" ? items[items.length - 1] : items[0]) || popup;
-      },
       restoreFocus: true,
       previousFocusableElement: trigger,
       nextFocusableElement: content._templTriggerGuards.focusTarget,
@@ -189,7 +230,7 @@
     content._templTriggerGuards = null;
   }
 
-  function open(content, trigger, focusOn) {
+  function open(content, trigger) {
     allContents().forEach((c) => {
       if (c !== content) close(c);
     });
@@ -199,9 +240,9 @@
     content._templDismiss ??= window.templ.dismiss.useDismiss({
       floating: content,
       reference: trigger,
-      onOpenChange: (open, reason, event) => requestOpenChange(content, open, false, { reason, event }),
+      onOpenChange: (open, reason, event) => requestOpenChange(content, open, { reason, event }),
     });
-    startFocusManager(content, trigger, focusOn);
+    startFocusManager(content, trigger);
 
     // Positioned first, then the enter animation plays in place.
     const finish = () => {
@@ -216,7 +257,9 @@
       trigger.setAttribute("aria-expanded", "true");
       trigger.setAttribute("data-popup-open", "");
       trigger.setAttribute("data-pressed", "");
-      if (popup) syncSubState(popup);
+      popup._templNav?.open();
+      popup._templTypeahead?.reset();
+      syncSubState(content);
     };
     startAutoPositioning(content, trigger).then(finish, finish);
   }
@@ -227,14 +270,17 @@
     content._templDismiss?.();
     content._templDismiss = null;
     content._templFocus?.close(details);
+    const popup = popupFor(content);
+    popup._templNav?.close();
+    popup._templTypeahead?.reset();
     // Positioned until it unmounts, like Base UI. Unmounting the focus
     // manager returns focus.
-    window.templ.transition.close(partsOf(content), popupFor(content), () => {
+    window.templ.transition.close(partsOf(content), popup, () => {
       stopAutoPositioning(content);
       stopFocusManager(content);
       content.hidden = true;
     });
-    content.querySelectorAll(SUB).forEach(closeSubNow);
+    content._templSubs?.forEach(closeSubNow);
     const trigger = triggerFor(content);
     if (trigger) {
       trigger.setAttribute("aria-expanded", "false");
@@ -245,11 +291,7 @@
     content._templReleaseScroll = null;
   }
 
-  function closeAll() {
-    allContents().forEach((content) => close(content));
-  }
-
-  function requestOpenChange(content, nextOpen, focusOn, details) {
+  function requestOpenChange(content, nextOpen, details) {
     if (!content || isOpen(content) === nextOpen) return false;
     const accepted = content.dispatchEvent(
       new CustomEvent("dropdownmenu-open-change", {
@@ -260,38 +302,89 @@
     );
     if (!accepted || content.hasAttribute("data-templ-open")) return false;
     const trigger = triggerFor(content);
-    if (nextOpen && trigger) open(content, trigger, focusOn);
+    if (nextOpen && trigger) open(content, trigger);
     else if (!nextOpen) close(content, details);
     return true;
   }
 
-  function anyOpen() {
-    return [...allContents()].find(isOpen) || null;
-  }
-
   // ----- submenus -------------------------------------------------------------
 
+  // The sub's trigger and popup. The popup portals on open, so the link is
+  // kept from the declaration.
   function subParts(sub) {
-    return {
-      trigger: sub.querySelector(SUB_TRIGGER),
-      content: sub.querySelector(SUB_CONTENT),
-    };
+    if (!sub._templSubContent) {
+      sub._templSubContent = sub.querySelector(SUB_CONTENT);
+      if (sub._templSubContent) sub._templSubContent._templSub = sub;
+    }
+    return { trigger: sub.querySelector(SUB_TRIGGER), content: sub._templSubContent };
   }
 
-  function openSub(sub, focusFirst) {
+  function isSubOpen(sub) {
+    return !!subParts(sub).content?.hasAttribute("data-open");
+  }
+
+  // A submenu's MenuRoot: list navigation nested in its parent menu.
+  function initSub(sub) {
+    const { trigger, content } = subParts(sub);
+    if (!trigger || !content) return;
+    trigger.addEventListener("blur", onSubTriggerBlur);
+    startListNavigation(content, trigger, () => isSubOpen(sub),
+      (open) => requestSubOpenChange(sub, open), true);
+  }
+
+  function destroySub(sub) {
+    const { trigger, content } = subParts(sub);
+    if (!content) return;
+    trigger?.removeEventListener("blur", onSubTriggerBlur);
+    closeSubNow(sub);
+    stopListNavigation(content);
+  }
+
+  // The submenu's MenuPopup focus manager: non modal, no initial focus, focus
+  // returns to the submenu trigger.
+  function startSubFocusManager(sub) {
+    const { trigger, content } = subParts(sub);
+    if (content._templFocus) {
+      content._templFocus.open();
+      return;
+    }
+    content._templFocus = window.templ.focusManager.useFloatingFocusManager({
+      floating: content.parentElement,
+      reference: trigger,
+      modal: false,
+      initialFocus: false,
+      restoreFocus: true,
+      previousFocusableElement: trigger,
+      onOpenChange: (open, reason, event) => requestSubOpenChange(sub, open, { reason, event }),
+    });
+  }
+
+  function stopSubFocusManager(content) {
+    content._templFocus?.unmount();
+    content._templFocus = null;
+  }
+
+  function openSub(sub) {
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
     const positioner = content.parentElement;
+    window.templ.portal.render(positioner.parentElement);
     positioner.hidden = false;
+    // The submenu's MenuRoot useDismiss: Escape closes only the submenu
+    // (closeParentOnEsc is false).
+    content._templDismiss ??= window.templ.dismiss.useDismiss({
+      floating: positioner,
+      reference: trigger,
+      onOpenChange: (open, reason, event) => requestSubOpenChange(sub, open, { reason, event }),
+    });
+    startSubFocusManager(sub);
     // The sub menu's MenuPositioner with the side and offsets of shadcn's
-    // DropdownMenuSubContent and the popup collision avoidance. Fixed, since it stays
-    // nested in the root popup.
+    // DropdownMenuSubContent.
     stopAutoPositioning(content);
     const positioning = window.templ.anchorPositioning.useAnchorPositioning({
       anchor: trigger,
       positioner,
       parts: [positioner, content],
-      positionMethod: "fixed",
       side: "right",
       align: "start",
       sideOffset: 0,
@@ -302,21 +395,29 @@
       if (positioner.hidden) return; // closed meanwhile
       window.templ.transition.open({ positioner, parts: [content] });
       trigger.setAttribute("data-popup-open", "");
-	  trigger.setAttribute("aria-expanded", "true");
-      if (focusFirst) focusItem(itemsIn(content)[0] || content);
+      setSubTriggerOpen(trigger, true);
+      content._templNav?.open();
+      content._templTypeahead?.reset();
     });
   }
 
-  // Closes with the exit animation.
-  function closeSub(sub) {
+  // Closes with the exit animation. details { reason, event } of the close,
+  // for the focus manager.
+  function closeSub(sub, details) {
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
+    content._templDismiss?.();
+    content._templDismiss = null;
+    content._templFocus?.close(details);
+    content._templNav?.close();
+    content._templTypeahead?.reset();
     window.templ.transition.close({ positioner: content.parentElement, parts: [content] }, content, () => {
       stopAutoPositioning(content);
+      stopSubFocusManager(content);
       content.parentElement.hidden = true;
     });
     trigger.removeAttribute("data-popup-open");
-	trigger.setAttribute("aria-expanded", "false");
+    setSubTriggerOpen(trigger, false);
   }
 
   // Closes immediately (used when the whole menu goes away).
@@ -328,54 +429,68 @@
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
     stopAutoPositioning(content);
+    content._templDismiss?.();
+    content._templDismiss = null;
+    content._templNav?.close();
+    stopSubFocusManager(content);
     content.parentElement.hidden = true;
     window.templ.transition.reset({ positioner: content.parentElement, parts: [content] }, false);
     trigger.removeAttribute("data-popup-open");
-	trigger.setAttribute("aria-expanded", "false");
+    setSubTriggerOpen(trigger, false);
   }
 
-  function requestSubOpenChange(sub, nextOpen, focusFirst) {
-	const { trigger, content } = subParts(sub);
-	if (!trigger || !content || content.hasAttribute("data-open") === nextOpen) return;
-	const accepted = trigger.dispatchEvent(
-	  new CustomEvent("dropdownmenu-sub-open-change", {
-		bubbles: true,
-		cancelable: true,
-		detail: { open: nextOpen },
-	  }),
-	);
-	// Controlled: the Base UI open prop on the SubmenuRoot, the owner commits.
-	if (!accepted || sub.hasAttribute("data-templ-open")) return;
-	sub._templSubOpen = nextOpen;
-	if (nextOpen) openSub(sub, focusFirst);
-	else closeSub(sub);
+  function requestSubOpenChange(sub, nextOpen, details) {
+    const { trigger, content } = subParts(sub);
+    if (!trigger || !content || content.hasAttribute("data-open") === nextOpen) return false;
+    const accepted = trigger.dispatchEvent(
+      new CustomEvent("dropdownmenu-sub-open-change", {
+        bubbles: true,
+        cancelable: true,
+        detail: { open: nextOpen },
+      }),
+    );
+    // Controlled: the Base UI open prop on the SubmenuRoot, the owner commits.
+    if (!accepted || sub.hasAttribute("data-templ-open")) return false;
+    sub._templSubOpen = nextOpen;
+    if (nextOpen) openSub(sub);
+    else closeSub(sub, details);
+    return true;
   }
 
-  function syncSubState(menu) {
-	menu.querySelectorAll(SUB).forEach((sub) => {
-	  const { content } = subParts(sub);
-	  if (!content) return;
-	  // Last requested state, else the server's open or defaultOpen.
-	  const shouldOpen = sub._templSubOpen ?? (
-	    sub.getAttribute("data-templ-open") === "true" || sub.hasAttribute("data-templ-default-open"));
-	  if (shouldOpen && !content.hasAttribute("data-open")) openSub(sub, false);
-	  else if (!shouldOpen && content.hasAttribute("data-open")) closeSubNow(sub);
-	});
+  function syncSubState(content) {
+    content._templSubs?.forEach((sub) => {
+      const { content: subContent } = subParts(sub);
+      if (!subContent) return;
+      // Last requested state, else the server's open or defaultOpen.
+      const shouldOpen = sub._templSubOpen ?? (
+        sub.getAttribute("data-templ-open") === "true" || sub.hasAttribute("data-templ-default-open"));
+      if (shouldOpen && !subContent.hasAttribute("data-open")) openSub(sub);
+      else if (!shouldOpen && subContent.hasAttribute("data-open")) closeSubNow(sub);
+    });
+  }
+
+  // The sub an element sits in, following portaled submenus to their sub.
+  function subOf(target) {
+    for (let node = target; node; node = node._templPortalOwner || node.parentNode) {
+      if (node.matches?.(SUB)) return node;
+    }
+    return null;
   }
 
   // Hover intent: while the pointer is over a sub (trigger or its content),
   // keep it open; everything else in the menu schedules its subs to close.
+  // Task 8b of plans/parity-runtime.md replaces it with useHover.
   document.addEventListener("mouseover", (e) => {
     if (!(e.target instanceof Element)) return;
     const menu = positionerOf(e.target);
     if (!menu) return;
-    const hovered = e.target.closest(SUB);
+    const hovered = subOf(e.target);
 
-    menu.querySelectorAll(SUB).forEach((sub) => {
+    menu._templSubs?.forEach((sub) => {
       const { content } = subParts(sub);
       if (!content) return;
       const isOpen = content.hasAttribute("data-open");
-      const onPath = hovered && (sub === hovered || sub.contains(hovered));
+      const onPath = hovered && withinTree(sub, hovered);
 
       if (onPath) {
         clearTimeout(sub._templClose);
@@ -383,7 +498,7 @@
         if (!isOpen && !sub._templOpen) {
           sub._templOpen = setTimeout(() => {
             sub._templOpen = null;
-			requestSubOpenChange(sub, true);
+            requestSubOpenChange(sub, true);
           }, SUB_OPEN_DELAY);
         }
       } else {
@@ -392,29 +507,11 @@
         if (isOpen && !sub._templClose) {
           sub._templClose = setTimeout(() => {
             sub._templClose = null;
-			requestSubOpenChange(sub, false);
+            requestSubOpenChange(sub, false);
           }, SUB_CLOSE_DELAY);
         }
       }
     });
-  });
-
-  // The highlight follows the pointer: focus the item under it, fall back to
-  // the menu container when the pointer sits on empty menu space.
-  document.addEventListener("pointermove", (e) => {
-    if (!(e.target instanceof Element)) return;
-    const content = positionerOf(e.target);
-    if (!isOpen(content)) return;
-    const item = e.target.closest(ITEM_SELECTOR);
-    if (item && containerOf(item)) {
-      focusItem(item);
-    } else {
-      const container = containerOf(e.target) || popupFor(content);
-      if (container && !container.contains(document.activeElement)) return;
-      if (container && document.activeElement !== container) {
-        container.focus({ preventScroll: true });
-      }
-    }
   });
 
   // ----- init (portal on open) --------------------
@@ -427,15 +524,25 @@
       const trigger = isPositioner(content) && triggerFor(content);
       if (!trigger) return;
       content._templClickCleanup = listenForClick(content, trigger);
+      startListNavigation(popup, trigger, () => isOpen(content), (open, reason, event) => {
+        if (trigger.disabled) return;
+        if (open) trigger._templOpenMethod = "keyboard";
+        requestOpenChange(content, open, { reason, event });
+      }, false);
+      // Every sub of the tree, collected before they portal.
+      content._templSubs = [...popup.querySelectorAll(SUB)];
+      content._templSubs.forEach(initSub);
       // Server-side open state (Base UI open or defaultOpen).
       if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
-        open(content, trigger, false);
+        open(content, trigger);
       }
     },
     destroy(popup) {
       const content = popup.parentElement;
       if (!isPositioner(content)) return;
       content._templClickCleanup?.();
+      stopListNavigation(popup);
+      content._templSubs?.forEach(destroySub);
       stopAutoPositioning(content);
       content._templReleaseScroll?.();
       content._templReleaseScroll = null;
@@ -448,8 +555,7 @@
   // ----- events ---------------------------------------------------------------
 
   // MenuTrigger's useClick: a mouse or touch press opens on mousedown, one
-  // frame later, Enter and Space arrive as the click a native button fires
-  // and open on the first item.
+  // frame later, Enter and Space arrive as the click a native button fires.
   function listenForClick(content, trigger) {
     return window.templ.click.useClick(trigger, {
       event: "mousedown",
@@ -457,35 +563,10 @@
       onOpenChange(nextOpen, event, pointerType) {
         if (trigger.disabled) return;
         trigger._templOpenMethod = pointerType || "keyboard";
-        requestOpenChange(content, nextOpen, pointerType ? false : "first");
+        requestOpenChange(content, nextOpen, { event });
       },
     });
   }
-
-  // The menu-button pattern: ArrowDown opens on the first item, ArrowUp on
-  // the last. Only the arrows are taken here — Enter and Space arrive as the
-  // detail-0 click a native button synthesises and are handled there, the way
-  // useClick and useListNavigation split it in the reference.
-  const OPEN_KEYS = { ArrowDown: "first", ArrowUp: "last" };
-  document.addEventListener("keydown", (e) => {
-    if (!(e.target instanceof Element)) return;
-    const focusOn = OPEN_KEYS[e.key];
-    if (!focusOn) return;
-    const trigger = triggerOf(e.target);
-    if (!trigger || trigger.disabled) return;
-    const content = contentFor(trigger);
-    // Already open: leave it to the handlers that navigate and close.
-    if (!content || isOpen(content)) return;
-    e.preventDefault(); // the arrows would otherwise scroll the page
-    // Opening consumes the key. Without this the navigation handler below
-    // sees the menu already open in the same dispatch and walks the highlight
-    // a second time, so ArrowDown would land on the second item.
-    e.stopImmediatePropagation();
-    // Through requestOpenChange, not open, so a controlled menu still gets to
-    // veto the open and the change event still fires.
-    trigger._templOpenMethod = "keyboard";
-    requestOpenChange(content, true, focusOn);
-  });
 
   document.addEventListener("click", (e) => {
     if (!(e.target instanceof Element)) return;
@@ -498,7 +579,7 @@
       if (sub) {
         clearTimeout(sub._templOpen);
         sub._templOpen = null;
-		requestSubOpenChange(sub, true, e.detail === 0);
+        requestSubOpenChange(sub, true);
       }
       return;
     }
@@ -506,7 +587,7 @@
     // Checkbox items toggle and keep the menu open.
     const checkbox = e.target.closest('[data-slot="dropdown-menu-checkbox-item"]');
     if (checkbox) {
-      if (!checkbox.disabled) {
+      if (checkbox.getAttribute("aria-disabled") !== "true") {
         const on = checkbox.hasAttribute("data-checked");
     const change = new CustomEvent("dropdownmenu-checked-change", {
       bubbles: true,
@@ -524,7 +605,7 @@
     // Radio items select within their group and keep the menu open.
     const radio = e.target.closest('[data-slot="dropdown-menu-radio-item"]');
     if (radio) {
-      if (!radio.disabled) {
+      if (radio.getAttribute("aria-disabled") !== "true") {
         const group = radio.closest('[data-slot="dropdown-menu-radio-group"]');
     const change = new CustomEvent("dropdownmenu-value-change", {
       bubbles: true,
@@ -552,61 +633,6 @@
         if (content) requestOpenChange(content, false);
       }
       return;
-    }
-  });
-
-  document.addEventListener("keydown", (e) => {
-    const content = anyOpen();
-    if (!content) return;
-
-    const active = document.activeElement;
-    if (!content.contains(active)) return;
-    const container = containerOf(active) || popupFor(content);
-    if (!container) return;
-
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        moveFocus(container, 1);
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        moveFocus(container, -1);
-        break;
-      case "Home": {
-        e.preventDefault();
-        const items = itemsIn(container);
-        focusItem(items[0]);
-        break;
-      }
-      case "End": {
-        e.preventDefault();
-        const items = itemsIn(container);
-        focusItem(items[items.length - 1]);
-        break;
-      }
-      case "ArrowRight": {
-        const subTrigger = active.closest(SUB_TRIGGER);
-        if (subTrigger) {
-          e.preventDefault();
-          const sub = subTrigger.closest(SUB);
-		  if (sub) requestSubOpenChange(sub, true, true);
-        }
-        break;
-      }
-      case "ArrowLeft": {
-        const subContent = active.closest(SUB_CONTENT);
-        if (subContent) {
-          e.preventDefault();
-          const sub = subContent.closest(SUB);
-          if (sub) {
-            const { trigger } = subParts(sub);
-			requestSubOpenChange(sub, false);
-            if (trigger) trigger.focus({ preventScroll: true });
-          }
-        }
-        break;
-      }
     }
   });
 

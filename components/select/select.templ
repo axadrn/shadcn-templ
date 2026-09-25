@@ -185,6 +185,7 @@ templ Trigger(props ...TriggerProps) {
 			data-placeholder
 		}
 		disabled?={ s.disabled }
+		data-disabled?={ s.disabled }
 		class={
 			utils.CN(
 				// 1:1 base/ui/select.tsx SelectTrigger, the look comes from
@@ -246,6 +247,7 @@ templ Content(props ...ContentProps) {
 		>
 			<div
 				data-slot="select-content"
+				tabindex="-1"
 				data-base-ui-focusable
 				if !alignItem {
 					data-align-trigger="false"

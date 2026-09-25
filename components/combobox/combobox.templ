@@ -289,6 +289,9 @@ templ Input(props ...InputProps) {
 			if s.readOnly {
 				attrs["readonly"] = true
 			}
+			if s.disabled {
+				attrs["data-disabled"] = true
+			}
 		}}
 		@inputgroup.Input(inputgroup.InputProps{
 			ID:          p.ID,
@@ -309,6 +312,7 @@ templ Input(props ...InputProps) {
 						"aria-haspopup": "listbox",
 						"aria-controls": s.id,
 						"aria-expanded": "false",
+						"data-disabled": s.disabled,
 					},
 					// shadcn hides the trigger while Base UI's Clear is mounted;
 					// ours stays mounted and toggles hidden, hence :not([hidden]).
@@ -385,6 +389,7 @@ templ Content(props ...ContentProps) {
 				data-slot="combobox-content"
 				data-chips={ utils.IfElse(s.multiple, "true", "false") }
 				data-closed
+				tabindex="-1"
 				role="listbox"
 				if s.multiple {
 					aria-multiselectable="true"
