@@ -33,6 +33,8 @@ shadcn-templ add dropdown-menu
 
 <ComponentSource name="dropdown-menu" title="components/baseui/lifecycle.js" />
 
+<ComponentSource name="dropdown-menu" title="components/baseui/portal.js" />
+
 <ComponentSource name="dropdown-menu" title="components/baseui/scroll_lock.js" />
 
 <ComponentSource name="dropdown-menu" title="components/floatingui/floating_ui_core.js" />

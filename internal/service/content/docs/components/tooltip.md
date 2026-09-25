@@ -33,6 +33,8 @@ shadcn-templ add tooltip
 
 <ComponentSource name="tooltip" title="components/baseui/lifecycle.js" />
 
+<ComponentSource name="tooltip" title="components/baseui/portal.js" />
+
 <ComponentSource name="tooltip" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="tooltip" title="components/floatingui/floating_ui_dom.js" />

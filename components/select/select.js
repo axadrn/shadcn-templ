@@ -174,10 +174,7 @@
   // Moves the content to <body> (shadcn portals it the same way).
   function portal(content) {
     listenForEscape(content);
-    if (content.parentElement !== document.body) {
-      if (!content._templPortalOwner) content._templPortalOwner = content.parentElement;
-      document.body.appendChild(content);
-    }
+    window.templ.portal.render(content);
   }
 
   // Clears everything a previous open left behind on the positioner and popup.
@@ -561,9 +558,6 @@
       content._templSelection.allowUnselectedMouseUp = true;
     }, SELECTED_DELAY);
     portal(content);
-    // z-index portal like shadcn (no native top layer); re-append
-    // keeps paint order = open order.
-    document.body.appendChild(content);
     content.hidden = false;
 
     // Position it invisibly first, then play the enter animation in place.
