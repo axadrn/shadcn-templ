@@ -7,6 +7,7 @@ import (
 	"go/format"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/axadrn/shadcn-templ/v2/cmd/shadcn-templ/utils"
@@ -18,9 +19,13 @@ func UpdateScripts(config *utils.Config) (path string, written bool, err error) 
 	if err != nil {
 		return "", false, err
 	}
-	var bundle bytes.Buffer
-	// Glob returns lexical order: baseui before its consumers, and
+	// The shared blocks in baseui come first, since components register with
+	// them while the bundle loads. Otherwise lexical order, which keeps
 	// floating_ui_core before floating_ui_dom.
+	sort.SliceStable(files, func(i, j int) bool {
+		return isBaseUI(files[i]) && !isBaseUI(files[j])
+	})
+	var bundle bytes.Buffer
 	for _, file := range files {
 		if strings.HasSuffix(file, ".min.js") {
 			continue
@@ -111,4 +116,8 @@ func writeChanged(path string, data []byte) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func isBaseUI(file string) bool {
+	return filepath.Base(filepath.Dir(file)) == "baseui"
 }

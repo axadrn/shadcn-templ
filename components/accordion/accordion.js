@@ -26,6 +26,9 @@
       .map(valueOf);
   }
 
+  // Base UI's AccordionPanel exposes its size as these variables.
+  const VARS = "--accordion-panel";
+
   function syncItemState(item, open) {
     item.toggleAttribute("data-open", open);
     item.toggleAttribute("data-closed", !open);
@@ -34,25 +37,21 @@
   function openItem(item) {
     const panel = panelOf(item);
     triggerOf(item).setAttribute("aria-expanded", "true");
+    triggerOf(item).toggleAttribute("data-panel-open", true);
   syncItemState(item, true);
     if (!panel) return;
     triggerOf(item).setAttribute("aria-controls", panel.id);
-    panel.hidden = false;
-    panel.style.setProperty("--accordion-panel-height", panel.scrollHeight + "px");
-    window.templ.transition.open([panel]);
+    window.templ.collapsiblePanel.open(panel, VARS);
   }
 
   function closeItem(item) {
     const panel = panelOf(item);
     triggerOf(item).setAttribute("aria-expanded", "false");
+    triggerOf(item).toggleAttribute("data-panel-open", false);
     triggerOf(item).removeAttribute("aria-controls");
   syncItemState(item, false);
     if (!panel) return;
-    panel.style.setProperty("--accordion-panel-height", panel.scrollHeight + "px");
-    // Hidden once the collapse animation finished.
-    window.templ.transition.close([panel], panel, () => {
-      panel.hidden = true;
-    });
+    window.templ.collapsiblePanel.close(panel, VARS);
   }
 
   function requestValueChange(accordion, item) {
@@ -123,5 +122,8 @@
       e.preventDefault();
       next.focus();
     }
+  });
+  window.templ.lifecycle.register('[data-slot="accordion-content"]', {
+    init: (panel) => window.templ.collapsiblePanel.mount(panel, VARS, !panel.hidden),
   });
 })();

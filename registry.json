@@ -23,6 +23,14 @@
         {
           "path": "components/baseui/use_transition_status.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/use_collapsible_panel.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -302,6 +310,14 @@
         },
         {
           "path": "components/baseui/use_transition_status.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/use_collapsible_panel.js",
           "type": "registry:ui"
         }
       ],
@@ -1211,6 +1227,10 @@
         },
         {
           "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/use_transition_status.js",
           "type": "registry:ui"
         }
       ],

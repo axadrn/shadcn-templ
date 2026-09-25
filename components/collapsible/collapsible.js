@@ -20,12 +20,8 @@
     el.toggleAttribute("data-closed", !isOpen);
   }
 
-  // Exposes the measured panel height, like Base UI's
-  // --collapsible-panel-height, so consumers can animate it.
-  function measure(panel) {
-    panel.style.setProperty("--collapsible-panel-height", panel.scrollHeight + "px");
-    panel.style.setProperty("--collapsible-panel-width", panel.scrollWidth + "px");
-  }
+  // Base UI's CollapsiblePanel exposes its size as these variables.
+  const VARS = "--collapsible-panel";
 
   function toggle(trigger) {
     const panel = panelFor(trigger);
@@ -45,16 +41,8 @@
     setOpen(root, isOpen);
     trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
     trigger.toggleAttribute("data-panel-open", isOpen);
-    if (isOpen) {
-      panel.hidden = false;
-      measure(panel);
-      window.templ.transition.open([panel]);
-    } else {
-      // Hidden once the panel's own animations finished.
-      window.templ.transition.close([panel], panel, () => {
-        panel.hidden = true;
-      });
-    }
+    if (isOpen) window.templ.collapsiblePanel.open(panel, VARS);
+    else window.templ.collapsiblePanel.close(panel, VARS);
   }
 
   document.addEventListener("click", (e) => {
@@ -63,5 +51,7 @@
     if (trigger) toggle(trigger);
   });
 
-  document.querySelectorAll(PANEL + "[data-open]").forEach(measure);
+  window.templ.lifecycle.register(PANEL, {
+    init: (panel) => window.templ.collapsiblePanel.mount(panel, VARS, !panel.hidden),
+  });
 })();

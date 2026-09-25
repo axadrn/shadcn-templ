@@ -185,7 +185,9 @@ templ Trigger(props ...TriggerProps) {
 			if itemOpen(ctx) {
 				aria-controls={ panelID(itemID(ctx)) }
 			}
+			data-panel-open?={ itemOpen(ctx) }
 			disabled?={ itemDisabled(ctx) }
+			data-disabled?={ itemDisabled(ctx) }
 			if itemDisabled(ctx) {
 				aria-disabled="true"
 			}
@@ -225,6 +227,8 @@ templ Content(props ...ContentProps) {
 		role="region"
 		aria-labelledby={ triggerID(itemID(ctx)) }
 		data-slot="accordion-content"
+		data-open?={ itemOpen(ctx) }
+		data-closed?={ !itemOpen(ctx) }
 		hidden?={ !itemOpen(ctx) }
 		class="cn-accordion-content overflow-hidden"
 		{ p.Attributes... }
