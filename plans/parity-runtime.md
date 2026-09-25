@@ -104,7 +104,9 @@ Done when: `grep -l "data-ending-style" components/*/*.js` lists only the block,
 
 `components/baseui/use_anchor_positioning.js`, `useAnchorPositioning.ts` over `floatingui`: side and align from `data-templ-side`/`-align`, offsets, `flip`/`shift`/`size`, the Base UI variables (`--available-width`, `--available-height`, `--anchor-width`, `--transform-origin`), `data-side`/`data-align` on positioner and popup, `autoUpdate` with cleanup. The 7 consumers switch; select keeps its item-aligned mode as its own code, it has no Base UI counterpart in the block.
 
-Done when: `grep -l "computePosition" components/*/*.js` lists only the block and select's item-aligned path, `check.sh` and `compare.mjs` green.
+Also from task 5: `select-demo` opens in popper mode here (`data-align-trigger="false"`) where shadcn aligns the popup with the trigger (`"true"`, no animation). Find out why ours falls back and match upstream.
+
+Done when: `grep -l "computePosition" components/*/*.js` lists only the block and select's item-aligned path, `select-demo` aligns with its trigger like upstream, `check.sh` and `compare.mjs` green.
 
 ### 7. Focus manager and mark others
 
