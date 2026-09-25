@@ -150,7 +150,7 @@ Done when: `drawer.templ` renders no `<dialog>`, the drawer suites of `behavior.
 
 - [ ] Done
 
-Also from task 4: Base UI's popover trigger opens on `click` (`useClick` with its default event), ours on `pointerdown`. Menu triggers open on `mousedown` in Base UI, dialog triggers on `click`. Task 7 ported `useClick` and moved the dropdown menu and the popover to it, check the remaining triggers (dialog, drawer, collapsible) against it.
+Also from task 4: Base UI's popover trigger opens on `click` (`useClick` with its default event), ours on `pointerdown`. Menu triggers open on `mousedown` in Base UI, dialog triggers on `click`. Task 7 ported `useClick` and moved the dropdown menu and the popover to it, check the remaining triggers (dialog, drawer, collapsible) against it. And from task 7: the context menu closes on every scroll and resize (`contextmenu.js`), Base UI's does not.
 
 No component script defines a behavior a block owns (the greps of tasks 2 to 9 together), every difference in task 1's baseline logs is closed or listed in `plans/UPSTREAM.md` as accepted with its reason, a changelog entry if any public behavior changed.
 
