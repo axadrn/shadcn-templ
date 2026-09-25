@@ -141,7 +141,7 @@ templ Content(props ...ContentProps) {
 	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
 	<div data-templ-portal hidden>
-		<div data-base-ui-portal hidden>
+		<div data-base-ui-portal data-slot="sheet-portal" hidden>
 			// 1:1 base/ui/sheet.tsx SheetOverlay (Dialog.Backdrop): the look
 			// comes from cn-sheet-overlay. user-select none is Base UI's
 			// inline style on the backdrop.
@@ -159,6 +159,7 @@ templ Content(props ...ContentProps) {
 				id={ s.id }
 				role="dialog"
 				tabindex="-1"
+				data-base-ui-focusable
 				data-slot="sheet-content"
 				data-side={ string(p.Side) }
 				if s.controlled {

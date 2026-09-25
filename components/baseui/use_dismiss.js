@@ -18,8 +18,6 @@
 // - The floating tree is every open useDismiss: a child is one whose popup lies
 //   inside this popup's tree.
 // - Options React re-reads on every render may be functions, read per event.
-// - The marker check for third party elements injected after opening comes
-//   with mark_others.js.
 (function () {
   "use strict";
 
@@ -174,6 +172,24 @@
       if (withinTree(floating, target)) return;
       // Another trigger of this popup was pressed.
       if (references.some((reference) => contains(reference, target))) return;
+
+      // A press on a third party element injected after the popup opened:
+      // its top level ancestor carries none of the data-base-ui-inert markers
+      // markOthers set when it opened.
+      const targetRoot = target instanceof Element ? target.getRootNode() : null;
+      const isShadowRoot = typeof ShadowRoot !== "undefined" && targetRoot instanceof ShadowRoot;
+      const markers = Array.from((isShadowRoot ? targetRoot : floating.ownerDocument).querySelectorAll("[data-base-ui-inert]"));
+      let targetRootAncestor = target instanceof Element ? target : null;
+      while (targetRootAncestor && !isLastTraversableNode(targetRootAncestor)) {
+        const nextParent = targetRootAncestor.assignedSlot || targetRootAncestor.parentNode ||
+          (targetRootAncestor.parentNode instanceof ShadowRoot ? targetRootAncestor.parentNode.host : null);
+        if (!nextParent || isLastTraversableNode(nextParent) || !(nextParent instanceof Element)) break;
+        targetRootAncestor = nextParent;
+      }
+      if (markers.length && target instanceof Element && !target.matches("html,body") &&
+        !contains(target, floating) && markers.every((marker) => !contains(targetRootAncestor, marker))) {
+        return;
+      }
 
       // A press on a scrollbar. Touch never hits a scrollbar.
       if (target instanceof HTMLElement && !("touches" in event)) {

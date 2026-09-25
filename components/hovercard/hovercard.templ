@@ -131,6 +131,7 @@ templ Content(props ...ContentProps) {
 	// content never participates in layout or sibling CSS. Inside it Base
 	// UI's positioner, which carries the position, around the popup.
 	<div data-templ-portal hidden>
+		<div data-base-ui-portal data-slot="hover-card-portal">
 		<div
 			data-templ-side={ string(p.Side) }
 			data-templ-align={ string(p.Align) }
@@ -138,7 +139,6 @@ templ Content(props ...ContentProps) {
 			data-templ-align-offset={ strconv.Itoa(p.AlignOffset) }
 			data-closed
 			hidden
-			data-base-ui-portal
 			role="presentation"
 			class="pointer-events-none isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
@@ -165,6 +165,7 @@ templ Content(props ...ContentProps) {
 			>
 				{ children... }
 			</div>
+		</div>
 		</div>
 	</div>
 }

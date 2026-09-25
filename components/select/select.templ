@@ -228,9 +228,9 @@ templ Content(props ...ContentProps) {
 	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
 	<div data-templ-portal hidden>
+		<div data-base-ui-portal>
 		<div
 			id={ s.id }
-			data-base-ui-portal
 			if !alignItem {
 				data-templ-align-item-with-trigger="false"
 			}
@@ -241,10 +241,12 @@ templ Content(props ...ContentProps) {
 			data-templ-default-open?={ s.open == nil && s.defaultOpen }
 			data-closed
 			hidden
+			role="presentation"
 			class="pointer-events-none isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
 				data-slot="select-content"
+				data-base-ui-focusable
 				if !alignItem {
 					data-align-trigger="false"
 				} else {
@@ -276,6 +278,7 @@ templ Content(props ...ContentProps) {
 					@icon.ChevronDown()
 				</div>
 			</div>
+		</div>
 		</div>
 	</div>
 }

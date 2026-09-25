@@ -513,7 +513,7 @@ func Content(props ...ContentProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, " tabindex=\"-1\" style=\"--drawer-swipe-progress:0;--nested-drawers:0;--drawer-swipe-strength:1;--drawer-swipe-movement-x:0px;--drawer-swipe-movement-y:0px;--drawer-snap-point-offset:0px\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, " tabindex=\"-1\" data-base-ui-focusable style=\"--drawer-swipe-progress:0;--nested-drawers:0;--drawer-swipe-strength:1;--drawer-swipe-movement-x:0px;--drawer-swipe-movement-y:0px;--drawer-snap-point-offset:0px\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -656,7 +656,7 @@ func Header(props ...HeaderProps) templ.Component {
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/drawer/drawer.templ`, Line: 343, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/drawer/drawer.templ`, Line: 344, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -746,7 +746,7 @@ func Footer(props ...FooterProps) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/drawer/drawer.templ`, Line: 360, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/drawer/drawer.templ`, Line: 361, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -836,7 +836,7 @@ func Title(props ...TitleProps) templ.Component {
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/drawer/drawer.templ`, Line: 377, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/drawer/drawer.templ`, Line: 378, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
@@ -926,7 +926,7 @@ func Description(props ...DescriptionProps) templ.Component {
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/drawer/drawer.templ`, Line: 394, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/drawer/drawer.templ`, Line: 395, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {

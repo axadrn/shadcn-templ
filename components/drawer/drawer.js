@@ -489,40 +489,52 @@
     updateState(dialog, false);
     dialog._templReleaseScroll?.();
     dialog._templReleaseScroll = null;
-    syncInert();
-    // Return focus to where the drawer was opened from, if focus is still
-    // ours to give back.
-    if (
-      dialog._templPreviousFocus?.isConnected &&
-      (dialog.contains(document.activeElement) || document.activeElement === document.body)
-    ) {
-      dialog._templPreviousFocus.focus({ preventScroll: true });
-    }
-    delete dialog._templPreviousFocus;
+    // Unmounting the focus manager returns focus.
+    dialog._templFocus?.unmount();
+    dialog._templFocus = null;
+    dialog._templInternalBackdrop?.remove();
     syncStack();
   }
 
-  // The hand-built half of showModal's modality: while a modal drawer is
-  // open, every body-level sibling is inert - except the surfaces carrying
-  // the shared data-base-ui-portal marker (floating popups, dialogs, the
-  // toaster). inert removes the rest from tab order and the accessibility
-  // tree: floating-ui's markOthers-with-inert pendant, without knowing any
-  // component by name.
-  function syncInert() {
-    const anyModalOpen = Array.from(
-      document.querySelectorAll("body > " + VIEWPORT),
-    ).some(
-      (d) =>
-        d.open &&
-        d.getAttribute("data-modal") === "true" &&
-        // A closing drawer no longer counts (Base UI removes markOthers at
-        // dismiss start, not after the exit transition).
-        !window.templ.transition.isEnding(popupOf(d)),
-    );
-    for (const node of document.body.children) {
-      if (node.localName === "script" || node.matches("[data-base-ui-portal]")) continue;
-      node.toggleAttribute("inert", anyModalOpen);
+  // The last pointer or keyboard interaction, the open interaction type the
+  // focus manager reads (useOpenInteractionType on the trigger).
+  let lastInteractionType = "";
+  document.addEventListener("pointerdown", (event) => {
+    lastInteractionType = event.pointerType || "mouse";
+  }, true);
+  document.addEventListener("keydown", () => {
+    lastInteractionType = "keyboard";
+  }, true);
+
+  // DrawerPortal is DialogPortal: an InternalBackdrop for a modal drawer
+  // while it is mounted, fixed over the viewport and inert while closing.
+  function createInternalBackdrop() {
+    const backdrop = document.createElement("div");
+    backdrop.setAttribute("role", "presentation");
+    backdrop.setAttribute("data-base-ui-inert", "");
+    backdrop.style.cssText = "position:fixed;inset:0;user-select:none;-webkit-user-select:none";
+    return backdrop;
+  }
+
+  // DrawerPopup's FloatingFocusManager: the popup takes the initial focus.
+  function startFocusManager(dialog) {
+    const popup = popupOf(dialog);
+    if (dialog._templFocus) {
+      dialog._templFocus.open();
+      return;
     }
+    const triggers = triggersFor(dialog);
+    dialog._templFocus = window.templ.focusManager.useFloatingFocusManager({
+      floating: popup,
+      reference: triggers[0] || null,
+      triggers,
+      modal: dialog.getAttribute("data-templ-modal") === "true",
+      openInteractionType: lastInteractionType || null,
+      initialFocus: popup,
+      restoreFocus: "popup",
+      closeOnFocusOut: !dialog.hasAttribute("data-templ-disable-pointer-dismissal"),
+      onOpenChange: (open) => requestOpenChange(dialog, open),
+    });
   }
 
   // useDismiss with useDialogRoot's options, DrawerRoot builds on them.
@@ -536,15 +548,17 @@
       // A nested open drawer blocks its parent.
       escapeKey: () => !hasOpenNested(dialog),
       // With a backdrop the dismissal waits for the click.
-      outsidePressEvent: () => overlayOf(dialog) ? "intentional" : { mouse: "intentional", touch: "sloppy" },
+      outsidePressEvent: () => (dialog._templInternalBackdrop?.isConnected || overlayOf(dialog)) ? "intentional" : { mouse: "intentional", touch: "sloppy" },
       outsidePress(event) {
         if ("button" in event && event.button !== 0) return false;
         if ("touches" in event && event.touches.length !== 1) return false;
         if (hasOpenNested(dialog) || dialog.hasAttribute("data-templ-disable-pointer-dismissal")) return false;
         const overlay = overlayOf(dialog);
-        if (!isModal() || !overlay) return true;
+        const internalBackdrop = dialog._templInternalBackdrop?.isConnected ? dialog._templInternalBackdrop : null;
+        if (!isModal() || (!overlay && !internalBackdrop)) return true;
         const target = event.target;
-        return target === overlay || (target.contains(popup) && !target.hasAttribute("data-base-ui-portal"));
+        return target === overlay || target === internalBackdrop ||
+          (target.contains(popup) && !target.hasAttribute("data-base-ui-portal"));
       },
       onOpenChange: (open) => requestOpenChange(dialog, open),
     });
@@ -573,9 +587,9 @@
         dialog.show();
         if (dialog.getAttribute("data-templ-modal") === "true") {
           dialog._templReleaseScroll = window.templ.scrollLock.acquire(dialog);
-          dialog._templPreviousFocus = document.activeElement;
-          syncInert();
-          (popupOf(dialog) || dialog).focus({ preventScroll: true });
+          dialog._templInternalBackdrop ??= createInternalBackdrop();
+          dialog._templInternalBackdrop.inert = false;
+          dialog.prepend(dialog._templInternalBackdrop);
         }
       } catch {
         return;
@@ -596,6 +610,7 @@
     updateState(dialog, true);
     // Also on a reopen during the exit, which stopped the dismissal.
     startDismiss(dialog);
+    startFocusManager(dialog);
     syncStack();
   }
 
@@ -630,14 +645,11 @@
       else cleanupClosed(dialog);
     });
     updateState(dialog, false);
-    syncInert();
-    if (
-      dialog._templPreviousFocus?.isConnected &&
-      (dialog.contains(document.activeElement) || document.activeElement === document.body)
-    ) {
-      dialog._templPreviousFocus.focus({ preventScroll: true });
-    }
-    delete dialog._templPreviousFocus;
+    dialog._templFocus?.close();
+    if (dialog._templInternalBackdrop) dialog._templInternalBackdrop.inert = true;
+    // Like the dialog, the scroll lock goes when the close starts.
+    dialog._templReleaseScroll?.();
+    dialog._templReleaseScroll = null;
     // The stack treats a closing drawer as closed (Base UI flips `open`
     // before the exit transition), so the parent starts scaling forward now.
     syncStack();
@@ -1295,8 +1307,7 @@
 
   // A drawer lives as long as its SSR declaration site (the portal owner)
   // stays in the document, which keeps programmatic drawers
-  // (window.templ.drawer.open) alive. Mounting and unmounting recompute the
-  // inert siblings, so a swap never leaves stale inert behind.
+  // (window.templ.drawer.open) alive.
   window.templ.lifecycle.register(VIEWPORT, {
     init(dialog) {
       ensureDrawer(dialog);
@@ -1306,7 +1317,6 @@
       } else {
         updateState(dialog, dialog.open);
       }
-      syncInert();
       syncStack();
     },
     destroy(dialog) {
@@ -1314,8 +1324,9 @@
       unwatchSnapResize(dialog);
       dialog._templReleaseScroll?.();
       dialog._templReleaseScroll = null;
-      if (dialog.isConnected) dialog.remove();
-      syncInert();
+      dialog._templFocus?.unmount();
+      dialog._templFocus = null;
+      window.templ.portal.remove(dialog);
       syncStack();
     },
   });

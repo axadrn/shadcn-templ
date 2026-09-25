@@ -34,9 +34,14 @@
     );
   }
 
-  // Moves the positioner to <body> (shadcn portals it the same way).
+  // The positioner's parent is the portal node, which moves to <body>
+  // (shadcn portals it the same way).
+  function portalNodeOf(content) {
+    return positionerOf(content).parentElement;
+  }
+
   function portal(content) {
-    window.templ.portal.render(positionerOf(content));
+    window.templ.portal.render(portalNodeOf(content));
   }
 
   // TooltipPositioner: useAnchorPositioning with the popup collision
@@ -169,8 +174,7 @@
     destroy(content) {
       stopAutoPositioning(content);
       content._templDismiss?.();
-      const positioner = positionerOf(content);
-      if (positioner?.isConnected) positioner.remove();
+      window.templ.portal.remove(portalNodeOf(content));
     },
   });
 })();

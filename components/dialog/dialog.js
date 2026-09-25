@@ -2,12 +2,10 @@
   "use strict";
 
   // Vanilla port of Base UI's Dialog (packages/react/src/dialog): the portal
-  // node, backdrop and popup are SSRd divs; this script drives Base UI's
-  // data-open/data-closed/data-starting-style/data-ending-style transition
-  // lifecycle, the FloatingFocusManager focus trap (guards, initial focus,
-  // return focus), useDismiss's escape/outside-press semantics, markOthers'
-  // aria-hidden application to outside content and useScrollLock's deferred
-  // body lock. "Unmount" is the portal node getting [hidden] again.
+  // node, backdrop and popup are SSRd divs. The script wires the blocks in
+  // components/baseui (portal, transition status, dismiss, focus manager,
+  // scroll lock) the way DialogRoot and DialogPopup use them. "Unmount" is
+  // the portal node getting [hidden] again.
 
   // ----- registry ------------------------------------------------------------
 
@@ -79,176 +77,6 @@
     true,
   );
 
-  // ----- tabbable (floating-ui-react/utils/tabbable.ts) ----------------------
-
-  const CANDIDATE_SELECTOR =
-    'a[href],button,input,select,textarea,summary,details,iframe,object,embed,[tabindex],[contenteditable]:not([contenteditable="false"]),audio[controls],video[controls]';
-
-  function isFocusableElement(element) {
-    if (
-      !element.matches(CANDIDATE_SELECTOR) ||
-      !element.isConnected ||
-      element.matches(":disabled") ||
-      (element.localName === "input" && element.type === "hidden")
-    ) {
-      return false;
-    }
-    for (let current = element; current; current = current.parentElement) {
-      const isAncestor = current !== element;
-      if (current.hasAttribute("inert") || current.hasAttribute("hidden")) return false;
-      const style = getComputedStyle(current);
-      if (style.display === "none") return false;
-      if (!isAncestor && (style.visibility === "hidden" || style.visibility === "collapse")) {
-        return false;
-      }
-      if (
-        isAncestor &&
-        current.localName === "details" &&
-        !current.open &&
-        !(current.querySelector(":scope > summary")?.contains(element))
-      ) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  function getTabIndex(element) {
-    const tabIndex = element.tabIndex;
-    if (tabIndex < 0) {
-      const name = element.localName;
-      if (name === "details" || name === "audio" || name === "video" || element.isContentEditable) {
-        return 0;
-      }
-    }
-    return tabIndex;
-  }
-
-  function getNamedRadioInput(element) {
-    return element.localName === "input" && element.type === "radio" && element.name !== ""
-      ? element
-      : null;
-  }
-
-  function isTabbableRadio(element, candidates) {
-    const input = getNamedRadioInput(element);
-    if (!input) return true;
-    const group = candidates.filter((candidate) => {
-      const radio = getNamedRadioInput(candidate);
-      return radio && radio.name === input.name && radio.form === input.form;
-    });
-    const checked = group.find((radio) => radio.checked);
-    return checked ? checked === input : group[0] === input;
-  }
-
-  function focusable(container) {
-    return Array.from(container.querySelectorAll(CANDIDATE_SELECTOR)).filter(isFocusableElement);
-  }
-
-  function tabbable(container) {
-    const candidates = focusable(container);
-    return candidates.filter(
-      (element) => getTabIndex(element) >= 0 && isTabbableRadio(element, candidates),
-    );
-  }
-
-  function isTabbable(element) {
-    return isFocusableElement(element) && getTabIndex(element) >= 0;
-  }
-
-  // FloatingFocusManager.getFirstTabbableElement: the element if it is
-  // tabbable, otherwise its first tabbable child, otherwise itself.
-  // (handleTabIndex is not ported: it early-returns for elements with an
-  // authored tabindex, and FOCUSABLE_POPUP_PROPS always renders the dialog
-  // popup with tabindex="-1" — ours is SSRd the same way and never changes.)
-  function getFirstTabbableElement(container) {
-    if (!container) return null;
-    if (isTabbable(container)) return container;
-    return tabbable(container)[0] || container;
-  }
-
-  // floating-ui-react/utils/enqueueFocus: focus lands on the next frame; a
-  // newer enqueue cancels the previous one.
-  let focusFrame = 0;
-  function enqueueFocus(el, options = {}) {
-    if (!el) return;
-    cancelAnimationFrame(focusFrame);
-    focusFrame = requestAnimationFrame(() => {
-      if (options.shouldFocus && !options.shouldFocus()) return;
-      el.focus(options);
-    });
-  }
-
-  // ----- markOthers (floating-ui-react/utils/markOthers.ts) ------------------
-
-  // Applies aria-hidden="true" to everything outside the open dialogs, with
-  // reference counting so nested opens undo cleanly. aria-live regions are
-  // kept, like Base UI. (Base UI's modal dialogs use aria-hidden, not inert:
-  // pointer interaction is blocked by the full-viewport backdrop.)
-  const ariaHiddenCounts = new WeakMap();
-  const ariaHiddenUncontrolled = new WeakSet();
-
-  function collectOutsideElements(keepElements, stopElements) {
-    const outside = [];
-    const walk = (parent) => {
-      if (!parent || stopElements.has(parent)) return;
-      for (const node of parent.children) {
-        if (node.localName === "script") continue;
-        if (keepElements.has(node)) {
-          walk(node);
-        } else {
-          outside.push(node);
-        }
-      }
-    };
-    walk(document.body);
-    return outside;
-  }
-
-  function buildKeepSet(targets) {
-    const keep = new Set();
-    targets.forEach((target) => {
-      let node = target;
-      while (node && !keep.has(node)) {
-        keep.add(node);
-        node = node.parentElement;
-      }
-    });
-    return keep;
-  }
-
-  function markOthers(avoidElements) {
-    const controlElements = avoidElements.concat(
-      Array.from(document.body.querySelectorAll("[aria-live]")),
-    );
-    const targets = collectOutsideElements(
-      buildKeepSet(controlElements),
-      new Set(controlElements),
-    );
-    const hiddenElements = [];
-
-    targets.forEach((node) => {
-      const attr = node.getAttribute("aria-hidden");
-      const alreadyHidden = attr !== null && attr !== "false";
-      const count = (ariaHiddenCounts.get(node) || 0) + 1;
-      ariaHiddenCounts.set(node, count);
-      hiddenElements.push(node);
-      if (count === 1 && alreadyHidden) ariaHiddenUncontrolled.add(node);
-      if (!alreadyHidden) node.setAttribute("aria-hidden", "true");
-    });
-
-    return () => {
-      hiddenElements.forEach((node) => {
-        const count = (ariaHiddenCounts.get(node) || 0) - 1;
-        ariaHiddenCounts.set(node, count);
-        if (count <= 0) {
-          if (!ariaHiddenUncontrolled.has(node)) node.removeAttribute("aria-hidden");
-          ariaHiddenUncontrolled.delete(node);
-        }
-      });
-    };
-  }
-
   // ----- aria wiring (useDialogTitle/-Description registration) --------------
 
   function wireAria(state) {
@@ -317,6 +145,17 @@
     });
   }
 
+  // DialogPortal renders an InternalBackdrop for a modal dialog while it is
+  // mounted: fixed over the viewport, inert while closing, and useDismiss
+  // treats it as a backdrop.
+  function createInternalBackdrop() {
+    const backdrop = document.createElement("div");
+    backdrop.setAttribute("role", "presentation");
+    backdrop.setAttribute("data-base-ui-inert", "");
+    backdrop.style.cssText = "position:fixed;inset:0;user-select:none;-webkit-user-select:none";
+    return backdrop;
+  }
+
   function openDialog(target, trigger) {
     const state = stateOf(target);
     if (!state || state.open) return;
@@ -325,7 +164,6 @@
     state.openType = trigger ? lastInteractionType || "mouse" : null;
     state.trigger =
       trigger && trigger instanceof Element ? trigger : triggersFor(popup)[0] || null;
-    state.previouslyFocused = document.activeElement;
 
     state.open = true;
     openStack.push(state);
@@ -334,6 +172,11 @@
 
     window.templ.portal.render(state.root);
     state.root.hidden = false;
+    if (isModal(state)) {
+      state.internalBackdrop ??= createInternalBackdrop();
+      state.internalBackdrop.inert = false;
+      state.root.prepend(state.internalBackdrop);
+    }
 
     wireAria(state);
 
@@ -341,28 +184,28 @@
 
     if (isModal(state)) {
       state.releaseScroll = window.templ.scrollLock.acquire(popup);
-      state.undoMarkOthers = markOthers([state.root]);
     }
 
     updateTriggers(state, true);
 
-    // FloatingFocusManager initial focus: first tabbable element, or the
-    // popup itself — also when opened by touch, so the virtual keyboard
-    // stays closed (createDefaultInitialFocus).
-    queueMicrotask(() => {
-      if (!state.open) return;
-      if (popup.contains(document.activeElement)) return;
-      const elToFocus =
-        state.openType === "touch" ? popup : tabbable(popup)[0] || popup;
-      enqueueFocus(elToFocus, {
-        preventScroll: elToFocus === popup,
-        shouldFocus() {
-          if (!state.open) return false;
-          const active = document.activeElement;
-          return !(active !== elToFocus && popup.contains(active));
-        },
+    // DialogPopup's FloatingFocusManager, mounted until the exit animation
+    // finished. Opened by touch the popup takes focus, so the virtual
+    // keyboard stays closed (createDefaultInitialFocus).
+    if (state.focus) {
+      state.focus.open();
+    } else {
+      state.focus = window.templ.focusManager.useFloatingFocusManager({
+        floating: popup,
+        reference: state.trigger,
+        triggers: triggersFor(popup),
+        modal: isModal(state),
+        openInteractionType: state.openType,
+        initialFocus: (interactionType) => (interactionType === "touch" ? popup : true),
+        restoreFocus: "popup",
+        closeOnFocusOut: !popup.hasAttribute("data-templ-disable-pointer-dismissal"),
+        onOpenChange: (open) => requestOpenChange(popup, open),
       });
-    });
+    }
   }
 
   function closeDialog(target) {
@@ -371,7 +214,6 @@
 
     const popup = state.popup;
     state.open = false;
-    state.closeType = lastInteractionType;
     stopDismiss(state);
     const index = openStack.indexOf(state);
     if (index !== -1) openStack.splice(index, 1);
@@ -380,55 +222,24 @@
     // Base UI order on open=false: the transition status flips to ending,
     // aria-hidden marking and the scroll lock release immediately, the
     // popup unmounts (and focus returns) once the exit animation finishes.
+    state.focus?.close();
+    if (state.internalBackdrop) state.internalBackdrop.inert = true;
     window.templ.transition.close(partsOf(state), popup, () => {
       state.root.hidden = true;
       popup.style.removeProperty("--nested-dialogs");
       popup.removeAttribute("data-nested-dialog-open");
-      returnFocus(state);
+      // Unmounting the focus manager returns focus.
+      state.focus?.unmount();
+      state.focus = null;
+      state.internalBackdrop?.remove();
       // onOpenChangeComplete(false) pendant: fires once the exit animation
       // finished and the dialog unmounted (command.js resets its palette on
       // this).
       popup.dispatchEvent(new CustomEvent("dialog-close", { bubbles: true }));
     });
-    if (state.undoMarkOthers) {
-      state.undoMarkOthers();
-      state.undoMarkOthers = null;
-    }
     state.releaseScroll?.();
     state.releaseScroll = null;
     updateTriggers(state, false);
-  }
-
-  // FloatingFocusManager return focus: the trigger (or the previously
-  // focused element for programmatic opens), resolved to its first tabbable,
-  // focused without scrolling — visibly when the dialog was closed with the
-  // keyboard. Focus that legitimately moved elsewhere is respected.
-  function returnFocus(state) {
-    const referenceReturn = state.trigger?.isConnected ? state.trigger : null;
-    const previousReturn =
-      state.previouslyFocused?.isConnected &&
-      state.previouslyFocused.localName !== "body"
-        ? state.previouslyFocused
-        : null;
-    const preferPreviousFocus = state.openType == null;
-    const returnElement = preferPreviousFocus
-      ? previousReturn || referenceReturn
-      : referenceReturn || previousReturn;
-
-    queueMicrotask(() => {
-      const tabbableReturnElement = getFirstTabbableElement(returnElement);
-      if (!tabbableReturnElement) return;
-      const active = document.activeElement;
-      const focusMovedElsewhere =
-        tabbableReturnElement !== active &&
-        active !== document.body &&
-        !state.popup.contains(active) &&
-        !state.root.contains(active);
-      if (focusMovedElsewhere) return;
-      const options = { preventScroll: true };
-      if (state.closeType === "keyboard") options.focusVisible = true;
-      tabbableReturnElement.focus(options);
-    });
   }
 
   function isDialogOpen(target) {
@@ -467,7 +278,7 @@
       // With a backdrop the dismissal waits for the click, so a press that
       // starts inside and is released over the backdrop never dismisses.
       // Modal is a boolean here, Base UI's "trap-focus" mode does not exist.
-      outsidePressEvent: () => state.backdrop ? "intentional" : { mouse: "intentional", touch: "sloppy" },
+      outsidePressEvent: () => (state.internalBackdrop?.isConnected || state.backdrop) ? "intentional" : { mouse: "intentional", touch: "sloppy" },
       outsidePress(event) {
         if ("button" in event && event.button !== 0) return false;
         if ("touches" in event && event.touches.length !== 1) return false;
@@ -476,8 +287,9 @@
         // several modal dialogs that are not nested.
         if (!isModal(state)) return true;
         const target = event.target;
-        if (!state.backdrop) return true;
-        return target === state.backdrop ||
+        const internalBackdrop = state.internalBackdrop?.isConnected ? state.internalBackdrop : null;
+        if (!state.backdrop && !internalBackdrop) return true;
+        return target === state.backdrop || target === internalBackdrop ||
           (target.contains(popup) && !target.hasAttribute("data-base-ui-portal"));
       },
       onOpenChange: (open) => requestOpenChange(popup, open),
@@ -489,34 +301,7 @@
     state.dismiss = null;
   }
 
-  document.addEventListener("keydown", (event) => {
-    // FloatingFocusManager: prevent Tab from escaping the modal when the
-    // popup has no tabbable elements (the guards would have nothing to
-    // focus).
-    if (event.key === "Tab") {
-      const state = openStack.find(
-        (other) => isModal(other) && other.popup.contains(document.activeElement),
-      );
-      if (state && tabbable(state.popup).length === 0) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    }
-  });
-
   // ----- initialization ------------------------------------------------------
-
-  // FocusGuard: visually hidden tabbable sentinels around the popup; focusing
-  // one wraps focus to the other end of the popup's tab cycle.
-  function createFocusGuard() {
-    const guard = document.createElement("span");
-    guard.setAttribute("tabindex", "0");
-    guard.setAttribute("aria-hidden", "true");
-    guard.setAttribute("data-base-ui-focus-guard", "");
-    guard.style.cssText =
-      "clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:-1px;position:fixed;top:0;left:0;";
-    return guard;
-  }
 
   function ensureDialog(popup) {
     if (!popup || dialogs.has(popup)) return dialogs.get(popup) || null;
@@ -531,10 +316,9 @@
       backdrop: root.querySelector(BACKDROP),
       open: false,
       trigger: null,
-      previouslyFocused: null,
       openType: null,
-      closeType: "",
-      undoMarkOthers: null,
+      focus: null,
+      internalBackdrop: null,
       releaseScroll: null,
     };
     dialogs.set(popup, state);
@@ -545,45 +329,6 @@
       popup.setAttribute("data-nested", "");
       if (state.backdrop) state.backdrop.hidden = true;
     }
-
-    const beforeGuard = createFocusGuard();
-    const afterGuard = createFocusGuard();
-    if (!isModal(state)) {
-      // Non-modal dialogs do not trap focus: the guards stay out of the tab
-      // order (Base UI renders different non-modal guard behavior; without a
-      // React portal boundary the natural tab order is the equivalent).
-      beforeGuard.setAttribute("tabindex", "-1");
-      afterGuard.setAttribute("tabindex", "-1");
-    }
-    popup.before(beforeGuard);
-    popup.after(afterGuard);
-    beforeGuard.addEventListener("focus", () => {
-      if (!isModal(state)) return;
-      const els = tabbable(popup);
-      enqueueFocus(els[els.length - 1] || popup, { preventScroll: els.length === 0 });
-    });
-    afterGuard.addEventListener("focus", () => {
-      if (!isModal(state)) return;
-      const els = tabbable(popup);
-      enqueueFocus(els[0] || popup, { preventScroll: els.length === 0 });
-    });
-
-    // FloatingFocusManager restoreFocus="popup": when the focused element is
-    // removed from inside the popup (e.g. an htmx swap of the dialog body),
-    // focus falls back to the popup instead of escaping to <body>.
-    popup.addEventListener("focusout", (event) => {
-      const target = event.target;
-      queueMicrotask(() => {
-        if (!state.open) return;
-        if (target instanceof Element && target.isConnected) return;
-        if (document.activeElement === document.body) {
-          popup.focus();
-          requestAnimationFrame(() => {
-            if (state.open && document.activeElement === document.body) popup.focus();
-          });
-        }
-      });
-    });
 
     wireAria(state);
     return state;
@@ -601,10 +346,8 @@
     }
     window.templ.transition.reset(partsOf(state), false);
     stopDismiss(state);
-    if (state.undoMarkOthers) {
-      state.undoMarkOthers();
-      state.undoMarkOthers = null;
-    }
+    state.focus?.unmount();
+    state.focus = null;
     const index = openStack.indexOf(state);
     if (index !== -1) openStack.splice(index, 1);
     const wasOpen = state.open;
@@ -613,7 +356,7 @@
     state.releaseScroll?.();
     state.releaseScroll = null;
     if (wasOpen) popup.dispatchEvent(new CustomEvent("dialog-close", { bubbles: true }));
-    state.root.remove();
+    window.templ.portal.remove(state.root);
     dialogs.delete(popup);
   }
 
