@@ -11,33 +11,6 @@
   const ARROW_TICK_MS = 40; // hovering a scroll arrow scrolls one item per tick
   const SELECTED_DELAY = 400; // mouseup selection stays disabled this long after open
 
-  const escapeTargets = new WeakSet();
-  function listenForEscape(element) {
-    if (!element || escapeTargets.has(element)) return;
-    element.addEventListener("keydown", closeOnEscapeKeyDown);
-    escapeTargets.add(element);
-  }
-
-  // useDismiss: popup/reference listeners stop Escape before outer document handlers.
-  function closeOnEscapeKeyDown(event) {
-    if (event.key !== "Escape") return;
-    const contents = event.currentTarget === document
-      ? allContents()
-      : [isPositioner(event.currentTarget)
-        ? event.currentTarget
-        : contentFor(event.currentTarget)];
-    let handled = false;
-    for (const content of contents) {
-      if (!content?.hasAttribute("data-open")) continue;
-      const trigger = triggerFor(content);
-      if (requestOpenChange(content, false)) event.preventDefault();
-      if (trigger) trigger.focus();
-      event.stopPropagation();
-      handled = true;
-    }
-    return handled;
-  }
-
   // The select's element is the positioner (no slot upstream) around the
   // [data-slot=select-content] popup.
   const POPUP = '[data-slot="select-content"]';
@@ -173,7 +146,6 @@
 
   // Moves the content to <body> (shadcn portals it the same way).
   function portal(content) {
-    listenForEscape(content);
     window.templ.portal.render(content);
   }
 
@@ -558,6 +530,16 @@
       content._templSelection.allowUnselectedMouseUp = true;
     }, SELECTED_DELAY);
     portal(content);
+    content._templDismiss ??= window.templ.dismiss.useDismiss({
+      floating: content,
+      reference: trigger,
+      onOpenChange(open, reason) {
+        const accepted = requestOpenChange(content, open);
+        // Base UI returns focus to the trigger when Escape closes the select.
+        if (reason === "escape-key") trigger.focus();
+        return accepted;
+      },
+    });
     content.hidden = false;
 
     // Position it invisibly first, then play the enter animation in place.
@@ -599,6 +581,8 @@
 
   function close(content) {
     if (content.hidden) return;
+    content._templDismiss?.();
+    content._templDismiss = null;
     stopAutoPositioning(content);
     stopArrowScroll();
     clearTimeout(content._templSelectedDelay);
@@ -659,10 +643,6 @@
     return true;
   }
 
-  function requestCloseAll() {
-    allContents().forEach((content) => requestOpenChange(content, false));
-  }
-
   function selectItem(content, item) {
     const trigger = triggerFor(content);
     if (!trigger) return;
@@ -706,7 +686,6 @@
   // value, the label lives in the item).
   window.templ.lifecycle.register(TRIGGER, {
     init(trigger) {
-      listenForEscape(trigger);
       const content = contentFor(trigger);
       if (!isPositioner(content)) return;
       const checked = content.querySelector(ITEM + "[data-selected]");
@@ -732,6 +711,7 @@
       stopAutoPositioning(content);
       content._templReleaseScroll?.();
       content._templReleaseScroll = null;
+      content._templDismiss?.();
       if (content.isConnected) content.remove();
     },
   });
@@ -823,7 +803,6 @@
       const content = positionerOf(item);
       if (content && content._templSelection) content._templSelection.dragY = 0;
     }
-    if (!positionerOf(e.target)) requestCloseAll();
   });
 
   document.addEventListener("pointerover", (e) => {
@@ -904,7 +883,6 @@
   let typeTimer;
 
   document.addEventListener("keydown", (e) => {
-    if (closeOnEscapeKeyDown(e)) return;
     if (!(e.target instanceof Element)) return;
 
     // Closed trigger: arrow keys open the listbox (Enter/Space go through

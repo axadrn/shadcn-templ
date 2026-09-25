@@ -358,6 +358,7 @@
     state.open = true;
     openStack.push(state);
     updateNestedAttributes();
+    startDismiss(state);
 
     window.templ.portal.render(state.root);
     state.root.hidden = false;
@@ -406,6 +407,7 @@
     const popup = state.popup;
     state.open = false;
     state.closeType = lastInteractionType;
+    stopDismiss(state);
     const index = openStack.indexOf(state);
     if (index !== -1) openStack.splice(index, 1);
     updateNestedAttributes();
@@ -491,79 +493,41 @@
     requestOpenChange(target, !isDialogOpen(target), trigger);
   }
 
-  // ----- dismissal (useDismiss + DialogInteractions) -------------------------
+  // ----- dismissal (useDismiss, options from useDialogRoot) ------------------
 
-  // With a rendered backdrop, Base UI's outsidePressEvent is 'intentional':
-  // the dismissal fires on the click that completes a press on the dialog's
-  // owning backdrop, only for the topmost dialog, only for the main button.
-  // A press that starts inside the popup and is released over the backdrop
-  // (text selection drag-out) never dismisses.
-  let pressStartedInPopup = null;
-  document.addEventListener(
-    "pointerdown",
-    (event) => {
-      pressStartedInPopup =
-        event.target instanceof Element
-          ? event.target.closest(POPUP)
-          : null;
-    },
-    true,
-  );
-
-  function handleBackdropClick(backdrop, event) {
-    const popup = backdrop.parentElement && [...backdrop.parentElement.children].find((el) => el.matches(POPUP));
-    const state = stateOf(popup);
-    if (!state || !state.open) return;
-    if (state.popup.hasAttribute("data-templ-disable-pointer-dismissal")) return;
-    if (!isTopmost(state)) return;
-    if (event.button !== 0) return;
-    if (pressStartedInPopup === state.popup) return;
-    requestOpenChange(state.popup, false);
-  }
-
-  // useDismiss escape key: closes the topmost dialog, ignoring presses that
-  // settle an IME composition (Safari fires compositionend before keydown,
-  // so the flag is cleared a few ms later there).
-  let isComposing = false;
-  let compositionTimer;
-  const isWebkit =
-    typeof navigator !== "undefined" && /AppleWebKit/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-  document.addEventListener("compositionstart", () => {
-    window.clearTimeout(compositionTimer);
-    isComposing = true;
-  });
-  document.addEventListener("compositionend", () => {
-    compositionTimer = window.setTimeout(
-      () => {
-        isComposing = false;
+  function startDismiss(state) {
+    const popup = state.popup;
+    state.dismiss = window.templ.dismiss.useDismiss({
+      floating: popup,
+      reference: triggersFor(popup),
+      // A nested open dialog blocks its parent.
+      escapeKey: () => isTopmost(state),
+      // With a backdrop the dismissal waits for the click, so a press that
+      // starts inside and is released over the backdrop never dismisses.
+      // Modal is a boolean here, Base UI's "trap-focus" mode does not exist.
+      outsidePressEvent: () => state.backdrop ? "intentional" : { mouse: "intentional", touch: "sloppy" },
+      outsidePress(event) {
+        if ("button" in event && event.button !== 0) return false;
+        if ("touches" in event && event.touches.length !== 1) return false;
+        if (!isTopmost(state) || popup.hasAttribute("data-templ-disable-pointer-dismissal")) return false;
+        // A modal dialog closes only on its own backdrop, which supports
+        // several modal dialogs that are not nested.
+        if (!isModal(state)) return true;
+        const target = event.target;
+        if (!state.backdrop) return true;
+        return target === state.backdrop ||
+          (target.contains(popup) && !target.hasAttribute("data-base-ui-portal"));
       },
-      isWebkit ? 5 : 0,
-    );
-  });
-
-  const escapeTargets = new WeakSet();
-  function listenForEscape(element) {
-    if (!element || escapeTargets.has(element)) return;
-    element.addEventListener("keydown", closeOnEscapeKeyDown);
-    escapeTargets.add(element);
+      onOpenChange: (open) => requestOpenChange(popup, open),
+    });
   }
 
-  // useDismiss installs the same handler on the popup, reference and document.
-  function closeOnEscapeKeyDown(event) {
-    if (event.key !== "Escape" || isComposing) return;
-    const top = openStack[openStack.length - 1];
-    const state = event.currentTarget === document
-      ? top
-      : stateOf(dialogFor(event.currentTarget));
-    // A nested open dialog blocks its parent's useDismiss handler.
-    if (!state?.open || state !== top) return;
-    if (requestOpenChange(state.popup, false)) event.preventDefault();
-    event.stopPropagation();
-    return true;
+  function stopDismiss(state) {
+    state.dismiss?.();
+    state.dismiss = null;
   }
 
   document.addEventListener("keydown", (event) => {
-    if (closeOnEscapeKeyDown(event)) return;
     // FloatingFocusManager: prevent Tab from escaping the modal when the
     // popup has no tabbable elements (the guards would have nothing to
     // focus).
@@ -613,7 +577,6 @@
       finishToken: null,
     };
     dialogs.set(popup, state);
-    listenForEscape(popup);
 
     // A nested dialog renders no backdrop in Base UI (DialogBackdrop's
     // enabled: !nested); the parent's backdrop keeps covering the page.
@@ -676,6 +639,7 @@
       return;
     }
     state.finishToken = null;
+    stopDismiss(state);
     if (state.undoMarkOthers) {
       state.undoMarkOthers();
       state.undoMarkOthers = null;
@@ -704,20 +668,9 @@
     const closeButton = event.target.closest("[data-templ-dialog-close]");
     if (closeButton) {
       requestOpenChange(dialogFor(closeButton), false);
-      return;
-    }
-    const backdrop = event.target.closest('[role="presentation"]');
-    if (backdrop && backdrop.parentElement?.querySelector(BACKDROP) === backdrop) {
-      handleBackdropClick(backdrop, event);
     }
   });
 
-  // Base UI's DialogTrigger identifier, shared with PopoverTrigger.
-  window.templ.lifecycle.register("[data-base-ui-click-trigger][aria-controls]", {
-    init(trigger) {
-      if (dialogFor(trigger)) listenForEscape(trigger);
-    },
-  });
   // A dialog lives as long as its SSR declaration site (the portal owner)
   // stays in the document, including trigger-less programmatic dialogs.
   // Unmounting retires it: aria-hidden marking, scroll lock, portaled DOM.

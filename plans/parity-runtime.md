@@ -84,7 +84,7 @@ Done when: `grep -l "_templPortalOwner" components/*/*.js` lists only `baseui/po
 
 ### 4. Dismiss
 
-- [ ] Done
+- [x] Done
 
 `components/baseui/use_dismiss.js`, `useDismiss.ts`: Escape with the nesting and bubbling rules from `plans/escape-cascade.md`, outside press on pointerdown with the `intentional` click variant for backdrops, returning a cleanup. The 10 Escape handlers and 12 outside press handlers switch to it; the Escape cascade probe from `escape-cascade` stays green.
 
@@ -187,5 +187,25 @@ Checks: `check.sh` in chromium and webkit with 0 DOM changes against t36, a11y 3
 Two details moved to the common path. The dialog records its owner on the first open instead of at registration, which is the same thing, because an unopened dialog is still inside its owner. The drawer used to append only when it was not in `<body>` yet, now it re-appends on every open like the others, so a reopened drawer paints above older popups.
 
 Checks: `check.sh` in chromium and webkit, a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 34). The DOM against t36 differs only on the 19 docs pages that list the new files, each by 19 elements per code block. `htmx.mjs` 110 of 110 in both engines, `compare.mjs` identical to the task 1 baseline in both engines.
+
+### Task 4
+
+`components/baseui/use_dismiss.js` ports `useDismiss` from Base UI 1.6.0 close to line by line: Escape on the document, the reference and the popup, the IME guard, blocking children, outside press in the capture phase with the listener on the target, sloppy and intentional, the drag out suppression, the scrollbar check and the touch rules. Like the source it runs while the popup is open, the scripts call it on open and its cleanup on close and in the lifecycle `destroy`. What differs comes from having no React tree. Inside the tree means inside the popup or inside something portaled from it, walking through the portal owners. A blocking child is another open instance inside that tree. Options React re-reads per render may be functions. The marker check for elements injected after opening needs `data-base-ui-inert` and comes with task 7.
+
+All nine overlays use it, with the options their Base UI root passes: popover `{ mouse: "intentional", touch: "sloppy" }`, combobox `{ mouse: "sloppy", touch: "intentional" }` with the input group, clear button and chips not counting as outside, dialog and drawer `intentional` with the backdrop and `escapeKey` only for the topmost, the rest the defaults. Their Escape copies, `listenForEscape`, the dialog's composition flag and backdrop click handler and the drawer's viewport `pointerdown` are gone. `grep -lE "'Escape'|\"Escape\"" components/*/*.js` lists `use_dismiss.js` and `chart.js`, whose Escape clears a chart tooltip.
+
+Behavior that moves to Base UI:
+
+- The popover dismisses a mouse press outside on the click, not on the press. `compare.mjs chromium dismiss` shows it: after pressing in an empty corner shadcn and we both keep it open, after releasing both close it.
+- Tooltip and hover card now also close on a press outside, which Base UI does through the same hook.
+- A non modal dialog closes on a press outside, before only the backdrop click closed a dialog.
+- The drawer closes on Escape even with `DisablePointerDismissal`, which in Base UI only turns off the outside press. `drawer-non-modal Escape` left the baseline fails with that.
+- Outside is decided per popup. Our old check was "not inside any popup of the same kind", so a press in an outer popover left an inner one open, and a press in a select popup portaled out of a popover closed the popover. That follows from the code, no example on the site nests like this, so it is not measured.
+
+Found on the way, not part of this task: Base UI's popover trigger opens on `click`, ours on `pointerdown`. After an outside press shadcn returns focus to the trigger of a menu, select and popover, ours leaves it on the body, which is the focus manager of task 7.
+
+`tmp/escape/probe.mjs` still used the `data-tui-*` selectors from before parity-attributes. It is ported to `tmp/parity-runtime/escape.mjs` with the same scenarios, 0 failed expectations in both engines. `compare.mjs` gained `down` and `up` steps and a `dismiss` set: open, press in an empty corner, release, for twelve overlay examples.
+
+Checks: `check.sh` in chromium and webkit, a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 35), the DOM against rt3 differs only on the nine docs pages by the new code block. `escape.mjs` 0 failures, `compare.mjs` against the task 1 baseline one fail less (the drawer Escape) and nothing new, `compare.mjs dismiss` open state equal to shadcn everywhere except the drawer, whose missing `data-open` is task 5. Nested drawers on a backdrop click close one level at a time on both sides. `htmx.mjs` 110 of 110 in both engines.
 
 ## Planner review

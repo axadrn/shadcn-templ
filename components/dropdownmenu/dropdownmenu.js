@@ -7,31 +7,6 @@
   const SUB_OPEN_DELAY = 100;
   const SUB_CLOSE_DELAY = 300;
 
-  const escapeTargets = new WeakSet();
-  function listenForEscape(element) {
-    if (!element || escapeTargets.has(element)) return;
-    element.addEventListener("keydown", closeOnEscapeKeyDown);
-    escapeTargets.add(element);
-  }
-
-  // useDismiss: popup/reference listeners stop Escape before outer document handlers.
-  function closeOnEscapeKeyDown(event) {
-    if (event.key !== "Escape") return;
-    const contents = event.currentTarget === document
-      ? allContents()
-      : [isPositioner(event.currentTarget)
-        ? event.currentTarget
-        : contentFor(event.currentTarget)];
-    let handled = false;
-    for (const content of contents) {
-      if (!content?.hasAttribute("data-open")) continue;
-      if (requestOpenChange(content, false, false, true)) event.preventDefault();
-      event.stopPropagation();
-      handled = true;
-    }
-    return handled;
-  }
-
   // The menu's element is the positioner (shadcn's isolate z-50 wrapper, no
   // slot) around the [data-slot=dropdown-menu-content] popup.
   const POPUP = '[data-slot="dropdown-menu-content"]';
@@ -131,7 +106,6 @@
 
   // Moves the content to <body> (shadcn portals it the same way).
   function portal(content) {
-    listenForEscape(content);
     window.templ.portal.render(content);
   }
 
@@ -272,6 +246,11 @@
     content._templOpenMethod = trigger._templOpenMethod || "programmatic";
     portal(content);
     content.hidden = false;
+    content._templDismiss ??= window.templ.dismiss.useDismiss({
+      floating: content,
+      reference: trigger,
+      onOpenChange: (open, reason) => requestOpenChange(content, open, false, reason === "escape-key"),
+    });
 
     // Position it invisibly first, then play the enter animation in place.
     content.style.visibility = "hidden";
@@ -313,6 +292,8 @@
 
   function close(content, refocusTrigger) {
     if (content.hidden) return;
+    content._templDismiss?.();
+    content._templDismiss = null;
     stopAutoPositioning(content);
     setTransitionAttribute(content, "data-starting-style", false);
     setState(content, "closed");
@@ -545,7 +526,6 @@
       const content = popup.parentElement;
       const trigger = isPositioner(content) && triggerFor(content);
       if (!trigger) return;
-      listenForEscape(trigger);
       // Server-side open state (Base UI open or defaultOpen).
       if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
         open(content, trigger, false);
@@ -557,6 +537,7 @@
       stopAutoPositioning(content);
       content._templReleaseScroll?.();
       content._templReleaseScroll = null;
+      content._templDismiss?.();
       if (content.isConnected) content.remove();
     },
   });
@@ -603,9 +584,7 @@
     if (trigger) {
       trigger._templOpenMethod = e.pointerType;
       if (!trigger.disabled) toggle(trigger, false);
-      return;
     }
-    if (!positionerOf(e.target)) requestCloseAll(false);
   });
 
   document.addEventListener("click", (e) => {
@@ -686,7 +665,6 @@
   });
 
   document.addEventListener("keydown", (e) => {
-    if (closeOnEscapeKeyDown(e)) return;
     const content = anyOpen();
     if (!content) return;
 

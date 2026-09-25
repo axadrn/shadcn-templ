@@ -7,31 +7,6 @@
   const SUB_OPEN_DELAY = 100;
   const SUB_CLOSE_DELAY = 300;
 
-  const escapeTargets = new WeakSet();
-  function listenForEscape(element) {
-    if (!element || escapeTargets.has(element)) return;
-    element.addEventListener("keydown", closeOnEscapeKeyDown);
-    escapeTargets.add(element);
-  }
-
-  // useDismiss: popup/reference listeners stop Escape before outer document handlers.
-  function closeOnEscapeKeyDown(event) {
-    if (event.key !== "Escape") return;
-    const contents = event.currentTarget === document
-      ? allContents()
-      : [isPositioner(event.currentTarget)
-        ? event.currentTarget
-        : contentFor(event.currentTarget)];
-    let handled = false;
-    for (const content of contents) {
-      if (!content?.hasAttribute("data-open")) continue;
-      if (requestOpenChange(content, false)) event.preventDefault();
-      event.stopPropagation();
-      handled = true;
-    }
-    return handled;
-  }
-
   // The menu's element is the positioner (no slot upstream) around the
   // [data-slot=context-menu-content] popup.
   const POPUP = '[data-slot="context-menu-content"]';
@@ -105,7 +80,6 @@
 
   // Moves the content to <body> (shadcn portals it the same way).
   function portal(content) {
-    listenForEscape(content);
     window.templ.portal.render(content);
   }
 
@@ -223,6 +197,11 @@
     clearTimeout(content._templHide);
     portal(content);
     content.hidden = false;
+    content._templDismiss ??= window.templ.dismiss.useDismiss({
+      floating: content,
+      reference: triggerFor(content),
+      onOpenChange: (open) => requestOpenChange(content, open),
+    });
 
     if (alreadyOpen) {
       // Right-click somewhere else while open: move over to the new spot.
@@ -266,6 +245,8 @@
 
   function close(content) {
     if (content.hidden) return;
+    content._templDismiss?.();
+    content._templDismiss = null;
     setState(content, "closed");
     content.querySelectorAll(SUB).forEach(closeSubNow);
     clearTimeout(content._templHide);
@@ -465,7 +446,6 @@
 
   window.templ.lifecycle.register(TRIGGER, {
     init(trigger) {
-      listenForEscape(trigger);
       // Server-side open state (Base UI open or defaultOpen).
       const content = contentFor(trigger);
       if (content && (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open"))) {
@@ -482,6 +462,7 @@
       if (!isPositioner(content)) return;
       content._templReleaseScroll?.();
       content._templReleaseScroll = null;
+      content._templDismiss?.();
       if (content.isConnected) content.remove();
     },
   });
@@ -504,8 +485,6 @@
     if (!(e.target instanceof Element)) return;
     const trigger = e.target.closest(TRIGGER);
     if (trigger) trigger._templOpenMethod = e.pointerType;
-    if (e.button !== 0) return;
-    if (!positionerOf(e.target)) closeAll();
   });
 
   document.addEventListener("click", (e) => {
@@ -574,7 +553,6 @@
   });
 
   document.addEventListener("keydown", (e) => {
-    if (closeOnEscapeKeyDown(e)) return;
     const content = anyOpen();
     if (!content) return;
 
