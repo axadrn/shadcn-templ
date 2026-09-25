@@ -1560,14 +1560,22 @@ function renderRadial(panel, m, state, alpha = 1) {
   const n = m.series.length ? m.series[0].values.length : 0;
   if (!n) return;
 
-  // The angle axis is a number axis with the [0, 'auto'] default domain, so
-  // it spans zero to the largest raw value.
+  // The angle axis is a number axis with the [0, 'auto'] default domain, so it
+  // spans zero to the tallest stack, like getDomainOfStackGroups. Chaining the
+  // totals in the same order as the ranges below keeps every range inside it.
   let domainMin = 0;
   let domainMax = 0;
-  for (const s of m.series) {
-    for (const v of s.values) {
-      if (v > domainMax) domainMax = v;
-      if (v < domainMin) domainMin = v;
+  for (let i = 0; i < n; i++) {
+    const stackTops = {};
+    for (const s of m.series) {
+      const v = s.values[i];
+      let top = v;
+      if (s.stackId) {
+        top = (stackTops[s.stackId] || 0) + v;
+        stackTops[s.stackId] = top;
+      }
+      if (top > domainMax) domainMax = top;
+      if (top < domainMin) domainMin = top;
     }
   }
   const span = domainMax - domainMin || 1;
