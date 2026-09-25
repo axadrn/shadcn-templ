@@ -33,6 +33,10 @@ shadcn-templ add collapsible
 
 <ComponentSource name="collapsible" title="components/baseui/use_transition_status.js" />
 
+<ComponentSource name="collapsible" title="components/baseui/lifecycle.js" />
+
+<ComponentSource name="collapsible" title="components/baseui/use_collapsible_panel.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

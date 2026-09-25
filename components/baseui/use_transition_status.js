@@ -13,8 +13,30 @@
     parts.forEach((part) => part?.toggleAttribute(name, present));
   }
 
+  // useAnimationsFinished: runs fn once every animation on the element
+  // finished, as long as isCurrent() still holds. An animation aborted
+  // because a property it depends on changed may be followed by a new one,
+  // so check again before running fn.
+  function whenAnimationsFinish(animated, isCurrent, fn) {
+    const exec = () => {
+      if (!isCurrent()) return;
+      if (typeof animated?.getAnimations !== "function") return fn();
+      Promise.all(animated.getAnimations().map((animation) => animation.finished)).then(() => {
+        if (isCurrent()) fn();
+      }, () => {
+        const running = animated.getAnimations().some((a) => a.pending || a.playState !== "finished");
+        if (running) exec();
+        else if (isCurrent()) fn();
+      });
+    };
+    // One frame, so the new style's animations are registered.
+    requestAnimationFrame(exec);
+  }
+
   // parts[0] carries the pending status, so an open cancels a close in flight.
-  function open(parts) {
+  // onComplete, when given, runs once the open animations on animated
+  // finished (useOpenChangeComplete with open true).
+  function open(parts, animated, onComplete) {
     const main = parts[0];
     const token = {};
     main._templTransition = token;
@@ -25,18 +47,22 @@
     // Compute the starting style once, so transitions start from it.
     void main.offsetWidth;
     requestAnimationFrame(() => {
-      if (main._templTransition === token) set(parts, "data-starting-style", false);
+      if (main._templTransition !== token) return;
+      set(parts, "data-starting-style", false);
+      if (onComplete) whenAnimationsFinish(animated, () => main._templTransition === token, onComplete);
     });
   }
 
-  function close(parts, animated, onComplete) {
+  // deferEnding sets data-ending-style one frame after data-closed, Base UI's
+  // deferEndingState, and calls onEnding then. onEnding returning false
+  // completes the close at once.
+  function close(parts, animated, onComplete, { deferEnding = false, onEnding } = {}) {
     const main = parts[0];
     const token = {};
     main._templTransition = token;
     set(parts, "data-open", false);
     set(parts, "data-starting-style", false);
     set(parts, "data-closed", true);
-    set(parts, "data-ending-style", true);
 
     const done = () => {
       if (main._templTransition !== token) return;
@@ -44,19 +70,15 @@
       set(parts, "data-ending-style", false);
       onComplete?.();
     };
-    // An animation aborted because a property it depends on changed may be
-    // followed by a new one, so check again before completing.
-    const exec = () => {
-      if (main._templTransition !== token) return;
-      if (typeof animated?.getAnimations !== "function") return done();
-      Promise.all(animated.getAnimations().map((animation) => animation.finished)).then(done, () => {
-        const running = animated.getAnimations().some((a) => a.pending || a.playState !== "finished");
-        if (running) exec();
-        else done();
-      });
+    const ending = () => {
+      set(parts, "data-ending-style", true);
+      if (onEnding?.() === false) return done();
+      whenAnimationsFinish(animated, () => main._templTransition === token, done);
     };
-    // One frame, so the ending style's animations are registered.
-    requestAnimationFrame(exec);
+    if (!deferEnding) return ending();
+    requestAnimationFrame(() => {
+      if (main._templTransition === token) ending();
+    });
   }
 
   // Sets the state without a transition, like an unmount without exit
@@ -74,6 +96,12 @@
     return !!element?.hasAttribute("data-ending-style");
   }
 
+  // useAnimationsFinished on its own, for parts whose status another store
+  // drives, like the toast manager.
+  function animationsFinished(element, fn) {
+    whenAnimationsFinish(element, () => element.isConnected, fn);
+  }
+
   window.templ = window.templ || {};
-  window.templ.transition = { open, close, reset, isEnding };
+  window.templ.transition = { open, close, reset, isEnding, animationsFinished };
 })();

@@ -228,8 +228,24 @@ Behavior that moves to Base UI:
 - A collapsed accordion panel keeps `data-closed` while hidden, it used to drop it.
 - The submenus of both menus no longer put the transition attributes on their first menu item, the old helper also toggled the content's `firstElementChild`.
 
-Left alone: the toast. Base UI's toast renders no open state, its status comes from the toast manager, so `open` and `close` would add attributes upstream does not have. Its class strings keep `data-ending-style` variants, which is why the Done when grep lists `toast.js` next to the block. shadcn's collapsible example shows no starting or ending style at all, ours kept them as before. Our `select-demo` opens in popper mode where shadcn aligns the popup with the trigger, which is positioning and belongs to task 6.
+Our `select-demo` opens in popper mode where shadcn aligns the popup with the trigger, which is positioning and belongs to task 6.
 
 Checks: `check.sh` in chromium and webkit, a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 36). The DOM against rt4 differs on the 15 docs pages by the new code block and on five accordion panels by `data-closed`. `escape.mjs` 0 failures, `compare.mjs dismiss` open state now equal to shadcn for the drawer too, `compare.mjs` against the task 1 baseline 295 pass instead of 292 with every change in a drawer line and none new. `htmx.mjs` 110 of 110 in both engines.
+
+### Task 5, second round
+
+The first round left the toast and the collapsible different from upstream, which is not done. Both are Base UI now.
+
+Collapsible and accordion get `components/baseui/use_collapsible_panel.js`, a port of `useCollapsiblePanel`, which both Base UI panels use. The motion type is read from the panel's computed style after the new state applied. Without motion a panel opens and closes at once with no starting or ending style, which is what shadcn's `collapsible-demo` shows. With a transition or keyframe animation the panel is measured to pixels, gets the starting style for one frame, the ending style one frame after the close (Base UI's `deferEndingState`), is hidden once its animations finished and goes back to `auto`. A panel that renders open skips its keyframe mount animation until it was closed once, with the inline `animation-name: none` upstream renders. Left out: `hidden="until-found"` with find in page, which no shadcn panel uses, and `React.Activity`. For this `use_transition_status.js` got the options the source has: `open` takes the animated element and an `onComplete`, `close` takes `deferEnding` and an `onEnding` step. Base UI's `animation-name: none` toggle without a style flush in between has no effect in a browser and is not ported.
+
+The accordion also renders the state upstream renders on the server: `data-panel-open` and `data-disabled` on the trigger, `data-open` or `data-closed` on the panel (task 1 baseline), and sets `data-panel-open` when it toggles. `compare.mjs family:accordion` goes from 15 of 24 to 24 of 24.
+
+The toast keeps its own status, since Base UI's toast manager drives it and renders no open state, but its timing is upstream's now. The starting style goes right after the height is measured, like `ToastRoot`'s layout effect, instead of after 20 ms. The toast is removed once its animations finished, `useOpenChangeComplete`, through the block's new `animationsFinished`, instead of after a fixed 500 ms.
+
+`transition.mjs` now covers toast, accordion and collapsible. Toast gone at 551 ms upstream and 552 ms here, accordion 254 and 250 ms, collapsible at once on both sides, the phases equal in both engines.
+
+Found on the way: the bundler's comment said lexical order puts `baseui` before its consumers, which is wrong for `accordion`, `alertdialog`, `aspectratio` and `avatar`. `update_scripts.go` now puts `baseui` first explicitly, covered in its test. The watcher had to restart once to pick it up.
+
+Checks: `check.sh` in chromium and webkit, a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 37). The DOM against rt4 differs by the new code blocks on the docs pages and by the accordion state above. `escape.mjs` 0 failures, `compare.mjs dismiss` unchanged, `compare.mjs` against the task 1 baseline 304 pass instead of 292 and nothing new, `htmx.mjs` 110 of 110 in both engines.
 
 ## Planner review

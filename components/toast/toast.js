@@ -7,7 +7,6 @@
   // Vanilla port of shadcn's base/toast (Base UI Toast): the class strings,
   // CSS variables and stacking behavior mirror components/ui/toast.tsx.
 
-  var ENTER_EXIT_MS = 500;
   var SWIPE_THRESHOLD = 45;
   var GAP = 12; // --gap: 0.75rem
 
@@ -207,15 +206,12 @@
     var vp = viewportOf(null);
     if (!vp) return null;
     var t = build(opts);
+    // ToastRoot mounts with the starting style and drops it once its height
+    // is measured, so the transform transitions in from there.
     t.setAttribute("data-starting-style", "");
     vp.appendChild(t);
     layout(vp);
-    // Enter: flush the starting transform, then transition into place
-    // (setTimeout instead of rAF so background tabs still settle).
-    void t.offsetHeight;
-    window.setTimeout(function () {
-      t.removeAttribute("data-starting-style");
-    }, 20);
+    t.removeAttribute("data-starting-style");
     startTimer(t);
     return t;
   }
@@ -226,10 +222,11 @@
     var vp = viewportOf(t);
     t.setAttribute("data-ending-style", "");
     if (direction) t.setAttribute("data-swipe-direction", direction);
-    window.setTimeout(function () {
+    // Removed once the exit animations finished (useOpenChangeComplete).
+    window.templ.transition.animationsFinished(t, function () {
       t.remove();
       if (vp) layout(vp);
-    }, ENTER_EXIT_MS);
+    });
     if (vp) layout(vp);
   }
 

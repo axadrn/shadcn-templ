@@ -36,6 +36,7 @@ func TestUpdateScripts(t *testing.T) {
 	}
 	write("internal/design/z/z.js", "last")
 	write("internal/design/a/a.js", "first")
+	write("internal/design/baseui/block.js", "block")
 	write("internal/design/a/a.min.js", "ignored")
 	write("internal/design/own.js", "ignored")
 	write("internal/design/a/nested/x.js", "ignored")
@@ -44,7 +45,7 @@ func TestUpdateScripts(t *testing.T) {
 	if err != nil || !written {
 		t.Fatalf("first build: written=%v err=%v", written, err)
 	}
-	want := []byte("// components/a/a.js\nfirst\n// components/z/z.js\nlast\n")
+	want := []byte("// components/baseui/block.js\nblock\n// components/a/a.js\nfirst\n// components/z/z.js\nlast\n")
 	got, err := os.ReadFile(path)
 	if err != nil || !bytes.Equal(got, want) {
 		t.Fatalf("bundle=%q err=%v", got, err)
