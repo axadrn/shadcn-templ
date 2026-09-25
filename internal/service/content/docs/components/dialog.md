@@ -39,6 +39,8 @@ shadcn-templ add dialog
 
 <ComponentSource name="dialog" title="components/baseui/scroll_lock.js" />
 
+<ComponentSource name="dialog" title="components/baseui/use_transition_status.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

@@ -1,8 +1,5 @@
 // Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
-  // Exit animations run for 100ms (duration-100); hide shortly after.
-  const EXIT_MS = 120;
-
   const CONTENT = '[data-slot="hover-card-content"]';
   // Base UI links PreviewCard.Trigger to its card through context only; the
   // port marker carries the card id.
@@ -20,11 +17,6 @@
     return document.querySelector(
       '[data-templ-hover-card-trigger="' + content.id + '"]',
     );
-  }
-
-  function setOpenState(content, open) {
-    content.toggleAttribute("data-open", open);
-    content.toggleAttribute("data-closed", !open);
   }
 
   // Base UI zooms the popup out of the anchor's center point (e.g.
@@ -102,7 +94,6 @@
   }
 
   function open(content, trigger) {
-    clearTimeout(content._templHide);
     portal(content);
     content.hidden = false;
     content._templDismiss ??= window.templ.dismiss.useDismiss({
@@ -121,7 +112,7 @@
       content.style.visibility = "";
       void content.offsetWidth;
       content.style.transitionProperty = "";
-      setOpenState(content, true);
+      window.templ.transition.open([content]);
     });
   }
 
@@ -130,13 +121,9 @@
     content._templDismiss?.();
     content._templDismiss = null;
     stopAutoPositioning(content);
-    setOpenState(content, false);
-    clearTimeout(content._templHide);
-    content._templHide = setTimeout(() => {
-      if (content.hasAttribute("data-closed") && !content.hidden) {
-        content.hidden = true;
-      }
-    }, EXIT_MS);
+    window.templ.transition.close([content], content, () => {
+      content.hidden = true;
+    });
   }
 
   function requestOpenChange(content, nextOpen) {

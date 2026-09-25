@@ -271,36 +271,9 @@
 
   // ----- transition lifecycle ------------------------------------------------
 
-  function setTransitionAttributes(state, attrs) {
-    [state.backdrop, state.popup].forEach((el) => {
-      if (!el) return;
-      ["data-open", "data-closed", "data-starting-style", "data-ending-style"].forEach((name) => {
-        if (attrs.includes(name)) {
-          el.setAttribute(name, "");
-        } else {
-          el.removeAttribute(name);
-        }
-      });
-    });
-  }
-
-  // useOpenChangeComplete/useAnimationsFinished: wait for every animation and
-  // transition on the popup to finish, then run fn (a resolved microtask runs
-  // before the browser paints the post-animation frame, so hiding here never
-  // flashes the natural styles, like Base UI's flushSync unmount).
-  function whenAnimationsFinish(state, fn) {
-    const token = {};
-    state.finishToken = token;
-    const popup = state.popup;
-    if (typeof popup.getAnimations !== "function") {
-      fn();
-      return;
-    }
-    // Base UI waits on the popup's animations only (useOpenChangeComplete's
-    // ref is the popup); the backdrop uses the same durations.
-    Promise.allSettled(popup.getAnimations().map((animation) => animation.finished)).then(() => {
-      if (state.finishToken === token) fn();
-    });
+  // The parts that render the transition status, popup first.
+  function partsOf(state) {
+    return [state.popup, state.backdrop];
   }
 
   // ----- nested dialog bookkeeping ------------------------------------------
@@ -347,7 +320,6 @@
   function openDialog(target, trigger) {
     const state = stateOf(target);
     if (!state || state.open) return;
-    state.finishToken = null; // cancel a pending exit unmount
 
     const popup = state.popup;
     state.openType = trigger ? lastInteractionType || "mouse" : null;
@@ -365,14 +337,7 @@
 
     wireAria(state);
 
-    // useTransitionStatus: mount with data-open + data-starting-style, drop
-    // the starting style a frame later so CSS transitions see the start
-    // values (the reflow guarantees they were computed).
-    setTransitionAttributes(state, ["data-open", "data-starting-style"]);
-    void popup.offsetWidth;
-    requestAnimationFrame(() => {
-      if (state.open) setTransitionAttributes(state, ["data-open"]);
-    });
+    window.templ.transition.open(partsOf(state));
 
     if (isModal(state)) {
       state.releaseScroll = window.templ.scrollLock.acquire(popup);
@@ -415,18 +380,8 @@
     // Base UI order on open=false: the transition status flips to ending,
     // aria-hidden marking and the scroll lock release immediately, the
     // popup unmounts (and focus returns) once the exit animation finishes.
-    setTransitionAttributes(state, ["data-closed", "data-ending-style"]);
-    if (state.undoMarkOthers) {
-      state.undoMarkOthers();
-      state.undoMarkOthers = null;
-    }
-    state.releaseScroll?.();
-    state.releaseScroll = null;
-    updateTriggers(state, false);
-
-    whenAnimationsFinish(state, () => {
+    window.templ.transition.close(partsOf(state), popup, () => {
       state.root.hidden = true;
-      setTransitionAttributes(state, []);
       popup.style.removeProperty("--nested-dialogs");
       popup.removeAttribute("data-nested-dialog-open");
       returnFocus(state);
@@ -435,6 +390,13 @@
       // this).
       popup.dispatchEvent(new CustomEvent("dialog-close", { bubbles: true }));
     });
+    if (state.undoMarkOthers) {
+      state.undoMarkOthers();
+      state.undoMarkOthers = null;
+    }
+    state.releaseScroll?.();
+    state.releaseScroll = null;
+    updateTriggers(state, false);
   }
 
   // FloatingFocusManager return focus: the trigger (or the previously
@@ -574,7 +536,6 @@
       closeType: "",
       undoMarkOthers: null,
       releaseScroll: null,
-      finishToken: null,
     };
     dialogs.set(popup, state);
 
@@ -638,7 +599,7 @@
       popup.parentElement?.remove();
       return;
     }
-    state.finishToken = null;
+    window.templ.transition.reset(partsOf(state), false);
     stopDismiss(state);
     if (state.undoMarkOthers) {
       state.undoMarkOthers();

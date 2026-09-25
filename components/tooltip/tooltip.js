@@ -1,8 +1,5 @@
 // Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
-  // Exit animations run at the tw-animate default (150ms); hide after.
-  const EXIT_MS = 170;
-
   const CONTENT = '[data-slot="tooltip-content"]';
   // Base UI's TooltipTrigger identifier; a disabled trigger renders
   // data-trigger-disabled instead, so it never opens.
@@ -118,7 +115,6 @@
     if (trigger.hasAttribute("data-trigger-disabled")) return;
     const content = contentFor(trigger);
     if (!content) return;
-    clearTimeout(content._templHide);
     portal(content);
     content.hidden = false;
     content._templDismiss ??= window.templ.dismiss.useDismiss({
@@ -137,24 +133,8 @@
       content.style.visibility = "";
       void content.offsetWidth;
       content.style.transitionProperty = "";
-      content.removeAttribute("data-closed");
-      content.removeAttribute("data-ending-style");
-      content.setAttribute("data-open", "");
-      content.setAttribute("data-starting-style", "");
-      const arrowEl = arrowOf(content);
-      if (arrowEl) {
-        arrowEl.removeAttribute("data-closed");
-        arrowEl.removeAttribute("data-ending-style");
-        arrowEl.setAttribute("data-open", "");
-        arrowEl.setAttribute("data-starting-style", "");
-      }
+      window.templ.transition.open([content, arrowOf(content)]);
       trigger.setAttribute("data-popup-open", "");
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          content.removeAttribute("data-starting-style");
-          if (arrowEl) arrowEl.removeAttribute("data-starting-style");
-        });
-      });
     });
   }
 
@@ -163,27 +143,11 @@
     content._templDismiss?.();
     content._templDismiss = null;
     stopAutoPositioning(content);
-    content.removeAttribute("data-open");
-    content.removeAttribute("data-starting-style");
-    content.setAttribute("data-closed", "");
-    content.setAttribute("data-ending-style", "");
-    const arrowEl = arrowOf(content);
-    if (arrowEl) {
-      arrowEl.removeAttribute("data-open");
-      arrowEl.removeAttribute("data-starting-style");
-      arrowEl.setAttribute("data-closed", "");
-      arrowEl.setAttribute("data-ending-style", "");
-    }
+    window.templ.transition.close([content, arrowOf(content)], content, () => {
+      content.hidden = true;
+    });
     const trigger = triggerFor(content);
     if (trigger) trigger.removeAttribute("data-popup-open");
-    clearTimeout(content._templHide);
-    content._templHide = setTimeout(() => {
-      if (content.hasAttribute("data-closed") && !content.hidden) {
-        content.hidden = true;
-        content.removeAttribute("data-ending-style");
-        if (arrowEl) arrowEl.removeAttribute("data-ending-style");
-      }
-    }, EXIT_MS);
   }
 
   function closeAll() {

@@ -92,7 +92,7 @@ Done when: `grep -lE "'Escape'|\"Escape\"" components/*/*.js` lists only `use_di
 
 ### 5. Transitions
 
-- [ ] Done
+- [x] Done
 
 `components/baseui/use_transition_status.js`, `useTransitionStatus.ts` plus `useOpenChangeComplete.tsx`: set `data-starting-style` for the first frame of an open, `data-ending-style` during close, finish on `animationend`/`transitionend` or immediately when there is no animation. The 8 consumers switch; the drawer popup gets Base UI's `data-open`/`data-closed` here (carried over).
 
@@ -211,5 +211,23 @@ Found on the way, not part of this task: Base UI's popover trigger opens on `cli
 `tmp/escape/probe.mjs` still used the `data-tui-*` selectors from before parity-attributes. It is ported to `tmp/parity-runtime/escape.mjs` with the same scenarios, 0 failed expectations in both engines. `compare.mjs` gained `down` and `up` steps and a `dismiss` set: open, press in an empty corner, release, for twelve overlay examples.
 
 Checks: `check.sh` in chromium and webkit, a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 35), the DOM against rt3 differs only on the nine docs pages by the new code block. `escape.mjs` 0 failures, `compare.mjs` against the task 1 baseline one fail less (the drawer Escape) and nothing new, `compare.mjs dismiss` open state equal to shadcn everywhere except the drawer, whose missing `data-open` is task 5. Nested drawers on a backdrop click close one level at a time on both sides. `htmx.mjs` 110 of 110 in both engines.
+
+### Task 5
+
+`components/baseui/use_transition_status.js` ports `useTransitionStatus` with `useOpenChangeComplete` and `useAnimationsFinished`. `open(parts)` sets `data-open` and `data-starting-style` for one frame, `close(parts, animated, onComplete)` sets `data-closed` and `data-ending-style` and completes once every animation on the animated element finished (`getAnimations()`, one frame later like the source, which also catches CSS transitions since `getAnimations` flushes styles). An open cancels a close in flight. `reset(parts, open)` is the unmount without exit animation, `isEnding(element)` reads Base UI's `transitionStatus === "ending"`.
+
+Eleven scripts use it: popover, dropdown menu with its submenus, context menu with its submenus, select, combobox, tooltip with its arrow, hover card, dialog with its backdrop, drawer with overlay and viewport, collapsible, accordion. Gone are the fixed `EXIT_MS` timers (120 or 170 ms), the dialog's `whenAnimationsFinish`, the drawer's `transitionend` with its 500 ms fallback, the collapsible's duration guess from computed CSS times with its document wide `transitionend` listener, the accordion's `animationend` listener and select's special case for the aligned mode, which now completes on the next frame because it has no animation.
+
+Behavior that moves to Base UI:
+
+- Every close ends when the animation ends. `tmp/parity-runtime/transition.mjs` records the status of the popup every frame after open and close on both sides. The phases are the same for every popup and the times close, for example popover gone at 113 ms upstream and hidden at 114 ms here, drawer 423 and 442 ms.
+- The drawer popup, overlay and viewport carry `data-open` and `data-closed`, its trigger `data-popup-open` (carried over). In `compare.mjs` every drawer example now has shadcn's open state; left there are the trigger slot (parity-components) and focus (task 7).
+- Context menu, combobox and hover card render `data-starting-style` and `data-ending-style`, which they did not before.
+- A collapsed accordion panel keeps `data-closed` while hidden, it used to drop it.
+- The submenus of both menus no longer put the transition attributes on their first menu item, the old helper also toggled the content's `firstElementChild`.
+
+Left alone: the toast. Base UI's toast renders no open state, its status comes from the toast manager, so `open` and `close` would add attributes upstream does not have. Its class strings keep `data-ending-style` variants, which is why the Done when grep lists `toast.js` next to the block. shadcn's collapsible example shows no starting or ending style at all, ours kept them as before. Our `select-demo` opens in popper mode where shadcn aligns the popup with the trigger, which is positioning and belongs to task 6.
+
+Checks: `check.sh` in chromium and webkit, a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 36). The DOM against rt4 differs on the 15 docs pages by the new code block and on five accordion panels by `data-closed`. `escape.mjs` 0 failures, `compare.mjs dismiss` open state now equal to shadcn for the drawer too, `compare.mjs` against the task 1 baseline 295 pass instead of 292 with every change in a drawer line and none new. `htmx.mjs` 110 of 110 in both engines.
 
 ## Planner review

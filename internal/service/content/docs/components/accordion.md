@@ -31,6 +31,8 @@ shadcn-templ add accordion
 
 <ComponentSource name="accordion" title="components/accordion/accordion.js" />
 
+<ComponentSource name="accordion" title="components/baseui/use_transition_status.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

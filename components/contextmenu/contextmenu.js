@@ -1,6 +1,5 @@
 // Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
-  const EXIT_MS = 120; // exit animation (duration-100) + slack
   const COLLISION_PADDING = 5;
   // Submenu hover intent, like Base UI: open fast, close with a grace delay so
   // moving the mouse diagonally into the submenu does not flicker.
@@ -47,11 +46,9 @@
     element.toggleAttribute("data-closed", !open);
   }
 
-  function setState(content, state) {
-    const open = state === "open";
-    setOpenState(content, open);
-    const popup = popupFor(content);
-    if (popup) setOpenState(popup, open);
+  // The parts that render the transition status.
+  function partsOf(content) {
+    return [content, popupFor(content)];
   }
 
   function setChecked(item, checked) {
@@ -194,7 +191,6 @@
     allContents().forEach((c) => {
     if (c !== content) requestOpenChange(c, false);
     });
-    clearTimeout(content._templHide);
     portal(content);
     content.hidden = false;
     content._templDismiss ??= window.templ.dismiss.useDismiss({
@@ -235,7 +231,7 @@
       content._templReleaseScroll = window.templ.scrollLock.anchoredPopup(
         true, touchOpen, content, triggerFor(content),
       );
-      setState(content, "open");
+      window.templ.transition.open(partsOf(content));
       if (popup) {
         syncSubState(popup);
         enqueueFocus(popup, () => content.hasAttribute("data-open"));
@@ -247,14 +243,10 @@
     if (content.hidden) return;
     content._templDismiss?.();
     content._templDismiss = null;
-    setState(content, "closed");
+    window.templ.transition.close(partsOf(content), popupFor(content), () => {
+      content.hidden = true;
+    });
     content.querySelectorAll(SUB).forEach(closeSubNow);
-    clearTimeout(content._templHide);
-    content._templHide = setTimeout(() => {
-      if (content.hasAttribute("data-closed") && !content.hidden) {
-        content.hidden = true;
-      }
-    }, EXIT_MS);
     content._templReleaseScroll?.();
     content._templReleaseScroll = null;
   }
@@ -324,7 +316,7 @@
       content.style.visibility = "";
       void content.offsetWidth;
       content.style.transitionProperty = "";
-      setOpenState(content, true);
+      window.templ.transition.open([content]);
       setOpenState(trigger, true);
 	  trigger.setAttribute("aria-expanded", "true");
       if (focusFirst) focusItem(itemsIn(content)[0] || content);
@@ -335,14 +327,9 @@
   function closeSub(sub) {
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
-    setOpenState(content, false);
+    window.templ.transition.close([content], content, () => content.classList.add("hidden"));
     setOpenState(trigger, false);
 	trigger.setAttribute("aria-expanded", "false");
-    setTimeout(() => {
-      if (content.hasAttribute("data-closed")) {
-        content.classList.add("hidden");
-      }
-    }, EXIT_MS);
   }
 
   // Closes immediately (used when the whole menu goes away).
@@ -354,7 +341,7 @@
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
     content.classList.add("hidden");
-    setOpenState(content, false);
+    window.templ.transition.reset([content], false);
     setOpenState(trigger, false);
 	trigger.setAttribute("aria-expanded", "false");
   }

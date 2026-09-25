@@ -1,7 +1,6 @@
 // Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
   // Constants from Base UI's select, shadcn's reference implementation.
-  const EXIT_MS = 120; // popper exit animation (duration-100) + slack
   const SIDE_OFFSET = 4;
   const COLLISION_PADDING = 5;
   const MARGIN = 10; // aligned mode: minimum distance to the viewport edges
@@ -95,33 +94,13 @@
     return content.getAttribute("data-templ-align-item-with-trigger") !== "false";
   }
 
-  function setState(content, state) {
-    const open = state === "open";
-    content.toggleAttribute("data-open", open);
-    content.toggleAttribute("data-closed", !open);
-    const popup = popupFor(content);
-    if (popup) {
-      popup.toggleAttribute("data-open", open);
-      popup.toggleAttribute("data-closed", !open);
-    }
+  // The parts that render the transition status.
+  function partsOf(content) {
+    return [content, popupFor(content)];
   }
 
   function isOpen(content) {
     return !!content && content.hasAttribute("data-open");
-  }
-
-  function setTransitionAttribute(content, name, present) {
-    content.toggleAttribute(name, present);
-    const popup = popupFor(content);
-    if (popup) popup.toggleAttribute(name, present);
-  }
-
-  function startTransition(content) {
-    setTransitionAttribute(content, "data-ending-style", false);
-    setTransitionAttribute(content, "data-starting-style", true);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => setTransitionAttribute(content, "data-starting-style", false));
-    });
   }
 
   function setSide(content, side) {
@@ -512,7 +491,6 @@
     allContents().forEach((c) => {
       if (c !== content) close(c);
     });
-    clearTimeout(content._templHide);
     content._templOpenMethod = openMethod || "programmatic";
     // A press on the trigger can open the popup under the pointer (aligned
     // mode). Mouseup selection stays disabled briefly so releasing over the
@@ -565,8 +543,7 @@
       content._templReleaseScroll = window.templ.scrollLock.anchoredPopup(
         true, content._templOpenMethod === "touch", content, trigger,
       );
-      setState(content, "open");
-      startTransition(content);
+      window.templ.transition.open(partsOf(content));
       trigger.setAttribute("aria-expanded", "true");
       trigger.setAttribute("data-popup-open", "");
       trigger.setAttribute("data-pressed", "");
@@ -592,9 +569,11 @@
       dragY: 0,
     };
     content.style.visibility = "";
-    setTransitionAttribute(content, "data-starting-style", false);
-    setState(content, "closed");
-    setTransitionAttribute(content, "data-ending-style", true);
+    // Aligned mode has no exit animation (animate-none, like shadcn), so
+    // the close completes on the next frame.
+    window.templ.transition.close(partsOf(content), popupFor(content), () => {
+      content.hidden = true;
+    });
     content._templReleaseScroll?.();
     content._templReleaseScroll = null;
     const trigger = triggerFor(content);
@@ -603,21 +582,6 @@
       trigger.removeAttribute("data-popup-open");
       trigger.removeAttribute("data-pressed");
     }
-    clearTimeout(content._templHide);
-    // Aligned mode has no exit animation (animate-none, like shadcn) — hide
-    // immediately instead of waiting for one.
-    const popup = popupFor(content);
-    if (popup && popup.getAttribute("data-align-trigger") === "true") {
-      content.hidden = true;
-      setTransitionAttribute(content, "data-ending-style", false);
-      return;
-    }
-    content._templHide = setTimeout(() => {
-      if (content.hasAttribute("data-closed") && !content.hidden) {
-        content.hidden = true;
-        setTransitionAttribute(content, "data-ending-style", false);
-      }
-    }, EXIT_MS);
   }
 
   function closeAll() {

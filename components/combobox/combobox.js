@@ -1,7 +1,6 @@
 // Uses window.FloatingUIDOM from components/floatingui (loaded in the same bundle).
 (function () {
   // Constants from Base UI's combobox, shadcn's reference implementation.
-  const EXIT_MS = 120; // exit animation (duration-100) + slack
   const SIDE_OFFSET = 6;
   const COLLISION_PADDING = 5;
 
@@ -122,15 +121,9 @@
     return itemsOf(content).filter((i) => i.hasAttribute("data-selected"));
   }
 
-  function setState(content, state) {
-    const open = state === "open";
-    content.toggleAttribute("data-open", open);
-    content.toggleAttribute("data-closed", !open);
-    const popup = popupFor(content);
-    if (popup) {
-      popup.toggleAttribute("data-open", open);
-      popup.toggleAttribute("data-closed", !open);
-    }
+  // The parts that render the transition status.
+  function partsOf(content) {
+    return [content, popupFor(content)];
   }
 
   function setSide(content, side) {
@@ -299,7 +292,6 @@
     allContents().forEach((c) => {
       if (c !== content) requestOpenChange(c, false);
     });
-    clearTimeout(content._templHide);
     portal(content);
     content._templDismiss ??= window.templ.dismiss.useDismiss({
       floating: content,
@@ -335,7 +327,7 @@
       void content.offsetWidth;
       content.style.transitionProperty = "";
       if (content.hidden) return;
-      setState(content, "open");
+      window.templ.transition.open(partsOf(content));
       setExpanded(content, true);
     };
     startAutoPositioning(content).then(finish, finish);
@@ -347,7 +339,9 @@
     content._templDismiss = null;
     stopAutoPositioning(content);
     content.style.visibility = "";
-    setState(content, "closed");
+    window.templ.transition.close(partsOf(content), popupFor(content), () => {
+      content.hidden = true;
+    });
     setExpanded(content, false);
     const input = inputFor(content);
     if (input) {
@@ -356,12 +350,6 @@
       input.value =
         isMultiple(content) || content.contains(input) ? "" : displayValue(content);
     }
-    clearTimeout(content._templHide);
-    content._templHide = setTimeout(() => {
-      if (content.hasAttribute("data-closed") && !content.hidden) {
-        content.hidden = true;
-      }
-    }, EXIT_MS);
   }
 
   function requestOpenChange(content, nextOpen) {
