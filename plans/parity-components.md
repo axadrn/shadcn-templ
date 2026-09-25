@@ -16,7 +16,7 @@ After `parity-attributes` and `parity-runtime`, every existing component follows
 ## Decisions
 
 - **One pinned upstream.** `plans/UPSTREAM.md` from `parity-attributes` task 1 holds the `shadcn-ui/ui` commit and the `@base-ui/react` version. Every port and every comparison in this plan uses that pin. Moving the pin is its own later plan.
-- **A local shadcn reference app is the ground truth.** `tmp/parity-components/reference/` (gitignored): a Next.js app created with the shadcn CLI at the pinned version, style `base-nova`, base color `neutral`, every `bases/base/ui` component installed, and one route per upstream example rendering it alone, `/preview/<example-name>`, the same shape as our `/preview/<name>`. Our site is not compared to ui.shadcn.com, which renders other styles.
+- **A local shadcn reference app is the ground truth.** It is built in `parity-runtime` task 1 (`tmp/parity-runtime/reference/`, `/preview/<example-name>` on port 3100) and reused here. Our site is not compared to ui.shadcn.com, which renders other styles.
 - **Comparison is automated and per example.** `tmp/parity-components/compare.mjs <engine> <example>` opens the example on both apps at the same viewport, then for the initial render and after each scripted interaction (open, arrow keys, typeahead, select, Escape, outside click, Tab) compares: the DOM tree (tag, `data-slot`, sorted attribute names and the values of `role`, `aria-*`, Base UI state attributes; rule 3 `data-templ-*` attributes ignored), the focused element's `data-slot`, scroll lock state, and a screenshot pixel diff with a small tolerance for font rendering. Interactions per example live in `tmp/parity-components/scenarios.json`. Output is one line per check, PASS or FAIL with the first difference.
 - **Example names map one to one.** Every upstream example has an example here under the same name in snake case; a missing one is ported as part of its component's task. Our extra examples stay, they are not compared.
 - **A new component is ported like the existing ones.** Templ from the upstream `ui/*.tsx` with verbatim classes, props per rule 1, the DOM per rule 2, rule 3 for the rest, behavior only from `components/baseui/` blocks plus the component's own wiring, docs page and registry entry like its siblings. Components that wrap a third party library upstream (`sonner`, `input-otp`, `embla`, `react-day-picker`, `recharts`, `react-resizable-panels`) follow the same rules against that library's rendered DOM.
@@ -31,7 +31,7 @@ Tasks 1 and 2 are written in full now; the component tasks are written after tas
 
 - [ ] Done
 
-`tmp/parity-components/reference/` at the pin in `plans/UPSTREAM.md` per Decisions, with a `README.md` saying how to start it (port 3100). `compare.mjs` and `scenarios.json` with scenarios for `button`, `dialog`, `select` as the first three, to prove the harness.
+The reference app from `parity-runtime` task 1. `compare.mjs` extended by the DOM tree comparison and the screenshot diff from Decisions, scenarios for `button`, `dialog`, `select` as the first three to prove the extension.
 
 Done when: the reference app serves `/preview/<name>` for every upstream example, `compare.mjs chromium dialog-demo` runs end to end on both apps and prints its checks.
 
