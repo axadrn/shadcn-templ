@@ -4,31 +4,6 @@
   const EXIT_MS = 120; // exit animation (duration-100) + slack
   const COLLISION_PADDING = 5;
 
-  const escapeTargets = new WeakSet();
-  function listenForEscape(element) {
-    if (!element || escapeTargets.has(element)) return;
-    element.addEventListener("keydown", closeOnEscapeKeyDown);
-    escapeTargets.add(element);
-  }
-
-  // useDismiss: popup/reference listeners stop Escape before outer document handlers.
-  function closeOnEscapeKeyDown(event) {
-    if (event.key !== "Escape") return;
-    const contents = event.currentTarget === document
-      ? allContents()
-      : [isPositioner(event.currentTarget)
-        ? event.currentTarget
-        : contentFor(event.currentTarget)];
-    let handled = false;
-    for (const content of contents) {
-      if (!content?.hasAttribute("data-open")) continue;
-      if (requestOpenChange(content, false)) event.preventDefault();
-      event.stopPropagation();
-      handled = true;
-    }
-    return handled;
-  }
-
   // The popover's element is the positioner (shadcn's isolate z-50 wrapper,
   // no slot) around the [data-slot=popover-content] popup.
   const POPUP = '[data-slot="popover-content"]';
@@ -125,7 +100,6 @@
 
   // Moves the content to <body> (shadcn portals it the same way).
   function portal(content) {
-    listenForEscape(content);
     window.templ.portal.render(content);
     wireAria(content);
   }
@@ -234,6 +208,15 @@
     clearTimeout(content._templHide);
     portal(content);
     content.hidden = false;
+    // useDismiss runs while open. Base UI's non modal popover dismisses a
+    // mouse press on the click, a touch on the press.
+    content._templDismiss = window.templ.dismiss.useDismiss({
+      floating: content,
+      reference: [...document.querySelectorAll('[aria-controls="' + content.id + '"]')],
+      outsidePressEvent: { mouse: "intentional", touch: "sloppy" },
+      // Focus follows an outside press instead of returning to the trigger.
+      onOpenChange: (open, reason) => requestOpenChange(content, open, reason !== "outside-press"),
+    });
 
     // Position it invisibly first, then play the enter animation in place.
     content.style.visibility = "hidden";
@@ -269,6 +252,8 @@
   function close(content, returnFocus) {
     if (typeof content === "string") content = document.getElementById(content);
     if (!content || content.hidden) return;
+    content._templDismiss?.();
+    content._templDismiss = null;
     stopAutoPositioning(content);
     if (returnFocus !== false && content.contains(document.activeElement)) {
       const focusTrigger = triggerFor(content);
@@ -295,10 +280,6 @@
 
   function closeAll(returnFocus) {
     allContents().forEach((content) => close(content, returnFocus));
-  }
-
-  function requestCloseAll(returnFocus) {
-    allContents().forEach((content) => requestOpenChange(content, false, returnFocus));
   }
 
   function closeNearest(element) {
@@ -328,9 +309,7 @@
       if (trigger.disabled) return;
       const content = contentFor(trigger);
       if (content) toggle(content);
-      return;
     }
-    if (!positionerOf(e.target)) requestCloseAll(false);
   });
 
   document.addEventListener("click", (e) => {
@@ -346,7 +325,6 @@
     }
   });
 
-  document.addEventListener("keydown", closeOnEscapeKeyDown);
 
 
   // Content stays in its hidden portal node until it opens. It unmounts with
@@ -356,7 +334,6 @@
       const content = popup.parentElement;
       const trigger = isPositioner(content) && triggerFor(content);
       if (!trigger) return;
-      listenForEscape(trigger);
       // Server-side open state (Base UI open or defaultOpen).
       if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
         open(content);
@@ -365,6 +342,7 @@
     destroy(popup) {
       const content = popup.parentElement;
       if (!isPositioner(content)) return;
+      content._templDismiss?.();
       stopAutoPositioning(content);
       if (content.isConnected) content.remove();
     },

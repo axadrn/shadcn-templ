@@ -5,31 +5,6 @@
   const SIDE_OFFSET = 6;
   const COLLISION_PADDING = 5;
 
-  const escapeTargets = new WeakSet();
-  function listenForEscape(element) {
-    if (!element || escapeTargets.has(element)) return;
-    element.addEventListener("keydown", closeOnEscapeKeyDown);
-    escapeTargets.add(element);
-  }
-
-  // useDismiss: popup/reference listeners stop Escape before outer document handlers.
-  function closeOnEscapeKeyDown(event) {
-    if (event.key !== "Escape") return;
-    const contents = event.currentTarget === document
-      ? allContents()
-      : [isPositioner(event.currentTarget)
-        ? event.currentTarget
-        : contentFor(event.currentTarget)];
-    let handled = false;
-    for (const content of contents) {
-      if (!content?.hasAttribute("data-open")) continue;
-      if (requestOpenChange(content, false)) event.preventDefault();
-      event.stopPropagation();
-      handled = true;
-    }
-    return handled;
-  }
-
   // The combobox's element is the positioner (no slot upstream) around the
   // [data-slot=combobox-content] popup.
   const POPUP = '[data-slot="combobox-content"]';
@@ -183,7 +158,6 @@
 
   // Moves the content to <body> (shadcn portals it the same way).
   function portal(content) {
-    listenForEscape(content);
     window.templ.portal.render(content);
   }
 
@@ -327,6 +301,19 @@
     });
     clearTimeout(content._templHide);
     portal(content);
+    content._templDismiss ??= window.templ.dismiss.useDismiss({
+      floating: content,
+      reference: [inputFor(content), ...document.querySelectorAll('[aria-haspopup][aria-controls="' + content.id + '"]')],
+      // The visual viewport can be small with the software keyboard open, so
+      // a touch outside dismisses on the click, after a possible scroll.
+      outsidePressEvent: { mouse: "sloppy", touch: "intentional" },
+      outsidePress(event) {
+        const target = event.target;
+        return !anchorFor(content)?.contains(target) &&
+          !target.closest?.('[data-slot="combobox-clear"], [data-slot="combobox-chips"]');
+      },
+      onOpenChange: (open) => requestOpenChange(content, open),
+    });
     content.hidden = false;
 
     applyFilter(content, "");
@@ -356,6 +343,8 @@
 
   function close(content) {
     if (content.hidden) return;
+    content._templDismiss?.();
+    content._templDismiss = null;
     stopAutoPositioning(content);
     content.style.visibility = "";
     setState(content, "closed");
@@ -373,10 +362,6 @@
         content.hidden = true;
       }
     }, EXIT_MS);
-  }
-
-  function closeAll() {
-  allContents().forEach((content) => requestOpenChange(content, false));
   }
 
   function requestOpenChange(content, nextOpen) {
@@ -549,9 +534,6 @@
     init(popup) {
       const content = popup.parentElement;
       if (!isPositioner(content)) return;
-      const field = inputFor(content);
-      if (field) listenForEscape(field);
-      document.querySelectorAll('[aria-haspopup][aria-controls="' + content.id + '"]').forEach(listenForEscape);
       // Server-side open state (Base UI open or defaultOpen).
       if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
         open(content);
@@ -567,6 +549,7 @@
       const content = popup.parentElement;
       if (!isPositioner(content)) return;
       stopAutoPositioning(content);
+      content._templDismiss?.();
       if (content.isConnected) content.remove();
     },
   });
@@ -610,8 +593,6 @@
       return;
     }
 
-    // Base UI dismisses on outside PRESS, not on the later click.
-    if (!positionerOf(e.target)) closeAll();
   });
 
   document.addEventListener("click", (e) => {
@@ -663,7 +644,6 @@
   });
 
   document.addEventListener("keydown", (e) => {
-    if (closeOnEscapeKeyDown(e)) return;
     if (!(e.target instanceof Element) || !e.target.matches(INPUT)) return;
     const content = contentFor(e.target);
     if (!isPositioner(content)) return;

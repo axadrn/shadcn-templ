@@ -35,6 +35,8 @@ shadcn-templ add context-menu
 
 <ComponentSource name="context-menu" title="components/baseui/portal.js" />
 
+<ComponentSource name="context-menu" title="components/baseui/use_dismiss.js" />
+
 <ComponentSource name="context-menu" title="components/baseui/scroll_lock.js" />
 
 <ComponentSource name="context-menu" title="components/floatingui/floating_ui_core.js" />

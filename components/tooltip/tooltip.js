@@ -3,31 +3,6 @@
   // Exit animations run at the tw-animate default (150ms); hide after.
   const EXIT_MS = 170;
 
-  const escapeTargets = new WeakSet();
-  function listenForEscape(element) {
-    if (!element || escapeTargets.has(element)) return;
-    element.addEventListener("keydown", closeOnEscapeKeyDown);
-    escapeTargets.add(element);
-  }
-
-  // useDismiss: popup/reference listeners stop Escape before outer document handlers.
-  function closeOnEscapeKeyDown(event) {
-    if (event.key !== "Escape") return;
-    const contents = event.currentTarget === document
-      ? allContents()
-      : [event.currentTarget.matches(CONTENT)
-        ? event.currentTarget
-        : contentFor(event.currentTarget)];
-    let handled = false;
-    for (const content of contents) {
-      if (!content?.hasAttribute("data-open")) continue;
-      if (requestOpenChange(triggerFor(content), false)) event.preventDefault();
-      event.stopPropagation();
-      handled = true;
-    }
-    return handled;
-  }
-
   const CONTENT = '[data-slot="tooltip-content"]';
   // Base UI's TooltipTrigger identifier; a disabled trigger renders
   // data-trigger-disabled instead, so it never opens.
@@ -77,7 +52,6 @@
 
   // Moves the content to <body> (shadcn portals it the same way).
   function portal(content) {
-    listenForEscape(content);
     window.templ.portal.render(content);
   }
 
@@ -147,6 +121,11 @@
     clearTimeout(content._templHide);
     portal(content);
     content.hidden = false;
+    content._templDismiss ??= window.templ.dismiss.useDismiss({
+      floating: content,
+      reference: trigger,
+      onOpenChange: (open) => requestOpenChange(trigger, open),
+    });
 
     // Position it invisibly first, then play the enter animation in place.
     content.style.visibility = "hidden";
@@ -181,6 +160,8 @@
 
   function close(content) {
     if (content.hidden) return;
+    content._templDismiss?.();
+    content._templDismiss = null;
     stopAutoPositioning(content);
     content.removeAttribute("data-open");
     content.removeAttribute("data-starting-style");
@@ -260,9 +241,7 @@
     if (content) requestOpenChange(trigger, false);
   });
 
-  document.addEventListener("keydown", closeOnEscapeKeyDown);
 
-  window.templ.lifecycle.register(TRIGGER, { init: listenForEscape });
   // Content stays in its hidden portal node until it opens. It unmounts with
   // its portal owner: a portaled one is removed from <body> then.
   window.templ.lifecycle.register(CONTENT, {
@@ -275,6 +254,7 @@
     },
     destroy(content) {
       stopAutoPositioning(content);
+      content._templDismiss?.();
       if (content.isConnected) content.remove();
     },
   });

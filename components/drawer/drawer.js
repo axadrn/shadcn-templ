@@ -459,6 +459,7 @@
   }
 
   function cleanupClosed(dialog) {
+    stopDismiss(dialog);
     setPartsAttr(dialog, "data-ending-style", false);
     setPartsAttr(dialog, "data-starting-style", false);
     setPartsAttr(dialog, "data-swiping", false);
@@ -519,28 +520,36 @@
     }
   }
 
-  const escapeTargets = new WeakSet();
-  function listenForEscape(element) {
-    if (!element || escapeTargets.has(element)) return;
-    element.addEventListener("keydown", closeOnEscapeKeyDown);
-    escapeTargets.add(element);
+  // useDismiss with useDialogRoot's options, DrawerRoot builds on them.
+  function startDismiss(dialog) {
+    const popup = popupOf(dialog);
+    if (!popup || dialog._templDismiss) return;
+    const isModal = () => dialog.getAttribute("data-templ-modal") === "true";
+    dialog._templDismiss = window.templ.dismiss.useDismiss({
+      floating: popup,
+      reference: [...document.querySelectorAll('[aria-controls="' + dialog.id + '"]')],
+      // A nested open drawer blocks its parent.
+      escapeKey: () => !hasOpenNested(dialog),
+      // With a backdrop the dismissal waits for the click.
+      outsidePressEvent: () => overlayOf(dialog) ? "intentional" : { mouse: "intentional", touch: "sloppy" },
+      outsidePress(event) {
+        if ("button" in event && event.button !== 0) return false;
+        if ("touches" in event && event.touches.length !== 1) return false;
+        if (hasOpenNested(dialog) || dialog.hasAttribute("data-templ-disable-pointer-dismissal")) return false;
+        const overlay = overlayOf(dialog);
+        if (!isModal() || !overlay) return true;
+        const target = event.target;
+        return target === overlay || (target.contains(popup) && !target.hasAttribute("data-base-ui-portal"));
+      },
+      onOpenChange: (open) => requestOpenChange(dialog, open),
+    });
   }
 
-  // useDismiss: the focused popup or reference handles Escape before document.
-  function closeOnEscapeKeyDown(event) {
-    if (event.key !== "Escape") return;
-    const drawer = event.currentTarget === document
-      ? [...document.querySelectorAll("body > " + VIEWPORT)].find(
-        (dialog) => dialog.open && !dialog.hasAttribute("data-templ-disable-pointer-dismissal") && !hasOpenNested(dialog),
-      )
-      : drawerFor(event.currentTarget);
-    if (!drawer?.open || drawer.hasAttribute("data-templ-disable-pointer-dismissal") || hasOpenNested(drawer)) return;
-    if (requestOpenChange(drawer, false)) event.preventDefault();
-    event.stopPropagation();
-    return true;
+  function stopDismiss(dialog) {
+    dialog._templDismiss?.();
+    dialog._templDismiss = null;
   }
 
-  document.addEventListener("keydown", closeOnEscapeKeyDown);
 
   function openDrawer(target) {
     const dialog = getDrawer(target);
@@ -587,6 +596,8 @@
     void popup.offsetWidth;
     setPartsAttr(dialog, "data-starting-style", false);
     updateState(dialog, true);
+    // Also on a reopen during the exit, which stopped the dismissal.
+    startDismiss(dialog);
     syncStack();
   }
 
@@ -602,6 +613,7 @@
       return;
     }
     if (popup.hasAttribute("data-ending-style")) return;
+    stopDismiss(dialog);
 
     // Pin the measured height for the exit (DrawerPopup sets --drawer-height
     // while transitionStatus is 'ending'), so the panel cannot collapse
@@ -1261,7 +1273,6 @@
   function ensureDrawer(dialog) {
     if (!dialog || dialog._templDrawerInit) return dialog;
     dialog._templDrawerInit = true;
-    listenForEscape(dialog);
 
     dialog.addEventListener("cancel", (event) => {
       event.preventDefault();
@@ -1272,18 +1283,6 @@
       window.clearTimeout(dialog._templCloseTimer);
       delete dialog._templCloseTimer;
       cleanupClosed(dialog);
-    });
-
-    // A press anywhere outside the popup (on the viewport or the overlay) is
-    // an outside press and dismisses the drawer (Base UI outside press). For
-    // non-modal drawers the viewport is pointer-events-none, so outside
-    // presses reach the page instead — same as before.
-    dialog.addEventListener("pointerdown", (event) => {
-      if (!dialog.open) return;
-      if (dialog.hasAttribute("data-templ-disable-pointer-dismissal")) return;
-      const popup = popupOf(dialog);
-      const target = event.target instanceof Element ? event.target : null;
-      if (popup && target && !popup.contains(target)) requestOpenChange(dialog, false);
     });
 
     attachSwipe(dialog);
@@ -1307,13 +1306,6 @@
     }
   });
 
-  // Base UI's DrawerTrigger identifier (DialogTrigger), shared with dialog
-  // and popover triggers.
-  window.templ.lifecycle.register("[data-base-ui-click-trigger][aria-controls]", {
-    init(trigger) {
-      if (drawerFor(trigger)) listenForEscape(trigger);
-    },
-  });
   // A drawer lives as long as its SSR declaration site (the portal owner)
   // stays in the document, which keeps programmatic drawers
   // (window.templ.drawer.open) alive. Mounting and unmounting recompute the
@@ -1331,6 +1323,7 @@
       syncStack();
     },
     destroy(dialog) {
+      stopDismiss(dialog);
       unwatchSnapResize(dialog);
       dialog._templReleaseScroll?.();
       dialog._templReleaseScroll = null;
