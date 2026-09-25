@@ -56,13 +56,13 @@ Every component task follows the same procedure: read the Base UI source of the 
 
 ### 1. Reference app and comparison harness
 
-- [ ] Done
+- [x] Done
 
-`tmp/parity-runtime/reference/` (gitignored): a Next.js app with the shadcn CLI at the pin in `plans/UPSTREAM.md`, style `base-nova`, base color `neutral`, every `bases/base/ui` component, and `/preview/<example>` routes rendering each upstream example alone, served on port 3100 (`README.md` says how to start it). `compare.mjs <engine> <example> [scenario]` opens the example on both apps at the same viewport and runs the scenario from `scenarios.json` (open, arrows, typeahead, select, Escape, outside press, Tab), after each step comparing the focused element's `data-slot` and role, the open state of popups, Base UI state attributes on the parts, and whether the page scroll is locked. Scenarios for the examples of every component in the Context table. Run it on `main` in both engines and save `baseline-{engine}.log`: the list of today's behavior differences, which the component tasks close.
+`tmp/parity-runtime/reference/` (gitignored): `shadcn-ui/ui` itself at the pin in `plans/UPSTREAM.md`, `apps/v4` after `registry:build`, which serves every upstream example alone at `/examples/base/<name>` on port 3100 (`tmp/parity-runtime/README.md` says how to start it). `compare.mjs <engine> <example|all|family:<name>>` opens the example on both apps at the same viewport and runs the steps of its component family (open, arrows, select, Escape, Tab), after each step comparing the focused element's `data-slot` and role, the open popups, Base UI state attributes on the rendered parts, and whether the page scroll is locked. Steps for every interactive family in the Context table. Run it on `main` in both engines and save `baseline-{engine}.log`: the list of today's behavior differences, which the component tasks close.
 
-Done when: the reference app serves every upstream example, `compare.mjs` runs every scenario on both apps in both engines, the baseline logs exist.
+Done when: the reference app serves every upstream example, `compare.mjs` runs every family on both apps in both engines, the baseline logs exist.
 
-Checks: `node tmp/parity-runtime/compare.mjs chromium all`, same for webkit.
+Checks: `tmp/parity-runtime/baseline.sh chromium`, same for webkit.
 
 ### 2. Lifecycle
 
@@ -147,5 +147,22 @@ No component script defines a behavior a block owns (the greps of tasks 2 to 9 t
 Done when: the greps hold, `compare.mjs all` in both engines has no unexplained difference.
 
 ## Executor log
+
+### Task 1
+
+The reference is shadcn's own `apps/v4` at the pin, not a CLI app, because the CLI pulls the online registry. Its route `(view)/examples/[base]/[name]` already renders each example alone, so there is nothing to build beyond `registry:build`. The steps live in `compare.mjs` as one list per family instead of a `scenarios.json`, since they are the same for every example of a family. 336 examples exist on both sides (`both.txt`), 177 only upstream, 56 only here.
+
+The harness compares roles and slots, not text, because our example data differs (names, emails). It counts state only on rendered parts, since Base UI does not mount closed popups and we keep them hidden. The slider step focuses the thumb's range input when there is one.
+
+Baseline on the branch point (614b9d5c plus this plan), 20 families, 122 examples: 292 pass and 175 fail, the same lines in chromium and webkit. Every fail is a real difference. Grouped by cause:
+
+- Trigger state. Base UI renders `data-popup-open`, `data-pressed` and `aria-expanded` on the trigger while its popup is open. We miss `data-pressed` and `data-popup-open` on menu, context menu, combobox and hover card triggers.
+- Merged trigger slot. With `render={<Button />}` shadcn keeps the trigger's own slot (`dropdown-menu-trigger`, `dialog-trigger`, `drawer-trigger`), we keep `button`. This contradicts the merged part rule in `AGENTS.md` and belongs to plan 3, the scripts here find triggers by ARIA either way. The collapsible is the other way round: shadcn's example renders a plain `button`, ours `collapsible-trigger`.
+- Highlight on open. Base UI highlights the first menu item on ArrowDown and the selected select item on open, we highlight later or not at all. The select popup keeps focus on its list (`select-content`), ours moves it to the item. Task 8.
+- Focus on open. The popover moves focus to its first input, ours to the popup. Task 7, like the combobox popup.
+- Drawer. The popup never gets `data-open`, focus lands on a popup without `role=dialog`, the scroll stays locked after Escape. Tasks 5 and 10.
+- Server rendered state. An initially open accordion item misses `data-panel-open` on its trigger and `data-open` on its content until clicked. Disabled parts miss `data-disabled` on the select trigger, accordion trigger, toggle group root, switch thumb, slider track and range and a disabled tooltip trigger. A disabled slider thumb is still focusable. These are attributes, fixed in the task that touches the component or in the sweep.
+
+Tabs, radio group, checkbox, toggle, dialog, alert dialog and sheet pass every step.
 
 ## Planner review
