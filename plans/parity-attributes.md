@@ -3,7 +3,7 @@
 - **Planner**: Claude
 - **Executor**: Claude
 - **Reviewer**: none, owner decision 2026-09-24
-- **Status**: review
+- **Status**: done, merged as PR #619 (614b9d5c)
 - **Commits**: none, owner reviews the working tree
 - **Branch**: `feat/parity-attributes` from `main` (da86e0c7)
 
