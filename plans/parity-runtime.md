@@ -130,6 +130,14 @@ Also from task 7: menu and select items are tabbable buttons here, Base UI's ite
 
 Done when: none of the four consumers handles `ArrowDown` itself, typeahead works in menus as in Base UI, the submenus portal and render `data-nested` like upstream and have their focus manager, no focus manager names an item as initial focus, `check.sh` and `compare.mjs` green.
 
+### 8b. Hover
+
+- [ ] Done
+
+`components/baseui/use_hover.js` and `safe_polygon.js` from `useHover`, `useHoverReferenceInteraction`, `useHoverFloatingInteraction`, `useHoverInteractionSharedState` and `safePolygon.ts`: open and close delays, rest time, the safe triangle toward the popup, `closeDelay`, and the per trigger hover state. Consumers: tooltip, hover card and the submenu triggers of both menus, which each have their own simplified hover intent today. Found in task 8, the plan's Context table did not list it.
+
+Done when: no consumer has its own hover timers or `mouseover`/`mouseout` intent handling, `transition.mjs` and `compare.mjs` green for tooltip, hover card and the submenus, with a scenario that moves the pointer diagonally from a submenu trigger into its submenu.
+
 ### 9. Composite roving tab stop
 
 - [ ] Done
