@@ -175,25 +175,23 @@ type SubContentProps struct {
 // the pointer and with the arrow keys), so there are no hover: styles here.
 // 1:1 base/ui/context-menu.tsx ContextMenuItem, the look comes from
 // cn-context-menu-item; the inset padding keys on the data-inset attribute.
-func itemClasses(disabled bool) string {
+func itemClasses() string {
 	return utils.CN(
 		"cn-context-menu-item group/context-menu-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
 		// Base UI's item primitive fills the menu row. Native buttons and links
 		// need that layout semantics explicitly.
 		"w-full text-left",
-		map[string]bool{"pointer-events-none opacity-50": disabled},
 	)
 }
 
 // 1:1 base/ui/context-menu.tsx ContextMenuCheckboxItem/RadioItem, cnClass is
 // cn-context-menu-checkbox-item or cn-context-menu-radio-item.
-func checkItemClasses(cnClass string, disabled bool) string {
+func checkItemClasses(cnClass string) string {
 	return utils.CN(
 		cnClass+" relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
 		// Base UI unmounts the indicator when unchecked; our indicator toggles
 		// on the checked state via the group instead.
 		"group/cmitem w-full text-left",
-		map[string]bool{"pointer-events-none opacity-50": disabled},
 	)
 }
 
@@ -333,9 +331,11 @@ templ Item(props ...ItemProps) {
 			}
 			if p.Disabled {
 				aria-disabled="true"
+				data-disabled
 			}
 			role="menuitem"
-			class={ utils.CN(itemClasses(p.Disabled), p.Class) }
+			tabindex="-1"
+			class={ utils.CN(itemClasses(), p.Class) }
 			{ p.Attributes... }
 		>
 			{ children... }
@@ -350,9 +350,13 @@ templ Item(props ...ItemProps) {
 			if p.CloseOnClick != nil && !*p.CloseOnClick {
 				data-templ-close-on-click="false"
 			}
-			disabled?={ p.Disabled }
+			if p.Disabled {
+				aria-disabled="true"
+				data-disabled
+			}
 			role="menuitem"
-			class={ utils.CN(itemClasses(p.Disabled), p.Class) }
+			tabindex="-1"
+			class={ utils.CN(itemClasses(), p.Class) }
 			{ p.Attributes... }
 		>
 			{ children... }
@@ -375,6 +379,7 @@ templ CheckboxItem(props ...CheckboxItemProps) {
 		data-slot="context-menu-checkbox-item"
 		data-templ-checked?={ p.Checked != nil }
 		role="menuitemcheckbox"
+		tabindex="-1"
 		if checked {
 			data-checked
 			aria-checked="true"
@@ -382,8 +387,11 @@ templ CheckboxItem(props ...CheckboxItemProps) {
 			data-unchecked
 			aria-checked="false"
 		}
-		disabled?={ p.Disabled }
-		class={ utils.CN(checkItemClasses("cn-context-menu-checkbox-item", p.Disabled), p.Class) }
+		if p.Disabled {
+			aria-disabled="true"
+			data-disabled
+		}
+		class={ utils.CN(checkItemClasses("cn-context-menu-checkbox-item"), p.Class) }
 		{ p.Attributes... }
 	>
 		<span class="cn-context-menu-item-indicator pointer-events-none opacity-0 group-data-checked/cmitem:opacity-100">
@@ -436,6 +444,7 @@ templ RadioItem(props ...RadioItemProps) {
 			data-templ-value={ p.Value }
 		}
 		role="menuitemradio"
+		tabindex="-1"
 		if checked {
 			data-checked
 			aria-checked="true"
@@ -443,8 +452,11 @@ templ RadioItem(props ...RadioItemProps) {
 			data-unchecked
 			aria-checked="false"
 		}
-		disabled?={ disabled }
-		class={ utils.CN(checkItemClasses("cn-context-menu-radio-item", disabled), p.Class) }
+		if disabled {
+			aria-disabled="true"
+			data-disabled
+		}
+		class={ utils.CN(checkItemClasses("cn-context-menu-radio-item"), p.Class) }
 		{ p.Attributes... }
 	>
 		<span class="cn-context-menu-item-indicator pointer-events-none opacity-0 group-data-checked/cmitem:opacity-100">
@@ -558,6 +570,7 @@ templ SubTrigger(props ...SubTriggerProps) {
 		data-inset?={ p.Inset }
 		data-closed
 		role="menuitem"
+		tabindex="-1"
 		aria-haspopup="menu"
 		aria-expanded="false"
 		class={
@@ -582,22 +595,26 @@ templ SubContent(props ...SubContentProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	// Base UI's positioner around the sub popup. It stays nested in the root
-	// popup and positions fixed, which escapes the popup's overflow clip.
-	<div
-		data-closed
-		hidden
-		role="presentation"
-		class="pointer-events-none isolate z-50 outline-none fixed inset-auto left-0 top-0"
-	>
+	// shadcn's ContextMenuSubContent is a ContextMenuContent: it portals on
+	// open like the root menu, into the root's portal node.
+	@Portal() {
+		<div
+			data-closed
+			data-nested
+			hidden
+			role="presentation"
+			class="pointer-events-none isolate z-50 outline-none fixed inset-auto left-0 top-0"
+		>
 		<div
 			if p.ID != "" {
 				id={ p.ID }
 			}
 			data-slot="context-menu-sub-content"
 			data-closed
+			data-nested
 			role="menu"
 			tabindex="-1"
+			data-base-ui-focusable
 			class={
 				utils.CN(
 					// 1:1 base/ui/context-menu.tsx ContextMenuSubContent: the content's
@@ -613,5 +630,6 @@ templ SubContent(props ...SubContentProps) {
 		>
 			{ children... }
 		</div>
-	</div>
+		</div>
+	}
 }

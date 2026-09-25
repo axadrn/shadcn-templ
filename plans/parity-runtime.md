@@ -120,7 +120,7 @@ Done when: `dialog.js` has no `tabbable`, no guard creation and no `aria-hidden`
 
 ### 8. List navigation and typeahead
 
-- [ ] Done
+- [x] Done
 
 `components/baseui/use_list_navigation.js` and `use_typeahead.js` from their sources: arrows, Home, End, loop, disabled items, orientation, RTL, highlight by focus or `aria-activedescendant` as each consumer uses it, typeahead with Base UI's timeout. Consumers: dropdownmenu, contextmenu, select, combobox (command stays cmdk).
 
@@ -136,7 +136,9 @@ Done when: none of the four consumers handles `ArrowDown` itself, typeahead work
 
 `components/baseui/use_hover.js` and `safe_polygon.js` from `useHover`, `useHoverReferenceInteraction`, `useHoverFloatingInteraction`, `useHoverInteractionSharedState` and `safePolygon.ts`: open and close delays, rest time, the safe triangle toward the popup, `closeDelay`, and the per trigger hover state. Consumers: tooltip, hover card and the submenu triggers of both menus, which each have their own simplified hover intent today. Found in task 8, the plan's Context table did not list it.
 
-Done when: no consumer has its own hover timers or `mouseover`/`mouseout` intent handling, `transition.mjs` and `compare.mjs` green for tooltip, hover card and the submenus, with a scenario that moves the pointer diagonally from a submenu trigger into its submenu.
+Also from task 8: the submenu triggers of both menus open on any click in our script. Base UI's `MenuSubmenuTrigger` uses `useClick` with `mousedown`, `toggle: !openOnHover`, `ignoreMouse: openOnHover` and `stickIfOpen: false`, so with hover opening a mouse press does nothing and the keyboard click opens.
+
+Done when: no consumer has its own hover timers or `mouseover`/`mouseout` intent handling, the submenu triggers use `useClick` like `MenuSubmenuTrigger`, `transition.mjs` and `compare.mjs` green for tooltip, hover card and the submenus, with a scenario that moves the pointer diagonally from a submenu trigger into its submenu.
 
 ### 9. Composite roving tab stop
 
@@ -310,5 +312,42 @@ Found on the way: the context menu closes on every scroll and resize, which Base
 The DOM diff of `check.sh` against rt6 is no signal this time: the new portal node moves every popup one level down and the diff compares elements by position, so everything after it shifts. `tmp/parity-runtime/structure.mjs [example...]` compares the structure with shadcn instead (body children, guards and their parents, `aria-owns`, `aria-hidden`, markers), and dialog, popover, dropdown menu and select match it.
 
 Checks: a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 43, the CLI test looked for `(() =>` in the installed dialog script and looks for its API now), in chromium and webkit. `escape.mjs` 0 failures, `compare.mjs dismiss` 34 pass instead of 30, the focus after an outside press is shadcn's for popover, menus and select (the trigger's slot name aside), `compare.mjs` 308 pass instead of 304 with only drawer and popover lines changed, all better, `position.mjs` and `transition.mjs` unchanged, `htmx.mjs` 110 of 110 in both engines. The behavior suites read tooltip, hover card, popover, context menu, combobox and select through the portal node now.
+
+### Task 8
+
+Two blocks, each a port of the Base UI 1.6.0 source it names:
+
+- `components/baseui/use_list_navigation.js`: `useListNavigation.ts` with the list helpers of `utils/composite.ts`. The hook's effects are one handle: `open()` after the popup opened, `close()`, `sync()` after the component set its active index itself, `cleanup()`. Item props are delegated on the popup (`focusin`, `click`, `mousemove`, `pointerout`), the reference props go on the trigger or the input. Left out: grid navigation, which only a grid combobox uses.
+- `components/baseui/use_typeahead.js`: `useTypeahead.ts`. The menus pass `TYPEAHEAD_RESET_MS` (500), the select keeps the default like `SelectRoot`.
+
+The consumers pass their root's options:
+
+- Dropdown menu: `MenuRoot` with `loopFocus`, an empty `disabledIndices`, opening on an arrow key. Each submenu gets its own nested instance with the submenu trigger as reference and the parent's vertical orientation, which the source reads from the floating tree.
+- Context menu: the same, but Base UI nests the root in `ContextMenu.Root`, so `nested` is set there too (ArrowLeft closes it) and no arrow key opens it.
+- Select: `SelectRoot` with `selectedIndex`, the highlight kept while closing and cleared on unmount. The typeahead skips disabled items, and typing on the closed trigger selects the match.
+- Combobox: `AriaCombobox` with virtual focus (`aria-activedescendant`), `loopFocus`, and `allowEscape` without autoHighlight.
+
+Highlighting is `data-highlighted` plus the roving `tabindex` of the item props (0 on the highlighted item, -1 on the rest). A submenu trigger keeps 0 while its submenu is open and clears the parent's highlight on blur, like `MenuSubmenuTrigger`.
+
+Gone from the four scripts: `moveFocus`, `focusItem`, the document `keydown` navigation, `OPEN_KEYS`, the select's own typeahead buffer, the pointer handlers that focused the item under the pointer, and the combobox `moveHighlight` and `mousemove` highlight. The focus managers use their default initial focus again, except the submenus (`false`) and the combobox input.
+
+Structure that moves to upstream's:
+
+- Menu items are `aria-disabled` with `data-disabled` instead of natively disabled, and out of the tab order (`tabindex="-1"`). Disabled items are highlighted like upstream's.
+- Submenus portal on open into the root's portal node. Positioner and popup render `data-nested` and `data-base-ui-focusable`. The dropdown submenu is positioned `absolute`, the context menu one `fixed` like every positioner inside a context menu (`MenuPositioner`). Both get their `MenuPopup` focus manager: non modal, no initial focus, no return focus. The menu scripts find a submenu's tree through the portal owners.
+- Each submenu gets its `MenuRoot` `useDismiss`. Escape closes only the submenu (`closeParentOnEsc` is false) and focus returns to its trigger (`MenuPopup` sets `returnFocus` when there is a trigger element). Before, Escape in a submenu closed the whole menu, which `escape.mjs` had written down as expected. Its scenario G now expects shadcn's two steps.
+- The focus manager treats focus that moves to an ancestor's popup or reference as inside, like the source's `getNodeAncestors` check. Without that, returning from a submenu closed it.
+- The select and combobox popups get `tabindex="-1"`, which shadcn renders (`FOCUSABLE_POPUP_PROPS`). Without it a mouse opened select left focus on `<body>`.
+- The popups render `aria-orientation="vertical"` from the list navigation's floating props where upstream does.
+
+Harness: the a11y runner waits a frame after the menu wrap keys. Base UI focuses a wrapped item in the next frame (`forceSyncFocus` false), on the reference the frame had already run when Playwright read the focus. The behavior suites find an open submenu in the document now.
+
+State attributes that `compare.mjs` showed missing next to the list navigation and that Base UI renders: `data-pressed` and `data-popup-open` on the context menu trigger, on the combobox input and triggers, `data-popup-open` on the combobox clear button, `data-disabled` on a disabled select trigger and combobox input and trigger. And the combobox `autoHighlight` is Base UI's `input-change` mode: typing highlights the first match, opening does not.
+
+Checks: a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 45), in chromium and webkit. The DOM against rt7 changes by `tabindex="-1"` on menu items, `aria-orientation` on the list popups, `data-highlighted` where an item is highlighted, the portal node around the submenus and the new code blocks on the docs pages. `escape.mjs` 0 failures, `compare.mjs dismiss` 36 pass instead of 34, `compare.mjs` 367 pass and 96 fail in chromium, 379 and 88 in webkit, instead of 308 and 159. The context menu family is 50 of 50, the combobox 51 of 52 (the `combobox-popup` role above), the dropdown menu fails only on the trigger slot, the select only on the null item and the listbox role. `position.mjs --offset` puts both submenus where shadcn puts them, `transition.mjs` unchanged apart from sampling jitter on both sides. `htmx.mjs` 110 of 110 in both engines, see below.
+
+`htmx.mjs` had checked nothing since the rename to `templ`: it still asked for `data-tui-*` and `_tuiPortalOwner`, and port 8099 was held by a two day old probe server that served the old bundle, so every "110 of 110" in the logs of tasks 2 to 7 came from that old build. The probe now reads the portal nodes (`[data-base-ui-portal]` in their `[data-templ-portal]` holder, `_templPortalOwner`) and loads the site stylesheet, which the fixture page lacks and which puts the dialog popup over Base UI's internal backdrop. Rebuilt and run on a free port it is 110 of 110 against this task. The old servers on 8095 to 8099 still run, they are not this task's.
+
+Found on the way, written into plan 3's decisions: shadcn's select and combobox popups have `role="presentation"` with the listbox on the list inside, its menu items are `div` elements with an id, and the `combobox-popup` trigger is `role="combobox"`.
 
 ## Planner review

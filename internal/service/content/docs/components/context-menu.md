@@ -49,6 +49,10 @@ shadcn-templ add context-menu
 
 <ComponentSource name="context-menu" title="components/baseui/floating_focus_manager.js" />
 
+<ComponentSource name="context-menu" title="components/baseui/use_list_navigation.js" />
+
+<ComponentSource name="context-menu" title="components/baseui/use_typeahead.js" />
+
 <ComponentSource name="context-menu" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="context-menu" title="components/floatingui/floating_ui_dom.js" />

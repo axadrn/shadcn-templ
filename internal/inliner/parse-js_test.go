@@ -294,8 +294,8 @@ func TestTransformJavaScriptStyleRegistryCorpus(t *testing.T) {
 			t.Errorf("%s changed without a cn- occurrence", path)
 		}
 	}
-	if len(paths) != 43 {
-		t.Errorf("component JavaScript file count = %d, want 43", len(paths))
+	if len(paths) != 45 {
+		t.Errorf("component JavaScript file count = %d, want 45", len(paths))
 	}
 }
 

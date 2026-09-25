@@ -47,6 +47,8 @@ shadcn-templ add combobox
 
 <ComponentSource name="combobox" title="components/baseui/floating_focus_manager.js" />
 
+<ComponentSource name="combobox" title="components/baseui/use_list_navigation.js" />
+
 <ComponentSource name="combobox" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="combobox" title="components/floatingui/floating_ui_dom.js" />

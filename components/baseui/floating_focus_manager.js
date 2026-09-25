@@ -37,6 +37,7 @@
 
   // ----- enqueueFocus -------------------------------------------------------
 
+  // Returns a cancel for the queued focus.
   let rafId = 0;
   function enqueueFocus(el, options = {}) {
     const { preventScroll = false, sync = false, shouldFocus } = options;
@@ -45,8 +46,18 @@
       if (shouldFocus && !shouldFocus()) return;
       el?.focus({ preventScroll });
     };
-    if (sync) return exec();
-    rafId = requestAnimationFrame(exec);
+    if (sync) {
+      exec();
+      return () => {};
+    }
+    const currentRafId = requestAnimationFrame(exec);
+    rafId = currentRafId;
+    return () => {
+      if (rafId === currentRafId) {
+        cancelAnimationFrame(currentRafId);
+        rafId = 0;
+      }
+    };
   }
 
   // ----- FocusGuard -----------------------------------------------------------
@@ -181,7 +192,7 @@
     // A typeable combobox reference keeps focus in its input: no guards,
     // but the outside is still hidden.
     const isUntrappedTypeableCombobox = isTypeableCombobox(domReference) && ignoreInitialFocus;
-    const self = { floating, open: false };
+    const self = { floating, reference: domReference, open: false };
     const cleanups = [];
     const openCleanups = [];
 
@@ -202,6 +213,7 @@
       list.push(() => target.removeEventListener(type, listener, !!capture));
     };
     const isChild = (other) => other !== self && withinTree(floating, other.floating);
+    const isAncestor = (other) => other !== self && withinTree(other.floating, floating);
 
     // Guards inside the floating tree: a modal trap, or for a non modal popup
     // in a portal the way back out through the portal's outside guards.
@@ -276,6 +288,9 @@
           const isRelatedFocusGuard = relatedTarget?.hasAttribute?.("data-base-ui-focus-guard") &&
             [beforeGuard, afterGuard, portalGuards?.beforeOutside, portalGuards?.afterOutside, previousFocusableElement, nextFocusableElement].includes(relatedTarget);
           const insideChild = [...instances].some((other) => isChild(other) && t().contains(other.floating, relatedTarget));
+          // An ancestor's popup or its reference, not the ancestor's items.
+          const toAncestor = [...instances].some((other) => isAncestor(other) &&
+            ([other.floating, getFloatingFocusElement(other.floating)].includes(relatedTarget) || other.reference === relatedTarget));
           const movedToUnrelatedNode = !(
             t().contains(domReference, relatedTarget) ||
             withinTree(floating, relatedTarget) ||
@@ -285,7 +300,8 @@
             (relatedTarget != null && triggers.includes(relatedTarget)) ||
             triggers.some((trigger) => t().contains(trigger, relatedTarget)) ||
             isRelatedFocusGuard ||
-            insideChild
+            insideChild ||
+            toAncestor
           );
           if (currentTarget === domReference && floatingFocusElement) handleTabIndex(floatingFocusElement);
 

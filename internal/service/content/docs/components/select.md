@@ -49,6 +49,10 @@ shadcn-templ add select
 
 <ComponentSource name="select" title="components/baseui/floating_focus_manager.js" />
 
+<ComponentSource name="select" title="components/baseui/use_list_navigation.js" />
+
+<ComponentSource name="select" title="components/baseui/use_typeahead.js" />
+
 <ComponentSource name="select" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="select" title="components/floatingui/floating_ui_dom.js" />
