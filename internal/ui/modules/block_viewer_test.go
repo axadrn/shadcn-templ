@@ -45,10 +45,10 @@ func TestBlockViewerCodeKeepsFlexLayoutWhenSwitchingFiles(t *testing.T) {
 	if strings.Contains(html, `class="mx-0! mt-0 hidden`) {
 		t.Fatal("hidden must remain an HTML attribute, not replace the flex display class")
 	}
-	if !strings.Contains(html, `data-tui-block-file-pane="second.go" hidden `+figureClass) {
+	if !strings.Contains(html, `data-templ-block-file-pane="second.go" hidden `+figureClass) {
 		t.Fatal("inactive file pane is not hidden with the native hidden attribute")
 	}
-	if !strings.Contains(html, `overflow-y-auto`) || !strings.Contains(html, `data-tui-block-file-scroll`) {
+	if !strings.Contains(html, `overflow-y-auto`) || !strings.Contains(html, `data-templ-block-file-scroll`) {
 		t.Fatal("file pane is missing its vertical scroll container")
 	}
 }
@@ -65,18 +65,18 @@ func TestBlockViewerUsesResizablePrimitiveComposition(t *testing.T) {
 	for _, want := range []string{
 		`data-slot="resizable-panel-group"`,
 		`id="dashboard-01-preview-panel"`,
-		`data-default-size="100%"`,
-		`data-min-size="30%"`,
+		`data-templ-default-size="100%"`,
+		`data-templ-min-size="30%"`,
 		`data-slot="resizable-handle"`,
 		`id="dashboard-01-preview-spacer"`,
-		`data-default-size="0%"`,
+		`data-templ-default-size="0%"`,
 		`class="relative z-20 no-scrollbar w-full bg-background"`,
 	} {
 		if !strings.Contains(html, want) {
 			t.Fatalf("block viewer is missing %q", want)
 		}
 	}
-	if strings.Contains(html, `data-tui-block-panel style="width:`) {
+	if strings.Contains(html, `data-templ-block-panel style="width:`) {
 		t.Fatal("block viewer still uses the legacy inline-width resize implementation")
 	}
 }

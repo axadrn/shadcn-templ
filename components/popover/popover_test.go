@@ -11,7 +11,7 @@ import (
 func TestContentCarriesDeclarativeInitialOpenState(t *testing.T) {
 	ctx := context.WithValue(context.Background(), stateKey, ctxState{
 		id:          "actions",
-		initialOpen: true,
+		defaultOpen: true,
 	})
 
 	var output bytes.Buffer
@@ -22,7 +22,7 @@ func TestContentCarriesDeclarativeInitialOpenState(t *testing.T) {
 	html := output.String()
 	for _, want := range []string{
 		`id="actions"`,
-		`data-tui-popover-initial-open="true"`,
+		`data-templ-default-open`,
 		`data-closed`,
 		`hidden`,
 	} {
@@ -34,13 +34,14 @@ func TestContentCarriesDeclarativeInitialOpenState(t *testing.T) {
 
 func TestControlledOpenOverridesDefaultOpen(t *testing.T) {
 	closed := false
-	if initialOpen(Props{Open: &closed, DefaultOpen: true}) {
-		t.Fatal("controlled false must override defaultOpen true")
+	ctx := context.WithValue(context.Background(), stateKey, ctxState{id: "p", open: &closed, defaultOpen: true})
+	var output bytes.Buffer
+	if err := Content().Render(ctx, &output); err != nil {
+		t.Fatal(err)
 	}
-
-	opened := true
-	if !initialOpen(Props{Open: &opened}) {
-		t.Fatal("controlled true must open the popover")
+	html := output.String()
+	if !strings.Contains(html, `data-templ-open="false"`) || strings.Contains(html, `data-templ-default-open`) {
+		t.Fatalf("controlled false must override defaultOpen true: %s", html)
 	}
 }
 
@@ -52,8 +53,7 @@ func TestClientConsumesInitialOpenState(t *testing.T) {
 
 	js := string(source)
 	for _, want := range []string{
-		`content.getAttribute("data-tui-popover-initial-open") === "true"`,
-		`content.removeAttribute("data-tui-popover-initial-open")`,
+		`content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")`,
 		`open(content);`,
 		`FloatingUIDOM.autoUpdate(trigger, content, update`,
 		`layoutShift: typeof IntersectionObserver !== "undefined"`,

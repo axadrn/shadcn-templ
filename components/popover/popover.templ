@@ -30,8 +30,8 @@ const stateKey ctxKey = "popoverState"
 
 type ctxState struct {
 	id          string
-	initialOpen bool
-	controlled  bool
+	open        *bool
+	defaultOpen bool
 }
 
 func state(ctx context.Context) ctxState {
@@ -50,13 +50,15 @@ func triggerID(popoverID string) string {
 
 // Trigger returns the attributes that turn any element (usually a button)
 // into the popover trigger — the asChild equivalent: no wrapper element.
+// The element keeps its own data-slot; data-base-ui-click-trigger is the
+// identifier Base UI's PopoverTrigger renders, aria-controls names the popover.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
-		"data-tui-popover-trigger": true,
-		"id":                       triggerID(state(ctx).id),
-		"aria-controls":            state(ctx).id,
-		"aria-haspopup":            "dialog",
-		"aria-expanded":            "false",
+		"data-base-ui-click-trigger": true,
+		"id":                         triggerID(state(ctx).id),
+		"aria-controls":              state(ctx).id,
+		"aria-haspopup":              "dialog",
+		"aria-expanded":              "false",
 	}
 }
 
@@ -68,13 +70,6 @@ type Props struct {
 	// DefaultOpen renders an uncontrolled popover initially open, matching
 	// Base UI Popover.Root's defaultOpen prop.
 	DefaultOpen bool
-}
-
-func initialOpen(p Props) bool {
-	if p.Open != nil {
-		return *p.Open
-	}
-	return p.DefaultOpen
 }
 
 type ContentProps struct {
@@ -118,7 +113,7 @@ templ Popover(props ...Props) {
 	if p.ID == "" {
 		{{ p.ID = utils.RandomID() }}
 	}
-	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, initialOpen: initialOpen(p), controlled: p.Open != nil}) }}
+	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, open: p.Open, defaultOpen: p.DefaultOpen}) }}
 	{ children... }
 }
 
@@ -142,26 +137,26 @@ templ Content(props ...ContentProps) {
 	}}
 	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
-	<div data-tui-popover-portal hidden>
+	<div data-templ-portal hidden>
 		<div
 			id={ s.id }
-			data-tui-popover-content
-			data-tui-popover-side={ string(p.Side) }
-			data-tui-popover-align={ string(p.Align) }
-			data-tui-popover-side-offset={ strconv.Itoa(sideOffset) }
-			data-tui-popover-initial-open={ strconv.FormatBool(s.initialOpen) }
-			data-tui-popover-controlled?={ s.controlled }
+			data-templ-side={ string(p.Side) }
+			data-templ-align={ string(p.Align) }
+			data-templ-side-offset={ strconv.Itoa(sideOffset) }
 			if p.AlignOffset != 0 {
-				data-tui-popover-align-offset={ strconv.Itoa(p.AlignOffset) }
+				data-templ-align-offset={ strconv.Itoa(p.AlignOffset) }
 			}
+			if s.open != nil {
+				data-templ-open={ strconv.FormatBool(*s.open) }
+			}
+			data-templ-default-open?={ s.open == nil && s.defaultOpen }
 			data-closed
 			hidden
-			data-tui-portal
+			data-base-ui-portal
 			class="pointer-events-none isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
 				data-slot="popover-content"
-				data-tui-popover-popup
 				data-closed
 				role="dialog"
 				tabindex="-1"

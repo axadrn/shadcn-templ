@@ -2,7 +2,7 @@ package examples
 
 import "github.com/axadrn/shadcn-templ/v2/components/button"
 
-// Full toast showcase using the window.tui.toast API.
+// Full toast showcase using the window.templ.toast API.
 templ toastExampleSection(title, class string) {
 	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
 		if title != "" {
@@ -35,7 +35,7 @@ templ toastExampleBasic() {
 		}
 		<script nonce={ templ.GetNonce(ctx) }>
 			document.getElementById("toast-example-basic-trigger").addEventListener("click", () => {
-				window.tui.toast.add({
+				window.templ.toast.add({
 					title: "Event created",
 					description: "Sunday, December 3 at 9:00 AM",
 				});
@@ -55,14 +55,14 @@ templ toastExampleWithAction() {
 		}
 		<script nonce={ templ.GetNonce(ctx) }>
 			document.getElementById("toast-example-action-trigger").addEventListener("click", () => {
-				const id = window.tui.toast.add({
+				const id = window.templ.toast.add({
 					title: "Event created",
 					description: "You can undo this action.",
 					actionProps: {
 						children: "Undo",
 						onClick() {
-							window.tui.toast.close(id);
-							window.tui.toast.add({
+							window.templ.toast.close(id);
+							window.templ.toast.add({
 								description: "Event creation undone.",
 							});
 						},
@@ -84,7 +84,7 @@ templ toastExamplePromise() {
 		}
 		<script nonce={ templ.GetNonce(ctx) }>
 			document.getElementById("toast-example-promise-trigger").addEventListener("click", () => {
-				window.tui.toast.promise(
+				window.templ.toast.promise(
 					new Promise((resolve) => {
 						window.setTimeout(() => resolve({ name: "Event" }), 2000);
 					}),

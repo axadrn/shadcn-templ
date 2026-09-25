@@ -1183,7 +1183,7 @@ func Separator(props ...SeparatorProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, " data-slot=\"item-separator\" data-orientation=\"horizontal\" data-horizontal role=\"separator\" aria-orientation=\"horizontal\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, " data-slot=\"item-separator\" data-orientation=\"horizontal\" role=\"separator\" aria-orientation=\"horizontal\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

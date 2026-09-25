@@ -128,22 +128,19 @@ templ Slider(props ...Props) {
 			fs[i] = fraction(v, p.Min, p.Max)
 		}
 	}}
-	// slider.js reads the bare data-vertical flag; the data-horizontal:/
-	// data-vertical: variants match data-orientation (shadcn-tailwind.css).
+	// The data-horizontal:/data-vertical: variants match data-orientation
+	// (shadcn-tailwind.css). min, max and step are Base UI props that React
+	// keeps in memory, so they are data-templ-* here.
 	<div
 		id={ p.ID }
 		data-slot="slider"
-		data-tui-slider
-		data-tui-slider-controlled?={ p.Value != nil }
-		data-orientation={ string(p.Orientation) }
-		if vertical {
-			data-vertical
-		} else {
-			data-horizontal
+		if p.Value != nil {
+			data-templ-value={ templ.JSONString(p.Value) }
 		}
-		data-min={ fmtF(p.Min) }
-		data-max={ fmtF(p.Max) }
-		data-step={ fmtF(p.Step) }
+		data-orientation={ string(p.Orientation) }
+		data-templ-min={ fmtF(p.Min) }
+		data-templ-max={ fmtF(p.Max) }
+		data-templ-step={ fmtF(p.Step) }
 		if p.Disabled {
 			data-disabled
 		}
@@ -152,11 +149,10 @@ templ Slider(props ...Props) {
 	>
 		if p.Name != "" {
 			for _, v := range values {
-				<input type="hidden" name={ p.Name } value={ fmtF(v) } data-tui-slider-input aria-hidden="true" tabindex="-1"/>
+				<input type="hidden" name={ p.Name } value={ fmtF(v) } aria-hidden="true" tabindex="-1"/>
 			}
 		}
 		<div
-			data-tui-slider-control
 			data-orientation={ string(p.Orientation) }
 			if p.Disabled {
 				data-disabled
@@ -165,13 +161,11 @@ templ Slider(props ...Props) {
 		>
 			<div
 				data-slot="slider-track"
-				data-tui-slider-track
 				data-orientation={ string(p.Orientation) }
 				class="cn-slider-track relative grow overflow-hidden select-none"
 			>
 				<div
 					data-slot="slider-range"
-					data-tui-slider-range
 					data-orientation={ string(p.Orientation) }
 					class="cn-slider-range select-none data-horizontal:h-full data-vertical:w-full"
 					style={ indicatorStyle(fs, vertical) }
@@ -182,7 +176,6 @@ templ Slider(props ...Props) {
 				// like in shadcn's thumb: only the control dims to 50%.
 				<div
 					data-slot="slider-thumb"
-					data-tui-slider-thumb
 					role="slider"
 					tabindex={ utils.IfElse(p.Disabled, "-1", "0") }
 					aria-valuemin={ fmtF(p.Min) }

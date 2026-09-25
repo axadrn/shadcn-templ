@@ -50,7 +50,6 @@ templ TeamSwitcher(teams []Team) {
 						Class:      "w-fit",
 						Align:      dropdownmenu.AlignStart,
 						Side:       dropdownmenu.SideRight,
-						MobileSide: dropdownmenu.SideBottom,
 						SideOffset: 4,
 					}) {
 						@dropdownmenu.Group() {
@@ -86,4 +85,15 @@ templ TeamSwitcher(teams []Team) {
 			}
 		}
 	}
+	<script type="module" nonce={ templ.GetNonce(ctx) }>
+		// The pendant of useSidebar().isMobile in the block: the menu reads
+		// its side when it opens, onMobileChange keeps it current until the
+		// block is swapped out.
+		// side={isMobile ? "bottom" : "right"}
+		const menu = document.getElementById("sidebar07-team-menu");
+		window.templ.sidebar.onMobileChange((isMobile) => {
+			if (!menu?.isConnected) return false;
+			menu.setAttribute("data-templ-side", isMobile ? "bottom" : "right");
+		});
+	</script>
 }

@@ -11,13 +11,13 @@ templ ToastDemo() {
 	}
 	<script nonce={ templ.GetNonce(ctx) }>
 		document.getElementById("toast-demo-trigger").addEventListener("click", () => {
-			const id = window.tui.toast.add({
+			const id = window.templ.toast.add({
 				title: "Event created",
 				description: "Sunday, December 3 at 9:00 AM",
 				actionProps: {
 					children: "Undo",
 					onClick() {
-						window.tui.toast.close(id);
+						window.templ.toast.close(id);
 					},
 				},
 			});

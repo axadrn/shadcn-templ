@@ -10,6 +10,7 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/components/input"
 	"github.com/axadrn/shadcn-templ/v2/components/item"
 	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
 templ selectExampleSection(title, containerClass string) {
@@ -89,7 +90,7 @@ templ selectExampleSides() {
 					@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-28 capitalize"}) {
 						@selectcomp.Value(selectcomp.ValueProps{Placeholder: side})
 					}
-					@selectcomp.Content(selectcomp.ContentProps{DisableAlignItemWithTrigger: true}) {
+					@selectcomp.Content(selectcomp.ContentProps{AlignItemWithTrigger: utils.Ptr(false)}) {
 						@selectcomp.Group() {
 							for _, fruit := range selectExampleFruits[:3] {
 								@selectcomp.Item(selectcomp.ItemProps{Value: fruit.Value}) {

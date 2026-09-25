@@ -11,18 +11,22 @@
   // the focused item (RadioGroup marks arrow navigation as touched, the
   // focused radio then clicks its hidden input).
 
+  const GROUP = '[data-slot="radio-group"]';
+  const ITEM = '[data-slot="radio-group-item"]';
+  // Base UI renders the hidden input right beside the item, without markers.
+  const INPUT = ITEM + ' + input[type="radio"]';
+
   function inputOf(item) {
     const next = item.nextElementSibling;
-    return next && next.matches("[data-tui-radio-input]") ? next : null;
+    return next && next.matches(INPUT) ? next : null;
   }
 
   function itemOf(input) {
-    const prev = input.previousElementSibling;
-    return prev && prev.matches("[data-tui-radio-group-item]") ? prev : null;
+    return input.matches && input.matches(INPUT) ? input.previousElementSibling : null;
   }
 
   function itemsOf(group) {
-    return Array.from(group.querySelectorAll("[data-tui-radio-group-item]"));
+    return Array.from(group.querySelectorAll(ITEM));
   }
 
   function isDisabled(item, input) {
@@ -34,23 +38,23 @@
   }
 
   function groupOf(input) {
-    return input.closest("[data-tui-radio-group]");
+    return input.closest(GROUP);
   }
 
   function requestValueChange(input) {
     const group = groupOf(input);
-    if (input.checked) return true;
-    const change = new CustomEvent(group ? "radio-group-value-change" : "radio-checked-change", {
+    // The browser checks a radio before click listeners run, so the state
+    // before this click lives on the item (RadioRoot reads its own checked).
+    const item = itemOf(input);
+    if (!group || (item && item.getAttribute("aria-checked") === "true")) return true;
+    const change = new CustomEvent("radio-group-value-change", {
       bubbles: true,
       cancelable: true,
-      detail: group ? { value: input.value } : { checked: true },
+      detail: { value: input.value },
     });
-    const target = group || itemOf(input);
-    const accepted = target.dispatchEvent(change);
-    const controlled = group
-      ? group.hasAttribute("data-tui-radio-group-controlled")
-      : target.hasAttribute("data-tui-radio-controlled");
-    return accepted && !controlled;
+    const accepted = group.dispatchEvent(change);
+    // Controlled: the Base UI value prop on the group, the owner commits.
+    return accepted && !group.hasAttribute("data-templ-value");
   }
 
   // Port of utils/dispatchClickWithModifiers.ts: the constructed click keeps
@@ -116,7 +120,7 @@
   // otherwise forward it to the input a second time) and select through the
   // hidden input so the native change event fires.
   document.addEventListener("click", (e) => {
-    const item = e.target.closest && e.target.closest("[data-tui-radio-group-item]");
+    const item = e.target.closest && e.target.closest(ITEM);
     if (!item || e.defaultPrevented) return;
     const input = inputOf(item);
     if (!input) return;
@@ -131,14 +135,12 @@
   });
 
   document.addEventListener("change", (e) => {
-    const input = e.target;
-    if (!input.matches || !input.matches("[data-tui-radio-input]")) return;
-    syncByInput(input);
+    if (itemOf(e.target)) syncByInput(e.target);
   });
 
   document.addEventListener("keydown", (e) => {
     const item = e.target;
-    if (!item.matches || !item.matches("[data-tui-radio-group-item]")) return;
+    if (!item.matches || !item.matches(ITEM)) return;
     const input = inputOf(item);
     if (isDisabled(item, input)) return;
     if (e.key === "Enter") {
@@ -155,7 +157,7 @@
     if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
     // isModifierKeySet with modifierKeys=[Shift]: any other modifier cancels.
     if (e.ctrlKey || e.altKey || e.metaKey) return;
-    const group = item.closest("[data-tui-radio-group]");
+    const group = item.closest(GROUP);
     if (!group) return;
     const rtl = getComputedStyle(group).direction === "rtl";
     const forward = e.key === "ArrowDown" || e.key === (rtl ? "ArrowLeft" : "ArrowRight");
@@ -183,17 +185,15 @@
   // Focus on the hidden input (label clicks, programmatic focus) belongs on
   // the item root (RadioRoot's input onFocus).
   document.addEventListener("focusin", (e) => {
-    const input = e.target;
-    if (!input.matches || !input.matches("[data-tui-radio-input]")) return;
-    const item = itemOf(input);
+    const item = itemOf(e.target);
     if (item) item.focus();
   });
 
   let labelId = 0;
 
   function setupItem(item) {
-    if (item.hasAttribute("data-tui-radio-initialized")) return;
-    item.setAttribute("data-tui-radio-initialized", "");
+    if (item._templRadio) return;
+    item._templRadio = true;
     const input = inputOf(item);
     if (!input) return;
     // The clicks dispatched on the hidden input are an implementation detail
@@ -213,7 +213,7 @@
       if (label) {
         if (!label.id) {
           labelId += 1;
-          label.id = (input.id || "tui-radio-" + labelId) + "-label";
+          label.id = (input.id || "templ-radio-" + labelId) + "-label";
         }
         item.setAttribute("aria-labelledby", label.id);
       }
@@ -221,10 +221,10 @@
   }
 
   function init() {
-    document.querySelectorAll("[data-tui-radio-group-item]").forEach(setupItem);
-    document.querySelectorAll("[data-tui-radio-group]").forEach((group) => {
-      if (group.hasAttribute("data-tui-radio-group-initialized")) return;
-      group.setAttribute("data-tui-radio-group-initialized", "");
+    document.querySelectorAll(ITEM).forEach(setupItem);
+    document.querySelectorAll(GROUP).forEach((group) => {
+      if (group._templRadioGroup) return;
+      group._templRadioGroup = true;
       syncGroup(group);
     });
   }

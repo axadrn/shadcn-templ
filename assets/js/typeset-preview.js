@@ -12,13 +12,13 @@
    parent handles once (R shuffle, Shift+R reset, D theme, Cmd/Ctrl+Z undo,
    Shift+Cmd/Ctrl+Z / Ctrl+Y redo).
 
-   Font data comes from window.tuiCreateConfig.FONTS (create-config.js loads
+   Font data comes from window.templCreateConfig.FONTS (create-config.js loads
    first). */
 (function () {
   "use strict";
 
-  if (window.__tuiTypesetPreviewInitialized) return;
-  window.__tuiTypesetPreviewInitialized = true;
+  if (window.__templTypesetPreviewInitialized) return;
+  window.__templTypesetPreviewInitialized = true;
 
   // lib/search-params.ts tables (values only; labels stay in the parent).
   var SIZES = ["14", "15", "16", "18"];
@@ -43,7 +43,7 @@
   };
   var PARAM_KEYS = Object.keys(DEFAULTS);
 
-  var cfg = window.tuiCreateConfig;
+  var cfg = window.templCreateConfig;
   var lastParams = null;
 
   var FONTS = (cfg ? cfg.FONTS : [])

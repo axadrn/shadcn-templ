@@ -184,7 +184,7 @@ The `contextmenu.Item` component is a selectable entry. It renders as a link whe
 | `Disabled`     | `bool`                                        | `false`          |
 | `Href`         | `string`                                      | -                |
 | `Target`       | `string`                                      | -                |
-| `DisableCloseOnClick` | `bool`                                        | `false`          |
+| `CloseOnClick`        | `*bool`                                       | `true`           |
 | `Class`        | `string`                                      | -                |
 
 ### CheckboxItem

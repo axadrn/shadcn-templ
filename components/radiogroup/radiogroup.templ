@@ -13,7 +13,6 @@ const stateKey ctxKey = "radioGroupState"
 type ctxState struct {
 	name       string
 	value      string
-	controlled bool
 	disabled   bool
 	readOnly   bool
 	required   bool
@@ -44,16 +43,14 @@ type Props struct {
 	Form         string
 }
 
+// ItemProps are Base UI's Radio.Root props. Name, form and the checked
+// state come from the group, as in Base UI.
 type ItemProps struct {
-	ID             string
-	Class          string
-	Attributes     templ.Attributes
-	Name           string
-	Value          string
-	Form           string
-	Disabled       bool
-	Checked        *bool
-	DefaultChecked bool
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Value      string
+	Disabled   bool
 }
 
 func initialValue(p Props) string {
@@ -61,13 +58,6 @@ func initialValue(p Props) string {
 		return *p.Value
 	}
 	return p.DefaultValue
-}
-
-func initialChecked(p ItemProps) bool {
-	if p.Checked != nil {
-		return *p.Checked
-	}
-	return p.DefaultChecked
 }
 
 // RadioGroup is the vanilla port of Base UI's RadioGroup
@@ -82,18 +72,19 @@ templ RadioGroup(props ...Props) {
 	if p.Name == "" {
 		{{ p.Name = utils.RandomID() }}
 	}
-	{{ ctx = context.WithValue(ctx, stateKey, ctxState{name: p.Name, value: initialValue(p), controlled: p.Value != nil, disabled: p.Disabled, readOnly: p.ReadOnly, required: p.Required, form: p.Form}) }}
+	{{ ctx = context.WithValue(ctx, stateKey, ctxState{name: p.Name, value: initialValue(p), disabled: p.Disabled, readOnly: p.ReadOnly, required: p.Required, form: p.Form}) }}
 	<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
 		data-slot="radio-group"
-		data-tui-radio-group
-		data-tui-radio-group-controlled?={ p.Value != nil }
-		data-tui-radio-group-value={ initialValue(p) }
+		if p.Value != nil {
+			data-templ-value={ *p.Value }
+		}
 		role="radiogroup"
 		if p.Disabled {
 			aria-disabled="true"
+			data-disabled
 		}
 		class={ utils.CN("cn-radio-group w-full", p.Class) }
 		{ p.Attributes... }
@@ -117,23 +108,12 @@ templ Item(props ...ItemProps) {
 	}
 	{{
 		s := state(ctx)
-		if p.Name == "" {
-			p.Name = s.name
-		}
-		checked := initialChecked(p)
-		if s.value != "" {
-			checked = s.value == p.Value
-		}
+		checked := s.value != "" && s.value == p.Value
 		disabled := p.Disabled || s.disabled
-		if p.Form == "" {
-			p.Form = s.form
-		}
 	}}
 	<span
 		data-slot="radio-group-item"
-		data-tui-radio-group-item
 		role="radio"
-		data-tui-radio-controlled?={ p.Checked != nil || s.controlled }
 		if checked {
 			aria-checked="true"
 			data-checked
@@ -146,7 +126,9 @@ templ Item(props ...ItemProps) {
 			aria-disabled="true"
 		}
 		aria-readonly?={ s.readOnly }
+		data-readonly?={ s.readOnly }
 		aria-required?={ s.required }
+		data-required?={ s.required }
 		if checked && !disabled {
 			tabindex="0"
 		} else {
@@ -185,7 +167,6 @@ templ Item(props ...ItemProps) {
 	// validation popups anchor near the control).
 	<input
 		type="radio"
-		data-tui-radio-input
 		aria-hidden="true"
 		tabindex="-1"
 		checked?={ checked }
@@ -195,16 +176,16 @@ templ Item(props ...ItemProps) {
 		if p.ID != "" {
 			id={ p.ID }
 		}
-		if p.Name != "" {
-			name={ p.Name }
+		if s.name != "" {
+			name={ s.name }
 		}
 		if p.Value != "" {
 			value={ p.Value }
 		}
-		if p.Form != "" {
-			form={ p.Form }
+		if s.form != "" {
+			form={ s.form }
 		}
-		if p.Name != "" {
+		if s.name != "" {
 			style="clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:-1px;position:absolute"
 		} else {
 			style="clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:-1px;position:fixed;top:0;left:0"

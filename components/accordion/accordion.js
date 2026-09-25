@@ -13,7 +13,7 @@
   }
 
   function valueOf(item) {
-    return item.getAttribute("data-tui-accordion-value") || "";
+    return item.getAttribute("data-templ-value") || "";
   }
 
   function valuesOf(accordion) {
@@ -39,7 +39,7 @@
     triggerOf(item).setAttribute("aria-controls", panel.id);
     panel.removeAttribute("data-closed");
     panel.hidden = false;
-    panel.style.setProperty("--tui-accordion-panel-height", panel.scrollHeight + "px");
+    panel.style.setProperty("--accordion-panel-height", panel.scrollHeight + "px");
     panel.setAttribute("data-open", "");
   }
 
@@ -50,7 +50,7 @@
   syncItemState(item, false);
     if (!panel) return;
     panel.removeAttribute("data-open");
-    panel.style.setProperty("--tui-accordion-panel-height", panel.scrollHeight + "px");
+    panel.style.setProperty("--accordion-panel-height", panel.scrollHeight + "px");
     panel.setAttribute("data-closed", "");
     panel.addEventListener(
       "animationend",
@@ -69,7 +69,7 @@
     let values = valuesOf(accordion);
     if (open) {
       values = values.filter((value) => value !== valueOf(item));
-    } else if (accordion.hasAttribute("data-multiple")) {
+    } else if (accordion.hasAttribute("data-templ-multiple")) {
       values = [...values, valueOf(item)];
     } else {
       values = [valueOf(item)];
@@ -80,7 +80,7 @@
       detail: { values },
     });
     const accepted = accordion.dispatchEvent(change);
-    return accepted && !accordion.hasAttribute("data-tui-accordion-controlled");
+    return accepted && !accordion.hasAttribute("data-templ-value");
   }
 
   document.addEventListener("click", (e) => {
@@ -101,7 +101,7 @@
       closeItem(item);
       return;
     }
-  if (!accordion.hasAttribute("data-multiple")) {
+  if (!accordion.hasAttribute("data-templ-multiple")) {
       accordion.querySelectorAll('[data-slot="accordion-item"]').forEach((other) => {
         if (other === item) return;
         if (other.closest('[data-slot="accordion"]') !== accordion) return;

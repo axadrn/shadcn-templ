@@ -13,7 +13,7 @@ templ InputGroupButton() {
 			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
 				@inputgroup.Button(inputgroup.ButtonProps{
 					Size:       inputgroup.ButtonSizeIconXs,
-					Attributes: templ.Attributes{"aria-label": "Copy", "title": "Copy", "data-copy-url": "https://x.com/axadrn"},
+					Attributes: templ.Attributes{"aria-label": "Copy", "title": "Copy", "data-templ-copy-url": "https://x.com/axadrn"},
 				}) {
 					<span class="[[data-copied=true]_&]:hidden">
 						@icon.Copy()
@@ -68,9 +68,9 @@ templ InputGroupButton() {
 		// The vanilla pendant of the demo's copy and favorite state.
 		document.addEventListener('click', (e) => {
 			if (!(e.target instanceof Element)) return;
-			const copy = e.target.closest('[data-copy-url]');
+			const copy = e.target.closest('[data-templ-copy-url]');
 			if (copy && copy.closest('[data-inputgroup-button-demo]')) {
-				navigator.clipboard.writeText(copy.getAttribute('data-copy-url')).then(() => {
+				navigator.clipboard.writeText(copy.getAttribute('data-templ-copy-url')).then(() => {
 					copy.setAttribute('data-copied', 'true');
 					setTimeout(() => copy.setAttribute('data-copied', 'false'), 1500);
 				});

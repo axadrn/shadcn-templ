@@ -234,7 +234,7 @@ func TeamSwitcher(teams []Team) templ.Component {
 										var templ_7745c5c3_Var12 string
 										templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(team.Name)
 										if templ_7745c5c3_Err != nil {
-											return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar07/team_switcher.templ`, Line: 68, Col: 20}
+											return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar07/team_switcher.templ`, Line: 67, Col: 20}
 										}
 										_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 										if templ_7745c5c3_Err != nil {
@@ -259,7 +259,7 @@ func TeamSwitcher(teams []Team) templ.Component {
 											var templ_7745c5c3_Var14 string
 											templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i + 1))
 											if templ_7745c5c3_Err != nil {
-												return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar07/team_switcher.templ`, Line: 70, Col: 34}
+												return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar07/team_switcher.templ`, Line: 69, Col: 34}
 											}
 											_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 											if templ_7745c5c3_Err != nil {
@@ -353,7 +353,6 @@ func TeamSwitcher(teams []Team) templ.Component {
 							Class:      "w-fit",
 							Align:      dropdownmenu.AlignStart,
 							Side:       dropdownmenu.SideRight,
-							MobileSide: dropdownmenu.SideBottom,
 							SideOffset: 4,
 						}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
@@ -377,6 +376,23 @@ func TeamSwitcher(teams []Team) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<script type=\"module\" nonce=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var17 string
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar07/team_switcher.templ`, Line: 88, Col: 50}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\">\n\t\t// The pendant of useSidebar().isMobile in the block: the menu reads\n\t\t// its side when it opens, onMobileChange keeps it current until the\n\t\t// block is swapped out.\n\t\t// side={isMobile ? \"bottom\" : \"right\"}\n\t\tconst menu = document.getElementById(\"sidebar07-team-menu\");\n\t\twindow.templ.sidebar.onMobileChange((isMobile) => {\n\t\t\tif (!menu?.isConnected) return false;\n\t\t\tmenu.setAttribute(\"data-templ-side\", isMobile ? \"bottom\" : \"right\");\n\t\t});\n\t</script>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
 		return nil
 	})

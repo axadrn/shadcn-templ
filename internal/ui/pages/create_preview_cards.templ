@@ -270,8 +270,8 @@ templ cardPayoutThreshold() {
 		// The vanilla pendant of payout-threshold.tsx's amount state: the
 		// slider drives the display, formatted like ${amount[0].toFixed(2)}.
 		(() => {
-			if (window.__tuiDemoPayoutThreshold) return;
-			window.__tuiDemoPayoutThreshold = true;
+			if (window.__templDemoPayoutThreshold) return;
+			window.__templDemoPayoutThreshold = true;
 			document.addEventListener("slider-change", (e) => {
 				const card = e.target.closest("[data-payout-threshold]");
 				if (!card) return;
@@ -782,8 +782,8 @@ templ cardKitchenIsland() {
 		// enables/disables scenes and sliders. Dragging a slider changes only
 		// that slider, exactly like the source.
 		(() => {
-			if (window.__tuiDemoKitchenIsland) return;
-			window.__tuiDemoKitchenIsland = true;
+			if (window.__templDemoKitchenIsland) return;
+			window.__templDemoKitchenIsland = true;
 			// kitchen-island.tsx SCENES, as [brightness, colorTemp, volume, fade].
 			const SCENES = {
 				cooking: [90, 70, 30, 0],
@@ -794,13 +794,13 @@ templ cardKitchenIsland() {
 			// slider.js render() for the single horizontal thumb, same repeat
 			// as the roller shades demo.
 			const setSlider = (root, v) => {
-				const min = parseFloat(root.getAttribute("data-min") || "0");
-				const max = parseFloat(root.getAttribute("data-max") || "100");
+				const min = parseFloat(root.getAttribute("data-templ-min") || "0");
+				const max = parseFloat(root.getAttribute("data-templ-max") || "100");
 				const f = max === min ? 0 : Math.min(1, Math.max(0, (v - min) / (max - min)));
-				const thumb = root.querySelector("[data-tui-slider-thumb]");
+				const thumb = root.querySelector("[data-slot=slider-thumb]");
 				thumb.setAttribute("aria-valuenow", String(v));
 				thumb.style.left = "calc(" + (f * 100).toFixed(4) + "% - " + (f * 12).toFixed(2) + "px)";
-				const range = root.querySelector("[data-tui-slider-range]");
+				const range = root.querySelector("[data-slot=slider-range]");
 				range.style.left = "0";
 				range.style.width = "calc(" + (f * 100).toFixed(4) + "% + " + (6 - f * 12).toFixed(2) + "px)";
 			};
@@ -812,32 +812,32 @@ templ cardKitchenIsland() {
 				const scene = e.detail.value[0] || "cooking";
 				const preset = SCENES[scene];
 				if (!preset) return;
-				card.querySelectorAll("[data-tui-slider]").forEach((root, i) => {
+				card.querySelectorAll("[data-slot=slider]").forEach((root, i) => {
 					if (preset[i] != null) setSlider(root, preset[i]);
 				});
-				const group = card.querySelector("[data-tui-toggle-group]");
-				group.querySelectorAll("[data-tui-toggle]").forEach((t) => {
-					const on = t.getAttribute("data-tui-toggle-value") === scene;
+				const group = card.querySelector("[data-slot=toggle-group]");
+				group.querySelectorAll("[data-slot=toggle-group-item]").forEach((t) => {
+					const on = t.getAttribute("data-templ-value") === scene;
 					t.toggleAttribute("data-pressed", on);
 					t.setAttribute("aria-pressed", on ? "true" : "false");
 				});
-				group.setAttribute("data-tui-toggle-group-value", scene);
 			});
 			document.addEventListener("change", (e) => {
-				if (!e.target.matches || !e.target.matches("[data-tui-switch-input]")) return;
+				if (!e.target.matches || !e.target.matches("[data-slot=switch] + input")) return;
 				const card = e.target.closest("[data-kitchen-island]");
 				if (!card) return;
 				const disabled = !e.target.checked;
-				card.querySelectorAll("[data-tui-toggle]").forEach((t) => {
+				card.querySelectorAll("[data-slot=toggle-group-item]").forEach((t) => {
 					t.disabled = disabled;
+					t.toggleAttribute("data-disabled", disabled);
 				});
 				// The slider's Disabled prop pendant: root + control carry
 				// data-disabled (behavior + 50% opacity), the thumb loses its
 				// tab stop.
-				card.querySelectorAll("[data-tui-slider]").forEach((root) => {
+				card.querySelectorAll("[data-slot=slider]").forEach((root) => {
 					root.toggleAttribute("data-disabled", disabled);
-					root.querySelector("[data-tui-slider-control]").toggleAttribute("data-disabled", disabled);
-					const thumb = root.querySelector("[data-tui-slider-thumb]");
+					root.querySelector("[data-slot=slider-track]").parentElement.toggleAttribute("data-disabled", disabled);
+					const thumb = root.querySelector("[data-slot=slider-thumb]");
 					thumb.toggleAttribute("data-disabled", disabled);
 					if (disabled) {
 						thumb.setAttribute("aria-disabled", "true");
@@ -1639,10 +1639,10 @@ templ cardReceivingMethod() {
 					@field.Legend(field.LegendProps{Variant: field.LegendVariantLabel}) {
 						Receiving Method
 					}
-					<div data-slot="radio-group" class="grid grid-cols-1 items-start gap-3 md:grid-cols-2 style-sera:grid-cols-1">
+					@radiogroup.RadioGroup(radiogroup.Props{Name: "receiving-method", DefaultValue: "bank", Class: "grid grid-cols-1 items-start gap-3 md:grid-cols-2 style-sera:grid-cols-1"}) {
 						@field.Label(field.LabelProps{For: "method-bank"}) {
 							@field.Field(field.Props{Orientation: field.OrientationHorizontal, Class: "pb-2.5"}) {
-								@radiogroup.Item(radiogroup.ItemProps{Name: "receiving-method", Value: "bank", ID: "method-bank", DefaultChecked: true})
+								@radiogroup.Item(radiogroup.ItemProps{Value: "bank", ID: "method-bank"})
 								@field.Content() {
 									@field.Title() {
 										Bank Transfer
@@ -1655,7 +1655,7 @@ templ cardReceivingMethod() {
 						}
 						@field.Label(field.LabelProps{For: "method-paypal"}) {
 							@field.Field(field.Props{Orientation: field.OrientationHorizontal, Class: "pb-2.5"}) {
-								@radiogroup.Item(radiogroup.ItemProps{Name: "receiving-method", Value: "paypal", ID: "method-paypal"})
+								@radiogroup.Item(radiogroup.ItemProps{Value: "paypal", ID: "method-paypal"})
 								@field.Content() {
 									@field.Title() {
 										PayPal
@@ -1666,7 +1666,7 @@ templ cardReceivingMethod() {
 								}
 							}
 						}
-					</div>
+					}
 				}
 				@field.Field() {
 					@field.Label(field.LabelProps{For: "iban"}) {
@@ -1815,33 +1815,32 @@ templ cardRollerShades() {
 		// >=90 closed, else half) drives the toggle group, and the toggle
 		// group is controlled, so unpressing keeps the current preset.
 		(() => {
-			if (window.__tuiDemoRollerShades) return;
-			window.__tuiDemoRollerShades = true;
+			if (window.__templDemoRollerShades) return;
+			window.__templDemoRollerShades = true;
 			const POSITIONS = { open: 0, half: 50, closed: 100 };
 			const presetOf = (v) => (v <= 10 ? "open" : v >= 90 ? "closed" : "half");
 			// slider.js render() for the single horizontal thumb: the demo sets
 			// the value from outside, so it repeats the edge-aligned math.
 			const setSlider = (root, v) => {
-				const min = parseFloat(root.getAttribute("data-min") || "0");
-				const max = parseFloat(root.getAttribute("data-max") || "100");
+				const min = parseFloat(root.getAttribute("data-templ-min") || "0");
+				const max = parseFloat(root.getAttribute("data-templ-max") || "100");
 				const f = max === min ? 0 : Math.min(1, Math.max(0, (v - min) / (max - min)));
-				const thumb = root.querySelector("[data-tui-slider-thumb]");
+				const thumb = root.querySelector("[data-slot=slider-thumb]");
 				thumb.setAttribute("aria-valuenow", String(v));
 				thumb.style.left = "calc(" + (f * 100).toFixed(4) + "% - " + (f * 12).toFixed(2) + "px)";
-				const range = root.querySelector("[data-tui-slider-range]");
+				const range = root.querySelector("[data-slot=slider-range]");
 				range.style.left = "0";
 				range.style.width = "calc(" + (f * 100).toFixed(4) + "% + " + (6 - f * 12).toFixed(2) + "px)";
 			};
 			const render = (card, v) => {
 				card.querySelector("[data-roller-shade]").style.height = v + "%";
 				const preset = presetOf(v);
-				const group = card.querySelector("[data-tui-toggle-group]");
-				group.querySelectorAll("[data-tui-toggle]").forEach((t) => {
-					const on = t.getAttribute("data-tui-toggle-value") === preset;
+				const group = card.querySelector("[data-slot=toggle-group]");
+				group.querySelectorAll("[data-slot=toggle-group-item]").forEach((t) => {
+					const on = t.getAttribute("data-templ-value") === preset;
 					t.toggleAttribute("data-pressed", on);
 					t.setAttribute("aria-pressed", on ? "true" : "false");
 				});
-				group.setAttribute("data-tui-toggle-group-value", preset);
 			};
 			document.addEventListener("slider-change", (e) => {
 				const card = e.target.closest("[data-roller-shades]");
@@ -1851,7 +1850,7 @@ templ cardRollerShades() {
 			document.addEventListener("toggle-group-value-change", (e) => {
 				const card = e.target.closest("[data-roller-shades]");
 				if (!card) return;
-				const sliderRoot = card.querySelector("[data-tui-slider]");
+				const sliderRoot = card.querySelector("[data-slot=slider]");
 				let v;
 				const nextPreset = e.detail.value[0];
 				if (nextPreset in POSITIONS) {
@@ -1860,7 +1859,7 @@ templ cardRollerShades() {
 				} else {
 					// Unpressing keeps the position; render re-asserts the
 					// controlled preset.
-					v = parseFloat(sliderRoot.querySelector("[data-tui-slider-thumb]").getAttribute("aria-valuenow"));
+					v = parseFloat(sliderRoot.querySelector("[data-slot=slider-thumb]").getAttribute("aria-valuenow"));
 				}
 				render(card, v);
 			});
@@ -1980,8 +1979,8 @@ templ cardStockPerformance() {
 		// toggled by the combobox. Clearing the combobox (null) keeps the
 		// last ticker, like the source's onValueChange guard.
 		(() => {
-			if (window.__tuiDemoStockPerformance) return;
-			window.__tuiDemoStockPerformance = true;
+			if (window.__templDemoStockPerformance) return;
+			window.__templDemoStockPerformance = true;
 			document.addEventListener("combobox-change", (e) => {
 				const card = e.target.closest("[data-stock-performance]");
 				if (!card) return;
@@ -2195,11 +2194,11 @@ templ cardNotificationSettings() {
 		// (aria-checked="mixed" + data-indeterminate), which the checkbox
 		// component itself does not model.
 		(() => {
-			if (window.__tuiDemoNotificationSettings) return;
-			window.__tuiDemoNotificationSettings = true;
+			if (window.__templDemoNotificationSettings) return;
+			window.__templDemoNotificationSettings = true;
 			const partsOf = (card) => {
 				const all = card.querySelector("#notify-all");
-				const items = [...card.querySelectorAll("[data-tui-checkbox-input]")].filter((i) => i !== all);
+				const items = [...card.querySelectorAll("[data-slot=checkbox] + input")].filter((i) => i !== all);
 				return { all, items };
 			};
 			const setChecked = (input, checked) => {
@@ -2223,7 +2222,7 @@ templ cardNotificationSettings() {
 			};
 			let updating = false;
 			document.addEventListener("change", (e) => {
-				if (updating || !e.target.matches || !e.target.matches("[data-tui-checkbox-input]")) return;
+				if (updating || !e.target.matches || !e.target.matches("[data-slot=checkbox] + input")) return;
 				const card = e.target.closest("[data-notification-settings]");
 				if (!card) return;
 				const { all } = partsOf(card);
@@ -2312,10 +2311,10 @@ templ cardStyleOverview() {
 		// paint from the iframe URL (same preset decoding as create-preview.js),
 		// updates from the parent's design-system-params postMessage.
 		(() => {
-			if (window.__tuiDemoStyleOverviewTitle) return;
-			window.__tuiDemoStyleOverviewTitle = true;
+			if (window.__templDemoStyleOverviewTitle) return;
+			window.__templDemoStyleOverviewTitle = true;
 			const apply = (p) => {
-				const cfg = window.tuiCreateConfig;
+				const cfg = window.templCreateConfig;
 				const el = document.querySelector("[data-style-overview-title]");
 				if (!cfg || !el || !p) return;
 				const style = cfg.STYLES.find((s) => s.name === p.style);
@@ -2329,8 +2328,8 @@ templ cardStyleOverview() {
 					(headingName && headingName !== fontName ? headingName : fontName);
 			};
 			const initialParams = () => {
-				const cfg = window.tuiCreateConfig;
-				const preset = window.tuiPreset;
+				const cfg = window.templCreateConfig;
+				const preset = window.templPreset;
 				if (!cfg) return null;
 				const p = Object.assign({}, cfg.DEFAULT_CONFIG);
 				const code = new URLSearchParams(window.location.search).get("preset");
@@ -2455,10 +2454,10 @@ templ cardTypographySpecimen() {
 		// "Inherit", bodyLabel to "Default". Same params plumbing as the
 		// style overview card above.
 		(() => {
-			if (window.__tuiDemoTypographySpecimenTitle) return;
-			window.__tuiDemoTypographySpecimenTitle = true;
+			if (window.__templDemoTypographySpecimenTitle) return;
+			window.__templDemoTypographySpecimenTitle = true;
 			const apply = (p) => {
-				const cfg = window.tuiCreateConfig;
+				const cfg = window.templCreateConfig;
 				const el = document.querySelector("[data-typography-specimen-title]");
 				if (!cfg || !el || !p) return;
 				const font = cfg.FONTS.find((f) => f.value === p.font);
@@ -2470,8 +2469,8 @@ templ cardTypographySpecimen() {
 				el.textContent = headingLabel + " - " + bodyLabel;
 			};
 			const initialParams = () => {
-				const cfg = window.tuiCreateConfig;
-				const preset = window.tuiPreset;
+				const cfg = window.templCreateConfig;
+				const preset = window.templPreset;
 				if (!cfg) return null;
 				const p = Object.assign({}, cfg.DEFAULT_CONFIG);
 				const code = new URLSearchParams(window.location.search).get("preset");
@@ -2560,10 +2559,10 @@ templ cardUIElements(suffix string) {
 						Outline
 					}
 				</div>
-				<div data-slot="radio-group" class="ml-auto flex w-fit gap-3">
-					@radiogroup.Item(radiogroup.ItemProps{Name: "ui-elements-fruit-" + suffix, Value: "apple", DefaultChecked: true})
-					@radiogroup.Item(radiogroup.ItemProps{Name: "ui-elements-fruit-" + suffix, Value: "banana"})
-				</div>
+				@radiogroup.RadioGroup(radiogroup.Props{Name: "ui-elements-fruit-" + suffix, DefaultValue: "apple", Class: "ml-auto flex w-fit gap-3"}) {
+					@radiogroup.Item(radiogroup.ItemProps{Value: "apple"})
+					@radiogroup.Item(radiogroup.ItemProps{Value: "banana"})
+				}
 				<div class="flex gap-3">
 					@checkbox.Checkbox(checkbox.Props{DefaultChecked: true})
 					@checkbox.Checkbox()
@@ -2833,8 +2832,8 @@ templ cardCodespaces() {
 		// The vanilla pendant of codespaces-card.tsx's isCreatingCodespace
 		// state: the button disables and shows the spinner for 2 seconds.
 		(() => {
-			if (window.__tuiDemoCodespaces) return;
-			window.__tuiDemoCodespaces = true;
+			if (window.__templDemoCodespaces) return;
+			window.__templDemoCodespaces = true;
 			document.addEventListener("click", (e) => {
 				if (!(e.target instanceof Element)) return;
 				const btn = e.target.closest("[data-codespaces-create]");
@@ -3330,7 +3329,7 @@ templ cardInviteTeam() {
 							@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-24"}) {
 								@selectcomp.Value()
 							}
-							@selectcomp.Content(selectcomp.ContentProps{DisableAlignItemWithTrigger: true, Align: selectcomp.AlignEnd}) {
+							@selectcomp.Content(selectcomp.ContentProps{AlignItemWithTrigger: utils.Ptr(false), Align: selectcomp.AlignEnd}) {
 								@selectcomp.Group() {
 									@selectcomp.Item(selectcomp.ItemProps{Value: "admin"}) {
 										Admin

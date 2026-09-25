@@ -96,7 +96,7 @@ selectcomp.Select
 
 ## Align Item With Trigger
 
-By default the popup positions so the selected item appears over the trigger (Base UI's `alignItemWithTrigger`). Set `DisableAlignItemWithTrigger` on `selectcomp.Content` to open it below the trigger edge like a dropdown instead.
+By default the popup positions so the selected item appears over the trigger (Base UI's `alignItemWithTrigger`). Set `AlignItemWithTrigger: utils.Ptr(false)` on `selectcomp.Content` to open it below the trigger edge like a dropdown instead.
 
 <ComponentPreview name="select-align-item" />
 
@@ -139,10 +139,9 @@ Set the `Invalid` prop on the `field.Field` component and `aria-invalid` on the 
 
 The `selectcomp.Select` component is the root that carries the selection and the form value.
 
-The `select-open-change` event detail contains `open` and `openMethod`. When
-controlling `Open`, pass `openMethod` back through `OpenMethod` so touch opens
-use the normal popper instead of item alignment. `openMethod` is `null` when
-the event requests that the Select close.
+The `select-open-change` event detail contains `open` and `openMethod`.
+`openMethod` is `null` when the event requests that the Select close. A Select
+the server renders open counts as opened programmatically.
 
 | Prop       | Type     | Default |
 | ---------- | -------- | ------- |
@@ -151,7 +150,6 @@ the event requests that the Select close.
 | `DefaultValue` | `string` | - |
 | `Open` | `*bool` | - |
 | `DefaultOpen` | `bool` | `false` |
-| `OpenMethod` | `OpenMethodProgrammatic \| OpenMethodKeyboard \| OpenMethodMouse \| OpenMethodTouch` | `OpenMethodProgrammatic` |
 | `Disabled` | `bool`   | `false` |
 
 ### SelectTrigger
@@ -178,7 +176,7 @@ The `selectcomp.Content` component is the listbox popup.
 
 | Prop       | Type                                       | Default               |
 | ---------- | ------------------------------------------ | --------------------- |
-| `DisableAlignItemWithTrigger` | `bool` | `false` |
+| `AlignItemWithTrigger` | `*bool` | `true` |
 | `Align`    | `AlignStart \| AlignCenter \| AlignEnd`    | `AlignCenter`         |
 | `Class`    | `string`                                   | -                     |
 

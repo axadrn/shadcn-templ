@@ -16,7 +16,7 @@ func TestControlledCheckedOverridesDefaultChecked(t *testing.T) {
 	}
 
 	html := output.String()
-	for _, want := range []string{`aria-checked="false"`, `data-unchecked`, `data-tui-checkbox-controlled`} {
+	for _, want := range []string{`aria-checked="false"`, `data-unchecked`, `data-templ-checked`} {
 		if !strings.Contains(html, want) {
 			t.Fatalf("rendered checkbox is missing %q: %s", want, html)
 		}
@@ -32,7 +32,7 @@ func TestClientRequestsCancelableCheckedChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	js := string(source)
-	for _, want := range []string{`new CustomEvent("checkbox-change"`, `cancelable: true`, `data-tui-checkbox-controlled`} {
+	for _, want := range []string{`new CustomEvent("checkbox-change"`, `cancelable: true`, `data-templ-checked`} {
 		if !strings.Contains(js, want) {
 			t.Fatalf("client behavior is missing %q", want)
 		}

@@ -1,8 +1,18 @@
 (function () {
   "use strict";
 
+  const PANEL = '[data-slot="collapsible-content"]';
+
   function panelFor(trigger) {
     return document.getElementById(trigger.getAttribute("aria-controls") || "");
+  }
+
+  // A trigger merged onto another component keeps that component's slot
+  // (Base UI render prop), so the trigger is whatever controls a panel.
+  function triggerOf(target) {
+    const trigger = target.closest("[aria-controls]");
+    const panel = trigger && panelFor(trigger);
+    return panel && panel.matches(PANEL) ? trigger : null;
   }
 
   function setOpen(el, isOpen) {
@@ -47,7 +57,7 @@
   function toggle(trigger) {
     const panel = panelFor(trigger);
     if (!panel) return;
-    const root = panel.closest("[data-tui-collapsible]");
+    const root = panel.closest('[data-slot="collapsible"]');
     if (!root || root.hasAttribute("data-disabled")) return;
     const isOpen = !panel.hasAttribute("data-open");
   const accepted = root.dispatchEvent(
@@ -57,13 +67,13 @@
       detail: { open: isOpen },
     }),
   );
-  if (!accepted || root.hasAttribute("data-tui-collapsible-controlled")) return;
+  if (!accepted || root.hasAttribute("data-templ-open")) return;
 
     setOpen(root, isOpen);
     trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
     trigger.toggleAttribute("data-panel-open", isOpen);
     if (isOpen) {
-      clearTimeout(panel._tuiCloseTimer);
+      clearTimeout(panel._templCloseTimer);
       panel.hidden = false;
       panel.removeAttribute("data-ending-style");
       setOpen(panel, true);
@@ -76,30 +86,30 @@
       panel.removeAttribute("data-starting-style");
       setOpen(panel, false);
       panel.setAttribute("data-ending-style", "");
-      clearTimeout(panel._tuiCloseTimer);
+      clearTimeout(panel._templCloseTimer);
       const duration = motionMs(panel);
       if (duration === 0) {
         finishClose(panel);
       } else {
-        panel._tuiCloseTimer = setTimeout(() => finishClose(panel), duration + 50);
+        panel._templCloseTimer = setTimeout(() => finishClose(panel), duration + 50);
       }
     }
   }
 
   document.addEventListener("click", (e) => {
     if (!(e.target instanceof Element)) return;
-    const trigger = e.target.closest("[data-tui-collapsible-trigger]");
+    const trigger = triggerOf(e.target);
     if (trigger) toggle(trigger);
   });
 
   function finishMotion(e) {
     if (!(e.target instanceof Element)) return;
-    const panel = e.target.closest("[data-tui-collapsible-content][data-ending-style]");
+    const panel = e.target.closest(PANEL + "[data-ending-style]");
     if (panel) finishClose(panel);
   }
 
   document.addEventListener("transitionend", finishMotion);
   document.addEventListener("animationend", finishMotion);
 
-  document.querySelectorAll("[data-tui-collapsible-content][data-open]").forEach(measure);
+  document.querySelectorAll(PANEL + "[data-open]").forEach(measure);
 })();

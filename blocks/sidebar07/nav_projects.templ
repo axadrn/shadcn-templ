@@ -1,6 +1,8 @@
 package sidebar07
 
 import (
+	"strconv"
+
 	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
@@ -18,13 +20,13 @@ templ NavProjects(projects []Project) {
 			Projects
 		}
 		@sidebar.Menu() {
-			for _, item := range projects {
+			for i, item := range projects {
 				@sidebar.MenuItem() {
 					@sidebar.MenuButton(sidebar.MenuButtonProps{Href: item.URL}) {
 						@item.Icon()
 						<span>{ item.Name }</span>
 					}
-					@dropdownmenu.DropdownMenu() {
+					@dropdownmenu.DropdownMenu(dropdownmenu.Props{ID: "sidebar07-nav-projects-menu-" + strconv.Itoa(i)}) {
 						@sidebar.MenuAction(sidebar.MenuActionProps{
 							ShowOnHover: true,
 							Class:       "aria-expanded:bg-muted",
@@ -34,11 +36,9 @@ templ NavProjects(projects []Project) {
 							<span class="sr-only">More</span>
 						}
 						@dropdownmenu.Content(dropdownmenu.ContentProps{
-							Class:       "w-fit",
-							Side:        dropdownmenu.SideRight,
-							Align:       dropdownmenu.AlignStart,
-							MobileSide:  dropdownmenu.SideBottom,
-							MobileAlign: dropdownmenu.AlignEnd,
+							Class: "w-fit",
+							Side:  dropdownmenu.SideRight,
+							Align: dropdownmenu.AlignStart,
 						}) {
 							@dropdownmenu.Item() {
 								@icon.Folder()
@@ -65,4 +65,18 @@ templ NavProjects(projects []Project) {
 			}
 		}
 	}
+	<script type="module" nonce={ templ.GetNonce(ctx) }>
+		// The pendant of useSidebar().isMobile in the block: the menu reads
+		// its side when it opens, onMobileChange keeps it current until the
+		// block is swapped out.
+		// side={isMobile ? "bottom" : "right"} align={isMobile ? "end" : "start"}
+		const menus = [...document.querySelectorAll('[id^="sidebar07-nav-projects-menu-"][data-templ-side]')];
+		window.templ.sidebar.onMobileChange((isMobile) => {
+			if (!menus[0]?.isConnected) return false;
+			menus.forEach((menu) => {
+				menu.setAttribute("data-templ-side", isMobile ? "bottom" : "right");
+				menu.setAttribute("data-templ-align", isMobile ? "end" : "start");
+			});
+		});
+	</script>
 }

@@ -1,6 +1,8 @@
 package combobox
 
 import (
+	"bytes"
+	"context"
 	"os"
 	"strings"
 	"testing"
@@ -13,8 +15,14 @@ func TestControlledStateOverridesDefaults(t *testing.T) {
 	if got := initialValue(p); got != "" {
 		t.Fatalf("controlled empty value must override default value, got %q", got)
 	}
-	if initialOpen(p) {
-		t.Fatal("controlled false open state must override defaultOpen true")
+	ctx := context.WithValue(context.Background(), stateKey, ctxState{id: "c", open: p.Open, defaultOpen: p.DefaultOpen})
+	var output bytes.Buffer
+	if err := Content().Render(ctx, &output); err != nil {
+		t.Fatal(err)
+	}
+	html := output.String()
+	if !strings.Contains(html, `data-templ-open="false"`) || strings.Contains(html, `data-templ-default-open`) {
+		t.Fatalf("controlled false open state must override defaultOpen true: %s", html)
 	}
 }
 
@@ -28,8 +36,8 @@ func TestClientRequestsCancelableValueAndOpenChanges(t *testing.T) {
 		`new CustomEvent("combobox-change"`,
 		`new CustomEvent("combobox-open-change"`,
 		`cancelable: true`,
-		`data-tui-combobox-value-controlled`,
-		`data-tui-combobox-open-controlled`,
+		`content.hasAttribute("data-templ-value")`,
+		`content.hasAttribute("data-templ-open")`,
 		`FloatingUIDOM.autoUpdate(anchor, content, update`,
 		`layoutShift: typeof IntersectionObserver !== "undefined"`,
 	} {

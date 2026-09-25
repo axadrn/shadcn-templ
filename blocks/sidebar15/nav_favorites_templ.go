@@ -9,6 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"strconv"
+
 	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
@@ -91,7 +93,7 @@ func NavFavorites(favorites []Favorite) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				for _, item := range favorites {
+				for i, item := range favorites {
 					templ_7745c5c3_Var5 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 						templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 						templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -123,7 +125,7 @@ func NavFavorites(favorites []Favorite) templ.Component {
 							var templ_7745c5c3_Var7 string
 							templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(item.Emoji)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/nav_favorites.templ`, Line: 27, Col: 24}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/nav_favorites.templ`, Line: 29, Col: 24}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 							if templ_7745c5c3_Err != nil {
@@ -136,7 +138,7 @@ func NavFavorites(favorites []Favorite) templ.Component {
 							var templ_7745c5c3_Var8 string
 							templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/nav_favorites.templ`, Line: 28, Col: 23}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/nav_favorites.templ`, Line: 30, Col: 23}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 							if templ_7745c5c3_Err != nil {
@@ -352,18 +354,16 @@ func NavFavorites(favorites []Favorite) templ.Component {
 								return nil
 							})
 							templ_7745c5c3_Err = dropdownmenu.Content(dropdownmenu.ContentProps{
-								Class:       "w-56 rounded-lg",
-								Side:        dropdownmenu.SideRight,
-								Align:       dropdownmenu.AlignStart,
-								MobileSide:  dropdownmenu.SideBottom,
-								MobileAlign: dropdownmenu.AlignEnd,
+								Class: "w-56 rounded-lg",
+								Side:  dropdownmenu.SideRight,
+								Align: dropdownmenu.AlignStart,
 							}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var11), templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							return nil
 						})
-						templ_7745c5c3_Err = dropdownmenu.DropdownMenu().Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = dropdownmenu.DropdownMenu(dropdownmenu.Props{ID: "sidebar15-nav-favorites-menu-" + strconv.Itoa(i)}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -431,6 +431,23 @@ func NavFavorites(favorites []Favorite) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = sidebar.Group(sidebar.GroupProps{Class: "group-data-[collapsible=icon]:hidden"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<script type=\"module\" nonce=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var18 string
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/nav_favorites.templ`, Line: 76, Col: 50}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\">\n\t\t// The pendant of useSidebar().isMobile in the block: the menu reads\n\t\t// its side when it opens, onMobileChange keeps it current until the\n\t\t// block is swapped out.\n\t\t// side={isMobile ? \"bottom\" : \"right\"} align={isMobile ? \"end\" : \"start\"}\n\t\tconst menus = [...document.querySelectorAll('[id^=\"sidebar15-nav-favorites-menu-\"][data-templ-side]')];\n\t\twindow.templ.sidebar.onMobileChange((isMobile) => {\n\t\t\tif (!menus[0]?.isConnected) return false;\n\t\t\tmenus.forEach((menu) => {\n\t\t\t\tmenu.setAttribute(\"data-templ-side\", isMobile ? \"bottom\" : \"right\");\n\t\t\t\tmenu.setAttribute(\"data-templ-align\", isMobile ? \"end\" : \"start\");\n\t\t\t});\n\t\t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -430,7 +430,7 @@ templ comboboxExampleWithForm() {
 			if (e.target.id !== "combobox-example-form") return;
 			e.preventDefault();
 			const framework = new FormData(e.target).get("framework");
-			window.tui.toast.add({ title: `You selected ${framework} as your framework.` });
+			window.templ.toast.add({ title: `You selected ${framework} as your framework.` });
 		});
 	</script>
 }
@@ -546,7 +546,7 @@ templ comboboxExampleMultipleNoRemove() {
 			AutoHighlight: true,
 			DefaultValues: []string{"templ", "htmx"},
 		}) {
-			@combobox.Chips(combobox.ChipsProps{Class: "[&_[data-tui-combobox-chip-remove]]:hidden"}) {
+			@combobox.Chips(combobox.ChipsProps{Class: "[&_[data-slot=combobox-chip-remove]]:hidden"}) {
 				@combobox.Value()
 				@combobox.ChipsInput()
 			}
@@ -650,7 +650,7 @@ templ comboboxExampleInDialog() {
 		// The vanilla pendant of the demo's confirm toast.
 		document.addEventListener("click", (e) => {
 			if (!(e.target instanceof Element) || !e.target.closest("#combobox-example-dialog-confirm")) return;
-			window.tui.toast.add({ title: "Framework selected." });
+			window.templ.toast.add({ title: "Framework selected." });
 		});
 	</script>
 }

@@ -193,13 +193,12 @@ templ BlockView(name string) {
 templ blocksPageScript() {
 	<script nonce={ templ.GetNonce(ctx) }>
 		(() => {
-			const wrapperOf = (el) => el.closest("[data-tui-block-wrapper]");
+			const wrapperOf = (el) => el.closest("[data-templ-block-wrapper]");
 			const setPanelSize = (wrapper, value) =>
-				window.tui?.resizable?.resize(wrapper.querySelector("[data-tui-block-panel]"), value);
+				window.templ?.resizable?.resize(wrapper.querySelector("[data-templ-block-panel]"), value);
 			const setPreviewTab = (wrapper) => {
-				const tabs = wrapper.querySelector("[data-tui-block-tabs]");
-				const tabsID = tabs?.getAttribute("data-tui-tabs-id");
-				if (tabsID) window.tui?.tabs?.setActive(tabsID, "preview");
+				const tabs = wrapper.querySelector("[data-templ-block-tabs]");
+				if (tabs) window.templ?.tabs?.setActive(tabs, "preview");
 			};
 
 			// Copy feedback: swap the idle icon for the check for two
@@ -220,43 +219,43 @@ templ blocksPageScript() {
 				if (!(e.target instanceof Element)) return;
 
 				// View tabs: Preview / Code set the wrapper's data-view.
-				const viewBtn = e.target.closest("[data-tui-block-set-view]");
+				const viewBtn = e.target.closest("[data-templ-block-set-view]");
 				if (viewBtn) {
-					wrapperOf(viewBtn)?.setAttribute("data-view", viewBtn.getAttribute("data-tui-block-set-view"));
+					wrapperOf(viewBtn)?.setAttribute("data-view", viewBtn.getAttribute("data-templ-block-set-view"));
 					return;
 				}
 
 				// Viewport toggles resize the panel and switch to preview.
-				const sizeBtn = e.target.closest("[data-tui-block-size]");
+				const sizeBtn = e.target.closest("[data-templ-block-size]");
 				if (sizeBtn) {
 					const wrapper = wrapperOf(sizeBtn);
 					if (!wrapper) return;
 					wrapper.setAttribute("data-view", "preview");
 					setPreviewTab(wrapper);
-					setPanelSize(wrapper, sizeBtn.getAttribute("data-tui-block-size"));
+					setPanelSize(wrapper, sizeBtn.getAttribute("data-templ-block-size"));
 					return;
 				}
 
 				// Refresh reloads the preview iframe.
-				const refreshBtn = e.target.closest("[data-tui-block-refresh]");
+				const refreshBtn = e.target.closest("[data-templ-block-refresh]");
 				if (refreshBtn) {
-					const frame = wrapperOf(refreshBtn)?.querySelector("[data-tui-block-iframe]");
+					const frame = wrapperOf(refreshBtn)?.querySelector("[data-templ-block-iframe]");
 					if (frame) frame.src = frame.src;
 					return;
 				}
 
 				// The CLI add command copy button.
-				const addBtn = e.target.closest("[data-tui-block-add]");
+				const addBtn = e.target.closest("[data-templ-block-add]");
 				if (addBtn) {
-					navigator.clipboard.writeText(addBtn.getAttribute("data-tui-block-add"));
-					flash(addBtn, "[data-tui-block-add-idle]", "[data-tui-block-add-done]");
+					navigator.clipboard.writeText(addBtn.getAttribute("data-templ-block-add"));
+					flash(addBtn, "[data-templ-block-add-idle]", "[data-templ-block-add-done]");
 					return;
 				}
 
 				// File tree folders collapse/expand.
-				const folderBtn = e.target.closest("[data-tui-block-folder-trigger]");
+				const folderBtn = e.target.closest("[data-templ-block-folder-trigger]");
 				if (folderBtn) {
-					const folder = folderBtn.closest("[data-tui-block-folder]");
+					const folder = folderBtn.closest("[data-templ-block-folder]");
 					if (!folder) return;
 					const closed = folder.toggleAttribute("data-closed");
 					folderBtn.setAttribute("aria-expanded", String(!closed));
@@ -264,19 +263,19 @@ templ blocksPageScript() {
 				}
 
 				// File tree leaves switch the active code pane.
-				const fileBtn = e.target.closest("[data-tui-block-file]");
+				const fileBtn = e.target.closest("[data-templ-block-file]");
 				if (fileBtn) {
 					const wrapper = wrapperOf(fileBtn);
 					if (!wrapper) return;
-					const path = fileBtn.getAttribute("data-tui-block-file");
-					wrapper.querySelectorAll("[data-tui-block-file]").forEach((b) => {
+					const path = fileBtn.getAttribute("data-templ-block-file");
+					wrapper.querySelectorAll("[data-templ-block-file]").forEach((b) => {
 						b.setAttribute("data-active", b === fileBtn ? "true" : "false");
 					});
-					wrapper.querySelectorAll("[data-tui-block-file-pane]").forEach((p) => {
-						const active = p.getAttribute("data-tui-block-file-pane") === path;
+					wrapper.querySelectorAll("[data-templ-block-file-pane]").forEach((p) => {
+						const active = p.getAttribute("data-templ-block-file-pane") === path;
 						p.hidden = !active;
 						if (active) {
-							const scroll = p.querySelector("[data-tui-block-file-scroll]");
+							const scroll = p.querySelector("[data-templ-block-file-scroll]");
 							if (scroll) scroll.scrollTop = 0;
 							const pre = scroll?.querySelector("pre");
 							if (pre) pre.scrollLeft = 0;
@@ -286,13 +285,13 @@ templ blocksPageScript() {
 				}
 
 				// The per-file copy button in the code figcaption.
-				const copyBtn = e.target.closest("[data-tui-block-copy-file]");
+				const copyBtn = e.target.closest("[data-templ-block-copy-file]");
 				if (copyBtn) {
 					const wrapper = wrapperOf(copyBtn);
-					const path = copyBtn.getAttribute("data-tui-block-copy-file");
-					const source = wrapper?.querySelector(`[data-tui-block-file-source="${CSS.escape(path)}"]`);
+					const path = copyBtn.getAttribute("data-templ-block-copy-file");
+					const source = wrapper?.querySelector(`[data-templ-block-file-source="${CSS.escape(path)}"]`);
 					if (source) navigator.clipboard.writeText(source.value);
-					flash(copyBtn, "[data-tui-block-copy-idle]", "[data-tui-block-copy-done]");
+					flash(copyBtn, "[data-templ-block-copy-idle]", "[data-templ-block-copy-done]");
 					return;
 				}
 			});

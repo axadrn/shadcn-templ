@@ -129,7 +129,7 @@ templ commandMenuScript() {
 						return;
 					}
 					e.preventDefault();
-					window.tui.dialog.toggle("command-menu");
+					window.templ.dialog.toggle("command-menu");
 				}
 			});
 
@@ -138,7 +138,7 @@ templ commandMenuScript() {
 				if (!(e.target instanceof Element) || !e.target.closest("#site-search")) return;
 				var item = e.target.closest("[data-href]");
 				if (!item) return;
-				window.tui.dialog.close("command-menu");
+				window.templ.dialog.close("command-menu");
 				window.location.href = item.dataset.href;
 			});
 		})();

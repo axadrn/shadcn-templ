@@ -14,7 +14,7 @@ templ FieldChoiceCard() {
 			@field.Description() {
 				Select the compute environment for your cluster.
 			}
-			<div data-slot="radio-group" class="grid gap-3">
+			@radiogroup.RadioGroup(radiogroup.Props{Name: "compute", DefaultValue: "kubernetes"}) {
 				@field.Label(field.LabelProps{For: "kubernetes-r2h"}) {
 					@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
 						@field.Content() {
@@ -26,10 +26,8 @@ templ FieldChoiceCard() {
 							}
 						}
 						@radiogroup.Item(radiogroup.ItemProps{
-							Name:           "compute",
-							Value:          "kubernetes",
-							ID:             "kubernetes-r2h",
-							DefaultChecked: true,
+							Value: "kubernetes",
+							ID:    "kubernetes-r2h",
 						})
 					}
 				}
@@ -44,13 +42,12 @@ templ FieldChoiceCard() {
 							}
 						}
 						@radiogroup.Item(radiogroup.ItemProps{
-							Name:  "compute",
 							Value: "vm",
 							ID:    "vm-z4k",
 						})
 					}
 				}
-			</div>
+			}
 		}
 	}
 }

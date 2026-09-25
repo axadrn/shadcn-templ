@@ -10,7 +10,7 @@ import (
 )
 
 // Theme is the pendant of a registry/themes.ts entry. The values are the
-// vendored 1:1 copy in assets/js/create-themes.js (window.tuiCreateThemes),
+// vendored 1:1 copy in assets/js/create-themes.js (window.templCreateThemes),
 // parsed here as the single data source so the Go build and the /create
 // browser UI can never drift apart.
 type Theme struct {
@@ -41,7 +41,7 @@ func loadThemes() ([]Theme, error) {
 			themesErr = fmt.Errorf("registryapi: read create-themes.js: %w", err)
 			return
 		}
-		// The file is `window.tuiCreateThemes = [...];` — parse the array.
+		// The file is `window.templCreateThemes = [...];` — parse the array.
 		start := bytes.IndexByte(src, '[')
 		end := bytes.LastIndexByte(src, ']')
 		if start < 0 || end < start {

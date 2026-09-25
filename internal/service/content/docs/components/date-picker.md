@@ -18,7 +18,7 @@ See installation instructions for the [Popover](/docs/components/popover#install
 	{{
 		triggerAttrs := popover.Trigger(ctx)
 		triggerAttrs["data-empty"] = "true"
-		triggerAttrs["data-tui-datepicker-display"] = ""
+		triggerAttrs["data-templ-datepicker-display"] = ""
 	}}
 	@button.Button(button.Props{
 		Variant:    button.VariantOutline,

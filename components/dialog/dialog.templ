@@ -2,6 +2,7 @@ package dialog
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/axadrn/shadcn-templ/v2/components/button"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
@@ -32,8 +33,9 @@ type Props struct {
 	// should own the state after the initial render.
 	Open        *bool
 	DefaultOpen bool
-	// DisableDismissible keeps the dialog open when clicking the backdrop.
-	DisableDismissible bool
+	// DisablePointerDismissal is Base UI's disablePointerDismissal: a press
+	// on the backdrop does not close the dialog.
+	DisablePointerDismissal bool
 }
 
 func initialOpen(p Props) bool {
@@ -47,7 +49,9 @@ type ContentProps struct {
 	Class           string
 	Attributes      templ.Attributes
 	HideCloseButton bool
-	DisableModal    bool
+	// Modal is Base UI's modal: focus trap, scroll lock and inert outside.
+	// nil means true.
+	Modal *bool
 }
 
 type HeaderProps struct {
@@ -84,7 +88,7 @@ templ Dialog(props ...Props) {
 	if p.ID == "" {
 		{{ p.ID = utils.RandomID() }}
 	}
-	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, open: initialOpen(p), controlled: p.Open != nil, disableClickAway: p.DisableDismissible}) }}
+	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, open: initialOpen(p), controlled: p.Open != nil, disableClickAway: p.DisablePointerDismissal}) }}
 	{ children... }
 }
 
@@ -97,10 +101,10 @@ func Trigger(ctx context.Context) templ.Attributes {
 // TriggerFor targets a dialog outside the current Dialog root by id.
 func TriggerFor(id string) templ.Attributes {
 	return templ.Attributes{
-		"data-tui-dialog-trigger": true,
-		"aria-controls":           id,
-		"aria-haspopup":           "dialog",
-		"aria-expanded":           "false",
+		"data-base-ui-click-trigger": true,
+		"aria-controls":              id,
+		"aria-haspopup":              "dialog",
+		"aria-expanded":              "false",
 	}
 }
 
@@ -112,8 +116,7 @@ func Close(ctx context.Context) templ.Attributes {
 // CloseFor targets a dialog outside the current Dialog root by id.
 func CloseFor(id string) templ.Attributes {
 	return templ.Attributes{
-		"data-tui-dialog-close":  true,
-		"data-tui-dialog-target": id,
+		"data-templ-dialog-close": id,
 	}
 }
 
@@ -135,8 +138,8 @@ templ Portal(props ...PortalProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	<div data-tui-dialog-portal hidden>
-		<div data-tui-dialog-root data-tui-portal hidden { p.Attributes... }>
+	<div data-templ-portal hidden>
+		<div data-base-ui-portal hidden { p.Attributes... }>
 			{ children... }
 		</div>
 	</div>
@@ -161,7 +164,6 @@ templ Overlay(props ...OverlayProps) {
 			id={ p.ID }
 		}
 		data-slot="dialog-overlay"
-		data-tui-dialog-backdrop
 		role="presentation"
 		style="user-select: none; -webkit-user-select: none;"
 		class={ utils.CN("cn-dialog-overlay fixed inset-0 isolate z-50", p.Class) }
@@ -186,12 +188,14 @@ templ Content(props ...ContentProps) {
 			role="dialog"
 			tabindex="-1"
 			data-slot="dialog-content"
-			data-tui-dialog-content
-			data-tui-dialog-initial-open={ utils.IfElse(s.open, "true", "false") }
-			data-tui-dialog-controlled?={ s.controlled }
-			data-tui-dialog-show-modal={ utils.IfElse(!p.DisableModal, "true", "false") }
+			if s.controlled {
+				data-templ-open={ strconv.FormatBool(s.open) }
+			} else {
+				data-templ-default-open?={ s.open }
+			}
+			data-templ-modal={ strconv.FormatBool(p.Modal == nil || *p.Modal) }
 			if s.disableClickAway {
-				data-tui-dialog-disable-dismissible="true"
+				data-templ-disable-pointer-dismissal="true"
 			}
 			class={
 				utils.CN(
@@ -209,7 +213,7 @@ templ Content(props ...ContentProps) {
 					Class:   "cn-dialog-close",
 					Attributes: templ.Attributes{
 						"data-slot":             "dialog-close",
-						"data-tui-dialog-close": true,
+						"data-templ-dialog-close": "",
 						"aria-label":            "Close",
 					},
 				}) {
@@ -260,14 +264,14 @@ templ Title(props ...TitleProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	// data-tui-dialog-title is the Title registration: the script wires the
+	// data-templ-dialog-title is the Title registration: the script wires the
 	// popup's aria-labelledby to this element, like Base UI's useDialogTitle.
 	<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
 		data-slot="dialog-title"
-		data-tui-dialog-title
+		data-templ-dialog-title
 		class={ utils.CN("cn-dialog-title cn-font-heading", p.Class) }
 		{ p.Attributes... }
 	>
@@ -280,14 +284,14 @@ templ Description(props ...DescriptionProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	// data-tui-dialog-description is the Description registration: the script
+	// data-templ-dialog-description is the Description registration: the script
 	// wires the popup's aria-describedby to this element, like Base UI.
 	<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
 		data-slot="dialog-description"
-		data-tui-dialog-description
+		data-templ-dialog-description
 		class={ utils.CN("cn-dialog-description", p.Class) }
 		{ p.Attributes... }
 	>

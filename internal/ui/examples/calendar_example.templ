@@ -274,9 +274,9 @@ templ calendarExampleCustomDays() {
 		(() => {
 			const root = () => document.getElementById("calendar-example-custom-days");
 			function decorate() {
-				root().querySelectorAll("[data-tui-calendar-day]").forEach((btn) => {
+				root().querySelectorAll("td[data-day] > button").forEach((btn) => {
 					if (btn.querySelector("span") || btn.getAttribute("data-outside") === "true") return;
-					const date = new Date(btn.getAttribute("data-tui-calendar-day"));
+					const date = new Date(btn.parentElement.getAttribute("data-day"));
 					const weekend = date.getDay() === 0 || date.getDay() === 6;
 					const price = document.createElement("span");
 					price.textContent = weekend ? "$120" : "$100";
@@ -395,7 +395,7 @@ templ calendarExampleDatePickerWithDropdowns() {
 			});
 			document.addEventListener("click", (e) => {
 				if (!(e.target instanceof Element) || !e.target.closest("[data-example-date-picker-done]")) return;
-				window.tui.popover.close("calendar-example-date-picker-dropdowns");
+				window.templ.popover.close("calendar-example-date-picker-dropdowns");
 			});
 		})();
 	</script>

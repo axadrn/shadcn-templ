@@ -19,8 +19,5 @@ func TestFontWeightToggleGroupsConsumeProposedGroupValue(t *testing.T) {
 		if !strings.Contains(text, `const value = e.detail.value[0]`) {
 			t.Fatalf("%s must consume the proposed group value from the event", path)
 		}
-		if strings.Contains(text, `getAttribute("data-tui-toggle-group-value")`) {
-			t.Fatalf("%s still reads the stale DOM group value during a change event", path)
-		}
 	}
 }

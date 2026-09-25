@@ -154,7 +154,7 @@ templ ChartAreaInteractive() {
 			@selectcomp.Select(selectcomp.Props{DefaultValue: "90d"}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{
 					Class:      "hidden w-[160px] rounded-lg sm:ml-auto sm:flex",
-					Attributes: templ.Attributes{"aria-label": "Select a value", "data-tui-chart-range-select": "area-interactive"},
+					Attributes: templ.Attributes{"aria-label": "Select a value", "data-templ-chart-range-select": "area-interactive"},
 				}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Last 3 months"})
 				}
@@ -174,7 +174,7 @@ templ ChartAreaInteractive() {
 		@card.Content(card.ContentProps{Class: "px-2 pt-4 sm:px-6 sm:pt-6"}) {
 			@chart.Container(chart.ContainerProps{ID: "area-interactive", Config: chartAreaInteractiveConfig, Class: "aspect-auto h-[250px] w-full"}) {
 				for _, rng := range chartAreaInteractiveRanges {
-					<div data-tui-chart-range={ rng.Key } hidden?={ rng.Key != "90d" } style="width:100%;height:100%">
+					<div data-templ-chart-range={ rng.Key } hidden?={ rng.Key != "90d" } style="width:100%;height:100%">
 						@chart.AreaChart(chart.AreaChartProps{
 							Data: areaInteractiveFilteredData(rng.Days),
 						}) {

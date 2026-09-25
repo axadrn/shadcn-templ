@@ -35,7 +35,7 @@ templ ChartDisplay(entry ChartEntry) {
 				height="460"
 				loading="lazy"
 				title={ entry.ID }
-				data-tui-chart-iframe
+				data-templ-chart-iframe
 			></iframe>
 		</div>
 	</div>
@@ -59,7 +59,7 @@ templ chartToolbar(entry ChartEntry) {
 			@chartCodeViewer(entry)
 		</div>
 	</div>
-	<textarea hidden readonly data-tui-chart-code={ entry.ID }>{ entry.Code }</textarea>
+	<textarea hidden readonly data-templ-chart-code={ entry.ID }>{ entry.Code }</textarea>
 }
 
 // chartTitle mirrors ChartToolbar's ChartTitle switch on the chart name.
@@ -100,15 +100,15 @@ templ chartCopyButton(name, class string) {
 			Variant: button.VariantGhost,
 			Class:   utils.CN("h-7 w-7 rounded-[6px] [&_svg]:h-3.5 [&_svg]:w-3.5", class),
 			Attributes: utils.MergeAttributes(tooltip.Trigger(ctx), templ.Attributes{
-				"data-tui-chart-copy": name,
+				"data-templ-chart-copy": name,
 				"aria-label":          "Copy code",
 			}),
 		}) {
 			<span class="sr-only">Copy</span>
-			<span data-tui-chart-copy-idle>
+			<span data-templ-chart-copy-idle>
 				@icon.Copy()
 			</span>
-			<span data-tui-chart-copy-done class="hidden">
+			<span data-templ-chart-copy-done class="hidden">
 				@icon.Check()
 			</span>
 		}
@@ -168,7 +168,7 @@ templ chartCodeViewer(entry ChartEntry) {
 								@chartCopyButton(entry.ID, "")
 							</div>
 						</figcaption>
-						<div class="no-scrollbar min-h-0 flex-1 overflow-y-auto [&_pre]:px-0 [&_pre]:py-3.5" data-tui-code-line-numbers>
+						<div class="no-scrollbar min-h-0 flex-1 overflow-y-auto [&_pre]:px-0 [&_pre]:py-3.5" data-templ-code-line-numbers>
 							@templ.Raw(GetHighlightedHTML(ctx, entry.Code, "go"))
 						</div>
 					</figure>

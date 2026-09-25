@@ -16,7 +16,7 @@ type User struct {
 templ NavUser(user User) {
 	@sidebar.Menu() {
 		@sidebar.MenuItem() {
-			@dropdownmenu.DropdownMenu() {
+			@dropdownmenu.DropdownMenu(dropdownmenu.Props{ID: "sidebar12-nav-user-menu"}) {
 				@sidebar.MenuButton(sidebar.MenuButtonProps{
 					Size:       sidebar.MenuButtonSizeLg,
 					Class:      "aria-expanded:bg-muted",
@@ -38,7 +38,6 @@ templ NavUser(user User) {
 					Class:      "min-w-56 rounded-lg",
 					Side:       dropdownmenu.SideRight,
 					Align:      dropdownmenu.AlignStart,
-					MobileSide: dropdownmenu.SideBottom,
 					SideOffset: 4,
 				}) {
 					@dropdownmenu.Group() {
@@ -88,4 +87,15 @@ templ NavUser(user User) {
 			}
 		}
 	}
+	<script type="module" nonce={ templ.GetNonce(ctx) }>
+		// The pendant of useSidebar().isMobile in the block: the menu reads
+		// its side when it opens, onMobileChange keeps it current until the
+		// block is swapped out.
+		// side={isMobile ? "bottom" : "right"}
+		const menu = document.getElementById("sidebar12-nav-user-menu");
+		window.templ.sidebar.onMobileChange((isMobile) => {
+			if (!menu?.isConnected) return false;
+			menu.setAttribute("data-templ-side", isMobile ? "bottom" : "right");
+		});
+	</script>
 }

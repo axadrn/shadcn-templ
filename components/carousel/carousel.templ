@@ -95,14 +95,13 @@ templ Carousel(props ...Props) {
 		role="region"
 		aria-roledescription="carousel"
 		data-slot="carousel"
-		data-tui-carousel
-		data-tui-carousel-orientation={ string(p.Orientation) }
+		data-templ-orientation={ string(p.Orientation) }
 		if p.Align != "" {
-			data-tui-carousel-align={ string(p.Align) }
+			data-templ-align={ string(p.Align) }
 		}
-		data-tui-carousel-loop={ strconv.FormatBool(p.Loop) }
-		data-tui-carousel-autoplay={ strconv.FormatBool(p.Autoplay) }
-		data-tui-carousel-interval={ strconv.Itoa(p.Interval) }
+		data-templ-loop={ strconv.FormatBool(p.Loop) }
+		data-templ-autoplay={ strconv.FormatBool(p.Autoplay) }
+		data-templ-interval={ strconv.Itoa(p.Interval) }
 		class={ utils.CN("relative", p.Class) }
 		{ p.Attributes... }
 	>
@@ -115,9 +114,8 @@ templ Content(props ...ContentProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	<div data-slot="carousel-content" data-tui-carousel-viewport class="overflow-hidden">
+	<div data-slot="carousel-content" class="overflow-hidden">
 		<div
-			data-tui-carousel-track
 			class={
 				utils.CN(
 					"flex",
@@ -144,7 +142,6 @@ templ Item(props ...ItemProps) {
 		role="group"
 		aria-roledescription="slide"
 		data-slot="carousel-item"
-		data-tui-carousel-item
 		class={
 			utils.CN(
 				"min-w-0 shrink-0 grow-0 basis-full",
@@ -177,8 +174,7 @@ templ Previous(props ...PreviousProps) {
 			p.Class,
 		),
 		Attributes: utils.MergeAttributes(templ.Attributes{
-			"data-slot":             "carousel-previous",
-			"data-tui-carousel-prev": true,
+			"data-slot": "carousel-previous",
 		}, p.Attributes),
 	}) {
 		@icon.ChevronLeft(icon.Props{Class: "cn-rtl-flip"})
@@ -205,8 +201,7 @@ templ Next(props ...NextProps) {
 			p.Class,
 		),
 		Attributes: utils.MergeAttributes(templ.Attributes{
-			"data-slot":             "carousel-next",
-			"data-tui-carousel-next": true,
+			"data-slot": "carousel-next",
 		}, p.Attributes),
 	}) {
 		@icon.ChevronRight(icon.Props{Class: "cn-rtl-flip"})

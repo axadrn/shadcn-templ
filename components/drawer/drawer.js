@@ -54,12 +54,15 @@
   // rendered for modal, non-nested drawers). Lifecycle attributes and swipe
   // vars land on popup and overlay, exactly where Base UI puts them.
 
+  // The viewport is the <dialog> with shadcn's drawer-viewport slot.
+  const VIEWPORT = 'dialog[data-slot="drawer-viewport"]';
+
   function popupOf(dialog) {
-    return dialog.querySelector(":scope > [data-tui-drawer-popup]");
+    return dialog.querySelector(':scope > [data-slot="drawer-popup"]');
   }
 
   function overlayOf(dialog) {
-    return dialog.querySelector(":scope > [data-tui-drawer-overlay]");
+    return dialog.querySelector(':scope > [data-slot="drawer-overlay"]');
   }
 
   function setPartsAttr(dialog, name, on) {
@@ -104,21 +107,23 @@
     return { x, y, scale };
   }
 
-  // Resolves a <dialog data-tui-drawer-content> from an id, the element
+  // Resolves a drawer viewport <dialog> from an id, the element
   // itself, or anything inside it.
   function getDrawer(target) {
     if (!target) return null;
     if (typeof target === "string") {
       const el = document.getElementById(target);
-      return el && el.matches("dialog[data-tui-drawer-content]") ? ensureDrawer(el) : null;
+      return el && el.matches(VIEWPORT) ? ensureDrawer(el) : null;
     }
-    if (target.matches?.("dialog[data-tui-drawer-content]")) return ensureDrawer(target);
-    return ensureDrawer(target.closest?.("dialog[data-tui-drawer-content]") || null);
+    if (target.matches?.(VIEWPORT)) return ensureDrawer(target);
+    return ensureDrawer(target.closest?.(VIEWPORT) || null);
   }
 
   function drawerFor(element) {
+    // Drawer.Close links through context in Base UI; its port marker carries
+    // the drawer id when the close sits outside the drawer.
     const id =
-      element.getAttribute("aria-controls") || element.getAttribute("data-tui-drawer-target");
+      element.getAttribute("aria-controls") || element.getAttribute("data-templ-drawer-close");
     if (id) return getDrawer(id);
     return getDrawer(element);
   }
@@ -126,7 +131,7 @@
   function triggersFor(dialog) {
     if (!dialog.id) return [];
     return document.querySelectorAll(
-      '[data-tui-drawer-trigger][aria-controls="' + dialog.id + '"]',
+      '[data-base-ui-click-trigger][aria-controls="' + dialog.id + '"]',
     );
   }
 
@@ -139,15 +144,15 @@
   // ----- nested drawers ------------------------------------------------------
   //
   // A Drawer rendered inside another Drawer's subtree carries
-  // data-tui-drawer-parent (the SSR pendant of Base UI's context nesting).
+  // data-templ-drawer-parent (the SSR pendant of Base UI's context nesting).
   // Everything below is recomputed from the DOM on every state change, so
   // swapped-in or swapped-out drawers never leave stale stacking state.
 
   function parentOf(dialog) {
-    const id = dialog.getAttribute("data-tui-drawer-parent");
+    const id = dialog.getAttribute("data-templ-drawer-parent");
     if (!id) return null;
     const el = document.getElementById(id);
-    return el && el.matches("dialog[data-tui-drawer-content]") ? el : null;
+    return el && el.matches(VIEWPORT) ? el : null;
   }
 
   function ancestorsOf(dialog) {
@@ -187,7 +192,7 @@
   // pin (DrawerPopup keeps the measured height while a nested drawer is
   // present or the popup is animating out; otherwise the height stays auto).
   function syncStack() {
-    const dialogs = Array.from(document.querySelectorAll("dialog[data-tui-drawer-content]"));
+    const dialogs = Array.from(document.querySelectorAll(VIEWPORT));
     if (!dialogs.length) return;
 
     const info = new Map();
@@ -214,7 +219,7 @@
           const depth = chain.length; // distance of d below the root, relative depth works per ancestor
           if (depth > ai.frontmostDepth) {
             ai.frontmostDepth = depth;
-            ai.frontmost = d._tuiHeight || popup.offsetHeight;
+            ai.frontmost = d._templHeight || popup.offsetHeight;
           }
         }
       }
@@ -228,7 +233,7 @@
       if (i.openDesc === 0 && !closing) {
         // Measure while unobstructed; the cached value is what gets pinned
         // once a nested drawer opens (DrawerPopup keepHeightWhileNested).
-        d._tuiHeight = popup.offsetHeight;
+        d._templHeight = popup.offsetHeight;
       }
       popup.style.setProperty("--nested-drawers", String(i.openDesc));
       popup.toggleAttribute("data-nested-drawer-open", i.openDesc > 0);
@@ -237,8 +242,8 @@
       } else {
         popup.style.removeProperty("--drawer-frontmost-height");
       }
-      if (i.present && d._tuiHeight > 0) {
-        popup.style.setProperty("--drawer-height", d._tuiHeight + "px");
+      if (i.present && d._templHeight > 0) {
+        popup.style.setProperty("--drawer-height", d._templHeight + "px");
       } else if (!closing) {
         popup.style.removeProperty("--drawer-height");
       }
@@ -253,13 +258,13 @@
   //
   // Port of packages/react/src/drawer/root/useDrawerSnapPoints.ts plus the
   // snap branches of DrawerViewport. Snap points apply to vertical drawers;
-  // the config is read once from data-tui-drawer-snap-points (JSON, the SSR
+  // the config is read once from data-templ-snap-points (JSON, the SSR
   // pendant of the snapPoints prop) and kept on the element itself so
   // swapped-out drawers take their state with them.
 
   function snapStateOf(dialog) {
-    if (dialog._tuiSnap !== undefined) return dialog._tuiSnap;
-    const raw = dialog.getAttribute("data-tui-drawer-snap-points");
+    if (dialog._templSnap !== undefined) return dialog._templSnap;
+    const raw = dialog.getAttribute("data-templ-snap-points");
     let points = null;
     if (raw) {
       try {
@@ -269,17 +274,17 @@
       }
     }
     if (!Array.isArray(points) || points.length === 0) {
-      dialog._tuiSnap = null;
+      dialog._templSnap = null;
       return null;
     }
-    dialog._tuiSnap = {
+    dialog._templSnap = {
       points,
       resolved: [],
       active: points[0],
       popupHeight: 0,
-      sequential: dialog.hasAttribute("data-tui-drawer-snap-sequential"),
+      sequential: dialog.hasAttribute("data-templ-snap-to-sequential-points"),
     };
-    return dialog._tuiSnap;
+    return dialog._templSnap;
   }
 
   // Resolves the vertical swipe movement for a snap point, damping the drag
@@ -421,20 +426,20 @@
   // Re-resolve snap offsets when the viewport resizes (the reference
   // observes the viewport and popup with a ResizeObserver).
   function watchSnapResize(dialog) {
-    if (dialog._tuiSnapRO || typeof ResizeObserver !== "function") return;
+    if (dialog._templSnapRO || typeof ResizeObserver !== "function") return;
     if (!snapStateOf(dialog)) return;
-    dialog._tuiSnapRO = new ResizeObserver(() => {
+    dialog._templSnapRO = new ResizeObserver(() => {
       if (!dialog.open || popupOf(dialog)?.hasAttribute("data-swiping")) return;
       resolveSnapPoints(dialog);
       applySnapState(dialog);
     });
-    dialog._tuiSnapRO.observe(dialog);
+    dialog._templSnapRO.observe(dialog);
   }
 
   function unwatchSnapResize(dialog) {
-    if (dialog._tuiSnapRO) {
-      dialog._tuiSnapRO.disconnect();
-      delete dialog._tuiSnapRO;
+    if (dialog._templSnapRO) {
+      dialog._templSnapRO.disconnect();
+      delete dialog._templSnapRO;
     }
   }
 
@@ -476,30 +481,30 @@
     if (snap) snap.active = snap.points[0];
     unwatchSnapResize(dialog);
     updateState(dialog, false);
-    dialog._tuiReleaseScroll?.();
-    dialog._tuiReleaseScroll = null;
+    dialog._templReleaseScroll?.();
+    dialog._templReleaseScroll = null;
     syncInert();
     // Return focus to where the drawer was opened from, if focus is still
     // ours to give back.
     if (
-      dialog._tuiPreviousFocus?.isConnected &&
+      dialog._templPreviousFocus?.isConnected &&
       (dialog.contains(document.activeElement) || document.activeElement === document.body)
     ) {
-      dialog._tuiPreviousFocus.focus({ preventScroll: true });
+      dialog._templPreviousFocus.focus({ preventScroll: true });
     }
-    delete dialog._tuiPreviousFocus;
+    delete dialog._templPreviousFocus;
     syncStack();
   }
 
   // The hand-built half of showModal's modality: while a modal drawer is
   // open, every body-level sibling is inert - except the surfaces carrying
-  // the shared data-tui-portal marker (floating popups, dialogs, the
+  // the shared data-base-ui-portal marker (floating popups, dialogs, the
   // toaster). inert removes the rest from tab order and the accessibility
   // tree: floating-ui's markOthers-with-inert pendant, without knowing any
   // component by name.
   function syncInert() {
     const anyModalOpen = Array.from(
-      document.querySelectorAll("body > dialog[data-tui-drawer-content]"),
+      document.querySelectorAll("body > " + VIEWPORT),
     ).some(
       (d) =>
         d.open &&
@@ -509,7 +514,7 @@
         !popupOf(d)?.hasAttribute("data-ending-style"),
     );
     for (const node of document.body.children) {
-      if (node.localName === "script" || node.matches("[data-tui-portal]")) continue;
+      if (node.localName === "script" || node.matches("[data-base-ui-portal]")) continue;
       node.toggleAttribute("inert", anyModalOpen);
     }
   }
@@ -525,11 +530,11 @@
   function closeOnEscapeKeyDown(event) {
     if (event.key !== "Escape") return;
     const drawer = event.currentTarget === document
-      ? [...document.querySelectorAll("body > dialog[data-tui-drawer-content]")].find(
-        (dialog) => dialog.open && !dialog.hasAttribute("data-tui-drawer-disable-dismissible") && !hasOpenNested(dialog),
+      ? [...document.querySelectorAll("body > " + VIEWPORT)].find(
+        (dialog) => dialog.open && !dialog.hasAttribute("data-templ-disable-pointer-dismissal") && !hasOpenNested(dialog),
       )
       : drawerFor(event.currentTarget);
-    if (!drawer?.open || drawer.hasAttribute("data-tui-drawer-disable-dismissible") || hasOpenNested(drawer)) return;
+    if (!drawer?.open || drawer.hasAttribute("data-templ-disable-pointer-dismissal") || hasOpenNested(drawer)) return;
     if (requestOpenChange(drawer, false)) event.preventDefault();
     event.stopPropagation();
     return true;
@@ -543,8 +548,8 @@
     const popup = popupOf(dialog);
     if (!popup) return;
 
-    window.clearTimeout(dialog._tuiCloseTimer);
-    delete dialog._tuiCloseTimer;
+    window.clearTimeout(dialog._templCloseTimer);
+    delete dialog._templCloseTimer;
     setPartsAttr(dialog, "data-ending-style", false);
 
     if (!dialog.open) {
@@ -560,9 +565,9 @@
         // built by hand, like Base UI does.
         portal(dialog);
         dialog.show();
-        if (dialog.getAttribute("data-tui-dialog-show-modal") === "true") {
-          dialog._tuiReleaseScroll = window.tui.scrollLock.acquire(dialog);
-          dialog._tuiPreviousFocus = document.activeElement;
+        if (dialog.getAttribute("data-templ-modal") === "true") {
+          dialog._templReleaseScroll = window.templ.scrollLock.acquire(dialog);
+          dialog._templPreviousFocus = document.activeElement;
           syncInert();
           (popupOf(dialog) || dialog).focus({ preventScroll: true });
         }
@@ -613,20 +618,20 @@
     updateState(dialog, false);
     syncInert();
     if (
-      dialog._tuiPreviousFocus?.isConnected &&
+      dialog._templPreviousFocus?.isConnected &&
       (dialog.contains(document.activeElement) || document.activeElement === document.body)
     ) {
-      dialog._tuiPreviousFocus.focus({ preventScroll: true });
+      dialog._templPreviousFocus.focus({ preventScroll: true });
     }
-    delete dialog._tuiPreviousFocus;
+    delete dialog._templPreviousFocus;
     // The stack treats a closing drawer as closed (Base UI flips `open`
     // before the exit transition), so the parent starts scaling forward now.
     syncStack();
 
     const finish = () => {
       popup.removeEventListener("transitionend", onTransitionEnd);
-      window.clearTimeout(dialog._tuiCloseTimer);
-      delete dialog._tuiCloseTimer;
+      window.clearTimeout(dialog._templCloseTimer);
+      delete dialog._templCloseTimer;
       if (dialog.open) dialog.close(); // the close handler runs cleanupClosed
       else cleanupClosed(dialog);
     };
@@ -634,7 +639,7 @@
       if (event.target === popup && event.propertyName === "transform") finish();
     };
     popup.addEventListener("transitionend", onTransitionEnd);
-    dialog._tuiCloseTimer = window.setTimeout(finish, CLOSE_FALLBACK_MS);
+    dialog._templCloseTimer = window.setTimeout(finish, CLOSE_FALLBACK_MS);
   }
 
   function isDrawerOpen(target) {
@@ -651,7 +656,7 @@
         detail: { open: nextOpen },
       }),
     );
-    if (!accepted || dialog.hasAttribute("data-tui-drawer-controlled")) return false;
+    if (!accepted || dialog.hasAttribute("data-templ-open")) return false;
     if (nextOpen) openDrawer(dialog);
     else closeDrawer(dialog, strength);
     return true;
@@ -875,7 +880,7 @@
       // Nested drawer: mirror the progress into the ancestor popups and flag
       // them as nested-swiping once the gesture passes the 10px threshold
       // (DrawerViewport updateNestedSwipeActive).
-      if (dialog.getAttribute("data-tui-drawer-parent")) {
+      if (dialog.getAttribute("data-templ-drawer-parent")) {
         notifyAncestors(dialog, progress);
         if (
           !state.nestedActive &&
@@ -898,7 +903,7 @@
     }
 
     function finishNestedSwipe(progress) {
-      if (dialog.getAttribute("data-tui-drawer-parent")) {
+      if (dialog.getAttribute("data-templ-drawer-parent")) {
         notifyAncestors(dialog, progress);
       }
       state.nestedActive = false;
@@ -1254,8 +1259,8 @@
   // ----- lifecycle -----------------------------------------------------------
 
   function ensureDrawer(dialog) {
-    if (!dialog || dialog.dataset.tuiDrawerInitialized === "true") return dialog;
-    dialog.dataset.tuiDrawerInitialized = "true";
+    if (!dialog || dialog._templDrawerInit) return dialog;
+    dialog._templDrawerInit = true;
     listenForEscape(dialog);
 
     dialog.addEventListener("cancel", (event) => {
@@ -1264,8 +1269,8 @@
     });
 
     dialog.addEventListener("close", () => {
-      window.clearTimeout(dialog._tuiCloseTimer);
-      delete dialog._tuiCloseTimer;
+      window.clearTimeout(dialog._templCloseTimer);
+      delete dialog._templCloseTimer;
       cleanupClosed(dialog);
     });
 
@@ -1275,7 +1280,7 @@
     // presses reach the page instead — same as before.
     dialog.addEventListener("pointerdown", (event) => {
       if (!dialog.open) return;
-      if (dialog.hasAttribute("data-tui-drawer-disable-dismissible")) return;
+      if (dialog.hasAttribute("data-templ-disable-pointer-dismissal")) return;
       const popup = popupOf(dialog);
       const target = event.target instanceof Element ? event.target : null;
       if (popup && target && !popup.contains(target)) requestOpenChange(dialog, false);
@@ -1289,36 +1294,37 @@
   // Moves the drawer to <body>, the pendant of the reference's DrawerPortal.
   function portal(dialog) {
     if (dialog.parentElement !== document.body) {
-      if (!dialog._tuiPortalOwner) dialog._tuiPortalOwner = dialog.parentElement;
+      if (!dialog._templPortalOwner) dialog._templPortalOwner = dialog.parentElement;
       document.body.appendChild(dialog);
     }
   }
 
   function init(root = document) {
-    root.querySelectorAll("[data-tui-drawer-trigger]").forEach(listenForEscape);
+    root.querySelectorAll("[data-base-ui-click-trigger][aria-controls]").forEach((t) => {
+      if (drawerFor(t)) listenForEscape(t);
+    });
     // Self-healing modality: recompute the inert siblings on every DOM
     // change, so a swap or a missed close event never leaves stale inert.
     syncInert();
     // The unmount half of the React portal pendant: a drawer lives as long
-    // as its SSR declaration site (_tuiPortalOwner) stays in the document.
-    // Ownership keeps programmatic drawers (window.tui.drawer.open) alive
+    // as its SSR declaration site (_templPortalOwner) stays in the document.
+    // Ownership keeps programmatic drawers (window.templ.drawer.open) alive
     // and judges swaps without mid-swap trigger heuristics.
-    document.querySelectorAll("body > dialog[data-tui-drawer-content]").forEach((dialog) => {
-      if (dialog._tuiPortalOwner && !dialog._tuiPortalOwner.isConnected) {
+    document.querySelectorAll("body > " + VIEWPORT).forEach((dialog) => {
+      if (dialog._templPortalOwner && !dialog._templPortalOwner.isConnected) {
         unwatchSnapResize(dialog);
-        dialog._tuiReleaseScroll?.();
-        dialog._tuiReleaseScroll = null;
+        dialog._templReleaseScroll?.();
+        dialog._templReleaseScroll = null;
         dialog.remove();
       }
     });
-    root.querySelectorAll("dialog[data-tui-drawer-content]").forEach((dialog) => {
-      if (dialog.dataset.tuiDrawerInitialized === "true") return;
+    root.querySelectorAll(VIEWPORT).forEach((dialog) => {
+      if (dialog._templDrawerInit) return;
       ensureDrawer(dialog);
 
-      if (dialog.getAttribute("data-tui-drawer-initial-open") === "true") {
-        // One-shot: consume the attribute so a later re-init never re-opens
-        // a closed drawer.
-        dialog.removeAttribute("data-tui-drawer-initial-open");
+      // Server-side open state (Base UI open or defaultOpen), read once: the
+      // _templDrawerInit guard above keeps a re-init from re-opening it.
+      if (dialog.getAttribute("data-templ-open") === "true" || dialog.hasAttribute("data-templ-default-open")) {
         openDrawer(dialog);
       } else {
         updateState(dialog, dialog.open);
@@ -1329,12 +1335,14 @@
 
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
-    const trigger = event.target.closest("[data-tui-drawer-trigger]");
-    if (trigger) {
+    // Base UI's DrawerTrigger identifier (DialogTrigger), shared with dialog
+    // and popover triggers; only those naming a drawer viewport are ours.
+    const trigger = event.target.closest("[data-base-ui-click-trigger][aria-controls]");
+    if (trigger && drawerFor(trigger)) {
       toggleDrawer(drawerFor(trigger));
       return;
     }
-    const closeButton = event.target.closest("[data-tui-drawer-close]");
+    const closeButton = event.target.closest("[data-templ-drawer-close]");
     if (closeButton) {
       requestOpenChange(drawerFor(closeButton), false);
     }
@@ -1356,8 +1364,8 @@
     subtree: true,
   });
 
-  window.tui = window.tui || {};
-  window.tui.drawer = {
+  window.templ = window.templ || {};
+  window.templ.drawer = {
     open: openDrawer,
     close: closeDrawer,
     toggle: toggleDrawer,

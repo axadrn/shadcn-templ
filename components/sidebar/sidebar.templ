@@ -14,13 +14,12 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
-// The pendant of shadcn's sidebar.tsx constants: edit these to change the
-// sidebar widths and the toggle key.
+// The pendant of shadcn's sidebar.tsx width constants; the cookie and the
+// toggle key constants live in sidebar.js, where they are used.
 const (
-	sidebarWidth            = "16rem"
-	sidebarWidthMobile      = "18rem"
-	sidebarWidthIcon        = "3rem"
-	sidebarKeyboardShortcut = "b"
+	sidebarWidth       = "16rem"
+	sidebarWidthMobile = "18rem"
+	sidebarWidthIcon   = "3rem"
 )
 
 type contextKey string
@@ -346,7 +345,7 @@ templ Sidebar(props ...Props) {
 						Displays the mobile sidebar.
 					}
 				}
-				<div class="flex h-full w-full flex-col" data-tui-sidebar-mobile-portal={ p.ID }></div>
+				<div class="flex h-full w-full flex-col" data-templ-sidebar-mobile-portal={ p.ID }></div>
 			}
 		}
 		<!-- Desktop -->
@@ -357,10 +356,8 @@ templ Sidebar(props ...Props) {
 			data-variant={ string(p.Variant) }
 			data-side={ string(p.Side) }
 			data-slot="sidebar"
-			data-tui-sidebar-wrapper
-			data-tui-sidebar-id={ p.ID }
-			data-tui-sidebar-collapsible-mode={ string(p.Collapsible) }
-			data-tui-sidebar-keyboard-shortcut={ sidebarKeyboardShortcut }
+			data-templ-sidebar-id={ p.ID }
+			data-templ-collapsible={ string(p.Collapsible) }
 		>
 			<!-- Gap element that keeps the sidebar width in the document flow -->
 			<div
@@ -396,7 +393,7 @@ templ Sidebar(props ...Props) {
 					data-slot="sidebar-inner"
 					class="cn-sidebar-inner flex size-full flex-col"
 				>
-					<div data-tui-sidebar-content={ p.ID } class="flex h-full w-full flex-col">
+					<div data-templ-sidebar-content={ p.ID } class="flex h-full w-full flex-col">
 						{ children... }
 					</div>
 				</div>
@@ -423,10 +420,9 @@ templ Trigger(props ...TriggerProps) {
 		Class:   utils.CN("cn-sidebar-trigger", p.Class),
 		Attributes: utils.MergeAttributes(
 			templ.Attributes{
-				"data-sidebar":             "trigger",
-				"data-slot":                "sidebar-trigger",
-				"data-tui-sidebar-trigger": true,
-				"data-tui-sidebar-target":  targetID,
+				"data-sidebar":               "trigger",
+				"data-slot":                  "sidebar-trigger",
+				"data-templ-sidebar-trigger": targetID,
 			},
 			p.Attributes,
 		),
@@ -446,9 +442,7 @@ templ Rail(props ...RailProps) {
 		type="button"
 		data-sidebar="rail"
 		data-slot="sidebar-rail"
-		data-tui-sidebar-trigger
-		data-tui-sidebar-target={ sidebarID(ctx) }
-		data-tui-sidebar-rail
+		data-templ-sidebar-trigger={ sidebarID(ctx) }
 		aria-label="Toggle Sidebar"
 		tabindex="-1"
 		title="Toggle Sidebar"
@@ -753,12 +747,12 @@ templ MenuButton(props ...MenuButtonProps) {
 			// TooltipHidden pins the state (the fixed marker keeps the
 			// script's toggle sync away).
 			if p.TooltipHidden != nil {
-				{{ trigger["data-tui-sidebar-tooltip-fixed"] = true }}
+				{{ trigger["data-templ-tooltip-hidden"] = strconv.FormatBool(*p.TooltipHidden) }}
 				if *p.TooltipHidden {
-					{{ trigger["data-tui-tooltip-disabled"] = true }}
+					{{ tooltip.DisableTrigger(trigger) }}
 				}
 			} else if !(s.collapsed && s.collapsible == CollapsibleIcon) {
-				{{ trigger["data-tui-tooltip-disabled"] = true }}
+				{{ tooltip.DisableTrigger(trigger) }}
 			}
 			{{ tp.Attributes = utils.MergeAttributes(trigger, p.Attributes) }}
 			@menuButtonEl(tp) {

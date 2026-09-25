@@ -17,7 +17,7 @@
     if (event.key !== "Escape") return;
     const contents = event.currentTarget === document
       ? allContents()
-      : [event.currentTarget.hasAttribute("data-tui-combobox-content")
+      : [isPositioner(event.currentTarget)
         ? event.currentTarget
         : contentFor(event.currentTarget)];
     let handled = false;
@@ -30,22 +30,55 @@
     return handled;
   }
 
+  // The combobox's element is the positioner (no slot upstream) around the
+  // [data-slot=combobox-content] popup.
+  const POPUP = '[data-slot="combobox-content"]';
+  const ITEM = '[data-slot="combobox-item"]';
+  const CHIP = '[data-slot="combobox-chip"]';
+  // Base UI keeps the positioning anchor in context; the port marker names
+  // the combobox it anchors.
+  const ANCHOR = "[data-templ-combobox-anchor]";
+  // The filter input: Base UI's ComboboxInput, role combobox.
+  const INPUT = '[role="combobox"]';
+
+  function isPositioner(el) {
+    return !!(el && el.firstElementChild && el.firstElementChild.matches(POPUP));
+  }
+
   function allContents() {
-    return document.querySelectorAll("[data-tui-combobox-content]");
+    return [...document.querySelectorAll(POPUP)].map((p) => p.parentElement).filter(isPositioner);
+  }
+
+  function positionerOf(target) {
+    const popup = target && target.closest && target.closest(POPUP);
+    return popup && isPositioner(popup.parentElement) ? popup.parentElement : null;
+  }
+
+  // Base UI's ComboboxTrigger: aria-haspopup plus aria-controls naming the
+  // combobox (not the role=combobox input).
+  function triggerOf(target) {
+    const trigger = target.closest && target.closest("[aria-haspopup][aria-controls]");
+    if (!trigger || trigger.matches(INPUT)) return null;
+    return isPositioner(document.getElementById(trigger.getAttribute("aria-controls"))) ? trigger : null;
+  }
+
+  // A popup-pattern anchor is the trigger button itself.
+  function isTriggerAnchor(anchor) {
+    return anchor.hasAttribute("aria-haspopup");
   }
 
   // The anchor is the input group, chips container or button trigger OUTSIDE
   // the content (an input group inside the popup also carries the attribute
   // but never anchors the position).
   function anchorFor(content) {
-    return [...document.querySelectorAll('[data-tui-combobox-anchor="' + content.id + '"]')].find(
+    return [...document.querySelectorAll('[data-templ-combobox-anchor="' + content.id + '"]')].find(
       (a) => !content.contains(a),
     );
   }
 
   function contentFor(el) {
-    const anchor = el.closest("[data-tui-combobox-anchor]");
-    return anchor ? document.getElementById(anchor.getAttribute("data-tui-combobox-anchor")) : null;
+    const anchor = el.closest(ANCHOR);
+    return anchor ? document.getElementById(anchor.getAttribute("data-templ-combobox-anchor")) : null;
   }
 
   // What the popup is positioned against, like shadcn's runtime: the chips
@@ -56,13 +89,10 @@
   function positionAnchorFor(content) {
     const anchor = anchorFor(content);
     if (!anchor) return null;
-    if (
-      anchor.hasAttribute("data-tui-combobox-chips") ||
-      anchor.hasAttribute("data-tui-combobox-trigger")
-    ) {
+    if (anchor.matches('[data-slot="combobox-chips"]') || isTriggerAnchor(anchor)) {
       return anchor;
     }
-    return anchor.querySelector("[data-tui-combobox-input]") || anchor;
+    return anchor.querySelector(INPUT) || anchor;
   }
 
   // The filter input sits in the anchor, or inside the popup (button-trigger
@@ -70,39 +100,40 @@
   function inputFor(content) {
     const anchor = anchorFor(content);
     return (
-      (anchor && anchor.querySelector("[data-tui-combobox-input]")) ||
-      content.querySelector("[data-tui-combobox-input]")
+      (anchor && anchor.querySelector(INPUT)) ||
+      content.querySelector(INPUT)
     );
   }
 
   function valueDisplayFor(content) {
     const anchor = anchorFor(content);
-    return anchor ? anchor.querySelector("[data-tui-combobox-value-display]") : null;
+    return anchor ? anchor.querySelector('[data-slot="combobox-value"]') : null;
   }
 
   function setExpanded(content, expanded) {
     const input = inputFor(content);
     if (input) input.setAttribute("aria-expanded", expanded ? "true" : "false");
-    const anchor = anchorFor(content);
-    if (anchor && anchor.hasAttribute("data-tui-combobox-trigger")) {
-      anchor.setAttribute("aria-expanded", expanded ? "true" : "false");
-    }
+    // Every trigger of this combobox (Base UI's ComboboxTrigger renders
+    // aria-expanded), the popup-pattern anchor and the input group button.
+    document.querySelectorAll('[aria-haspopup][aria-controls="' + content.id + '"]').forEach((t) => {
+      t.setAttribute("aria-expanded", expanded ? "true" : "false");
+    });
   }
 
   function popupFor(content) {
-    return content.querySelector("[data-tui-combobox-popup]");
+    return content.firstElementChild;
   }
 
   function listFor(content) {
-    return content.querySelector("[data-tui-combobox-list]");
+    return content.querySelector('[data-slot="combobox-list"]');
   }
 
   function itemsOf(content) {
-    return [...content.querySelectorAll("[data-tui-combobox-item]")];
+    return [...content.querySelectorAll(ITEM)];
   }
 
   function labelOf(item) {
-    return item.getAttribute("data-tui-combobox-label") || item.textContent.trim();
+    return item.getAttribute("data-templ-label") || item.textContent.trim();
   }
 
   function isMultiple(content) {
@@ -134,7 +165,7 @@
   }
 
   function sideOffsetOf(content) {
-    const v = parseFloat(content.getAttribute("data-tui-combobox-side-offset"));
+    const v = parseFloat(content.getAttribute("data-templ-side-offset"));
     return isNaN(v) ? SIDE_OFFSET : v;
   }
 
@@ -152,12 +183,12 @@
 
   // Moves the content to <body> (shadcn portals it the same way).
   // The unmount half of the React portal pendant: a portaled content lives
-  // as long as its SSR declaration site (_tuiPortalOwner) stays in the
+  // as long as its SSR declaration site (_templPortalOwner) stays in the
   // document. Trigger-presence heuristics judged mid-swap moments wrongly -
   // multi-phase swap layers briefly disconnect the new triggers.
   function removeOrphanedContents(content) {
-    document.querySelectorAll("body > [data-tui-combobox-content]").forEach((c) => {
-      if (c !== content && c._tuiPortalOwner && !c._tuiPortalOwner.isConnected) {
+    allContents().filter((c) => c.parentElement === document.body).forEach((c) => {
+      if (c !== content && c._templPortalOwner && !c._templPortalOwner.isConnected) {
         stopAutoPositioning(c);
         c.remove();
       }
@@ -168,7 +199,7 @@
     listenForEscape(content);
     removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
-      if (!content._tuiPortalOwner) content._tuiPortalOwner = content.parentElement;
+      if (!content._templPortalOwner) content._templPortalOwner = content.parentElement;
       document.body.appendChild(content);
     }
   }
@@ -177,9 +208,9 @@
     const anchor = positionAnchorFor(content);
     if (!anchor) return Promise.resolve();
     const { computePosition, offset, flip, shift, size } = window.FloatingUIDOM;
-    const side = content.getAttribute("data-tui-combobox-side") || "bottom";
-    const align = content.getAttribute("data-tui-combobox-align") || "start";
-    const alignOffset = parseFloat(content.getAttribute("data-tui-combobox-align-offset")) || 0;
+    const side = content.getAttribute("data-templ-side") || "bottom";
+    const align = content.getAttribute("data-templ-align") || "start";
+    const alignOffset = parseFloat(content.getAttribute("data-templ-align-offset")) || 0;
     const sideOffset = sideOffsetOf(content);
     const placement = align === "center" ? side : side + "-" + align;
 
@@ -193,9 +224,9 @@
         size({
           padding: COLLISION_PADDING,
           apply(args) {
-            content.style.setProperty("--tui-combobox-available-height", args.availableHeight + "px");
-            content.style.setProperty("--tui-combobox-available-width", args.availableWidth + "px");
-            content.style.setProperty("--tui-combobox-anchor-width", args.rects.reference.width + "px");
+            content.style.setProperty("--available-height", args.availableHeight + "px");
+            content.style.setProperty("--available-width", args.availableWidth + "px");
+            content.style.setProperty("--anchor-width", args.rects.reference.width + "px");
           },
         }),
       ],
@@ -206,7 +237,7 @@
       const popup = popupFor(content);
       if (popup) {
         popup.style.setProperty(
-          "--tui-combobox-transform-origin",
+          "--transform-origin",
           anchorOrigin(
             result,
             anchor.getBoundingClientRect(),
@@ -221,13 +252,13 @@
   function startAutoPositioning(content) {
     const anchor = positionAnchorFor(content);
     if (!anchor) return Promise.resolve();
-    if (content._tuiPositionCleanup) content._tuiPositionCleanup();
+    if (content._templPositionCleanup) content._templPositionCleanup();
     let resolveFirst;
     const firstPosition = new Promise((resolve) => {
       resolveFirst = resolve;
     });
     const update = () => position(content).then(resolveFirst, resolveFirst);
-    content._tuiPositionCleanup = window.FloatingUIDOM.autoUpdate(anchor, content, update, {
+    content._templPositionCleanup = window.FloatingUIDOM.autoUpdate(anchor, content, update, {
       elementResize: typeof ResizeObserver !== "undefined",
       layoutShift: typeof IntersectionObserver !== "undefined",
     });
@@ -235,9 +266,9 @@
   }
 
   function stopAutoPositioning(content) {
-    if (!content._tuiPositionCleanup) return;
-    content._tuiPositionCleanup();
-    content._tuiPositionCleanup = null;
+    if (!content._templPositionCleanup) return;
+    content._templPositionCleanup();
+    content._templPositionCleanup = null;
   }
 
   // ----- filtering ----------------------------------------------------------
@@ -250,8 +281,8 @@
       item.hidden = !match;
       if (match) visible += 1;
     });
-    content.querySelectorAll("[data-tui-combobox-group]").forEach((group) => {
-      group.hidden = !group.querySelector("[data-tui-combobox-item]:not([hidden])");
+    content.querySelectorAll('[data-slot="combobox-group"]').forEach((group) => {
+      group.hidden = !group.querySelector(ITEM + ":not([hidden])");
     });
     const popup = popupFor(content);
     const list = listFor(content);
@@ -260,7 +291,7 @@
 
     const highlighted = highlightedItem(content);
     if (highlighted && highlighted.hidden) setHighlight(content, null);
-    if (!highlightedItem(content) && content.hasAttribute("data-tui-combobox-auto-highlight")) {
+    if (!highlightedItem(content) && content.hasAttribute("data-templ-auto-highlight")) {
       setHighlight(content, visibleItems(content)[0] || null);
     }
   }
@@ -272,7 +303,7 @@
   // ----- highlight ----------------------------------------------------------
 
   function highlightedItem(content) {
-    return content.querySelector("[data-tui-combobox-item][data-highlighted]");
+    return content.querySelector(ITEM + "[data-highlighted]");
   }
 
   function setHighlight(content, item) {
@@ -311,7 +342,7 @@
     allContents().forEach((c) => {
       if (c !== content) requestOpenChange(c, false);
     });
-    clearTimeout(content._tuiHide);
+    clearTimeout(content._templHide);
     portal(content);
     // z-index portal like shadcn (no native top layer); re-append
     // keeps paint order = open order.
@@ -323,7 +354,7 @@
     // autoHighlight) the first item.
     const selected = selectedItems(content).find((i) => !i.hidden);
     setHighlight(content, selected || null);
-    if (!selected && content.hasAttribute("data-tui-combobox-auto-highlight")) {
+    if (!selected && content.hasAttribute("data-templ-auto-highlight")) {
       setHighlight(content, visibleItems(content)[0] || null);
     }
 
@@ -356,8 +387,8 @@
       input.value =
         isMultiple(content) || content.contains(input) ? "" : displayValue(content);
     }
-    clearTimeout(content._tuiHide);
-    content._tuiHide = setTimeout(() => {
+    clearTimeout(content._templHide);
+    content._templHide = setTimeout(() => {
       if (content.hasAttribute("data-closed") && !content.hidden) {
         content.hidden = true;
       }
@@ -376,7 +407,7 @@
     detail: { open: nextOpen },
   });
   const accepted = (anchor || content).dispatchEvent(change);
-  if (!accepted || content.hasAttribute("data-tui-combobox-open-controlled")) return false;
+  if (!accepted || content.hasAttribute("data-templ-open")) return false;
   if (nextOpen) open(content);
   else close(content);
   return true;
@@ -390,7 +421,7 @@
   // ----- selection ----------------------------------------------------------
 
   function hiddenInputs(anchor) {
-    return [...anchor.querySelectorAll("[data-tui-combobox-hidden]")];
+    return [...anchor.querySelectorAll('input[type="hidden"]')];
   }
 
   function dispatchNativeChange(anchor) {
@@ -399,9 +430,10 @@
   }
 
   function requestValueChange(content, values) {
-  const controlled = content.hasAttribute("data-tui-combobox-value-controlled");
+  // Controlled: the Base UI value prop, the owner commits.
+  const controlled = content.hasAttribute("data-templ-value");
   const anchor = anchorFor(content);
-  if (!anchor || content.hasAttribute("data-tui-combobox-readonly")) {
+  if (!anchor || content.hasAttribute("data-templ-read-only")) {
     return { accepted: false, controlled };
   }
   const change = new CustomEvent("combobox-change", {
@@ -419,7 +451,7 @@
     const name = inputs[0].name;
     if (isMultiple(content)) {
       inputs.slice(1).forEach((i) => i.remove());
-      const values = selectedItems(content).map((i) => i.getAttribute("data-tui-combobox-value") || "");
+      const values = selectedItems(content).map((i) => i.getAttribute("data-templ-value") || "");
       const first = inputs[0];
       first.value = values[0] || "";
       values.slice(1).forEach((v) => {
@@ -429,29 +461,30 @@
       });
     } else {
       const selected = selectedItems(content)[0];
-      inputs[0].value = selected ? selected.getAttribute("data-tui-combobox-value") || "" : "";
+      inputs[0].value = selected ? selected.getAttribute("data-templ-value") || "" : "";
     }
     inputs[0].name = name;
   }
 
   function syncChips(content, anchor) {
-    if (!anchor.hasAttribute("data-tui-combobox-chips")) return;
-    const template = anchor.querySelector("[data-tui-combobox-chip-template]");
-    anchor.querySelectorAll("[data-tui-combobox-chip]").forEach((chip) => {
-      if (!chip.closest("[data-tui-combobox-chip-template]")) chip.remove();
-    });
+    if (!anchor.matches('[data-slot="combobox-chips"]')) return;
+    // The chip template the chips container renders last; a template's
+    // content is not part of the document, so querySelectorAll skips it.
+    const template = anchor.querySelector(":scope > template");
+    anchor.querySelectorAll(CHIP).forEach((chip) => chip.remove());
     if (!template) return;
-    const input = anchor.querySelector("[data-tui-combobox-input]");
+    const input = anchor.querySelector(INPUT);
     selectedItems(content).forEach((item) => {
       const chip = template.content.firstElementChild.cloneNode(true);
-      chip.setAttribute("data-tui-combobox-value", item.getAttribute("data-tui-combobox-value") || "");
-      chip.querySelector("[data-tui-combobox-chip-label]").textContent = labelOf(item);
+      chip.setAttribute("data-templ-value", item.getAttribute("data-templ-value") || "");
+      // The chip's label is its first child, the remove button follows.
+      chip.firstElementChild.textContent = labelOf(item);
       anchor.insertBefore(chip, input);
     });
   }
 
   function toggleClear(content, anchor) {
-    const clear = anchor.querySelector("[data-tui-combobox-clear]");
+    const clear = anchor.querySelector('[data-slot="combobox-clear"]');
     if (clear) clear.hidden = selectedItems(content).length === 0;
   }
 
@@ -459,7 +492,7 @@
     const display = valueDisplayFor(content);
     if (!display) return;
     const label = displayValue(content);
-    const text = label || display.getAttribute("data-tui-combobox-placeholder") || "";
+    const text = label || display.getAttribute("data-templ-placeholder") || "";
     if (display.textContent !== text) display.textContent = text;
   }
 
@@ -476,8 +509,8 @@
   function selectItem(content, item) {
     const input = inputFor(content);
     if (isMultiple(content)) {
-    const values = selectedItems(content).map((selected) => selected.getAttribute("data-tui-combobox-value") || "");
-    const value = item.getAttribute("data-tui-combobox-value") || "";
+    const values = selectedItems(content).map((selected) => selected.getAttribute("data-templ-value") || "");
+    const value = item.getAttribute("data-templ-value") || "";
     const nextValues = item.hasAttribute("data-selected")
       ? values.filter((selected) => selected !== value)
       : [...values, value];
@@ -495,7 +528,7 @@
       position(content); // the chips anchor may have grown or shrunk
       return;
     }
-  const nextValue = item.getAttribute("data-tui-combobox-value") || "";
+  const nextValue = item.getAttribute("data-templ-value") || "";
   const request = requestValueChange(content, [nextValue]);
   if (!request.accepted) return;
   if (request.controlled) {
@@ -535,11 +568,16 @@
   // framework-agnostic.
   function init() {
     removeOrphanedContents();
-    document.querySelectorAll("[data-tui-combobox-input], [data-tui-combobox-trigger]").forEach(listenForEscape);
     allContents().forEach((content) => {
-      if (content.getAttribute("data-tui-combobox-initial-open") === "true") {
-        content.removeAttribute("data-tui-combobox-initial-open");
-        open(content);
+      const field = inputFor(content);
+      if (field) listenForEscape(field);
+      document.querySelectorAll('[aria-haspopup][aria-controls="' + content.id + '"]').forEach(listenForEscape);
+      // Server-side open state (Base UI open or defaultOpen), once per element.
+      if (!content._templInit) {
+        content._templInit = true;
+        if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
+          open(content);
+        }
       }
       if (isMultiple(content)) return;
       syncValueDisplay(content);
@@ -582,18 +620,18 @@
   document.addEventListener("pointerdown", (e) => {
     if (e.button !== 0 || !(e.target instanceof Element)) return;
 
-    const trigger = e.target.closest("[data-tui-combobox-trigger]");
+    const trigger = triggerOf(e.target);
     if (trigger) {
       toggleTrigger(trigger);
       return;
     }
 
     // Clear and chip-remove buttons act on the selection, they never open.
-    if (e.target.closest("[data-tui-combobox-clear], [data-tui-combobox-chip-remove]")) return;
+    if (e.target.closest('[data-slot="combobox-clear"], [data-slot="combobox-chip-remove"]')) return;
 
-    const anchor = e.target.closest("[data-tui-combobox-anchor]");
-    if (anchor && !anchor.closest("[data-tui-combobox-content]")) {
-      const content = document.getElementById(anchor.getAttribute("data-tui-combobox-anchor"));
+    const anchor = e.target.closest(ANCHOR);
+    if (anchor && !positionerOf(anchor)) {
+      const content = document.getElementById(anchor.getAttribute("data-templ-combobox-anchor"));
       if (!content || content.hasAttribute("data-open")) return;
       const field = inputFor(content);
     if (field && !field.disabled) requestOpenChange(content, true);
@@ -601,34 +639,34 @@
     }
 
     // Base UI dismisses on outside PRESS, not on the later click.
-    if (!e.target.closest("[data-tui-combobox-content]")) closeAll();
+    if (!positionerOf(e.target)) closeAll();
   });
 
   document.addEventListener("click", (e) => {
     if (!(e.target instanceof Element)) return;
 
-    const remove = e.target.closest("[data-tui-combobox-chip-remove]");
-    if (remove && !remove.closest("[data-tui-combobox-chip-template]")) {
-      const chip = remove.closest("[data-tui-combobox-chip]");
+    const remove = e.target.closest('[data-slot="combobox-chip-remove"]');
+    if (remove) {
+      const chip = remove.closest(CHIP);
       const content = contentFor(remove);
       if (chip && content) {
-        const value = chip.getAttribute("data-tui-combobox-value");
+        const value = chip.getAttribute("data-templ-value");
         const item = itemsOf(content).find(
-          (i) => (i.getAttribute("data-tui-combobox-value") || "") === value,
+          (i) => (i.getAttribute("data-templ-value") || "") === value,
         );
     if (item) selectItem(content, item);
       }
       return;
     }
 
-    const clear = e.target.closest("[data-tui-combobox-clear]");
+    const clear = e.target.closest('[data-slot="combobox-clear"]');
     if (clear) {
       const content = contentFor(clear);
       if (content) clearSelection(content);
       return;
     }
 
-    const trigger = e.target.closest("[data-tui-combobox-trigger]");
+    const trigger = triggerOf(e.target);
     if (trigger) {
       // Keyboard activation only (Enter/Space fire a detail-0 click without
       // a preceding pointerdown); pointer presses are handled on pointerdown.
@@ -636,17 +674,17 @@
       return;
     }
 
-    const item = e.target.closest("[data-tui-combobox-item]");
+    const item = e.target.closest(ITEM);
     if (item && !item.hasAttribute("data-disabled")) {
-      const content = item.closest("[data-tui-combobox-content]");
+      const content = positionerOf(item);
       if (content) selectItem(content, item);
     }
   });
 
   document.addEventListener("input", (e) => {
-    if (!(e.target instanceof Element) || !e.target.hasAttribute("data-tui-combobox-input")) return;
+    if (!(e.target instanceof Element) || !e.target.matches(INPUT)) return;
     const content = contentFor(e.target);
-    if (!content) return;
+    if (!isPositioner(content)) return;
   if (!content.hasAttribute("data-open")) requestOpenChange(content, true);
     applyFilter(content, e.target.value);
     if (content.hasAttribute("data-open")) position(content);
@@ -654,9 +692,9 @@
 
   document.addEventListener("keydown", (e) => {
     if (closeOnEscapeKeyDown(e)) return;
-    if (!(e.target instanceof Element) || !e.target.hasAttribute("data-tui-combobox-input")) return;
+    if (!(e.target instanceof Element) || !e.target.matches(INPUT)) return;
     const content = contentFor(e.target);
-    if (!content) return;
+    if (!isPositioner(content)) return;
     const isOpen = content.hasAttribute("data-open");
 
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -677,12 +715,10 @@
       return;
     }
     if (e.key === "Backspace" && isMultiple(content) && e.target.value === "") {
-      const chips = [...e.target.parentElement.querySelectorAll("[data-tui-combobox-chip]")].filter(
-        (c) => !c.closest("[data-tui-combobox-chip-template]"),
-      );
+      const chips = [...e.target.parentElement.querySelectorAll(CHIP)];
       const last = chips[chips.length - 1];
       if (last) {
-        const btn = last.querySelector("[data-tui-combobox-chip-remove]");
+        const btn = last.querySelector('[data-slot="combobox-chip-remove"]');
         if (btn) btn.click();
       }
       return;
@@ -695,9 +731,9 @@
   // Hovering an item highlights it, exactly like Base UI.
   document.addEventListener("mousemove", (e) => {
     if (!(e.target instanceof Element)) return;
-    const item = e.target.closest("[data-tui-combobox-item]");
+    const item = e.target.closest(ITEM);
     if (!item || item.hasAttribute("data-disabled") || item.hasAttribute("data-highlighted")) return;
-    const content = item.closest("[data-tui-combobox-content]");
+    const content = positionerOf(item);
     if (content && content.hasAttribute("data-open")) setHighlight(content, item);
   });
 

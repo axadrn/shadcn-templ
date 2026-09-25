@@ -94,8 +94,6 @@ templ Separator(props ...SeparatorProps) {
 		role="separator"
 		data-slot="button-group-separator"
 		data-orientation={ string(p.Orientation) }
-		data-horizontal?={ p.Orientation == OrientationHorizontal }
-		data-vertical?={ p.Orientation == OrientationVertical }
 		aria-orientation={ string(p.Orientation) }
 		class={ utils.CN("shrink-0 bg-border data-horizontal:h-px data-horizontal:w-full data-vertical:w-px data-vertical:self-stretch", "cn-button-group-separator relative self-stretch data-horizontal:mx-px data-horizontal:w-auto data-vertical:my-px data-vertical:h-auto", p.Class) }
 		{ p.Attributes... }

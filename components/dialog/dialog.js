@@ -16,14 +16,22 @@
   const dialogs = new Map();
   const openStack = [];
 
+  // A dialog popup (Dialog, Sheet, AlertDialog) is the dialog or alertdialog
+  // element carrying Base UI's modal prop; the popover popup has role dialog
+  // too but no modal prop. Its parent is the portal node (data-base-ui-portal)
+  // that holds the backdrop and the popup.
+  const POPUP = '[role="dialog"][data-templ-modal], [role="alertdialog"][data-templ-modal]';
+  // Base UI's Dialog.Backdrop renders role="presentation".
+  const BACKDROP = ':scope > [role="presentation"]';
+
   function getDialog(target) {
     if (!target) return null;
     if (typeof target === "string") {
       const el = document.getElementById(target);
-      return el && el.matches("[data-tui-dialog-content]") ? el : null;
+      return el && el.matches(POPUP) ? el : null;
     }
-    if (target.matches?.("[data-tui-dialog-content]")) return target;
-    return target.closest?.("[data-tui-dialog-content]") || null;
+    if (target.matches?.(POPUP)) return target;
+    return target.closest?.(POPUP) || null;
   }
 
   function stateOf(target) {
@@ -32,8 +40,10 @@
   }
 
   function dialogFor(element) {
+    // Dialog.Close links through context in Base UI; its port marker carries
+    // the dialog id when the close sits outside the popup.
     const id =
-      element.getAttribute("aria-controls") || element.getAttribute("data-tui-dialog-target");
+      element.getAttribute("aria-controls") || element.getAttribute("data-templ-dialog-close");
     if (id) return getDialog(id);
     return getDialog(element);
   }
@@ -41,12 +51,12 @@
   function triggersFor(popup) {
     if (!popup.id) return [];
     return document.querySelectorAll(
-      '[data-tui-dialog-trigger][aria-controls="' + popup.id + '"]',
+      '[data-base-ui-click-trigger][aria-controls="' + popup.id + '"]',
     );
   }
 
   function isModal(state) {
-    return state.popup.getAttribute("data-tui-dialog-show-modal") !== "false";
+    return state.popup.getAttribute("data-templ-modal") !== "false";
   }
 
   // ----- interaction type ----------------------------------------------------
@@ -243,14 +253,14 @@
 
   function wireAria(state) {
     const popup = state.popup;
-    const title = popup.querySelector("[data-tui-dialog-title]");
+    const title = popup.querySelector("[data-templ-dialog-title]");
     if (title) {
       if (!title.id) title.id = popup.id + "-title";
       popup.setAttribute("aria-labelledby", title.id);
     } else {
       popup.removeAttribute("aria-labelledby");
     }
-    const description = popup.querySelector("[data-tui-dialog-description]");
+    const description = popup.querySelector("[data-templ-dialog-description]");
     if (description) {
       if (!description.id) description.id = popup.id + "-description";
       popup.setAttribute("aria-describedby", description.id);
@@ -300,7 +310,7 @@
   // relation is recorded at registration (see ensureDialog); parentOf resolves
   // it to the parent's live state.
   function parentOf(state) {
-    const parentId = state.root.getAttribute("data-tui-dialog-parent");
+    const parentId = state.root._templParent;
     return parentId ? stateOf(parentId) : null;
   }
 
@@ -365,7 +375,7 @@
     });
 
     if (isModal(state)) {
-      state.releaseScroll = window.tui.scrollLock.acquire(popup);
+      state.releaseScroll = window.templ.scrollLock.acquire(popup);
       state.undoMarkOthers = markOthers([state.root]);
     }
 
@@ -472,7 +482,7 @@
         detail: { open: nextOpen },
       }),
     );
-    if (!accepted || state.popup.hasAttribute("data-tui-dialog-controlled")) return false;
+    if (!accepted || state.popup.hasAttribute("data-templ-open")) return false;
     if (nextOpen) openDialog(state.popup, trigger);
     else closeDialog(state.popup);
     return true;
@@ -495,16 +505,17 @@
     (event) => {
       pressStartedInPopup =
         event.target instanceof Element
-          ? event.target.closest("[data-tui-dialog-content]")
+          ? event.target.closest(POPUP)
           : null;
     },
     true,
   );
 
   function handleBackdropClick(backdrop, event) {
-    const state = stateOf(backdrop.parentElement?.querySelector("[data-tui-dialog-content]"));
+    const popup = backdrop.parentElement && [...backdrop.parentElement.children].find((el) => el.matches(POPUP));
+    const state = stateOf(popup);
     if (!state || !state.open) return;
-    if (state.popup.hasAttribute("data-tui-dialog-disable-dismissible")) return;
+    if (state.popup.hasAttribute("data-templ-disable-pointer-dismissal")) return;
     if (!isTopmost(state)) return;
     if (event.button !== 0) return;
     if (pressStartedInPopup === state.popup) return;
@@ -576,24 +587,24 @@
     const guard = document.createElement("span");
     guard.setAttribute("tabindex", "0");
     guard.setAttribute("aria-hidden", "true");
-    guard.setAttribute("data-tui-dialog-focus-guard", "");
+    guard.setAttribute("data-base-ui-focus-guard", "");
     guard.style.cssText =
       "clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:-1px;position:fixed;top:0;left:0;";
     return guard;
   }
 
-  function ensureDialog(root) {
-    const popup = root.querySelector("[data-tui-dialog-content]");
+  function ensureDialog(popup) {
     if (!popup || dialogs.has(popup)) return dialogs.get(popup) || null;
+    const root = popup.parentElement;
 
-    const parentPopup = root.parentElement?.closest("[data-tui-dialog-content]");
-    if (parentPopup?.id) root.setAttribute("data-tui-dialog-parent", parentPopup.id);
-    if (!root._tuiPortalOwner) root._tuiPortalOwner = root.parentElement;
+    const parentPopup = root.parentElement?.closest(POPUP);
+    if (parentPopup?.id) root._templParent = parentPopup.id;
+    if (!root._templPortalOwner) root._templPortalOwner = root.parentElement;
 
     const state = {
       root,
       popup,
-      backdrop: root.querySelector("[data-tui-dialog-backdrop]"),
+      backdrop: root.querySelector(BACKDROP),
       open: false,
       trigger: null,
       previouslyFocused: null,
@@ -608,7 +619,7 @@
 
     // A nested dialog renders no backdrop in Base UI (DialogBackdrop's
     // enabled: !nested); the parent's backdrop keeps covering the page.
-    if (root.hasAttribute("data-tui-dialog-parent")) {
+    if (root._templParent) {
       popup.setAttribute("data-nested", "");
       if (state.backdrop) state.backdrop.hidden = true;
     }
@@ -663,7 +674,7 @@
   function destroyDialog(popup) {
     const state = dialogs.get(popup);
     if (!state) {
-      popup.closest("[data-tui-dialog-root]")?.remove();
+      popup.parentElement?.remove();
       return;
     }
     state.finishToken = null;
@@ -684,31 +695,26 @@
   }
 
   function init() {
-    document.querySelectorAll("[data-tui-dialog-trigger]").forEach(listenForEscape);
-    // A dialog lives as long as its SSR declaration site (_tuiPortalOwner)
+    document.querySelectorAll("[data-base-ui-click-trigger][aria-controls]").forEach((t) => {
+      if (dialogFor(t)) listenForEscape(t);
+    });
+    // A dialog lives as long as its SSR declaration site (_templPortalOwner)
     // stays in the document, including trigger-less programmatic dialogs.
     // Retire registered dialogs even when their root itself was removed.
     dialogs.forEach((state, popup) => {
-      if (!state.root.isConnected || (state.root._tuiPortalOwner && !state.root._tuiPortalOwner.isConnected)) {
+      if (!state.root.isConnected || (state.root._templPortalOwner && !state.root._templPortalOwner.isConnected)) {
         destroyDialog(popup);
       }
     });
-    document.querySelectorAll("[data-tui-dialog-root]").forEach((root) => {
-      const popup = root.querySelector("[data-tui-dialog-content]");
-      if (!popup) {
-        root.remove();
-        return;
-      }
-
+    document.querySelectorAll(POPUP).forEach((popup) => {
       if (dialogs.has(popup)) return;
 
-      const fresh = ensureDialog(root);
+      const fresh = ensureDialog(popup);
       if (!fresh) return;
 
-      if (popup.getAttribute("data-tui-dialog-initial-open") === "true") {
-        // One-shot: consume the attribute so a later re-init never re-opens
-        // a closed dialog.
-        popup.removeAttribute("data-tui-dialog-initial-open");
+      // Server-side open state (Base UI open or defaultOpen), once per
+      // registration, so a later re-init never re-opens a closed dialog.
+      if (popup.getAttribute("data-templ-open") === "true" || popup.hasAttribute("data-templ-default-open")) {
         openDialog(popup);
       }
     });
@@ -716,18 +722,20 @@
 
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
-    const trigger = event.target.closest("[data-tui-dialog-trigger]");
-    if (trigger) {
+    // Base UI's DialogTrigger identifier, shared with PopoverTrigger; only
+    // triggers whose aria-controls names a dialog popup are ours.
+    const trigger = event.target.closest("[data-base-ui-click-trigger][aria-controls]");
+    if (trigger && dialogFor(trigger)) {
       toggleDialog(dialogFor(trigger), trigger);
       return;
     }
-    const closeButton = event.target.closest("[data-tui-dialog-close]");
+    const closeButton = event.target.closest("[data-templ-dialog-close]");
     if (closeButton) {
       requestOpenChange(dialogFor(closeButton), false);
       return;
     }
-    const backdrop = event.target.closest("[data-tui-dialog-backdrop]");
-    if (backdrop) {
+    const backdrop = event.target.closest('[role="presentation"]');
+    if (backdrop && backdrop.parentElement?.querySelector(BACKDROP) === backdrop) {
       handleBackdropClick(backdrop, event);
     }
   });
@@ -749,8 +757,8 @@
     subtree: true,
   });
 
-  window.tui = window.tui || {};
-  window.tui.dialog = {
+  window.templ = window.templ || {};
+  window.templ.dialog = {
     open: openDialog,
     close: closeDialog,
     toggle: toggleDialog,

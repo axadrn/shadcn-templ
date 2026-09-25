@@ -57,48 +57,7 @@
 @custom-variant dark (&:is(.dark *));
 @custom-variant fixed (&:is(.layout-fixed *));
 
-/* tw-animate's accordion/collapsible keyframes read other libraries' height
-   variables (radix, bits, ...) that we never set, so height animates 0 ->
-   auto and jumps. Own keyframe names against our measured vars, and the
-   theme below repoints the animate-* utilities at them. */
-@keyframes tui-accordion-down {
-  from {
-    height: 0;
-  }
-  to {
-    height: var(--tui-accordion-panel-height, auto);
-  }
-}
-@keyframes tui-accordion-up {
-  from {
-    height: var(--tui-accordion-panel-height, auto);
-  }
-  to {
-    height: 0;
-  }
-}
-@keyframes tui-collapsible-down {
-  from {
-    height: 0;
-  }
-  to {
-    height: var(--tui-collapsible-panel-height, auto);
-  }
-}
-@keyframes tui-collapsible-up {
-  from {
-    height: var(--tui-collapsible-panel-height, auto);
-  }
-  to {
-    height: 0;
-  }
-}
-
 @theme inline {
-  --animate-accordion-down: tui-accordion-down var(--tw-animation-duration, var(--tw-duration, 0.2s)) var(--tw-ease, ease-out);
-  --animate-accordion-up: tui-accordion-up var(--tw-animation-duration, var(--tw-duration, 0.2s)) var(--tw-ease, ease-out);
-  --animate-collapsible-down: tui-collapsible-down var(--tw-animation-duration, var(--tw-duration, 0.2s)) var(--tw-ease, ease-out);
-  --animate-collapsible-up: tui-collapsible-up var(--tw-animation-duration, var(--tw-duration, 0.2s)) var(--tw-ease, ease-out);
   --breakpoint-3xl: 1600px;
   --breakpoint-4xl: 2000px;
   --font-sans: var(--font-sans);
@@ -425,16 +384,16 @@
   padding-bottom: calc(var(--spacing) * 0.25);
 }
 
-[data-tui-code-line-numbers] .shiki code {
+[data-templ-code-line-numbers] .shiki code {
   counter-reset: line;
 }
 
-[data-tui-code-line-numbers] .shiki .line {
+[data-templ-code-line-numbers] .shiki .line {
   padding-inline: calc(var(--spacing) * 4);
   padding-left: 0;
 }
 
-[data-tui-code-line-numbers] .shiki .line[data-highlighted-line]::before {
+[data-templ-code-line-numbers] .shiki .line[data-highlighted-line]::before {
   background-color: var(--color-code-highlight);
 }
 
@@ -462,7 +421,7 @@
   font-size: 0.8rem;
 }
 
-[data-tui-code-line-numbers] .shiki .line::before {
+[data-templ-code-line-numbers] .shiki .line::before {
   font-size: var(--text-sm);
   counter-increment: line;
   content: counter(line);

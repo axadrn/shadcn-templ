@@ -15,7 +15,7 @@
     if (event.key !== "Escape") return;
     const contents = event.currentTarget === document
       ? allContents()
-      : [event.currentTarget.hasAttribute("data-tui-tooltip-content")
+      : [event.currentTarget.matches(CONTENT)
         ? event.currentTarget
         : contentFor(event.currentTarget)];
     let handled = false;
@@ -28,8 +28,19 @@
     return handled;
   }
 
+  const CONTENT = '[data-slot="tooltip-content"]';
+  // Base UI's TooltipTrigger identifier; a disabled trigger renders
+  // data-trigger-disabled instead, so it never opens.
+  const TRIGGER = "[data-base-ui-tooltip-trigger]";
+
   function allContents() {
-    return document.querySelectorAll("[data-tui-tooltip-content]");
+    return document.querySelectorAll(CONTENT);
+  }
+
+  // shadcn's TooltipPrimitive.Arrow has no slot; Base UI renders it
+  // aria-hidden as the popup's last child.
+  function arrowOf(content) {
+    return content.querySelector(':scope > [aria-hidden="true"]:last-child');
   }
 
   function contentFor(trigger) {
@@ -38,7 +49,7 @@
 
   function triggerFor(content) {
     return document.querySelector(
-      '[data-tui-tooltip-trigger][aria-describedby="' + content.id + '"]',
+      '[aria-describedby="' + content.id + '"]',
     );
   }
 
@@ -57,7 +68,7 @@
   // The arrow styles itself per side (data-side classes, like Base UI's
   // Arrow); the script only feeds it the side and the centered coordinate.
   function placeArrow(content, side, arrowData) {
-    const arrowEl = content.querySelector("[data-tui-tooltip-arrow]");
+    const arrowEl = arrowOf(content);
     if (!arrowEl) return;
     arrowEl.setAttribute("data-side", side);
     arrowEl.style.left = arrowData && arrowData.x != null ? arrowData.x + "px" : "";
@@ -66,12 +77,12 @@
 
   // Moves the content to <body> (shadcn portals it the same way).
   // The unmount half of the React portal pendant: a portaled content lives
-  // as long as its SSR declaration site (_tuiPortalOwner) stays in the
+  // as long as its SSR declaration site (_templPortalOwner) stays in the
   // document. Trigger-presence heuristics judged mid-swap moments wrongly -
   // multi-phase swap layers briefly disconnect the new triggers.
   function removeOrphanedContents(content) {
-    document.querySelectorAll("body > [data-tui-tooltip-content]").forEach((c) => {
-      if (c !== content && c._tuiPortalOwner && !c._tuiPortalOwner.isConnected) {
+    document.querySelectorAll("body > " + CONTENT).forEach((c) => {
+      if (c !== content && c._templPortalOwner && !c._templPortalOwner.isConnected) {
         stopAutoPositioning(c);
         c.remove();
       }
@@ -82,17 +93,17 @@
     listenForEscape(content);
     removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
-      if (!content._tuiPortalOwner) content._tuiPortalOwner = content.parentElement;
+      if (!content._templPortalOwner) content._templPortalOwner = content.parentElement;
       document.body.appendChild(content);
     }
   }
 
   function positionContent(content, trigger) {
     const { computePosition, offset, flip, shift, arrow } = window.FloatingUIDOM;
-    const side = content.getAttribute("data-tui-tooltip-side") || "top";
+    const side = content.getAttribute("data-templ-side") || "top";
     const sideOffset =
-      parseInt(content.getAttribute("data-tui-tooltip-side-offset"), 10) || 4;
-    const arrowEl = content.querySelector("[data-tui-tooltip-arrow]");
+      parseInt(content.getAttribute("data-templ-side-offset"), 10) || 4;
+    const arrowEl = arrowOf(content);
 
     return computePosition(trigger, content, {
       placement: side,
@@ -125,13 +136,13 @@
   }
 
   function startAutoPositioning(content, trigger) {
-    if (content._tuiPositionCleanup) content._tuiPositionCleanup();
+    if (content._templPositionCleanup) content._templPositionCleanup();
     let resolveFirst;
     const firstPosition = new Promise((resolve) => {
       resolveFirst = resolve;
     });
     const update = () => positionContent(content, trigger).then(resolveFirst, resolveFirst);
-    content._tuiPositionCleanup = window.FloatingUIDOM.autoUpdate(trigger, content, update, {
+    content._templPositionCleanup = window.FloatingUIDOM.autoUpdate(trigger, content, update, {
       elementResize: typeof ResizeObserver !== "undefined",
       layoutShift: typeof IntersectionObserver !== "undefined",
     });
@@ -139,18 +150,18 @@
   }
 
   function stopAutoPositioning(content) {
-    if (!content._tuiPositionCleanup) return;
-    content._tuiPositionCleanup();
-    content._tuiPositionCleanup = null;
+    if (!content._templPositionCleanup) return;
+    content._templPositionCleanup();
+    content._templPositionCleanup = null;
   }
 
   function open(trigger) {
-    // Consumers can suppress a tooltip situationally (e.g. the sidebar only
-    // shows menu tooltips while collapsed to icons).
-    if (trigger.hasAttribute("data-tui-tooltip-disabled")) return;
+    // A disabled trigger (Base UI data-trigger-disabled) never opens, e.g.
+    // the sidebar's menu tooltips while it is expanded.
+    if (trigger.hasAttribute("data-trigger-disabled")) return;
     const content = contentFor(trigger);
     if (!content) return;
-    clearTimeout(content._tuiHide);
+    clearTimeout(content._templHide);
     portal(content);
     // z-index portal like shadcn (no native top layer); re-append
     // keeps paint order = open order.
@@ -171,7 +182,7 @@
       content.removeAttribute("data-ending-style");
       content.setAttribute("data-open", "");
       content.setAttribute("data-starting-style", "");
-      const arrowEl = content.querySelector("[data-tui-tooltip-arrow]");
+      const arrowEl = arrowOf(content);
       if (arrowEl) {
         arrowEl.removeAttribute("data-closed");
         arrowEl.removeAttribute("data-ending-style");
@@ -195,7 +206,7 @@
     content.removeAttribute("data-starting-style");
     content.setAttribute("data-closed", "");
     content.setAttribute("data-ending-style", "");
-    const arrowEl = content.querySelector("[data-tui-tooltip-arrow]");
+    const arrowEl = arrowOf(content);
     if (arrowEl) {
       arrowEl.removeAttribute("data-open");
       arrowEl.removeAttribute("data-starting-style");
@@ -204,8 +215,8 @@
     }
     const trigger = triggerFor(content);
     if (trigger) trigger.removeAttribute("data-popup-open");
-    clearTimeout(content._tuiHide);
-    content._tuiHide = setTimeout(() => {
+    clearTimeout(content._templHide);
+    content._templHide = setTimeout(() => {
       if (content.hasAttribute("data-closed") && !content.hidden) {
         content.hidden = true;
         content.removeAttribute("data-ending-style");
@@ -229,7 +240,7 @@
         detail: { open: nextOpen },
       }),
     );
-    if (!accepted || content.hasAttribute("data-tui-tooltip-controlled")) return false;
+    if (!accepted || content.hasAttribute("data-templ-open")) return false;
     if (nextOpen) open(trigger);
     else close(content);
     return true;
@@ -242,12 +253,12 @@
   // ----- events -------------------------------------------------------------
 
   document.addEventListener("mouseover", (e) => {
-    const trigger = e.target.closest("[data-tui-tooltip-trigger]");
+    const trigger = e.target.closest(TRIGGER);
     if (trigger) requestOpenChange(trigger, true);
   });
 
   document.addEventListener("mouseout", (e) => {
-    const trigger = e.target.closest("[data-tui-tooltip-trigger]");
+    const trigger = e.target.closest(TRIGGER);
     if (!trigger) return;
     if (e.relatedTarget && trigger.contains(e.relatedTarget)) return; // still inside
     const content = contentFor(trigger);
@@ -258,12 +269,12 @@
   // focus opens the tooltip, so programmatic focus (e.g. a dialog's
   // autofocus) does not pop it.
   document.addEventListener("focusin", (e) => {
-    const trigger = e.target.closest("[data-tui-tooltip-trigger]");
+    const trigger = e.target.closest(TRIGGER);
     if (trigger && trigger.matches(":focus-visible")) requestOpenChange(trigger, true);
   });
 
   document.addEventListener("focusout", (e) => {
-    const trigger = e.target.closest("[data-tui-tooltip-trigger]");
+    const trigger = e.target.closest(TRIGGER);
     if (!trigger) return;
     const content = contentFor(trigger);
     if (content) requestOpenChange(trigger, false);
@@ -274,10 +285,12 @@
   // Content stays in its hidden portal node until it opens.
   function init() {
     removeOrphanedContents();
-    document.querySelectorAll("[data-tui-tooltip-trigger]").forEach(listenForEscape);
+    document.querySelectorAll(TRIGGER).forEach(listenForEscape);
     allContents().forEach((content) => {
-      if (content.getAttribute("data-tui-tooltip-initial-open") === "true") {
-        content.removeAttribute("data-tui-tooltip-initial-open");
+      // Server-side open state (Base UI open or defaultOpen), once per element.
+      if (content._templInit) return;
+      content._templInit = true;
+      if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
         const trigger = triggerFor(content);
         if (trigger) open(trigger);
       }

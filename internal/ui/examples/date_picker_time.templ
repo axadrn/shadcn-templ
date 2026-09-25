@@ -69,7 +69,7 @@ templ DatePickerTime() {
 				const content = e.target.closest("#date-picker-time");
 				const trigger = document.querySelector('[aria-controls="date-picker-time"]');
 				trigger.querySelector("span").textContent = e.detail.value ? fmt(e.detail.value) : "Select date";
-				if (e.detail.value) window.tui.popover.close(content);
+				if (e.detail.value) window.templ.popover.close(content);
 			});
 		})();
 	</script>

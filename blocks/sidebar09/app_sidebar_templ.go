@@ -663,10 +663,10 @@ func AppSidebar() templ.Component {
 		})
 		templ_7745c5c3_Err = sidebar.Sidebar(sidebar.Props{
 			Collapsible: sidebar.CollapsibleIcon,
-			// [&_[data-tui-sidebar-content]]:flex-row is shadcn-templ wiring: the
+			// [&_[data-templ-sidebar-content]]:flex-row is shadcn-templ wiring: the
 			// templ sidebar nests the children one wrapper deeper than the tsx, so
 			// the *:data-[sidebar=sidebar]:flex-row alone does not reach them.
-			Class: "overflow-hidden *:data-[sidebar=sidebar]:flex-row [&_[data-tui-sidebar-content]]:flex-row",
+			Class: "overflow-hidden *:data-[sidebar=sidebar]:flex-row [&_[data-templ-sidebar-content]]:flex-row",
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

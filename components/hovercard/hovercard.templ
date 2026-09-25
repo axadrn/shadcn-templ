@@ -30,8 +30,8 @@ const stateKey ctxKey = "hovercardState"
 
 type ctxState struct {
 	id          string
-	initialOpen bool
-	controlled  bool
+	open        *bool
+	defaultOpen bool
 }
 
 type delaysKey struct{}
@@ -49,11 +49,17 @@ func cardID(ctx context.Context) string {
 }
 
 // Trigger returns the attributes that turn any element into the hover card
-// trigger — the asChild equivalent: no wrapper element.
+// trigger — the asChild equivalent: no wrapper element. Base UI links
+// PreviewCard.Trigger and its card through React context only, no DOM
+// attribute, so data-templ-hover-card-trigger carries that link. delay and
+// closeDelay are PreviewCard.Trigger props in Base UI and render here; in Go
+// they stay on Props because Trigger has none of its own.
 func Trigger(ctx context.Context) templ.Attributes {
+	d, _ := ctx.Value(delaysKey{}).(delays)
 	return templ.Attributes{
-		"data-tui-hovercard-trigger": true,
-		"data-tui-hovercard-for":     cardID(ctx),
+		"data-templ-hover-card-trigger": cardID(ctx),
+		"data-templ-delay":              strconv.Itoa(d.open),
+		"data-templ-close-delay":        strconv.Itoa(d.close),
 	}
 }
 
@@ -65,13 +71,6 @@ type Props struct {
 	Delay int
 	// CloseDelay is the grace period before hiding, in ms. Defaults to 300.
 	CloseDelay int
-}
-
-func initialOpen(p Props) bool {
-	if p.Open != nil {
-		return *p.Open
-	}
-	return p.DefaultOpen
 }
 
 type ContentProps struct {
@@ -105,7 +104,7 @@ templ HoverCard(props ...Props) {
 	if p.CloseDelay == 0 {
 		{{ p.CloseDelay = 300 }}
 	}
-	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, initialOpen: initialOpen(p), controlled: p.Open != nil}) }}
+	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, open: p.Open, defaultOpen: p.DefaultOpen}) }}
 	{{ ctx = context.WithValue(ctx, delaysKey{}, delays{open: p.Delay, close: p.CloseDelay}) }}
 	{ children... }
 }
@@ -127,32 +126,29 @@ templ Content(props ...ContentProps) {
 	if p.AlignOffset == 0 {
 		{{ p.AlignOffset = 4 }}
 	}
-	{{ d, _ := ctx.Value(delaysKey{}).(delays) }}
 	{{ s, _ := ctx.Value(stateKey).(ctxState) }}
 	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
-	<div data-tui-hovercard-portal hidden>
+	<div data-templ-portal hidden>
 		<div
 			id={ cardID(ctx) }
 			data-slot="hover-card-content"
-			data-tui-hovercard-content
-			data-tui-hovercard-initial-open={ strconv.FormatBool(s.initialOpen) }
-			data-tui-hovercard-controlled?={ s.controlled }
-			data-tui-hovercard-side={ string(p.Side) }
-			data-tui-hovercard-align={ string(p.Align) }
-			data-tui-hovercard-side-offset={ strconv.Itoa(p.SideOffset) }
-			data-tui-hovercard-align-offset={ strconv.Itoa(p.AlignOffset) }
-			data-tui-hovercard-delay={ strconv.Itoa(d.open) }
-			data-tui-hovercard-close-delay={ strconv.Itoa(d.close) }
+			data-templ-side={ string(p.Side) }
+			data-templ-align={ string(p.Align) }
+			data-templ-side-offset={ strconv.Itoa(p.SideOffset) }
+			data-templ-align-offset={ strconv.Itoa(p.AlignOffset) }
+			if s.open != nil {
+				data-templ-open={ strconv.FormatBool(*s.open) }
+			}
+			data-templ-default-open?={ s.open == nil && s.defaultOpen }
 			data-closed
 			hidden
-			data-tui-portal
+			data-base-ui-portal
 			class={
 				utils.CN(
 					// 1:1 base/ui/hover-card.tsx HoverCardContent, the look comes from
 					// cn-hover-card-content (animations key on Base UI's data-open/data-closed attributes).
-					// origin-(--transform-origin) becomes our JS variable name.
-					"cn-hover-card-content cn-hover-card-content-logical z-50 origin-(--tui-hovercard-transform-origin) outline-hidden",
+					"cn-hover-card-content cn-hover-card-content-logical z-50 origin-(--transform-origin) outline-hidden",
 					// Native [popover] resets plus JS wiring: the popup stays mounted
 					// after animate-out until hidePopover runs.
 					"absolute inset-auto left-0 top-0 m-0 overflow-visible data-closed:fill-mode-forwards",

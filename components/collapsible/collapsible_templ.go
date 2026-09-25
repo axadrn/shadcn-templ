@@ -92,7 +92,7 @@ func Collapsible(props ...Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div data-slot=\"collapsible\" data-tui-collapsible")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div data-slot=\"collapsible\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -115,7 +115,7 @@ func Collapsible(props ...Props) templ.Component {
 			}
 		}
 		if p.Open != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " data-tui-collapsible-controlled")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " data-templ-open")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -159,13 +159,15 @@ func Collapsible(props ...Props) templ.Component {
 
 // Trigger returns the attributes that turn any element (usually a button)
 // into the collapsible trigger — the asChild equivalent: no wrapper element.
+// On an element with its own data-slot (sidebar.MenuButton) that slot wins,
+// as with Base UI's render prop, so collapsible.js finds a trigger by its
+// aria-controls link to the panel.
 func Trigger(ctx context.Context) templ.Attributes {
 	s := state(ctx)
 	attrs := templ.Attributes{
-		"data-slot":                    "collapsible-trigger",
-		"data-tui-collapsible-trigger": true,
-		"aria-controls":                s.id,
-		"aria-expanded":                utils.IfElse(s.open, "true", "false"),
+		"data-slot":     "collapsible-trigger",
+		"aria-controls": s.id,
+		"aria-expanded": utils.IfElse(s.open, "true", "false"),
 	}
 	if s.disabled {
 		attrs["data-disabled"] = true
@@ -218,13 +220,13 @@ func Content(props ...ContentProps) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(s.id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/collapsible/collapsible.templ`, Line: 106, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/collapsible/collapsible.templ`, Line: 107, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" data-slot=\"collapsible-content\" data-tui-collapsible-content")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" data-slot=\"collapsible-content\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

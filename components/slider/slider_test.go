@@ -15,7 +15,7 @@ func TestControlledValueOverridesDefaultValue(t *testing.T) {
 		t.Fatal(err)
 	}
 	html := output.String()
-	if !strings.Contains(html, `data-tui-slider-controlled`) {
+	if !strings.Contains(html, `data-templ-value`) {
 		t.Fatalf("rendered slider is missing controlled marker: %s", html)
 	}
 	if strings.Contains(html, `aria-valuenow="50"`) {
@@ -29,7 +29,7 @@ func TestClientRequestsCancelableValueChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	js := string(source)
-	for _, want := range []string{`new CustomEvent("slider-change"`, `cancelable: true`, `data-tui-slider-controlled`} {
+	for _, want := range []string{`new CustomEvent("slider-change"`, `cancelable: true`, `data-templ-value`} {
 		if !strings.Contains(js, want) {
 			t.Fatalf("client behavior is missing %q", want)
 		}

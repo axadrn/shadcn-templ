@@ -17,7 +17,7 @@ func TestActionsPopoverIsLinkedAndInitiallyOpen(t *testing.T) {
 	for _, want := range []string{
 		`aria-controls="sidebar10-actions-popover"`,
 		`id="sidebar10-actions-popover"`,
-		`data-tui-popover-initial-open="true"`,
+		`data-templ-default-open`,
 	} {
 		if !strings.Contains(html, want) {
 			t.Fatalf("rendered actions popover is missing %q: %s", want, html)

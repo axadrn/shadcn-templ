@@ -84,7 +84,6 @@ templ Progress(props ...Props) {
 			id={ p.ID }
 		}
 		data-slot="progress"
-		data-tui-progress
 		role="progressbar"
 		aria-valuemin="0"
 		aria-valuemax={ fmt.Sprintf("%d", p.Max) }
@@ -122,7 +121,6 @@ templ Track(props ...TrackProps) {
 			id={ p.ID }
 		}
 		data-slot="progress-track"
-		data-tui-progress-part
 		class={ utils.CN("cn-progress-track relative flex w-full items-center overflow-x-hidden", p.Class) }
 		{ statusAttr(s.value, s.max)... }
 		{ p.Attributes... }
@@ -150,8 +148,6 @@ templ Indicator(props ...IndicatorProps) {
 			id={ p.ID }
 		}
 		data-slot="progress-indicator"
-		data-tui-progress-indicator
-		data-tui-progress-part
 		class={ utils.CN("cn-progress-indicator h-full transition-all", p.Class) }
 		style={ fmt.Sprintf("inset-inline-start:0;height:inherit;width:%d%%", percentage(s.value, s.max)) }
 		{ statusAttr(s.value, s.max)... }
@@ -171,7 +167,6 @@ templ Label(props ...LabelProps) {
 	<span
 		id={ p.ID }
 		data-slot="progress-label"
-		data-tui-progress-part
 		role="presentation"
 		class={ utils.CN("cn-progress-label", p.Class) }
 		{ statusAttr(s.value, s.max)... }
@@ -193,7 +188,6 @@ templ Value(props ...ValueProps) {
 			id={ p.ID }
 		}
 		data-slot="progress-value"
-		data-tui-progress-part
 		aria-hidden="true"
 		class={ utils.CN("cn-progress-value", p.Class) }
 		{ statusAttr(s.value, s.max)... }

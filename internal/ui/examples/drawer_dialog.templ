@@ -13,7 +13,7 @@ import (
 // mobile (the reference's useMediaQuery("(min-width: 768px)")). Both are
 // SSR'd; the demo-local script below shows one and hides the other.
 templ DrawerDialog() {
-	<div data-tui-drawer-dialog-desktop hidden>
+	<div data-templ-drawer-dialog-desktop hidden>
 		@dialog.Dialog(dialog.Props{ID: "drawer-dialog-desktop"}) {
 			@button.Button(button.Props{Variant: button.VariantOutline, Attributes: dialog.Trigger(ctx)}) {
 				Edit Profile
@@ -31,7 +31,7 @@ templ DrawerDialog() {
 			}
 		}
 	</div>
-	<div data-tui-drawer-dialog-mobile hidden>
+	<div data-templ-drawer-dialog-mobile hidden>
 		@drawer.Drawer(drawer.Props{ID: "drawer-dialog-mobile"}) {
 			@button.Button(button.Props{Variant: button.VariantOutline, Attributes: drawer.Trigger(ctx)}) {
 				Edit Profile
@@ -57,10 +57,10 @@ templ DrawerDialog() {
 			// component API.
 			const mq = window.matchMedia("(min-width: 768px)");
 			const apply = () => {
-				document.querySelectorAll("[data-tui-drawer-dialog-desktop]").forEach((el) => {
+				document.querySelectorAll("[data-templ-drawer-dialog-desktop]").forEach((el) => {
 					el.hidden = !mq.matches;
 				});
-				document.querySelectorAll("[data-tui-drawer-dialog-mobile]").forEach((el) => {
+				document.querySelectorAll("[data-templ-drawer-dialog-mobile]").forEach((el) => {
 					el.hidden = mq.matches;
 				});
 			};

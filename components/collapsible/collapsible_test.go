@@ -15,7 +15,7 @@ func TestControlledOpenOverridesDefaultOpen(t *testing.T) {
 		t.Fatal(err)
 	}
 	html := output.String()
-	for _, want := range []string{`data-closed`, `data-tui-collapsible-controlled`} {
+	for _, want := range []string{`data-closed`, `data-templ-open`} {
 		if !strings.Contains(html, want) {
 			t.Fatalf("rendered collapsible is missing %q: %s", want, html)
 		}
@@ -28,7 +28,7 @@ func TestClientRequestsCancelableOpenChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	js := string(source)
-	for _, want := range []string{`new CustomEvent("collapsible-open-change"`, `cancelable: true`, `data-tui-collapsible-controlled`} {
+	for _, want := range []string{`new CustomEvent("collapsible-open-change"`, `cancelable: true`, `data-templ-open`} {
 		if !strings.Contains(js, want) {
 			t.Fatalf("client behavior is missing %q", want)
 		}

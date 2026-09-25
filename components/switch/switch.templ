@@ -55,7 +55,6 @@ templ Switch(props ...Props) {
 	{{ checked := initialChecked(p) }}
 	<span
 		data-slot="switch"
-		data-tui-switch
 		data-size={ string(p.Size) }
 		role="switch"
 		if checked {
@@ -74,7 +73,7 @@ templ Switch(props ...Props) {
 		}
 		aria-readonly?={ p.ReadOnly }
 		aria-required?={ p.Required }
-		data-tui-switch-controlled?={ p.Checked != nil }
+		data-templ-checked?={ p.Checked != nil }
 		class={
 			utils.CN(
 				// 1:1 base/ui/switch.tsx: structure lives here, the look comes from
@@ -104,7 +103,6 @@ templ Switch(props ...Props) {
 	// validation popups anchor near the control).
 	<input
 		type="checkbox"
-		data-tui-switch-input
 		aria-hidden="true"
 		tabindex="-1"
 		id={ p.ID }

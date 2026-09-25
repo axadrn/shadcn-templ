@@ -740,7 +740,7 @@ templ fieldExampleSliderFields() {
 					Step:         5,
 				})
 				@field.Description() {
-					Current brightness: <span data-tui-field-example-brightness>75</span>%
+					Current brightness: <span data-templ-field-example-brightness>75</span>%
 				}
 			}
 			@field.Field() {
@@ -770,7 +770,7 @@ templ fieldExampleSliderFields() {
 					Step:         0.1,
 				})
 				@field.Description() {
-					Range: <span data-tui-field-example-temperature>0.3 - 0.7</span>
+					Range: <span data-templ-field-example-temperature>0.3 - 0.7</span>
 				}
 			}
 			@field.Field() {
@@ -784,7 +784,7 @@ templ fieldExampleSliderFields() {
 					Step:         5,
 				})
 				@field.Description() {
-					<span data-tui-field-example-price>$25 - $75</span>
+					<span data-templ-field-example-price>$25 - $75</span>
 				}
 			}
 			@field.Field() {
@@ -798,7 +798,7 @@ templ fieldExampleSliderFields() {
 					Step:         10,
 				})
 				@field.Description() {
-					<span data-tui-field-example-color>Red: 10%, Green: 20%, Blue: 70%</span>
+					<span data-templ-field-example-color>Red: 10%, Green: 20%, Blue: 70%</span>
 				}
 			}
 			@field.Field(field.Props{Attributes: templ.Attributes{"data-invalid": "true"}}) {
@@ -841,10 +841,10 @@ templ fieldExampleSliderFields() {
 						if (el) el.textContent = format(e.detail.values);
 					});
 				};
-				bind('slider-brightness', '[data-tui-field-example-brightness]', (v) => v[0]);
-				bind('slider-temperature', '[data-tui-field-example-temperature]', (v) => v[0].toFixed(1) + ' - ' + v[1].toFixed(1));
-				bind('slider-price-range', '[data-tui-field-example-price]', (v) => '$' + v[0] + ' - $' + v[1]);
-				bind('slider-color-balance', '[data-tui-field-example-color]', (v) => 'Red: ' + v[0] + '%, Green: ' + v[1] + '%, Blue: ' + v[2] + '%');
+				bind('slider-brightness', '[data-templ-field-example-brightness]', (v) => v[0]);
+				bind('slider-temperature', '[data-templ-field-example-temperature]', (v) => v[0].toFixed(1) + ' - ' + v[1].toFixed(1));
+				bind('slider-price-range', '[data-templ-field-example-price]', (v) => '$' + v[0] + ' - $' + v[1]);
+				bind('slider-color-balance', '[data-templ-field-example-color]', (v) => 'Red: ' + v[0] + '%, Green: ' + v[1] + '%, Blue: ' + v[2] + '%');
 			})();
 		</script>
 	}

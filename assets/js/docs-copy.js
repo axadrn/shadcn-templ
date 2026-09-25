@@ -29,11 +29,11 @@
       // Create icon spans
       const clipboardSpan = document.createElement('span');
       clipboardSpan.innerHTML = clipboardIcon;
-      clipboardSpan.setAttribute('data-copy-icon-clipboard', '');
+      clipboardSpan.setAttribute('data-templ-copy-icon-clipboard', '');
 
       const checkSpan = document.createElement('span');
       checkSpan.innerHTML = checkIcon;
-      checkSpan.setAttribute('data-copy-icon-check', '');
+      checkSpan.setAttribute('data-templ-copy-icon-check', '');
       checkSpan.style.display = 'none';
 
       btn.appendChild(clipboardSpan);

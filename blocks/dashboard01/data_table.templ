@@ -311,8 +311,8 @@ templ DataTable(data []Item) {
 templ dataTableScript() {
 	<script nonce={ templ.GetNonce(ctx) }>
 		(() => {
-			if (window.__tuiDashboard01DataTable) return;
-			window.__tuiDashboard01DataTable = true;
+			if (window.__templDashboard01DataTable) return;
+			window.__templDashboard01DataTable = true;
 			let draggedRow = null;
 			let keyboardOrigin = null;
 
@@ -345,11 +345,11 @@ templ dataTableScript() {
 			let syncing = false;
 			document.addEventListener("change", (e) => {
 				if (syncing || !(e.target instanceof Element)) return;
-				if (!e.target.matches("[data-tui-checkbox-input]")) return;
+				if (!e.target.matches("[data-slot=checkbox] + input")) return;
 				const root = e.target.closest("[data-dashboard01-table]");
 				if (!root) return;
-				const all = root.querySelector("thead [data-tui-checkbox-input]");
-				const rows = [...root.querySelectorAll("tbody [data-tui-checkbox-input]")];
+				const all = root.querySelector("thead [data-slot=checkbox] + input");
+				const rows = [...root.querySelectorAll("tbody [data-slot=checkbox] + input")];
 				if (!all || rows.length === 0) return;
 
 				syncing = true;
@@ -478,7 +478,7 @@ templ dataTableScript() {
 				if (!(e.target instanceof HTMLFormElement) || !e.target.matches("[data-dashboard01-save]")) return;
 				e.preventDefault();
 				const title = e.target.getAttribute("data-dashboard01-save") || "section";
-				window.tui?.toast?.promise(
+				window.templ?.toast?.promise(
 					new Promise((resolve) => window.setTimeout(resolve, 1000)),
 					{ loading: `Saving ${title}`, success: "Done", error: "Error" },
 				);
@@ -486,19 +486,14 @@ templ dataTableScript() {
 
 			// useIsMobile pendant for TableCellViewer: mutate the inert portal
 			// template before drawer.js opens it, so the first open is correct.
+			// The drawer lives in the document from the first render (hidden
+			// portal node), so the trigger's aria-controls always resolves.
 			const drawerDialog = (trigger) => {
 				const id = trigger.getAttribute("aria-controls");
-				if (!id) return null;
-				const live = document.getElementById(id);
-				if (live) return live;
-				for (const template of document.querySelectorAll("template[data-tui-drawer-portal]")) {
-					const dialog = [...template.content.querySelectorAll("dialog[data-tui-drawer-content]")].find((item) => item.id === id);
-					if (dialog) return dialog;
-				}
-				return null;
+				return id ? document.getElementById(id) : null;
 			};
 			const syncDrawerDirection = (trigger) => {
-				const popup = drawerDialog(trigger)?.querySelector("[data-tui-drawer-popup]");
+				const popup = drawerDialog(trigger)?.querySelector('[data-slot="drawer-popup"]');
 				if (!popup) return;
 				const mobile = window.matchMedia("(max-width: 767px)").matches;
 				popup.setAttribute("data-swipe-direction", mobile ? "down" : "right");

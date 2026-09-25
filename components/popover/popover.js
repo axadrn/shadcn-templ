@@ -16,7 +16,7 @@
     if (event.key !== "Escape") return;
     const contents = event.currentTarget === document
       ? allContents()
-      : [event.currentTarget.hasAttribute("data-tui-popover-content")
+      : [isPositioner(event.currentTarget)
         ? event.currentTarget
         : contentFor(event.currentTarget)];
     let handled = false;
@@ -29,18 +29,40 @@
     return handled;
   }
 
+  // The popover's element is the positioner (shadcn's isolate z-50 wrapper,
+  // no slot) around the [data-slot=popover-content] popup.
+  const POPUP = '[data-slot="popover-content"]';
+  // Base UI's PopoverTrigger identifier, shared with DialogTrigger; the
+  // aria-controls target tells the two apart.
+  const CLICK_TRIGGER = "[data-base-ui-click-trigger][aria-controls]";
+
+  function isPositioner(el) {
+    return !!(el && el.firstElementChild && el.firstElementChild.matches(POPUP));
+  }
+
   function allContents() {
-    return document.querySelectorAll("[data-tui-popover-content]");
+    return [...document.querySelectorAll(POPUP)].map((p) => p.parentElement).filter(isPositioner);
   }
 
   function triggerFor(content) {
-    return document.querySelector(
-      '[data-tui-popover-trigger][aria-controls="' + content.id + '"]',
-    );
+    return document.querySelector('[aria-controls="' + content.id + '"]');
   }
 
   function contentFor(trigger) {
-    return document.getElementById(trigger.getAttribute("aria-controls"));
+    const el = document.getElementById(trigger.getAttribute("aria-controls"));
+    return isPositioner(el) ? el : null;
+  }
+
+  // The popover trigger an event target sits in, if any.
+  function triggerOf(target) {
+    const trigger = target.closest && target.closest(CLICK_TRIGGER);
+    return trigger && contentFor(trigger) ? trigger : null;
+  }
+
+  // The popover positioner an element sits in, if any.
+  function positionerOf(target) {
+    const popup = target.closest && target.closest(POPUP);
+    return popup && isPositioner(popup.parentElement) ? popup.parentElement : null;
   }
 
   // Focus waits until after the input task:
@@ -55,7 +77,7 @@
   }
 
   function popupFor(content) {
-    return content.querySelector("[data-tui-popover-popup]");
+    return content.firstElementChild;
   }
 
   function setState(content, state) {
@@ -103,12 +125,12 @@
 
   // Moves the content to <body> (shadcn portals it the same way).
   // The unmount half of the React portal pendant: a portaled content lives
-  // as long as its SSR declaration site (_tuiPortalOwner) stays in the
+  // as long as its SSR declaration site (_templPortalOwner) stays in the
   // document. Trigger-presence heuristics judged mid-swap moments wrongly -
   // multi-phase swap layers briefly disconnect the new triggers.
   function removeOrphanedContents(content) {
-    document.querySelectorAll("body > [data-tui-popover-content]").forEach((c) => {
-      if (c !== content && c._tuiPortalOwner && !c._tuiPortalOwner.isConnected) {
+    allContents().filter((c) => c.parentElement === document.body).forEach((c) => {
+      if (c !== content && c._templPortalOwner && !c._templPortalOwner.isConnected) {
         stopAutoPositioning(c);
         c.remove();
       }
@@ -119,7 +141,7 @@
     listenForEscape(content);
     removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
-      if (!content._tuiPortalOwner) content._tuiPortalOwner = content.parentElement;
+      if (!content._templPortalOwner) content._templPortalOwner = content.parentElement;
       document.body.appendChild(content);
     }
     wireAria(content);
@@ -146,10 +168,10 @@
     const trigger = triggerFor(content);
     if (!trigger) return Promise.resolve();
     const { computePosition, offset, flip, shift } = window.FloatingUIDOM;
-    const side = content.getAttribute("data-tui-popover-side") || "bottom";
-    const align = content.getAttribute("data-tui-popover-align") || "center";
-    const sideOffset = parseFloat(content.getAttribute("data-tui-popover-side-offset")) || 0;
-    const alignOffset = parseFloat(content.getAttribute("data-tui-popover-align-offset")) || 0;
+    const side = content.getAttribute("data-templ-side") || "bottom";
+    const align = content.getAttribute("data-templ-align") || "center";
+    const sideOffset = parseFloat(content.getAttribute("data-templ-side-offset")) || 0;
+    const alignOffset = parseFloat(content.getAttribute("data-templ-align-offset")) || 0;
     const placement = align === "center" ? side : side + "-" + align;
 
     return computePosition(trigger, content, {
@@ -182,13 +204,13 @@
   function startAutoPositioning(content) {
     const trigger = triggerFor(content);
     if (!trigger) return Promise.resolve();
-    if (content._tuiPositionCleanup) content._tuiPositionCleanup();
+    if (content._templPositionCleanup) content._templPositionCleanup();
     let resolveFirst;
     const firstPosition = new Promise((resolve) => {
       resolveFirst = resolve;
     });
     const update = () => position(content).then(resolveFirst, resolveFirst);
-    content._tuiPositionCleanup = window.FloatingUIDOM.autoUpdate(trigger, content, update, {
+    content._templPositionCleanup = window.FloatingUIDOM.autoUpdate(trigger, content, update, {
       elementResize: typeof ResizeObserver !== "undefined",
       layoutShift: typeof IntersectionObserver !== "undefined",
     });
@@ -196,9 +218,9 @@
   }
 
   function stopAutoPositioning(content) {
-    if (!content._tuiPositionCleanup) return;
-    content._tuiPositionCleanup();
-    content._tuiPositionCleanup = null;
+    if (!content._templPositionCleanup) return;
+    content._templPositionCleanup();
+    content._templPositionCleanup = null;
   }
 
   function isOpen(content) {
@@ -214,7 +236,7 @@
         detail: { open: nextOpen },
       }),
     );
-    if (!accepted || content.hasAttribute("data-tui-popover-controlled")) return false;
+    if (!accepted || content.hasAttribute("data-templ-open")) return false;
     if (nextOpen) open(content);
     else close(content, returnFocus);
     return true;
@@ -226,7 +248,7 @@
     allContents().forEach((c) => {
       if (c !== content) close(c);
     });
-    clearTimeout(content._tuiHide);
+    clearTimeout(content._templHide);
     portal(content);
     // z-index portal like shadcn (no native top layer); re-append
     // keeps paint order = open order.
@@ -282,8 +304,8 @@
       trigger.removeAttribute("data-popup-open");
       trigger.removeAttribute("data-pressed");
     }
-    clearTimeout(content._tuiHide);
-    content._tuiHide = setTimeout(() => {
+    clearTimeout(content._templHide);
+    content._templHide = setTimeout(() => {
       if (content.hasAttribute("data-closed") && !content.hidden) {
         content.hidden = true;
         setTransitionAttribute(content, "data-ending-style", false);
@@ -301,11 +323,12 @@
 
   function closeNearest(element) {
     if (!element) return;
+    const trigger = triggerOf(element);
+    const inner = element.querySelector && element.querySelector(POPUP);
     const content =
-      element.closest?.("[data-tui-popover-content]") ||
-      (element.closest?.("[data-tui-popover-trigger]") &&
-        contentFor(element.closest("[data-tui-popover-trigger]"))) ||
-      element.querySelector?.("[data-tui-popover-content]");
+      positionerOf(element) ||
+      (trigger && contentFor(trigger)) ||
+      (inner && isPositioner(inner.parentElement) ? inner.parentElement : null);
     if (content) requestOpenChange(content, false);
   }
 
@@ -320,19 +343,19 @@
   // on body when the popup ends up under the released pointer is harmless.
   document.addEventListener("pointerdown", (e) => {
     if (e.button !== 0 || !(e.target instanceof Element)) return;
-    const trigger = e.target.closest("[data-tui-popover-trigger]");
+    const trigger = triggerOf(e.target);
     if (trigger) {
       if (trigger.disabled) return;
       const content = contentFor(trigger);
       if (content) toggle(content);
       return;
     }
-    if (!e.target.closest("[data-tui-popover-content]")) requestCloseAll(false);
+    if (!positionerOf(e.target)) requestCloseAll(false);
   });
 
   document.addEventListener("click", (e) => {
     if (!(e.target instanceof Element)) return;
-    const trigger = e.target.closest("[data-tui-popover-trigger]");
+    const trigger = triggerOf(e.target);
     if (trigger) {
       // Keyboard activation only (Enter/Space fire a detail-0 click without
       // a preceding pointerdown); pointer presses are handled on pointerdown.
@@ -349,11 +372,14 @@
   // Content stays in its hidden portal node until it opens.
   function init() {
     removeOrphanedContents();
-    document.querySelectorAll("[data-tui-popover-trigger]").forEach(listenForEscape);
     allContents().forEach((content) => {
-      if (!triggerFor(content)) return;
-      if (content.getAttribute("data-tui-popover-initial-open") === "true") {
-        content.removeAttribute("data-tui-popover-initial-open");
+      const trigger = triggerFor(content);
+      if (!trigger) return;
+      listenForEscape(trigger);
+      // Server-side open state (Base UI open or defaultOpen), once per element.
+      if (content._templInit) return;
+      content._templInit = true;
+      if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
         open(content);
       }
     });
@@ -370,8 +396,8 @@
   // ownership sweep.
   new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
 
-  window.tui = window.tui || {};
-  window.tui.popover = {
+  window.templ = window.templ || {};
+  window.templ.popover = {
     open,
     close,
     closeAll,

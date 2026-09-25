@@ -166,7 +166,7 @@ templ ChartAreaInteractive() {
 					// px-4! beats the joined mode's px-2 like upstream.
 					Spacing:    utils.Ptr(0),
 					Class:      "hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex",
-					Attributes: templ.Attributes{"data-tui-chart-range-toggle": "dashboard01-area-interactive"},
+					Attributes: templ.Attributes{"data-templ-chart-range-toggle": "dashboard01-area-interactive"},
 				}) {
 					for _, rng := range chartAreaInteractiveRanges {
 						@togglegroup.Item(togglegroup.ItemProps{Value: rng.Key}) {
@@ -178,7 +178,7 @@ templ ChartAreaInteractive() {
 					@selectcomp.Trigger(selectcomp.TriggerProps{
 						Class:      "flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden",
 						Size:       selectcomp.SizeSm,
-						Attributes: templ.Attributes{"aria-label": "Select a value", "data-tui-chart-range-select": "dashboard01-area-interactive"},
+						Attributes: templ.Attributes{"aria-label": "Select a value", "data-templ-chart-range-select": "dashboard01-area-interactive"},
 					}) {
 						@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Last 3 months"})
 					}
@@ -199,7 +199,7 @@ templ ChartAreaInteractive() {
 				// All three ranges render up front, the chart script toggles
 				// them on range change (the pendant of the timeRange state).
 				for _, rng := range chartAreaInteractiveRanges {
-					<div data-tui-chart-range={ rng.Key } hidden?={ rng.Key != "90d" } style="width:100%;height:100%">
+					<div data-templ-chart-range={ rng.Key } hidden?={ rng.Key != "90d" } style="width:100%;height:100%">
 						@chart.AreaChart(chart.AreaChartProps{
 							Data: chartAreaInteractiveFilteredData(rng.Days),
 						}) {
@@ -253,36 +253,31 @@ templ ChartAreaInteractive() {
 			// a toggle pick forwards to the matching select item, so select.js
 			// stays the single owner of value, trigger label and the
 			// select-change event chart.js flips the panels on.
-			if (window.__tuiDashboard01ChartRange) return;
-			window.__tuiDashboard01ChartRange = true;
+			if (window.__templDashboard01ChartRange) return;
+			window.__templDashboard01ChartRange = true;
 			const mobile = window.matchMedia("(max-width: 767px)");
 
+			// The content lives in the document from the first render (hidden
+			// portal node), so the trigger's aria-controls always resolves.
 			const selectContent = (trigger) => {
 				const id = trigger && trigger.getAttribute("aria-controls");
-				if (!id) return null;
-				const live = document.getElementById(id);
-				if (live) return live;
-				for (const template of document.querySelectorAll("template[data-tui-select-portal]")) {
-					const content = [...template.content.querySelectorAll("[data-tui-select-content]")].find((item) => item.id === id);
-					if (content) return content;
-				}
-				return null;
+				return id ? document.getElementById(id) : null;
 			};
 
 			// useIsMobile sets 7d whenever the viewport enters mobile. Update the
 			// same uncontrolled select state without opening or focusing it.
 			const setRange = (card, value) => {
-				const trigger = card && card.querySelector("[data-tui-chart-range-select]");
+				const trigger = card && card.querySelector("[data-templ-chart-range-select]");
 				const content = selectContent(trigger);
-				const item = content && content.querySelector('[data-tui-select-item][data-tui-select-value="' + value + '"]');
+				const item = content && content.querySelector('[data-slot="select-item"][data-templ-value="' + value + '"]');
 				if (!trigger || !item) return;
-				content.querySelectorAll("[data-tui-select-item]").forEach((candidate) => {
+				content.querySelectorAll('[data-slot="select-item"]').forEach((candidate) => {
 					const selected = candidate === item;
 					candidate.toggleAttribute("data-selected", selected);
 					candidate.setAttribute("aria-selected", String(selected));
 				});
-				const label = item.getAttribute("data-tui-select-label") || item.textContent.trim();
-				const valueNode = trigger.querySelector("[data-tui-select-value]");
+				const label = item.getAttribute("data-templ-label") || item.textContent.trim();
+				const valueNode = trigger.querySelector('[data-slot="select-value"]');
 				if (valueNode) valueNode.textContent = label;
 				trigger.removeAttribute("data-placeholder");
 				trigger.dispatchEvent(new CustomEvent("select-change", {
@@ -300,21 +295,21 @@ templ ChartAreaInteractive() {
 
 			document.addEventListener("toggle-change", (e) => {
 				if (!(e.target instanceof Element)) return;
-				const group = e.target.closest("[data-tui-chart-range-toggle]");
+				const group = e.target.closest("[data-templ-chart-range-toggle]");
 				if (!group) return;
 				const value = e.detail && e.detail.value;
 				if (!value) return;
 				// Single-select groups allow unpressing the active item; a
 				// time range must stay active, so re-press it.
-				const toggle = e.target.closest("[data-tui-toggle]");
+				const toggle = e.target.closest("[data-slot=toggle-group-item]");
 				if (toggle && e.detail.pressed === false) {
 					toggle.setAttribute("data-pressed", "");
 					toggle.setAttribute("aria-pressed", "true");
 				}
 				const card = group.closest("[data-slot=card]");
-				const trigger = card && card.querySelector("[data-tui-chart-range-select]");
+				const trigger = card && card.querySelector("[data-templ-chart-range-select]");
 				const content = trigger && document.getElementById(trigger.getAttribute("aria-controls"));
-				const item = content && content.querySelector('[data-tui-select-item][data-tui-select-value="' + value + '"]');
+				const item = content && content.querySelector('[data-slot="select-item"][data-templ-value="' + value + '"]');
 				if (item) item.click();
 			});
 
@@ -322,17 +317,16 @@ templ ChartAreaInteractive() {
 			// chart.js flips the panels on the same select-change.
 			document.addEventListener("select-change", (e) => {
 				if (!(e.target instanceof Element)) return;
-				const trigger = e.target.closest("[data-tui-chart-range-select]");
+				const trigger = e.target.closest("[data-templ-chart-range-select]");
 				if (!trigger) return;
 				const card = trigger.closest("[data-slot=card]");
-				const group = card && card.querySelector("[data-tui-chart-range-toggle]");
+				const group = card && card.querySelector("[data-templ-chart-range-toggle]");
 				if (!group) return;
-				group.querySelectorAll("[data-tui-toggle]").forEach((t) => {
-					const on = t.getAttribute("data-tui-toggle-value") === e.detail.value;
+				group.querySelectorAll("[data-slot=toggle-group-item]").forEach((t) => {
+					const on = t.getAttribute("data-templ-value") === e.detail.value;
 					t.toggleAttribute("data-pressed", on);
 					t.setAttribute("aria-pressed", String(on));
 				});
-				group.setAttribute("data-tui-toggle-group-value", e.detail.value);
 			});
 		})();
 	</script>

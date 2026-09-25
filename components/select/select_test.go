@@ -15,17 +15,14 @@ func TestControlledStateOverridesDefaults(t *testing.T) {
 	if got := initialValue(p); got != "" {
 		t.Fatalf("controlled empty value must override default value, got %q", got)
 	}
-	if initialOpen(p) {
-		t.Fatal("controlled false open state must override defaultOpen true")
+	ctx := context.WithValue(context.Background(), stateKey, ctxState{id: "s", open: p.Open, defaultOpen: p.DefaultOpen})
+	var output bytes.Buffer
+	if err := Content().Render(ctx, &output); err != nil {
+		t.Fatal(err)
 	}
-}
-
-func TestControlledOpenMethodDefaultsToProgrammatic(t *testing.T) {
-	if got := initialOpenMethod(Props{}); got != OpenMethodProgrammatic {
-		t.Fatalf("empty open method must default to programmatic, got %q", got)
-	}
-	if got := initialOpenMethod(Props{OpenMethod: OpenMethodTouch}); got != OpenMethodTouch {
-		t.Fatalf("controlled touch method must survive rendering, got %q", got)
+	html := output.String()
+	if !strings.Contains(html, `data-templ-open="false"`) || strings.Contains(html, `data-templ-default-open`) {
+		t.Fatalf("controlled false open state must override defaultOpen true: %s", html)
 	}
 }
 
@@ -53,21 +50,21 @@ func TestClientRequestsCancelableValueAndOpenChanges(t *testing.T) {
 		`new CustomEvent("select-change"`,
 		`new CustomEvent("select-open-change"`,
 		`cancelable: true`,
-		`data-tui-select-value-controlled`,
-		`data-tui-select-open-controlled`,
+		`trigger.hasAttribute("data-templ-value")`,
+		`content.hasAttribute("data-templ-open")`,
 		`FloatingUIDOM.autoUpdate(trigger, content, update`,
 		`layoutShift: typeof IntersectionObserver !== "undefined"`,
 		`positionPopper(content, trigger, alignMode ? "fixed" : "absolute")`,
 		`positionPopper(content, trigger, "absolute")`,
-		`content._tuiOpenMethod !== "touch"`,
+		`content._templOpenMethod !== "touch"`,
 		`openMethod: nextOpen ? openMethod || "programmatic" : null`,
-		`data-tui-select-initial-open-method`,
+		`open(content, trigger, "programmatic")`,
 		`document.addEventListener("pointercancel"`,
 		`popup.setAttribute("data-align-trigger", "false")`,
 		`requestOpenChange(content, true, "keyboard")`,
 		`const SELECTED_DELAY = 400`,
-		`item._tuiAllowMouseSelection = true`,
-		`item._tuiPointerType === "touch"`,
+		`item._templAllowMouseSelection = true`,
+		`item._templPointerType === "touch"`,
 		`document.addEventListener("mouseup"`,
 		`item.hasAttribute("data-selected")`,
 		`requestOpenChange(content, false)`,

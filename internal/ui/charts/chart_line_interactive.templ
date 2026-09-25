@@ -161,7 +161,7 @@ templ ChartLineInteractive() {
 				for _, series := range []string{"desktop", "mobile"} {
 					<button
 						data-active={ utils.IfElse(series == "desktop", "true", "false") }
-						data-tui-chart-series={ series }
+						data-templ-chart-series={ series }
 						class="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
 					>
 						<span class="text-xs text-muted-foreground">
@@ -177,7 +177,7 @@ templ ChartLineInteractive() {
 		@card.Content(card.ContentProps{Class: "px-2 sm:p-6"}) {
 			@chart.Container(chart.ContainerProps{ID: "line-interactive", Config: chartLineInteractiveConfig, Class: "aspect-auto h-[250px] w-full"}) {
 				for _, series := range []string{"desktop", "mobile"} {
-					<div data-tui-chart-series-panel={ series } hidden?={ series != "desktop" } style="width:100%;height:100%">
+					<div data-templ-chart-series-panel={ series } hidden?={ series != "desktop" } style="width:100%;height:100%">
 						@chart.LineChart(chart.LineChartProps{
 							AccessibilityLayer: true,
 							Data:   chartLineInteractiveData,

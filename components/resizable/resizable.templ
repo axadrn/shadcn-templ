@@ -88,19 +88,18 @@ templ PanelGroup(props ...PanelGroupProps) {
 		id={ p.ID }
 		data-testid={ p.ID }
 		data-slot="resizable-panel-group"
-		data-tui-resizable-group
 		data-group
-		data-orientation={ string(p.Orientation) }
-		data-resize-target-coarse={ strconv.Itoa(p.ResizeTargetMinimumSize.Coarse) }
-		data-resize-target-fine={ strconv.Itoa(p.ResizeTargetMinimumSize.Fine) }
+		data-templ-orientation={ string(p.Orientation) }
+		data-templ-resize-target-minimum-size-coarse={ strconv.Itoa(p.ResizeTargetMinimumSize.Coarse) }
+		data-templ-resize-target-minimum-size-fine={ strconv.Itoa(p.ResizeTargetMinimumSize.Fine) }
 		if layout := defaultLayoutJSON(p.DefaultLayout); layout != "" {
-			data-default-layout={ layout }
+			data-templ-default-layout={ layout }
 		}
 		if p.DisableCursor {
-			data-disable-cursor
+			data-templ-disable-cursor
 		}
 		if p.Disabled {
-			data-disabled
+			data-templ-disabled
 		}
 		class={ utils.CN("cn-resizable-panel-group flex h-full w-full aria-[orientation=vertical]:flex-col", p.Class) }
 		style={ "height:100%;width:100%;overflow:hidden;" + p.Style + ";display:flex;flex-direction:" + map[bool]string{true: "column", false: "row"}[p.Orientation == OrientationVertical] + ";flex-wrap:nowrap;touch-action:" + map[bool]string{true: "pan-x", false: "pan-y"}[p.Orientation == OrientationVertical] + ";" }
@@ -159,18 +158,16 @@ templ Panel(props ...PanelProps) {
 		id={ p.ID }
 		data-testid={ p.ID }
 		data-slot="resizable-panel"
-		data-tui-resizable-panel
 		data-panel
-		data-tui-resizable-group-id={ group.id }
 		if p.DefaultSize != "" {
-			data-default-size={ p.DefaultSize }
+			data-templ-default-size={ p.DefaultSize }
 		}
-		data-min-size={ p.MinSize }
-		data-max-size={ p.MaxSize }
-		data-collapsed-size={ p.CollapsedSize }
-		data-group-resize-behavior={ string(p.GroupResizeBehavior) }
+		data-templ-min-size={ p.MinSize }
+		data-templ-max-size={ p.MaxSize }
+		data-templ-collapsed-size={ p.CollapsedSize }
+		data-templ-group-resize-behavior={ string(p.GroupResizeBehavior) }
 		if p.Collapsible {
-			data-collapsible
+			data-templ-collapsible
 		}
 		if p.Disabled {
 			data-disabled
@@ -182,7 +179,6 @@ templ Panel(props ...PanelProps) {
 		}
 	>
 		<div
-			data-tui-resizable-panel-content
 			class={ p.Class }
 			style={ "max-height:100%;max-width:100%;flex-grow:1;overflow:auto;" + p.Style + ";touch-action:" + map[bool]string{true: "pan-x", false: "pan-y"}[group.orientation == OrientationVertical] + ";" }
 		>
@@ -221,9 +217,7 @@ templ Handle(props ...HandleProps) {
 		id={ p.ID }
 		data-testid={ p.ID }
 		data-slot="resizable-handle"
-		data-tui-resizable-handle
 		data-separator={ map[bool]string{true: "disabled", false: "inactive"}[p.Disabled] }
-		data-tui-resizable-group-id={ group.id }
 		role="separator"
 		aria-orientation={ string(separatorOrientation) }
 		if p.Disabled {
@@ -232,7 +226,7 @@ templ Handle(props ...HandleProps) {
 			tabindex="0"
 		}
 		if p.DisableDoubleClick {
-			data-disable-double-click
+			data-templ-disable-double-click
 		}
 		class={
 			utils.CN(

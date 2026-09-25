@@ -103,13 +103,13 @@ func sourceLanguage(path string) string {
 // to max-h-64 with an Expand/Collapse button next to the copy button and a
 // gradient trigger across the bottom.
 templ CodeCollapsibleWrapper() {
-	<div data-tui-docs-collapsible data-open="false" class="group/collapsible relative md:-mx-1">
+	<div data-templ-docs-collapsible data-open="false" class="group/collapsible relative md:-mx-1">
 		<div class="absolute top-1.5 right-9 z-10 flex items-center">
 			@button.Button(button.Props{
 				Variant:    button.VariantGhost,
 				Size:       button.SizeSm,
 				Class:      "h-7 rounded-md px-2 text-muted-foreground",
-				Attributes: templ.Attributes{"data-tui-docs-collapsible-toggle": true},
+				Attributes: templ.Attributes{"data-templ-docs-collapsible-toggle": true},
 			}) {
 				<span class="group-data-[open=true]/collapsible:hidden">Expand</span>
 				<span class="hidden group-data-[open=true]/collapsible:inline">Collapse</span>
@@ -121,7 +121,7 @@ templ CodeCollapsibleWrapper() {
 		</div>
 		<button
 			type="button"
-			data-tui-docs-collapsible-toggle
+			data-templ-docs-collapsible-toggle
 			class="absolute inset-x-0 -bottom-2 flex h-20 items-center justify-center rounded-b-lg bg-gradient-to-b from-code/70 to-code text-sm text-muted-foreground group-data-[open=true]/collapsible:hidden"
 		>Expand</button>
 	</div>
@@ -132,8 +132,8 @@ templ CodeCollapsibleWrapper() {
 // button; expanding swaps in the full source (one-way).
 templ CollapsibleCodeBlock(file string) {
 	<div
-		data-tui-docs-code
-		data-tui-code-line-numbers
+		data-templ-docs-code
+		data-templ-code-line-numbers
 		data-open="false"
 		class="group/code relative border-t"
 	>
@@ -145,7 +145,7 @@ templ CollapsibleCodeBlock(file string) {
 					Variant:    button.VariantOutline,
 					Size:       button.SizeSm,
 					Class:      "relative z-10 h-8 rounded-lg bg-background px-3 text-sm text-foreground shadow-none hover:bg-muted dark:bg-background dark:text-foreground dark:hover:bg-muted",
-					Attributes: templ.Attributes{"data-tui-docs-code-toggle": true},
+					Attributes: templ.Attributes{"data-templ-docs-code-toggle": true},
 				}) {
 					View Code
 				}
@@ -183,7 +183,7 @@ func sourcePreviewLines(file string, maxLines int) string {
 // InstallTabTriggerClass restyles our tabs trigger to shadcn's docs mdx
 // TabsTrigger (default variant, underline via border-b-2; the list height
 // clamps the trigger so the underline sits tight under the text).
-const InstallTabTriggerClass = "rounded-none border-0 border-b-2 border-transparent bg-transparent px-0 pt-1 pb-3 text-base text-muted-foreground hover:text-primary data-[tui-tabs-state=active]:border-primary data-[tui-tabs-state=active]:bg-transparent data-[tui-tabs-state=active]:!shadow-none data-[tui-tabs-state=active]:text-foreground dark:data-[tui-tabs-state=active]:border-primary dark:data-[tui-tabs-state=active]:bg-transparent"
+const InstallTabTriggerClass = "rounded-none border-0 border-b-2 border-transparent bg-transparent px-0 pt-1 pb-3 text-base text-muted-foreground hover:text-primary data-active:border-primary data-active:bg-transparent data-active:!shadow-none data-active:text-foreground dark:data-active:border-primary dark:data-active:bg-transparent"
 
 // DocsPageHeader: title, description and the copy-page/prev-next controls
 // (no breadcrumbs, like shadcn).
@@ -234,7 +234,7 @@ templ CopyPageMenu() {
 			Variant:    button.VariantSecondary,
 			Size:       button.SizeSm,
 			Class:      "h-8 shadow-none md:h-7 md:text-[0.8rem]",
-			Attributes: templ.Attributes{"data-tui-docs-copy-md": true, "data-copied": "false"},
+			Attributes: templ.Attributes{"data-templ-docs-copy-md": true, "data-copied": "false"},
 		}) {
 			<span class="[[data-copied=true]_&]:hidden">
 				@icon.Copy()
@@ -335,19 +335,19 @@ templ DocsCodeToggleScript() {
 	<script defer nonce={ templ.GetNonce(ctx) }>
 		document.addEventListener('click', (e) => {
 			if (!(e.target instanceof Element)) return;
-			const collapsibleToggle = e.target.closest('[data-tui-docs-collapsible-toggle]');
+			const collapsibleToggle = e.target.closest('[data-templ-docs-collapsible-toggle]');
 			if (collapsibleToggle) {
-				const wrapper = collapsibleToggle.closest('[data-tui-docs-collapsible]');
+				const wrapper = collapsibleToggle.closest('[data-templ-docs-collapsible]');
 				if (wrapper) wrapper.dataset.open = wrapper.dataset.open === 'true' ? 'false' : 'true';
 				return;
 			}
-			const toggle = e.target.closest('[data-tui-docs-code-toggle]');
+			const toggle = e.target.closest('[data-templ-docs-code-toggle]');
 			if (toggle) {
-				const block = toggle.closest('[data-tui-docs-code]');
+				const block = toggle.closest('[data-templ-docs-code]');
 				if (block) block.dataset.open = 'true';
 				return;
 			}
-			const copy = e.target.closest('[data-tui-docs-copy-md]');
+			const copy = e.target.closest('[data-templ-docs-copy-md]');
 			if (copy) {
 				fetch(window.location.pathname + '.md')
 					.then((r) => (r.ok ? r.text() : Promise.reject()))

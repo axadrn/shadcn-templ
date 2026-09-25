@@ -9,6 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"strconv"
+
 	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
@@ -91,7 +93,7 @@ func NavProjects(projects []Project) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				for _, item := range projects {
+				for i, item := range projects {
 					templ_7745c5c3_Var5 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 						templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 						templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -127,7 +129,7 @@ func NavProjects(projects []Project) templ.Component {
 							var templ_7745c5c3_Var7 string
 							templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar16/nav_projects.templ`, Line: 25, Col: 23}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar16/nav_projects.templ`, Line: 27, Col: 23}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 							if templ_7745c5c3_Err != nil {
@@ -302,18 +304,16 @@ func NavProjects(projects []Project) templ.Component {
 								return nil
 							})
 							templ_7745c5c3_Err = dropdownmenu.Content(dropdownmenu.ContentProps{
-								Class:       "w-48",
-								Side:        dropdownmenu.SideRight,
-								Align:       dropdownmenu.AlignStart,
-								MobileSide:  dropdownmenu.SideBottom,
-								MobileAlign: dropdownmenu.AlignEnd,
+								Class: "w-48",
+								Side:  dropdownmenu.SideRight,
+								Align: dropdownmenu.AlignStart,
 							}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							return nil
 						})
-						templ_7745c5c3_Err = dropdownmenu.DropdownMenu().Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = dropdownmenu.DropdownMenu(dropdownmenu.Props{ID: "sidebar16-nav-projects-menu-" + strconv.Itoa(i)}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -381,6 +381,23 @@ func NavProjects(projects []Project) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = sidebar.Group(sidebar.GroupProps{Class: "group-data-[collapsible=icon]:hidden"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<script type=\"module\" nonce=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var16 string
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar16/nav_projects.templ`, Line: 68, Col: 50}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\">\n\t\t// The pendant of useSidebar().isMobile in the block: the menu reads\n\t\t// its side when it opens, onMobileChange keeps it current until the\n\t\t// block is swapped out.\n\t\t// side={isMobile ? \"bottom\" : \"right\"} align={isMobile ? \"end\" : \"start\"}\n\t\tconst menus = [...document.querySelectorAll('[id^=\"sidebar16-nav-projects-menu-\"][data-templ-side]')];\n\t\twindow.templ.sidebar.onMobileChange((isMobile) => {\n\t\t\tif (!menus[0]?.isConnected) return false;\n\t\t\tmenus.forEach((menu) => {\n\t\t\t\tmenu.setAttribute(\"data-templ-side\", isMobile ? \"bottom\" : \"right\");\n\t\t\t\tmenu.setAttribute(\"data-templ-align\", isMobile ? \"end\" : \"start\");\n\t\t\t});\n\t\t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

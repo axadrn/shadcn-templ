@@ -19,7 +19,7 @@
     if (event.key !== "Escape") return;
     const contents = event.currentTarget === document
       ? allContents()
-      : [event.currentTarget.hasAttribute("data-tui-dropdownmenu-content")
+      : [isPositioner(event.currentTarget)
         ? event.currentTarget
         : contentFor(event.currentTarget)];
     let handled = false;
@@ -32,22 +32,48 @@
     return handled;
   }
 
+  // The menu's element is the positioner (shadcn's isolate z-50 wrapper, no
+  // slot) around the [data-slot=dropdown-menu-content] popup.
+  const POPUP = '[data-slot="dropdown-menu-content"]';
+  const SUB = '[data-slot="dropdown-menu-sub"]';
+  const SUB_TRIGGER = '[data-slot="dropdown-menu-sub-trigger"]';
+  const SUB_CONTENT = '[data-slot="dropdown-menu-sub-content"]';
+  // Base UI's MenuTrigger renders no identifier: a menu trigger is whatever
+  // has aria-haspopup="menu" and controls a menu positioner. The element may
+  // carry another component's slot (sidebar.MenuButton).
+  const TRIGGER = '[aria-haspopup="menu"][aria-controls]';
+
+  function isPositioner(el) {
+    return !!(el && el.firstElementChild && el.firstElementChild.matches(POPUP));
+  }
+
   function allContents() {
-    return document.querySelectorAll("[data-tui-dropdownmenu-content]");
+    return [...document.querySelectorAll(POPUP)].map((p) => p.parentElement).filter(isPositioner);
   }
 
   function triggerFor(content) {
-    return document.querySelector(
-      '[data-tui-dropdownmenu-trigger][aria-controls="' + content.id + '"]',
-    );
+    return document.querySelector('[aria-controls="' + content.id + '"]');
   }
 
   function contentFor(trigger) {
-    return document.getElementById(trigger.getAttribute("aria-controls"));
+    const el = document.getElementById(trigger.getAttribute("aria-controls"));
+    return isPositioner(el) ? el : null;
+  }
+
+  // The dropdown trigger an event target sits in, if any.
+  function triggerOf(target) {
+    const trigger = target.closest && target.closest(TRIGGER);
+    return trigger && !trigger.matches(SUB_TRIGGER) && contentFor(trigger) ? trigger : null;
+  }
+
+  // The dropdown positioner an element sits in, if any.
+  function positionerOf(target) {
+    const popup = target && target.closest && target.closest(POPUP);
+    return popup && isPositioner(popup.parentElement) ? popup.parentElement : null;
   }
 
   function popupFor(content) {
-    return content.querySelector("[data-tui-dropdownmenu-popup]");
+    return content.firstElementChild;
   }
 
   function setState(content, state) {
@@ -105,15 +131,15 @@
 
   // Moves the content to <body> (shadcn portals it the same way).
   // The unmount half of the React portal pendant: a portaled content lives
-  // as long as its SSR declaration site (_tuiPortalOwner) stays in the
+  // as long as its SSR declaration site (_templPortalOwner) stays in the
   // document. Trigger-presence heuristics judged mid-swap moments wrongly -
   // multi-phase swap layers briefly disconnect the new triggers.
   function removeOrphanedContents(content) {
-    document.querySelectorAll("body > [data-tui-dropdownmenu-content]").forEach((c) => {
-      if (c !== content && c._tuiPortalOwner && !c._tuiPortalOwner.isConnected) {
+    allContents().filter((c) => c.parentElement === document.body).forEach((c) => {
+      if (c !== content && c._templPortalOwner && !c._templPortalOwner.isConnected) {
         stopAutoPositioning(c);
-        c._tuiReleaseScroll?.();
-        c._tuiReleaseScroll = null;
+        c._templReleaseScroll?.();
+        c._templReleaseScroll = null;
         c.remove();
       }
     });
@@ -123,26 +149,21 @@
     listenForEscape(content);
     removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
-      if (!content._tuiPortalOwner) content._tuiPortalOwner = content.parentElement;
+      if (!content._templPortalOwner) content._templPortalOwner = content.parentElement;
       document.body.appendChild(content);
     }
   }
 
   function positionMenu(content, trigger) {
     const { computePosition, offset, flip, shift, size } = window.FloatingUIDOM;
-    const mobile = window.matchMedia("(max-width: 767px)").matches;
-    const side =
-      (mobile && content.getAttribute("data-tui-dropdownmenu-mobile-side")) ||
-      content.getAttribute("data-tui-dropdownmenu-side") ||
-      "bottom";
-    const align =
-      (mobile && content.getAttribute("data-tui-dropdownmenu-mobile-align")) ||
-      content.getAttribute("data-tui-dropdownmenu-align") ||
-      "start";
+    // Read at open, like Base UI reads its side prop on render; a block that
+    // switches side per viewport updates data-templ-side itself.
+    const side = content.getAttribute("data-templ-side") || "bottom";
+    const align = content.getAttribute("data-templ-align") || "start";
     const sideOffset =
-      parseInt(content.getAttribute("data-tui-dropdownmenu-side-offset"), 10) || 4;
+      parseInt(content.getAttribute("data-templ-side-offset"), 10) || 4;
     const alignOffset =
-      parseInt(content.getAttribute("data-tui-dropdownmenu-align-offset"), 10) || 0;
+      parseInt(content.getAttribute("data-templ-align-offset"), 10) || 0;
     const placement = align === "center" ? side : side + "-" + align;
 
     return computePosition(trigger, content, {
@@ -189,13 +210,13 @@
   // move, resize, scroll, or shift layout. This also tracks a mobile sidebar
   // while its opening transform is still settling.
   function startAutoPositioning(content, trigger) {
-    if (content._tuiPositionCleanup) content._tuiPositionCleanup();
+    if (content._templPositionCleanup) content._templPositionCleanup();
     let resolveFirst;
     const firstPosition = new Promise((resolve) => {
       resolveFirst = resolve;
     });
     const update = () => positionMenu(content, trigger).then(resolveFirst, resolveFirst);
-    content._tuiPositionCleanup = window.FloatingUIDOM.autoUpdate(trigger, content, update, {
+    content._templPositionCleanup = window.FloatingUIDOM.autoUpdate(trigger, content, update, {
       elementResize: typeof ResizeObserver !== "undefined",
       layoutShift: typeof IntersectionObserver !== "undefined",
     });
@@ -203,9 +224,9 @@
   }
 
   function stopAutoPositioning(content) {
-    if (!content._tuiPositionCleanup) return;
-    content._tuiPositionCleanup();
-    content._tuiPositionCleanup = null;
+    if (!content._templPositionCleanup) return;
+    content._templPositionCleanup();
+    content._templPositionCleanup = null;
   }
 
   // ----- focus highlighting (Base UI moves real focus to menu items) --------
@@ -215,7 +236,7 @@
   // The menu container the keyboard navigates in: the deepest open submenu
   // holding focus, otherwise the root popup.
   function containerOf(el) {
-    return el.closest("[data-tui-dropdownmenu-sub-content], [data-tui-dropdownmenu-popup]");
+    return el.closest(SUB_CONTENT + ", " + POPUP);
   }
 
   function itemsIn(container) {
@@ -266,8 +287,8 @@
     allContents().forEach((c) => {
       if (c !== content) close(c);
     });
-    clearTimeout(content._tuiHide);
-    content._tuiOpenMethod = trigger._tuiOpenMethod || "programmatic";
+    clearTimeout(content._templHide);
+    content._templOpenMethod = trigger._templOpenMethod || "programmatic";
     portal(content);
     // z-index portal like shadcn (no native top layer); re-append
     // keeps paint order = open order.
@@ -288,9 +309,9 @@
       if (popup) popup.style.transitionProperty = "";
       if (content.hidden || !content.isConnected) return;
       // useAnchoredPopupScrollLock measures the positioned popup for touch opens.
-      content._tuiReleaseScroll?.();
-      content._tuiReleaseScroll = window.tui.scrollLock.anchoredPopup(
-        true, content._tuiOpenMethod === "touch", content, trigger,
+      content._templReleaseScroll?.();
+      content._templReleaseScroll = window.templ.scrollLock.anchoredPopup(
+        true, content._templOpenMethod === "touch", content, trigger,
       );
       setState(content, "open");
       startTransition(content);
@@ -318,7 +339,7 @@
     setTransitionAttribute(content, "data-starting-style", false);
     setState(content, "closed");
     setTransitionAttribute(content, "data-ending-style", true);
-    content.querySelectorAll("[data-tui-dropdownmenu-sub]").forEach(closeSubNow);
+    content.querySelectorAll(SUB).forEach(closeSubNow);
     const trigger = triggerFor(content);
     if (trigger) {
       trigger.setAttribute("aria-expanded", "false");
@@ -326,15 +347,15 @@
       trigger.removeAttribute("data-pressed");
       if (refocusTrigger) trigger.focus({ preventScroll: true });
     }
-    clearTimeout(content._tuiHide);
-    content._tuiHide = setTimeout(() => {
+    clearTimeout(content._templHide);
+    content._templHide = setTimeout(() => {
       if (content.hasAttribute("data-closed") && !content.hidden) {
         content.hidden = true;
         setTransitionAttribute(content, "data-ending-style", false);
       }
     }, EXIT_MS);
-    content._tuiReleaseScroll?.();
-    content._tuiReleaseScroll = null;
+    content._templReleaseScroll?.();
+    content._templReleaseScroll = null;
   }
 
   function closeAll(refocusTrigger) {
@@ -350,7 +371,7 @@
         detail: { open: nextOpen },
       }),
     );
-    if (!accepted || content.hasAttribute("data-tui-dropdownmenu-controlled")) return false;
+    if (!accepted || content.hasAttribute("data-templ-open")) return false;
     const trigger = triggerFor(content);
     if (nextOpen && trigger) open(content, trigger, focusOn);
     else if (!nextOpen) close(content, refocusTrigger);
@@ -371,8 +392,8 @@
 
   function subParts(sub) {
     return {
-      trigger: sub.querySelector("[data-tui-dropdownmenu-sub-trigger]"),
-      content: sub.querySelector("[data-tui-dropdownmenu-sub-content]"),
+      trigger: sub.querySelector(SUB_TRIGGER),
+      content: sub.querySelector(SUB_CONTENT),
     };
   }
 
@@ -439,10 +460,10 @@
 
   // Closes immediately (used when the whole menu goes away).
   function closeSubNow(sub) {
-    clearTimeout(sub._tuiOpen);
-    clearTimeout(sub._tuiClose);
-    sub._tuiOpen = null;
-    sub._tuiClose = null;
+    clearTimeout(sub._templOpen);
+    clearTimeout(sub._templClose);
+    sub._templOpen = null;
+    sub._templClose = null;
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
     content.classList.add("hidden");
@@ -464,17 +485,20 @@
 		detail: { open: nextOpen },
 	  }),
 	);
-	if (!accepted || sub.hasAttribute("data-tui-dropdownmenu-sub-controlled")) return;
-	sub.setAttribute("data-tui-dropdownmenu-sub-open", String(nextOpen));
+	// Controlled: the Base UI open prop on the SubmenuRoot, the owner commits.
+	if (!accepted || sub.hasAttribute("data-templ-open")) return;
+	sub._templSubOpen = nextOpen;
 	if (nextOpen) openSub(sub, focusFirst);
 	else closeSub(sub);
   }
 
   function syncSubState(menu) {
-	menu.querySelectorAll("[data-tui-dropdownmenu-sub]").forEach((sub) => {
+	menu.querySelectorAll(SUB).forEach((sub) => {
 	  const { content } = subParts(sub);
 	  if (!content) return;
-	  const shouldOpen = sub.getAttribute("data-tui-dropdownmenu-sub-open") === "true";
+	  // Last requested state, else the server's open or defaultOpen.
+	  const shouldOpen = sub._templSubOpen ?? (
+	    sub.getAttribute("data-templ-open") === "true" || sub.hasAttribute("data-templ-default-open"));
 	  if (shouldOpen && !content.hasAttribute("data-open")) openSub(sub, false);
 	  else if (!shouldOpen && content.hasAttribute("data-open")) closeSubNow(sub);
 	});
@@ -484,31 +508,31 @@
   // keep it open; everything else in the menu schedules its subs to close.
   document.addEventListener("mouseover", (e) => {
     if (!(e.target instanceof Element)) return;
-    const menu = e.target.closest("[data-tui-dropdownmenu-content]");
+    const menu = positionerOf(e.target);
     if (!menu) return;
-    const hovered = e.target.closest("[data-tui-dropdownmenu-sub]");
+    const hovered = e.target.closest(SUB);
 
-    menu.querySelectorAll("[data-tui-dropdownmenu-sub]").forEach((sub) => {
+    menu.querySelectorAll(SUB).forEach((sub) => {
       const { content } = subParts(sub);
       if (!content) return;
       const isOpen = content.hasAttribute("data-open");
       const onPath = hovered && (sub === hovered || sub.contains(hovered));
 
       if (onPath) {
-        clearTimeout(sub._tuiClose);
-        sub._tuiClose = null;
-        if (!isOpen && !sub._tuiOpen) {
-          sub._tuiOpen = setTimeout(() => {
-            sub._tuiOpen = null;
+        clearTimeout(sub._templClose);
+        sub._templClose = null;
+        if (!isOpen && !sub._templOpen) {
+          sub._templOpen = setTimeout(() => {
+            sub._templOpen = null;
 			requestSubOpenChange(sub, true);
           }, SUB_OPEN_DELAY);
         }
       } else {
-        clearTimeout(sub._tuiOpen);
-        sub._tuiOpen = null;
-        if (isOpen && !sub._tuiClose) {
-          sub._tuiClose = setTimeout(() => {
-            sub._tuiClose = null;
+        clearTimeout(sub._templOpen);
+        sub._templOpen = null;
+        if (isOpen && !sub._templClose) {
+          sub._templClose = setTimeout(() => {
+            sub._templClose = null;
 			requestSubOpenChange(sub, false);
           }, SUB_CLOSE_DELAY);
         }
@@ -520,7 +544,7 @@
   // the menu container when the pointer sits on empty menu space.
   document.addEventListener("pointermove", (e) => {
     if (!(e.target instanceof Element)) return;
-    const content = e.target.closest("[data-tui-dropdownmenu-content]");
+    const content = positionerOf(e.target);
     if (!isOpen(content)) return;
     const item = e.target.closest(ITEM_SELECTOR);
     if (item && containerOf(item)) {
@@ -537,13 +561,15 @@
   // ----- init (portal on open) --------------------
 
   function init() {
-    document.querySelectorAll("[data-tui-dropdownmenu-trigger]").forEach(listenForEscape);
     removeOrphanedContents();
-    document.querySelectorAll("[data-tui-dropdownmenu-trigger]").forEach((trigger) => {
-      const content = contentFor(trigger);
-      if (!content) return;
-      if (content.getAttribute("data-tui-dropdownmenu-initial-open") === "true") {
-        content.removeAttribute("data-tui-dropdownmenu-initial-open");
+    allContents().forEach((content) => {
+      const trigger = triggerFor(content);
+      if (!trigger) return;
+      listenForEscape(trigger);
+      // Server-side open state (Base UI open or defaultOpen), once per element.
+      if (content._templInit) return;
+      content._templInit = true;
+      if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
         open(content, trigger, false);
       }
     });
@@ -580,7 +606,7 @@
     if (!(e.target instanceof Element)) return;
     const focusOn = OPEN_KEYS[e.key];
     if (!focusOn) return;
-    const trigger = e.target.closest("[data-tui-dropdownmenu-trigger]");
+    const trigger = triggerOf(e.target);
     if (!trigger || trigger.disabled) return;
     const content = contentFor(trigger);
     // Already open: leave it to the handlers that navigate and close.
@@ -592,48 +618,48 @@
     e.stopImmediatePropagation();
     // Through requestOpenChange, not open, so a controlled menu still gets to
     // veto the open and the change event still fires.
-    trigger._tuiOpenMethod = "keyboard";
+    trigger._templOpenMethod = "keyboard";
     requestOpenChange(content, true, focusOn);
   });
 
   document.addEventListener("pointerdown", (e) => {
     if (e.button !== 0 || !(e.target instanceof Element)) return;
-    const trigger = e.target.closest("[data-tui-dropdownmenu-trigger]");
+    const trigger = triggerOf(e.target);
     if (trigger) {
-      trigger._tuiOpenMethod = e.pointerType;
+      trigger._templOpenMethod = e.pointerType;
       if (!trigger.disabled) toggle(trigger, false);
       return;
     }
-    if (!e.target.closest("[data-tui-dropdownmenu-content]")) requestCloseAll(false);
+    if (!positionerOf(e.target)) requestCloseAll(false);
   });
 
   document.addEventListener("click", (e) => {
     if (!(e.target instanceof Element)) return;
-    const trigger = e.target.closest("[data-tui-dropdownmenu-trigger]");
+    const trigger = triggerOf(e.target);
     if (trigger) {
       // Keyboard activation only (Enter/Space fire a detail-0 click without
       // a preceding pointerdown); pointer presses are handled on pointerdown.
       if (e.detail === 0 && !trigger.disabled) {
-        trigger._tuiOpenMethod = "keyboard";
+        trigger._templOpenMethod = "keyboard";
         toggle(trigger, true);
       }
       return;
     }
 
     // Clicking a submenu trigger opens it right away.
-    const subTrigger = e.target.closest("[data-tui-dropdownmenu-sub-trigger]");
+    const subTrigger = e.target.closest(SUB_TRIGGER);
     if (subTrigger) {
-      const sub = subTrigger.closest("[data-tui-dropdownmenu-sub]");
+      const sub = subTrigger.closest(SUB);
       if (sub) {
-        clearTimeout(sub._tuiOpen);
-        sub._tuiOpen = null;
+        clearTimeout(sub._templOpen);
+        sub._templOpen = null;
 		requestSubOpenChange(sub, true, e.detail === 0);
       }
       return;
     }
 
     // Checkbox items toggle and keep the menu open.
-    const checkbox = e.target.closest("[data-tui-dropdownmenu-checkbox-item]");
+    const checkbox = e.target.closest('[data-slot="dropdown-menu-checkbox-item"]');
     if (checkbox) {
       if (!checkbox.disabled) {
         const on = checkbox.hasAttribute("data-checked");
@@ -643,7 +669,7 @@
       detail: { checked: !on },
     });
     const accepted = checkbox.dispatchEvent(change);
-    if (accepted && !checkbox.hasAttribute("data-tui-dropdownmenu-checkbox-controlled")) {
+    if (accepted && !checkbox.hasAttribute("data-templ-checked")) {
       setChecked(checkbox, !on);
     }
       }
@@ -651,18 +677,18 @@
     }
 
     // Radio items select within their group and keep the menu open.
-    const radio = e.target.closest("[data-tui-dropdownmenu-radio-item]");
+    const radio = e.target.closest('[data-slot="dropdown-menu-radio-item"]');
     if (radio) {
       if (!radio.disabled) {
-        const group = radio.closest("[data-tui-dropdownmenu-radio-group]");
+        const group = radio.closest('[data-slot="dropdown-menu-radio-group"]');
     const change = new CustomEvent("dropdownmenu-value-change", {
       bubbles: true,
       cancelable: true,
-      detail: { value: radio.getAttribute("data-tui-dropdownmenu-radio-value") },
+      detail: { value: radio.getAttribute("data-templ-value") },
     });
     const accepted = (group || radio).dispatchEvent(change);
-    if (accepted && group && !group.hasAttribute("data-tui-dropdownmenu-radio-controlled")) {
-          group.querySelectorAll("[data-tui-dropdownmenu-radio-item]").forEach((r) => {
+    if (accepted && group && !group.hasAttribute("data-templ-value")) {
+          group.querySelectorAll('[data-slot="dropdown-menu-radio-item"]').forEach((r) => {
             setChecked(r, false);
           });
       setChecked(radio, true);
@@ -671,13 +697,13 @@
       return;
     }
 
-    const item = e.target.closest("[data-tui-dropdownmenu-item]");
+    const item = e.target.closest('[data-slot="dropdown-menu-item"]');
     if (item) {
       if (
         item.getAttribute("aria-disabled") !== "true" &&
-        item.getAttribute("data-tui-dropdownmenu-disable-close-on-click") !== "true"
+        item.getAttribute("data-templ-close-on-click") !== "false"
       ) {
-        const content = item.closest("[data-tui-dropdownmenu-content]");
+        const content = positionerOf(item);
         if (content) requestOpenChange(content, false, false, true);
       }
       return;
@@ -721,19 +747,19 @@
         break;
       }
       case "ArrowRight": {
-        const subTrigger = active.closest("[data-tui-dropdownmenu-sub-trigger]");
+        const subTrigger = active.closest(SUB_TRIGGER);
         if (subTrigger) {
           e.preventDefault();
-          const sub = subTrigger.closest("[data-tui-dropdownmenu-sub]");
+          const sub = subTrigger.closest(SUB);
 		  if (sub) requestSubOpenChange(sub, true, true);
         }
         break;
       }
       case "ArrowLeft": {
-        const subContent = active.closest("[data-tui-dropdownmenu-sub-content]");
+        const subContent = active.closest(SUB_CONTENT);
         if (subContent) {
           e.preventDefault();
-          const sub = subContent.closest("[data-tui-dropdownmenu-sub]");
+          const sub = subContent.closest(SUB);
           if (sub) {
             const { trigger } = subParts(sub);
 			requestSubOpenChange(sub, false);

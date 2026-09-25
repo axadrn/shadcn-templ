@@ -22,7 +22,7 @@ templ BlockViewer(entry BlockEntry) {
 	<div
 		id={ entry.Name }
 		data-view="preview"
-		data-tui-block-wrapper
+		data-templ-block-wrapper
 		class="group/block-view-wrapper flex min-w-0 scroll-mt-24 flex-col-reverse items-stretch gap-4 overflow-hidden md:flex-col"
 		style={ "--height: " + entry.Height() }
 	>
@@ -42,13 +42,13 @@ templ blockViewerToolbar(entry BlockEntry) {
 		@tabs.Tabs(tabs.Props{
 			ID:           entry.Name + "-view-tabs",
 			DefaultValue: "preview",
-			Attributes:   templ.Attributes{"data-tui-block-tabs": ""},
+			Attributes:   templ.Attributes{"data-templ-block-tabs": ""},
 		}) {
 			@tabs.List(tabs.ListProps{Class: "grid h-8! grid-cols-2 items-center rounded-lg p-1 *:data-[slot=tabs-trigger]:h-6 *:data-[slot=tabs-trigger]:rounded-sm *:data-[slot=tabs-trigger]:px-2 *:data-[slot=tabs-trigger]:text-xs"}) {
-				@tabs.Trigger(tabs.TriggerProps{Value: "preview", Attributes: templ.Attributes{"data-tui-block-set-view": "preview"}}) {
+				@tabs.Trigger(tabs.TriggerProps{Value: "preview", Attributes: templ.Attributes{"data-templ-block-set-view": "preview"}}) {
 					Preview
 				}
-				@tabs.Trigger(tabs.TriggerProps{Value: "code", Attributes: templ.Attributes{"data-tui-block-set-view": "code"}}) {
+				@tabs.Trigger(tabs.TriggerProps{Value: "code", Attributes: templ.Attributes{"data-templ-block-set-view": "code"}}) {
 					Code
 				}
 			}
@@ -63,13 +63,13 @@ templ blockViewerToolbar(entry BlockEntry) {
 		<div class="ml-auto flex items-center gap-2">
 			<div class="h-8 items-center gap-1.5 rounded-md border p-[3px] shadow-none">
 				@togglegroup.ToggleGroup(togglegroup.Props{Spacing: utils.Ptr(1), DefaultValue: []string{"100%"}, Class: "*:data-[slot=toggle-group-item]:size-6! *:data-[slot=toggle-group-item]:rounded-sm!"}) {
-					@togglegroup.Item(togglegroup.ItemProps{Value: "100%", Attributes: templ.Attributes{"data-tui-block-size": "100%", "title": "Desktop"}}) {
+					@togglegroup.Item(togglegroup.ItemProps{Value: "100%", Attributes: templ.Attributes{"data-templ-block-size": "100%", "title": "Desktop"}}) {
 						@icon.Monitor()
 					}
-					@togglegroup.Item(togglegroup.ItemProps{Value: "60%", Attributes: templ.Attributes{"data-tui-block-size": "60%", "title": "Tablet"}}) {
+					@togglegroup.Item(togglegroup.ItemProps{Value: "60%", Attributes: templ.Attributes{"data-templ-block-size": "60%", "title": "Tablet"}}) {
 						@icon.Tablet()
 					}
-					@togglegroup.Item(togglegroup.ItemProps{Value: "30%", Attributes: templ.Attributes{"data-tui-block-size": "30%", "title": "Mobile"}}) {
+					@togglegroup.Item(togglegroup.ItemProps{Value: "30%", Attributes: templ.Attributes{"data-templ-block-size": "30%", "title": "Mobile"}}) {
 						@icon.Smartphone()
 					}
 					@separator.Separator(separator.Props{Orientation: separator.OrientationVertical, Class: "h-4! self-center!"})
@@ -89,7 +89,7 @@ templ blockViewerToolbar(entry BlockEntry) {
 						Size:       button.SizeIcon,
 						Variant:    button.VariantGhost,
 						Class:      "size-6 rounded-sm p-0",
-						Attributes: templ.Attributes{"title": "Refresh Preview", "data-tui-block-refresh": entry.Name},
+						Attributes: templ.Attributes{"title": "Refresh Preview", "data-templ-block-refresh": entry.Name},
 					}) {
 						@icon.RotateCw()
 						<span class="sr-only">Refresh Preview</span>
@@ -101,12 +101,12 @@ templ blockViewerToolbar(entry BlockEntry) {
 				Variant:    button.VariantOutline,
 				Size:       button.SizeSm,
 				Class:      "w-fit gap-1 px-2 shadow-none",
-				Attributes: templ.Attributes{"data-tui-block-add": "shadcn-templ add " + entry.Name},
+				Attributes: templ.Attributes{"data-templ-block-add": "shadcn-templ add " + entry.Name},
 			}) {
-				<span data-tui-block-add-idle>
+				<span data-templ-block-add-idle>
 					@icon.Terminal()
 				</span>
-				<span data-tui-block-add-done class="hidden">
+				<span data-templ-block-add-done class="hidden">
 					@icon.Check()
 				</span>
 				<span>shadcn-templ add { entry.Name }</span>
@@ -125,14 +125,14 @@ templ blockViewerView(entry BlockEntry) {
 				ID:          entry.Name + "-preview-group",
 				Orientation: resizable.OrientationHorizontal,
 				Class:       "relative z-10 after:absolute after:inset-0 after:right-3 after:z-0 after:rounded-xl after:bg-surface/50",
-				Attributes:  templ.Attributes{"data-tui-block-resizable": ""},
+				Attributes:  templ.Attributes{"data-templ-block-resizable": ""},
 			}) {
 				@resizable.Panel(resizable.PanelProps{
 					ID:          entry.Name + "-preview-panel",
 					DefaultSize: "100%",
 					MinSize:     "30%",
 					Class:       "relative aspect-[4/2.5] overflow-hidden rounded-lg border bg-background md:aspect-auto md:rounded-xl",
-					Attributes:  templ.Attributes{"data-tui-block-panel": ""},
+					Attributes:  templ.Attributes{"data-templ-block-panel": ""},
 				}) {
 					<iframe
 						src={ templ.SafeURL("/view/" + entry.Name) }
@@ -140,12 +140,12 @@ templ blockViewerView(entry BlockEntry) {
 						loading="lazy"
 						class="relative z-20 no-scrollbar w-full bg-background"
 						title={ entry.Name }
-						data-tui-block-iframe={ entry.Name }
+						data-templ-block-iframe={ entry.Name }
 					></iframe>
 				}
 				@resizable.Handle(resizable.HandleProps{
 					Class:      "relative hidden w-3 bg-transparent p-0 after:absolute after:top-1/2 after:right-0 after:h-8 after:w-[6px] after:translate-x-[-1px] after:-translate-y-1/2 after:rounded-full after:bg-border after:transition-all after:hover:h-10 md:block",
-					Attributes: templ.Attributes{"data-tui-block-handle": "", "aria-label": "Resize preview"},
+					Attributes: templ.Attributes{"data-templ-block-handle": "", "aria-label": "Resize preview"},
 				})
 				@resizable.Panel(resizable.PanelProps{
 					ID:          entry.Name + "-preview-spacer",
@@ -168,7 +168,7 @@ templ blockViewerCode(entry BlockEntry) {
 		for i, file := range entry.Files {
 			<figure
 				data-rehype-pretty-code-figure=""
-				data-tui-block-file-pane={ file.Path }
+				data-templ-block-file-pane={ file.Path }
 				if i != 0 {
 					hidden
 				}
@@ -185,21 +185,21 @@ templ blockViewerCode(entry BlockEntry) {
 							Variant:    button.VariantGhost,
 							Size:       button.SizeIcon,
 							Class:      "size-7",
-							Attributes: templ.Attributes{"data-tui-block-copy-file": file.Path, "aria-label": "Copy code"},
+							Attributes: templ.Attributes{"data-templ-block-copy-file": file.Path, "aria-label": "Copy code"},
 						}) {
-							<span data-tui-block-copy-idle>
+							<span data-templ-block-copy-idle>
 								@icon.Clipboard()
 							</span>
-							<span data-tui-block-copy-done class="hidden">
+							<span data-templ-block-copy-done class="hidden">
 								@icon.Check()
 							</span>
 						}
 					</div>
 				</figcaption>
-				<div class="no-scrollbar min-h-0 flex-1 overflow-y-auto [&_pre]:px-0 [&_pre]:py-3.5" data-tui-block-file-scroll data-tui-code-line-numbers>
+				<div class="no-scrollbar min-h-0 flex-1 overflow-y-auto [&_pre]:px-0 [&_pre]:py-3.5" data-templ-block-file-scroll data-templ-code-line-numbers>
 					@templ.Raw(GetHighlightedHTML(ctx, file.Content, blockFileLanguage(file.Path)))
 				</div>
-				<textarea hidden readonly data-tui-block-file-source={ file.Path }>{ file.Content }</textarea>
+				<textarea hidden readonly data-templ-block-file-source={ file.Path }>{ file.Content }</textarea>
 			</figure>
 		}
 	</div>
@@ -225,7 +225,7 @@ templ blockViewerTreeNode(entry BlockEntry, node *blockFileTree, index int) {
 	if len(node.Children) == 0 {
 		<button
 			type="button"
-			data-tui-block-file={ node.Path }
+			data-templ-block-file={ node.Path }
 			data-active={ utils.IfElse(len(entry.Files) > 0 && entry.Files[0].Path == node.Path, "true", "false") }
 			class="flex h-8 w-full items-center gap-2 rounded-none pl-(--index) text-sm whitespace-nowrap hover:bg-muted-foreground/15 focus:bg-muted-foreground/15 focus-visible:bg-muted-foreground/15 active:bg-muted-foreground/15 data-[active=true]:bg-muted-foreground/15 [&_svg]:size-4"
 			style={ "--index: " + strconv.FormatFloat(float64(index)*utils.IfElse(index == 2, 1.2, 1.3), 'g', -1, 64) + "rem" }
@@ -235,10 +235,10 @@ templ blockViewerTreeNode(entry BlockEntry, node *blockFileTree, index int) {
 			{ node.Name }
 		</button>
 	} else {
-		<div data-tui-block-folder class="group/block-folder">
+		<div data-templ-block-folder class="group/block-folder">
 			<button
 				type="button"
-				data-tui-block-folder-trigger
+				data-templ-block-folder-trigger
 				aria-expanded="true"
 				class="flex h-8 w-full items-center gap-2 rounded-none pl-(--index) text-sm whitespace-nowrap hover:bg-muted-foreground/15 focus:bg-muted-foreground/15 focus-visible:bg-muted-foreground/15 active:bg-muted-foreground/15 data-[active=true]:bg-muted-foreground/15 [&_svg]:size-4"
 				style={ "--index: " + strconv.FormatFloat(float64(index)*utils.IfElse(index == 1, 1.0, 1.2), 'g', -1, 64) + "rem" }

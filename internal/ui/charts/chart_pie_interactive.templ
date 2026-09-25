@@ -60,7 +60,7 @@ templ ChartPieInteractive() {
 			@selectcomp.Select(selectcomp.Props{DefaultValue: "january"}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{
 					Class:      "ml-auto h-7 w-[130px] rounded-lg pl-2.5",
-					Attributes: templ.Attributes{"aria-label": "Select a value", "data-tui-chart-month-select": "pie-interactive"},
+					Attributes: templ.Attributes{"aria-label": "Select a value", "data-templ-chart-month-select": "pie-interactive"},
 				}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select month"})
 				}
@@ -83,7 +83,7 @@ templ ChartPieInteractive() {
 		@card.Content(card.ContentProps{Class: "flex flex-1 justify-center pb-0"}) {
 			@chart.Container(chart.ContainerProps{ID: "pie-interactive", Config: chartPieInteractiveConfig, Class: "mx-auto aspect-square w-full max-w-[300px]"}) {
 				for i, d := range chartPieInteractiveData {
-					<div data-tui-chart-month={ d["month"].(string) } hidden?={ i != 0 } style="width:100%;height:100%">
+					<div data-templ-chart-month={ d["month"].(string) } hidden?={ i != 0 } style="width:100%;height:100%">
 						@chart.PieChart() {
 							@chart.Tooltip(chart.TooltipProps{
 								Cursor:  chart.Bool(false),

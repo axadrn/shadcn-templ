@@ -2,7 +2,6 @@ package accordion
 
 import (
 	"context"
-	"strings"
 
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/utils"
@@ -109,11 +108,12 @@ templ Accordion(props ...Props) {
 			id={ p.ID }
 		}
 		data-slot="accordion"
-		data-tui-accordion
-		data-multiple?={ p.Multiple }
+		data-orientation="vertical"
+		data-templ-multiple?={ p.Multiple }
 		data-disabled?={ p.Disabled }
-		data-tui-accordion-controlled?={ p.Value != nil }
-		data-tui-accordion-value={ strings.Join(values, " ") }
+		if p.Value != nil {
+			data-templ-value={ templ.JSONString(p.Value) }
+		}
 		class={
 			utils.CN(
 				"cn-accordion flex w-full flex-col",
@@ -147,7 +147,7 @@ templ Item(props ...ItemProps) {
 			id={ p.ID }
 		}
 		data-slot="accordion-item"
-		data-tui-accordion-value={ p.Value }
+		data-templ-value={ p.Value }
 		data-open?={ open }
 		data-closed?={ !open }
 		data-disabled?={ disabled }

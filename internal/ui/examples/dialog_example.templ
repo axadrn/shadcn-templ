@@ -259,7 +259,7 @@ templ dialogExampleChatSettings() {
 						Customize your chat settings: theme, accent color, spoken language, voice, personality, and custom instructions.
 					}
 				}
-				<div class="flex flex-col gap-4" data-tui-dialog-example-chat-settings>
+				<div class="flex flex-col gap-4" data-templ-dialog-example-chat-settings>
 					<div class="cn-native-select-wrapper group/native-select relative w-fit has-[select:disabled]:opacity-50 w-full md:hidden" data-slot="native-select-wrapper" data-size="default">
 						<select data-slot="native-select" data-size="default" class="cn-native-select outline-none disabled:pointer-events-none disabled:cursor-not-allowed">
 							<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="general" selected>General</option>
@@ -487,9 +487,9 @@ templ dialogExampleChatSettings() {
 				// change handler is the vanilla port of the shared tab state.
 				<script nonce={ templ.GetNonce(ctx) }>
 					document.addEventListener('change', (e) => {
-						const root = e.target.closest?.('[data-tui-dialog-example-chat-settings]');
+						const root = e.target.closest?.('[data-templ-dialog-example-chat-settings]');
 						if (!root || e.target.dataset.slot !== 'native-select') return;
-						root.querySelector('[data-tui-tabs-trigger][data-tui-tabs-value="' + e.target.value + '"]')?.click();
+						root.querySelector('[data-slot="tabs-trigger"][data-templ-value="' + e.target.value + '"]')?.click();
 					});
 				</script>
 			}

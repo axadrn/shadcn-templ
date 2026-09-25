@@ -61,11 +61,10 @@ templ Collapsible(props ...Props) {
 	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, open: open, controlled: p.Open != nil, disabled: p.Disabled}) }}
 	<div
 		data-slot="collapsible"
-		data-tui-collapsible
 		data-open?={ open }
 		data-closed?={ !open }
 		data-disabled?={ p.Disabled }
-		data-tui-collapsible-controlled?={ p.Open != nil }
+		data-templ-open?={ p.Open != nil }
 		class={ utils.CN("", p.Class) }
 		{ p.Attributes... }
 	>
@@ -75,13 +74,15 @@ templ Collapsible(props ...Props) {
 
 // Trigger returns the attributes that turn any element (usually a button)
 // into the collapsible trigger — the asChild equivalent: no wrapper element.
+// On an element with its own data-slot (sidebar.MenuButton) that slot wins,
+// as with Base UI's render prop, so collapsible.js finds a trigger by its
+// aria-controls link to the panel.
 func Trigger(ctx context.Context) templ.Attributes {
 	s := state(ctx)
 	attrs := templ.Attributes{
-		"data-slot":                    "collapsible-trigger",
-		"data-tui-collapsible-trigger": true,
-		"aria-controls":                s.id,
-		"aria-expanded":                utils.IfElse(s.open, "true", "false"),
+		"data-slot":     "collapsible-trigger",
+		"aria-controls": s.id,
+		"aria-expanded": utils.IfElse(s.open, "true", "false"),
 	}
 	if s.disabled {
 		attrs["data-disabled"] = true
@@ -105,7 +106,6 @@ templ Content(props ...ContentProps) {
 	<div
 		id={ s.id }
 		data-slot="collapsible-content"
-		data-tui-collapsible-content
 		data-open?={ s.open }
 		data-closed?={ !s.open }
 		hidden?={ !s.open }

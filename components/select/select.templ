@@ -2,6 +2,7 @@ package selectcomp
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/utils"
@@ -22,15 +23,6 @@ const (
 	AlignEnd    Align = "end"
 )
 
-type OpenMethod string
-
-const (
-	OpenMethodProgrammatic OpenMethod = "programmatic"
-	OpenMethodKeyboard     OpenMethod = "keyboard"
-	OpenMethodMouse        OpenMethod = "mouse"
-	OpenMethodTouch        OpenMethod = "touch"
-)
-
 type ctxKey string
 
 const stateKey ctxKey = "selectState"
@@ -40,9 +32,8 @@ type ctxState struct {
 	name            string
 	value           string
 	valueControlled bool
-	initialOpen     bool
-	openMethod      OpenMethod
-	openControlled  bool
+	open            *bool
+	defaultOpen     bool
 	disabled        bool
 	readOnly        bool
 	required        bool
@@ -66,9 +57,6 @@ type Props struct {
 	DefaultValue string
 	Open         *bool
 	DefaultOpen  bool
-	// OpenMethod preserves how a controlled Open state was requested. Read it
-	// from the select-open-change event detail. Defaults to programmatic.
-	OpenMethod OpenMethod
 	Disabled     bool
 	ReadOnly     bool
 	Required     bool
@@ -80,22 +68,6 @@ func initialValue(p Props) string {
 		return *p.Value
 	}
 	return p.DefaultValue
-}
-
-func initialOpen(p Props) bool {
-	if p.Open != nil {
-		return *p.Open
-	}
-	return p.DefaultOpen
-}
-
-func initialOpenMethod(p Props) OpenMethod {
-	switch p.OpenMethod {
-	case OpenMethodKeyboard, OpenMethodMouse, OpenMethodTouch:
-		return p.OpenMethod
-	default:
-		return OpenMethodProgrammatic
-	}
 }
 
 type TriggerProps struct {
@@ -117,10 +89,10 @@ type ValueProps struct {
 type ContentProps struct {
 	Class      string
 	Attributes templ.Attributes
-	// DisableAlignItemWithTrigger opens the popup below the trigger like a
-	// dropdown instead of overlaying the selected item (Base UI
-	// alignItemWithTrigger, default true).
-	DisableAlignItemWithTrigger bool
+	// AlignItemWithTrigger is Base UI's alignItemWithTrigger: the popup
+	// overlays the selected item on the trigger. nil means true; false opens
+	// it below the trigger edge like a dropdown.
+	AlignItemWithTrigger *bool
 	// Align along the trigger edge in popper mode. Defaults to center.
 	Align Align
 }
@@ -164,7 +136,7 @@ templ Select(props ...Props) {
 	if p.ID == "" {
 		{{ p.ID = utils.RandomID() }}
 	}
-	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, name: p.Name, value: initialValue(p), valueControlled: p.Value != nil, initialOpen: initialOpen(p), openMethod: initialOpenMethod(p), openControlled: p.Open != nil, disabled: p.Disabled, readOnly: p.ReadOnly, required: p.Required, form: p.Form}) }}
+	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, name: p.Name, value: initialValue(p), valueControlled: p.Value != nil, open: p.Open, defaultOpen: p.DefaultOpen, disabled: p.Disabled, readOnly: p.ReadOnly, required: p.Required, form: p.Form}) }}
 	{ children... }
 }
 
@@ -188,7 +160,6 @@ templ Trigger(props ...TriggerProps) {
 			if s.form != "" {
 				form={ s.form }
 			}
-			data-tui-select-input
 			aria-hidden="true"
 			tabindex="-1"
 		/>
@@ -200,7 +171,6 @@ templ Trigger(props ...TriggerProps) {
 			tabindex="0"
 		}
 		data-slot="select-trigger"
-		data-tui-select-trigger
 		data-size={ string(p.Size) }
 		role="combobox"
 		aria-controls={ s.id }
@@ -208,7 +178,9 @@ templ Trigger(props ...TriggerProps) {
 		aria-expanded="false"
 		aria-readonly?={ s.readOnly }
 		aria-required?={ s.required }
-		data-tui-select-value-controlled?={ s.valueControlled }
+		if s.valueControlled {
+			data-templ-value={ s.value }
+		}
 		if s.value == "" {
 			data-placeholder
 		}
@@ -235,8 +207,7 @@ templ Value(props ...ValueProps) {
 	}
 	<span
 		data-slot="select-value"
-		data-tui-select-value
-		data-tui-select-placeholder={ p.Placeholder }
+		data-templ-placeholder={ p.Placeholder }
 		class={ utils.CN("cn-select-value", p.Class) }
 		{ p.Attributes... }
 	>
@@ -253,26 +224,28 @@ templ Content(props ...ContentProps) {
 		{{ p.Align = AlignCenter }}
 	}
 	{{ s := state(ctx) }}
+	{{ alignItem := p.AlignItemWithTrigger == nil || *p.AlignItemWithTrigger }}
 	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
-	<div data-tui-select-portal hidden>
+	<div data-templ-portal hidden>
 		<div
 			id={ s.id }
-			data-tui-select-content
-			data-tui-portal
-			data-tui-select-disable-align-item-with-trigger?={ p.DisableAlignItemWithTrigger }
-			data-tui-select-align={ string(p.Align) }
-			data-tui-select-initial-open={ utils.IfElse(s.initialOpen, "true", "false") }
-			data-tui-select-initial-open-method={ string(s.openMethod) }
-			data-tui-select-open-controlled?={ s.openControlled }
+			data-base-ui-portal
+			if !alignItem {
+				data-templ-align-item-with-trigger="false"
+			}
+			data-templ-align={ string(p.Align) }
+			if s.open != nil {
+				data-templ-open={ strconv.FormatBool(*s.open) }
+			}
+			data-templ-default-open?={ s.open == nil && s.defaultOpen }
 			data-closed
 			hidden
 			class="pointer-events-none isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
 				data-slot="select-content"
-				data-tui-select-popup
-				if p.DisableAlignItemWithTrigger {
+				if !alignItem {
 					data-align-trigger="false"
 				} else {
 					data-align-trigger="true"
@@ -293,13 +266,13 @@ templ Content(props ...ContentProps) {
 				}
 				{ p.Attributes... }
 			>
-				<div data-slot="select-scroll-up-button" data-tui-select-scroll-up class="cn-select-scroll-up-button top-0 w-full absolute hidden">
+				<div data-slot="select-scroll-up-button" class="cn-select-scroll-up-button top-0 w-full absolute hidden">
 					@icon.ChevronUp()
 				</div>
-				<div data-tui-select-viewport class="relative flex-1 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+				<div class="relative flex-1 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 					{ children... }
 				</div>
-				<div data-slot="select-scroll-down-button" data-tui-select-scroll-down class="cn-select-scroll-down-button bottom-0 w-full absolute hidden">
+				<div data-slot="select-scroll-down-button" class="cn-select-scroll-down-button bottom-0 w-full absolute hidden">
 					@icon.ChevronDown()
 				</div>
 			</div>
@@ -356,10 +329,9 @@ templ Item(props ...ItemProps) {
 		role="option"
 		tabindex="-1"
 		data-slot="select-item"
-		data-tui-select-item
-		data-tui-select-value={ p.Value }
+		data-templ-value={ p.Value }
 		if p.Label != "" {
-			data-tui-select-label={ p.Label }
+			data-templ-label={ p.Label }
 		}
 		if selected {
 			data-selected
@@ -385,7 +357,7 @@ templ Item(props ...ItemProps) {
 		}
 		{ p.Attributes... }
 	>
-		<span data-tui-select-item-text class="cn-select-item-text shrink-0 whitespace-nowrap">
+		<span class="cn-select-item-text shrink-0 whitespace-nowrap">
 			{ children... }
 		</span>
 		<span class="cn-select-item-indicator opacity-0 group-data-selected/select-item:opacity-100">

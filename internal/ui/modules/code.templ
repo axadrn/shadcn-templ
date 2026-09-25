@@ -39,7 +39,7 @@ templ Code(p CodeProps) {
 		id={ p.ID }
 		class={ utils.CN("relative code-highlighting-container", p.Class) }
 		{ p.Attrs... }
-		data-tui-code-highlighting=""
+		data-templ-code-highlighting=""
 	>
 		<div
 			class={ utils.CN(
@@ -52,7 +52,7 @@ templ Code(p CodeProps) {
 			"[&_pre]:text-sm",
 			p.CodeClass,
 		) }
-			data-tui-code-container=""
+			data-templ-code-container=""
 		>
 			@templ.Raw(highlightedHTML)
 		</div>

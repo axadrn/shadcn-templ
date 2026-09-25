@@ -1,6 +1,8 @@
 package sidebar06
 
 import (
+	"strconv"
+
 	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
@@ -23,8 +25,8 @@ type NavMainSubItem struct {
 templ NavMain(items []NavMainItem) {
 	@sidebar.Group() {
 		@sidebar.Menu() {
-			for _, item := range items {
-				@dropdownmenu.DropdownMenu() {
+			for i, item := range items {
+				@dropdownmenu.DropdownMenu(dropdownmenu.Props{ID: "sidebar06-nav-main-menu-" + strconv.Itoa(i)}) {
 					@sidebar.MenuItem() {
 						@sidebar.MenuButton(sidebar.MenuButtonProps{
 							Class:      "aria-expanded:bg-muted",
@@ -35,11 +37,9 @@ templ NavMain(items []NavMainItem) {
 						}
 						if len(item.Items) > 0 {
 							@dropdownmenu.Content(dropdownmenu.ContentProps{
-								Side:        dropdownmenu.SideRight,
-								Align:       dropdownmenu.AlignStart,
-								MobileSide:  dropdownmenu.SideBottom,
-								MobileAlign: dropdownmenu.AlignEnd,
-								Class:       "min-w-56 rounded-lg",
+								Side:  dropdownmenu.SideRight,
+								Align: dropdownmenu.AlignStart,
+								Class: "min-w-56 rounded-lg",
 							}) {
 								for _, subItem := range item.Items {
 									@dropdownmenu.Item(dropdownmenu.ItemProps{Href: subItem.URL}) {
@@ -53,4 +53,18 @@ templ NavMain(items []NavMainItem) {
 			}
 		}
 	}
+	<script type="module" nonce={ templ.GetNonce(ctx) }>
+		// The pendant of useSidebar().isMobile in the block: the menu reads
+		// its side when it opens, onMobileChange keeps it current until the
+		// block is swapped out.
+		// side={isMobile ? "bottom" : "right"} align={isMobile ? "end" : "start"}
+		const menus = [...document.querySelectorAll('[id^="sidebar06-nav-main-menu-"][data-templ-side]')];
+		window.templ.sidebar.onMobileChange((isMobile) => {
+			if (!menus[0]?.isConnected) return false;
+			menus.forEach((menu) => {
+				menu.setAttribute("data-templ-side", isMobile ? "bottom" : "right");
+				menu.setAttribute("data-templ-align", isMobile ? "end" : "start");
+			});
+		});
+	</script>
 }

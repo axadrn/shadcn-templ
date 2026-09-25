@@ -13,13 +13,13 @@
     "load",
     function (e) {
       const img = e.target;
-      if (img.matches && img.matches("[data-tui-avatar-image]")) reveal(img);
+      if (img.matches && img.matches('[data-slot="avatar-image"]')) reveal(img);
     },
     true,
   );
 
   // Images that already loaded before this script ran.
-  document.querySelectorAll("[data-tui-avatar-image]").forEach(function (img) {
+  document.querySelectorAll('[data-slot="avatar-image"]').forEach(function (img) {
     if (img.complete && img.naturalWidth > 0) reveal(img);
   });
 })();

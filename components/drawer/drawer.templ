@@ -3,6 +3,7 @@ package drawer
 import (
 	"context"
 	"encoding/json"
+	"strconv"
 
 	"github.com/axadrn/shadcn-templ/v2/utils"
 )
@@ -49,12 +50,12 @@ type Props struct {
 	// should own the state after the initial render.
 	Open        *bool
 	DefaultOpen bool
-	// DisableDismissible keeps the drawer open when clicking the backdrop
-	// (Base UI's disablePointerDismissal).
-	DisableDismissible bool
-	// DisableModal opens the drawer without backdrop, focus trap and body
-	// scroll lock (Base UI's modal={false}).
-	DisableModal bool
+	// DisablePointerDismissal is Base UI's disablePointerDismissal: a press
+	// outside does not close the drawer.
+	DisablePointerDismissal bool
+	// Modal is Base UI's modal: backdrop, focus trap and body scroll lock.
+	// nil means true.
+	Modal *bool
 	// SwipeDirection the drawer is swiped in to dismiss. Defaults to down.
 	SwipeDirection SwipeDirection
 	// ShowSwipeHandle renders the drag handle bar inside the panel.
@@ -137,7 +138,7 @@ templ Drawer(props ...Props) {
 			}
 		}}
 	}
-	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, parentID: parentID, open: initialOpen(p), controlled: p.Open != nil, disableClickAway: p.DisableDismissible, disableModal: p.DisableModal, direction: p.SwipeDirection, showSwipeHandle: p.ShowSwipeHandle, snapJSON: snapJSON, snapSequential: p.SnapToSequentialPoints}) }}
+	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, parentID: parentID, open: initialOpen(p), controlled: p.Open != nil, disableClickAway: p.DisablePointerDismissal, disableModal: p.Modal != nil && !*p.Modal, direction: p.SwipeDirection, showSwipeHandle: p.ShowSwipeHandle, snapJSON: snapJSON, snapSequential: p.SnapToSequentialPoints}) }}
 	{ children... }
 }
 
@@ -150,10 +151,10 @@ func Trigger(ctx context.Context) templ.Attributes {
 // TriggerFor targets a drawer outside the current Drawer root by id.
 func TriggerFor(id string) templ.Attributes {
 	return templ.Attributes{
-		"data-tui-drawer-trigger": true,
-		"aria-controls":           id,
-		"aria-haspopup":           "dialog",
-		"aria-expanded":           "false",
+		"data-base-ui-click-trigger": true,
+		"aria-controls":              id,
+		"aria-haspopup":              "dialog",
+		"aria-expanded":              "false",
 	}
 }
 
@@ -165,8 +166,7 @@ func Close(ctx context.Context) templ.Attributes {
 // CloseFor targets a drawer outside the current Drawer root by id.
 func CloseFor(id string) templ.Attributes {
 	return templ.Attributes{
-		"data-tui-drawer-close":  true,
-		"data-tui-drawer-target": id,
+		"data-templ-drawer-close": id,
 	}
 }
 
@@ -188,10 +188,8 @@ func CloseFor(id string) templ.Attributes {
 //     overlay, so the blocks apply 1:1.
 //
 // The hidden portal node keeps the SSRd content hidden until drawer.js portals it
-// (DrawerPortal pendant). data-tui-dialog-show-modal is shared with
-// dialog.js: both scripts key the body scroll lock release on
-// dialog[open][data-tui-dialog-show-modal="true"], so a closing dialog never
-// unlocks scroll under an open drawer.
+// (DrawerPortal pendant). data-templ-modal is Base UI's modal prop, which
+// drawer.js reads for the modality (scroll lock, inert, focus trap).
 //
 // The inline styles seed the vars the reference registers with initial
 // values via CSS.registerProperty (DrawerPopup removeCSSVariableInheritance)
@@ -208,26 +206,29 @@ templ Content(props ...ContentProps) {
 		{{ axis = "x" }}
 	}
 	{{ hasSnapPoints := s.snapJSON != "" }}
-	<div data-tui-drawer-portal hidden>
+	<div data-templ-portal hidden>
 		<dialog
 			id={ s.id }
-			data-tui-drawer-content
-			data-tui-portal
+			data-slot="drawer-viewport"
+			data-base-ui-portal
 			data-modal={ utils.IfElse(!s.disableModal, "true", "false") }
-			data-tui-dialog-show-modal={ utils.IfElse(!s.disableModal, "true", "false") }
-			data-tui-drawer-initial-open={ utils.IfElse(s.open, "true", "false") }
-			data-tui-drawer-controlled?={ s.controlled }
+			data-templ-modal={ utils.IfElse(!s.disableModal, "true", "false") }
+			if s.controlled {
+				data-templ-open={ strconv.FormatBool(s.open) }
+			} else {
+				data-templ-default-open?={ s.open }
+			}
 			if s.parentID != "" {
-				data-tui-drawer-parent={ s.parentID }
+				data-templ-drawer-parent={ s.parentID }
 			}
 			if s.disableClickAway {
-				data-tui-drawer-disable-dismissible="true"
+				data-templ-disable-pointer-dismissal="true"
 			}
 			if hasSnapPoints {
-				data-tui-drawer-snap-points={ s.snapJSON }
+				data-templ-snap-points={ s.snapJSON }
 			}
 			if s.snapSequential {
-				data-tui-drawer-snap-sequential="true"
+				data-templ-snap-to-sequential-points="true"
 			}
 			class={
 				utils.CN(
@@ -253,7 +254,6 @@ templ Content(props ...ContentProps) {
 			if !s.disableModal && s.parentID == "" {
 				<div
 					data-slot="drawer-overlay"
-					data-tui-drawer-overlay
 					role="presentation"
 					if hasSnapPoints {
 						data-snap-points=""
@@ -264,7 +264,6 @@ templ Content(props ...ContentProps) {
 			}
 			<div
 				data-slot="drawer-popup"
-				data-tui-drawer-popup
 				data-swipe-direction={ string(s.direction) }
 				data-swipe-axis={ axis }
 				if hasSnapPoints {

@@ -175,7 +175,7 @@ Open drawers from inside another drawer. Parent drawers stay mounted and stack b
 
 ## Non Modal
 
-Set `DisableModal` to allow interaction with the rest of the page while the drawer is open. Combine with `DisableDismissible` to prevent the drawer from closing on outside presses.
+Set `Modal: utils.Ptr(false)` to allow interaction with the rest of the page while the drawer is open. Combine with `DisablePointerDismissal` to prevent the drawer from closing on outside presses.
 
 <ComponentPreview styleName="base-rhea" name="drawer-non-modal" />
 
@@ -183,7 +183,7 @@ Set `DisableModal` to allow interaction with the rest of the page while the draw
 
 Use `SnapPoints` to snap a drawer to preset heights. Numbers between `0` and `1` represent fractions of the viewport. Numbers greater than `1` are treated as pixel values. String values support `px` and `rem` units. Snap points apply to vertical drawers.
 
-Track and control the active snap point with `window.tui.drawer.getSnapPoint(id)` and `window.tui.drawer.setSnapPoint(id, value)`. At the full snap point, the drawer gets a `data-expanded` attribute you can style with the `data-expanded:` variant.
+Track and control the active snap point with `window.templ.drawer.getSnapPoint(id)` and `window.templ.drawer.setSnapPoint(id, value)`. At the full snap point, the drawer gets a `data-expanded` attribute you can style with the `data-expanded:` variant.
 
 <ComponentPreview styleName="base-rhea" name="drawer-snap-points" />
 
@@ -202,8 +202,8 @@ The `drawer.Drawer` component is the root, it carries the id and options that li
 | Prop                     | Type                                                     | Default         |
 | ------------------------ | -------------------------------------------------------- | --------------- |
 | `Open`                   | `bool`                                                   | `false`         |
-| `DisableDismissible`       | `bool`                                                   | `false`         |
-| `DisableModal`           | `bool`                                                   | `false`         |
+| `DisablePointerDismissal`  | `bool`                                                   | `false`         |
+| `Modal`                    | `*bool`                                                  | `true`          |
 | `SwipeDirection`              | `SwipeDirectionDown \| SwipeDirectionUp \| SwipeDirectionLeft \| SwipeDirectionRight` | `SwipeDirectionDown` |
 | `ShowSwipeHandle`        | `bool`                                                   | `false`         |
 | `SnapPoints`             | `[]any`                                                  | -               |
