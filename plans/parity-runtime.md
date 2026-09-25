@@ -66,7 +66,7 @@ Checks: `tmp/parity-runtime/baseline.sh chromium`, same for webkit.
 
 ### 2. Lifecycle
 
-- [ ] Done
+- [x] Done
 
 `components/baseui/lifecycle.js`: one `MutationObserver` on `document.body` and `window.templ.lifecycle.register(selector, { init, destroy })`; `init(el)` runs once per matching element when it appears (and for the initial document at registration), `destroy(el)` when it leaves the document. It is the only DOM watcher, the mount and unmount pendant. The 22 scripts register their root selector and move their setup and teardown into `init` and `destroy`; their own observers, `_templInit`-style flags and re-init sweeps go.
 
@@ -164,5 +164,20 @@ Baseline on the branch point (614b9d5c plus this plan), 20 families, 122 example
 - Server rendered state. An initially open accordion item misses `data-panel-open` on its trigger and `data-open` on its content until clicked. Disabled parts miss `data-disabled` on the select trigger, accordion trigger, toggle group root, switch thumb, slider track and range and a disabled tooltip trigger. A disabled slider thumb is still focusable. These are attributes, fixed in the task that touches the component or in the sweep.
 
 Tabs, radio group, checkbox, toggle, dialog, alert dialog and sheet pass every step.
+
+### Task 2
+
+`components/baseui/lifecycle.js` is the React mount and unmount pendant: one `MutationObserver` on the document and `register(selector, { init, destroy })`. `init` runs once per matching element, for the document at registration and for every element that appears later. `destroy` runs once when the element is gone. A portaled subtree counts as gone once its portal owner leaves the document, like React unmounts a portal with the component that rendered it. The orphan sweeps of the nine overlays became their `destroy`, the `_templInit` style flags and the per script re-scans went. 229 lines in, 594 out.
+
+The 22 observers are gone. `grep -l "new MutationObserver" components/*/*.js` lists `baseui/lifecycle.js` and `progress/progress.js`, whose second observer watches `aria-valuenow`, not DOM presence. `lifecycle.js` is in the 22 registry entries and docs pages next to the component script. Checkbox, radio group and switch never listed their script on the docs page, that stays as it was.
+
+Two behaviors change on purpose:
+
+- Tabs, select and combobox synced their state from the DOM on every mutation, now once per mounted root. React re-renders on a change inside a component, we have no render. Swapped HTML comes from the server with its state, so a fresh root is enough.
+- The drawer recomputed its inert siblings on every mutation, now when a drawer mounts or unmounts. Elements added to `<body>` while a modal drawer is open stay interactive until then. Tasks 7 and 10 replace this with `markOthers`.
+
+One fix for free: carousel autoplay kept running after its carousel was removed, `destroy` stops it now. The drawer read its server open state only when no trigger had registered it first, now always.
+
+Checks: `check.sh` in chromium and webkit with 0 DOM changes against t36, a11y 30 of 30, behavior 30 of 30, `go test ./...` green (the inliner test counts component scripts, 32 became 33). `tmp/htmx-616/htmx.mjs` against a rebuilt probe server 110 of 110 in both engines, same as the htmx-616 final run.
 
 ## Planner review

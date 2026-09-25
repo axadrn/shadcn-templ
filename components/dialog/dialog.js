@@ -694,32 +694,6 @@
     dialogs.delete(popup);
   }
 
-  function init() {
-    document.querySelectorAll("[data-base-ui-click-trigger][aria-controls]").forEach((t) => {
-      if (dialogFor(t)) listenForEscape(t);
-    });
-    // A dialog lives as long as its SSR declaration site (_templPortalOwner)
-    // stays in the document, including trigger-less programmatic dialogs.
-    // Retire registered dialogs even when their root itself was removed.
-    dialogs.forEach((state, popup) => {
-      if (!state.root.isConnected || (state.root._templPortalOwner && !state.root._templPortalOwner.isConnected)) {
-        destroyDialog(popup);
-      }
-    });
-    document.querySelectorAll(POPUP).forEach((popup) => {
-      if (dialogs.has(popup)) return;
-
-      const fresh = ensureDialog(popup);
-      if (!fresh) return;
-
-      // Server-side open state (Base UI open or defaultOpen), once per
-      // registration, so a later re-init never re-opens a closed dialog.
-      if (popup.getAttribute("data-templ-open") === "true" || popup.hasAttribute("data-templ-default-open")) {
-        openDialog(popup);
-      }
-    });
-  }
-
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
     // Base UI's DialogTrigger identifier, shared with PopoverTrigger; only
@@ -740,21 +714,24 @@
     }
   });
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => init());
-  } else {
-    init();
-  }
-
-  // Initialize dialogs added later (e.g. swapped in via htmx), so a
-  // server-rendered dialog with Open true still opens. Also retire dialogs
-  // whose source got swapped out of the DOM (releasing the scroll lock and
-  // the aria-hidden marking).
-  new MutationObserver(() => {
-    init();
-  }).observe(document.body, {
-    childList: true,
-    subtree: true,
+  // Base UI's DialogTrigger identifier, shared with PopoverTrigger.
+  window.templ.lifecycle.register("[data-base-ui-click-trigger][aria-controls]", {
+    init(trigger) {
+      if (dialogFor(trigger)) listenForEscape(trigger);
+    },
+  });
+  // A dialog lives as long as its SSR declaration site (_templPortalOwner)
+  // stays in the document, including trigger-less programmatic dialogs.
+  // Unmounting retires it: aria-hidden marking, scroll lock, portaled DOM.
+  window.templ.lifecycle.register(POPUP, {
+    init(popup) {
+      if (!ensureDialog(popup)) return;
+      // Server-side open state (Base UI open or defaultOpen).
+      if (popup.getAttribute("data-templ-open") === "true" || popup.hasAttribute("data-templ-default-open")) {
+        openDialog(popup);
+      }
+    },
+    destroy: destroyDialog,
   });
 
   window.templ = window.templ || {};

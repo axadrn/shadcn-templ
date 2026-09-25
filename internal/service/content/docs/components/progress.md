@@ -31,6 +31,8 @@ shadcn-templ add progress
 
 <ComponentSource name="progress" title="components/progress/progress.js" />
 
+<ComponentSource name="progress" title="components/baseui/lifecycle.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

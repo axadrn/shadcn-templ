@@ -1876,9 +1876,6 @@ function tooltipTranslate(coordinate, tooltipDimension, viewBoxKey, viewBoxDimen
 }
 
 function initPanel(script) {
-  if (script._templInit) return;
-  script._templInit = true;
-
   const panel = script.parentElement;
   const container = panel.closest('[data-slot="chart"]');
   const m = JSON.parse(script.textContent);
@@ -2179,10 +2176,6 @@ function initPanel(script) {
   }
 }
 
-function init() {
-  document.querySelectorAll("script[data-templ-chart-model]").forEach(initPanel);
-}
-
 /* Interactive demo wiring: selects and header buttons toggle the SSR
  * rendered variants of a chart. */
 document.addEventListener("select-change", (e) => {
@@ -2213,15 +2206,4 @@ document.addEventListener("click", (e) => {
   });
 });
 
-// Setup on load and on mutations, the shadcn-templ convention: init is
-// idempotent (every panel carries its own init flag), so any inserted
-// node just re-runs the full scan, no matter what put it into the DOM.
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
-// Re-init on any childList mutation, directly (never rAF-deferred: rAF
-// does not fire in hidden tabs or throttled iframes): swapped-in markup
-// wires itself.
-new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+window.templ.lifecycle.register("script[data-templ-chart-model]", { init: initPanel });

@@ -192,8 +192,6 @@
   let labelId = 0;
 
   function setupItem(item) {
-    if (item._templRadio) return;
-    item._templRadio = true;
     const input = inputOf(item);
     if (!input) return;
     // The clicks dispatched on the hidden input are an implementation detail
@@ -220,22 +218,6 @@
     }
   }
 
-  function init() {
-    document.querySelectorAll(ITEM).forEach(setupItem);
-    document.querySelectorAll(GROUP).forEach((group) => {
-      if (group._templRadioGroup) return;
-      group._templRadioGroup = true;
-      syncGroup(group);
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+  window.templ.lifecycle.register(ITEM, { init: setupItem });
+  window.templ.lifecycle.register(GROUP, { init: syncGroup });
 })();

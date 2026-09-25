@@ -368,8 +368,8 @@
 
   // ----- SSR/htmx adoption --------------------------------------------------
 
-  function init() {
-    document.querySelectorAll("[data-templ-toast]").forEach(function (stub) {
+  window.templ.lifecycle.register("[data-templ-toast]", {
+    init: function (stub) {
       var opts = {
         id: stub.id || undefined,
         title: stub.getAttribute("data-templ-title") || "",
@@ -379,16 +379,6 @@
       };
       stub.remove();
       createToast(opts);
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+    },
+  });
 })();

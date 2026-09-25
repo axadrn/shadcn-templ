@@ -151,8 +151,6 @@
   let labelId = 0;
 
   function setup(root) {
-    if (root._templCheckbox) return;
-    root._templCheckbox = true;
     const input = inputOf(root);
     if (!input) return;
     // SSR'd mixed state: the input element has no indeterminate attribute,
@@ -182,14 +180,5 @@
     sync(root, input);
   }
 
-  function init() {
-    document.querySelectorAll(ROOT).forEach(setup);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+  window.templ.lifecycle.register(ROOT, { init: setup });
 })();

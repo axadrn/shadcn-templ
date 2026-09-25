@@ -37,6 +37,8 @@ shadcn-templ add sidebar
 
 <ComponentSource name="sidebar" title="components/sidebar/sidebar.js" />
 
+<ComponentSource name="sidebar" title="components/baseui/lifecycle.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

@@ -130,8 +130,6 @@
   let labelId = 0;
 
   function setup(root) {
-    if (root._templSwitch) return;
-    root._templSwitch = true;
     const input = inputOf(root);
     if (!input) return;
     // The clicks dispatched on the hidden input are an implementation detail
@@ -156,17 +154,5 @@
     sync(root, input);
   }
 
-  function init() {
-    document.querySelectorAll(ROOT).forEach(setup);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+  window.templ.lifecycle.register(ROOT, { init: setup });
 })();

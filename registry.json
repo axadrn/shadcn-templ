@@ -175,6 +175,10 @@
         {
           "path": "components/calendar/calendar.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -215,6 +219,10 @@
         {
           "path": "components/carousel/carousel.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -238,6 +246,10 @@
         {
           "path": "components/chart/chart.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -259,6 +271,10 @@
         },
         {
           "path": "components/checkbox/checkbox.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
           "type": "registry:ui"
         }
       ],
@@ -305,6 +321,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/floatingui/floating_ui_core.js",
           "type": "registry:ui"
         },
@@ -334,6 +354,10 @@
         },
         {
           "path": "components/command/command.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
           "type": "registry:ui"
         }
       ],
@@ -391,6 +415,10 @@
         },
         {
           "path": "components/dropdownmenu/dropdownmenu.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
           "type": "registry:ui"
         },
         {
@@ -464,6 +492,10 @@
         {
           "path": "components/inputotp/inputotp.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -500,6 +532,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/baseui/scroll_lock.js",
           "type": "registry:ui"
         }
@@ -524,6 +560,10 @@
         },
         {
           "path": "components/dialog/dialog.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
           "type": "registry:ui"
         },
         {
@@ -569,6 +609,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/floatingui/floating_ui_core.js",
           "type": "registry:ui"
         },
@@ -593,6 +637,10 @@
         },
         {
           "path": "components/hovercard/hovercard.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
           "type": "registry:ui"
         },
         {
@@ -757,6 +805,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/baseui/scroll_lock.js",
           "type": "registry:ui"
         },
@@ -786,6 +838,10 @@
         {
           "path": "components/progress/progress.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -805,6 +861,10 @@
         {
           "path": "components/radiogroup/radiogroup.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -823,6 +883,10 @@
         },
         {
           "path": "components/resizable/resizable.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
           "type": "registry:ui"
         }
       ],
@@ -845,6 +909,10 @@
         },
         {
           "path": "components/select/select.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
           "type": "registry:ui"
         },
         {
@@ -900,6 +968,10 @@
         {
           "path": "components/sidebar/sidebar.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -953,6 +1025,10 @@
         {
           "path": "components/switch/switch.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -986,6 +1062,10 @@
         },
         {
           "path": "components/tabs/tabs.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
           "type": "registry:ui"
         }
       ],
@@ -1024,6 +1104,10 @@
         {
           "path": "components/toast/toast.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -1042,6 +1126,10 @@
         },
         {
           "path": "components/tooltip/tooltip.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
           "type": "registry:ui"
         },
         {

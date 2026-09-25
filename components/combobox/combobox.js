@@ -182,22 +182,8 @@
   }
 
   // Moves the content to <body> (shadcn portals it the same way).
-  // The unmount half of the React portal pendant: a portaled content lives
-  // as long as its SSR declaration site (_templPortalOwner) stays in the
-  // document. Trigger-presence heuristics judged mid-swap moments wrongly -
-  // multi-phase swap layers briefly disconnect the new triggers.
-  function removeOrphanedContents(content) {
-    allContents().filter((c) => c.parentElement === document.body).forEach((c) => {
-      if (c !== content && c._templPortalOwner && !c._templPortalOwner.isConnected) {
-        stopAutoPositioning(c);
-        c.remove();
-      }
-    });
-  }
-
   function portal(content) {
     listenForEscape(content);
-    removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
       if (!content._templPortalOwner) content._templPortalOwner = content.parentElement;
       document.body.appendChild(content);
@@ -563,21 +549,18 @@
   }
 
   // Shows the selected item's label in the input (server only knows the
-  // value, the label lives in the item). Runs on load and whenever new
-  // comboboxes appear in the DOM; the MutationObserver keeps this
-  // framework-agnostic.
-  function init() {
-    removeOrphanedContents();
-    allContents().forEach((content) => {
+  // value, the label lives in the item). A content unmounts with its portal
+  // owner: a portaled one is removed from <body> then.
+  window.templ.lifecycle.register(POPUP, {
+    init(popup) {
+      const content = popup.parentElement;
+      if (!isPositioner(content)) return;
       const field = inputFor(content);
       if (field) listenForEscape(field);
       document.querySelectorAll('[aria-haspopup][aria-controls="' + content.id + '"]').forEach(listenForEscape);
-      // Server-side open state (Base UI open or defaultOpen), once per element.
-      if (!content._templInit) {
-        content._templInit = true;
-        if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
-          open(content);
-        }
+      // Server-side open state (Base UI open or defaultOpen).
+      if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
+        open(content);
       }
       if (isMultiple(content)) return;
       syncValueDisplay(content);
@@ -585,19 +568,14 @@
       if (!input || input.value !== "" || content.contains(input)) return;
       const label = displayValue(content);
       if (label) input.value = label;
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself, removals release portaled content through the
-  // ownership sweep.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+    },
+    destroy(popup) {
+      const content = popup.parentElement;
+      if (!isPositioner(content)) return;
+      stopAutoPositioning(content);
+      if (content.isConnected) content.remove();
+    },
+  });
 
   // ----- events -------------------------------------------------------------
 

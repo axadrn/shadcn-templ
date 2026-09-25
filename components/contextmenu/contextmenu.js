@@ -104,23 +104,8 @@
   }
 
   // Moves the content to <body> (shadcn portals it the same way).
-  // The unmount half of the React portal pendant: a portaled content lives
-  // as long as its SSR declaration site (_templPortalOwner) stays in the
-  // document. Trigger-presence heuristics judged mid-swap moments wrongly -
-  // multi-phase swap layers briefly disconnect the new triggers.
-  function removeOrphanedContents(content) {
-    allContents().filter((c) => c.parentElement === document.body).forEach((c) => {
-      if (c !== content && c._templPortalOwner && !c._templPortalOwner.isConnected) {
-        c._templReleaseScroll?.();
-        c._templReleaseScroll = null;
-        c.remove();
-      }
-    });
-  }
-
   function portal(content) {
     listenForEscape(content);
-    removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
       if (!content._templPortalOwner) content._templPortalOwner = content.parentElement;
       document.body.appendChild(content);
@@ -484,31 +469,28 @@
 
   // ----- init (portal on open) --------------------
 
-  function init() {
-    document.querySelectorAll(TRIGGER).forEach(listenForEscape);
-    removeOrphanedContents();
-    document.querySelectorAll(TRIGGER).forEach((trigger) => {
+  window.templ.lifecycle.register(TRIGGER, {
+    init(trigger) {
+      listenForEscape(trigger);
+      // Server-side open state (Base UI open or defaultOpen).
       const content = contentFor(trigger);
-      // Server-side open state (Base UI open or defaultOpen), once per element.
-      if (!content || content._templInit) return;
-      content._templInit = true;
-      if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
+      if (content && (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open"))) {
         const rect = trigger.getBoundingClientRect();
         openAt(content, rect.left + rect.width / 2, rect.top + rect.height / 2);
       }
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself, removals release portaled content through the
-  // ownership sweep.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+    },
+  });
+  // A content unmounts with its portal owner: a portaled one is removed from
+  // <body> then.
+  window.templ.lifecycle.register(POPUP, {
+    destroy(popup) {
+      const content = popup.parentElement;
+      if (!isPositioner(content)) return;
+      content._templReleaseScroll?.();
+      content._templReleaseScroll = null;
+      if (content.isConnected) content.remove();
+    },
+  });
 
   // ----- events ---------------------------------------------------------------
 

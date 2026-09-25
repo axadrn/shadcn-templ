@@ -172,24 +172,8 @@
   }
 
   // Moves the content to <body> (shadcn portals it the same way).
-  // The unmount half of the React portal pendant: a portaled content lives
-  // as long as its SSR declaration site (_templPortalOwner) stays in the
-  // document. Trigger-presence heuristics judged mid-swap moments wrongly -
-  // multi-phase swap layers briefly disconnect the new triggers.
-  function removeOrphanedContents(content) {
-    allContents().filter((c) => c.parentElement === document.body).forEach((c) => {
-      if (c !== content && c._templPortalOwner && !c._templPortalOwner.isConnected) {
-        stopAutoPositioning(c);
-        c._templReleaseScroll?.();
-        c._templReleaseScroll = null;
-        c.remove();
-      }
-    });
-  }
-
   function portal(content) {
     listenForEscape(content);
-    removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
       if (!content._templPortalOwner) content._templPortalOwner = content.parentElement;
       document.body.appendChild(content);
@@ -725,13 +709,10 @@
   }
 
   // Shows the selected item's label in the trigger (server only knows the
-  // value, the label lives in the item). Runs on load and whenever new selects
-  // appear in the DOM (e.g. content swapped in by a library like htmx) — the
-  // MutationObserver keeps this framework-agnostic.
-  function init() {
-    document.querySelectorAll(TRIGGER).forEach(listenForEscape);
-    removeOrphanedContents();
-    document.querySelectorAll(TRIGGER).forEach((trigger) => {
+  // value, the label lives in the item).
+  window.templ.lifecycle.register(TRIGGER, {
+    init(trigger) {
+      listenForEscape(trigger);
       const content = contentFor(trigger);
       if (!isPositioner(content)) return;
       const checked = content.querySelector(ITEM + "[data-selected]");
@@ -741,26 +722,25 @@
         if (span && span.textContent.trim() !== label) span.textContent = label;
         if (trigger.hasAttribute("data-placeholder")) trigger.removeAttribute("data-placeholder");
       }
-      // Server-side open state (Base UI open or defaultOpen), once per
-      // element. A server open has no pointer, so it is programmatic.
-      if (content._templInit) return;
-      content._templInit = true;
+      // Server-side open state (Base UI open or defaultOpen). A server open
+      // has no pointer, so it is programmatic.
       if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
         open(content, trigger, "programmatic");
       }
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself, removals release portaled content through the
-  // ownership sweep.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+    },
+  });
+  // A content unmounts with its portal owner: a portaled one is removed from
+  // <body> then.
+  window.templ.lifecycle.register(POPUP, {
+    destroy(popup) {
+      const content = popup.parentElement;
+      if (!isPositioner(content)) return;
+      stopAutoPositioning(content);
+      content._templReleaseScroll?.();
+      content._templReleaseScroll = null;
+      if (content.isConnected) content.remove();
+    },
+  });
 
   // ----- events -------------------------------------------------------------
 

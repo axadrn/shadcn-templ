@@ -32,10 +32,6 @@
   // button inside carries shadcn's locale data-day.
   const DAY = "td[data-day] > button";
 
-  function containers() {
-    return document.querySelectorAll(ROOT);
-  }
-
   function dayISO(btn) {
     return btn.parentElement.getAttribute("data-day");
   }
@@ -408,22 +404,5 @@
     }
   });
 
-  function init() {
-    containers().forEach((root) => {
-      if (!root._templRendered) {
-        root._templRendered = true;
-        render(root);
-      }
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+  window.templ.lifecycle.register(ROOT, { init: render });
 })();

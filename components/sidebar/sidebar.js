@@ -34,45 +34,37 @@
 
   // The sidebar content renders once and moves between the desktop container
   // and the mobile sheet, depending on the viewport.
-  function init() {
-    document.querySelectorAll("[data-templ-sidebar-content]").forEach((content) => {
-      const sidebarId = content.getAttribute("data-templ-sidebar-content");
-      const portal = document.querySelector(
-        '[data-templ-sidebar-mobile-portal="' + sidebarId + '"]',
-      );
-      if (!portal) return;
+  const CONTENT = "[data-templ-sidebar-content]";
 
-      const isMobile = window.matchMedia(MOBILE_QUERY).matches;
+  function place(content) {
+    const sidebarId = content.getAttribute("data-templ-sidebar-content");
+    const portal = document.querySelector(
+      '[data-templ-sidebar-mobile-portal="' + sidebarId + '"]',
+    );
+    if (!portal) return;
 
-      if (isMobile && content.parentElement !== portal) {
-        portal.appendChild(content);
-      } else if (!isMobile && content.parentElement === portal) {
-        const inner = wrapperFor(sidebarId)?.querySelector('[data-slot="sidebar-inner"]');
-        if (inner) inner.appendChild(content);
-      }
+    const isMobile = window.matchMedia(MOBILE_QUERY).matches;
 
-      // Mount/unmount the Sheet with open={openMobile}, as in shadcn's Sidebar.
-      const popup = document.getElementById(sidebarId + "-mobile");
-      const dialog = window.templ?.dialog;
-      if (!popup || !dialog) return;
-      if (isMobile && openMobileOf(sidebarId) && !dialog.isOpen(popup)) {
-        dialog.open(popup);
-      } else if (!isMobile && dialog.isOpen(popup)) {
-        dialog.close(popup);
-      }
-    });
+    if (isMobile && content.parentElement !== portal) {
+      portal.appendChild(content);
+    } else if (!isMobile && content.parentElement === portal) {
+      const inner = wrapperFor(sidebarId)?.querySelector('[data-slot="sidebar-inner"]');
+      if (inner) inner.appendChild(content);
+    }
+
+    // Mount/unmount the Sheet with open={openMobile}, as in shadcn's Sidebar.
+    const popup = document.getElementById(sidebarId + "-mobile");
+    const dialog = window.templ?.dialog;
+    if (!popup || !dialog) return;
+    if (isMobile && openMobileOf(sidebarId) && !dialog.isOpen(popup)) {
+      dialog.open(popup);
+    } else if (!isMobile && dialog.isOpen(popup)) {
+      dialog.close(popup);
+    }
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  window.addEventListener("resize", init);
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+  window.templ.lifecycle.register(CONTENT, { init: place });
+  window.addEventListener("resize", () => document.querySelectorAll(CONTENT).forEach(place));
 
   function toggleSidebar(sidebarId) {
     // shadcn's toggleSidebar: setOpenMobile((open) => !open) below md.
