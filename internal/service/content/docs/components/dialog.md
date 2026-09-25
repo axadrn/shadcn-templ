@@ -115,7 +115,7 @@ The `Dialog` component is the root that links trigger, content and close via con
 | Prop               | Type     | Default |
 | ------------------ | -------- | ------- |
 | `Open`             | `bool`   | `false` |
-| `DisableDismissible` | `bool`   | `false` |
+| `DisablePointerDismissal` | `bool` | `false` |
 
 ### Trigger
 
@@ -132,7 +132,7 @@ The `dialog.Content` component is the dialog window.
 | Prop              | Type     | Default |
 | ----------------- | -------- | ------- |
 | `HideCloseButton` | `bool`   | `false` |
-| `DisableModal`    | `bool`   | `false` |
+| `Modal`           | `*bool`  | `true`  |
 | `Class`           | `string` | -       |
 
 ### Header

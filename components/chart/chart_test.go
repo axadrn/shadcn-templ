@@ -21,7 +21,7 @@ func renderModel(t *testing.T, config Config, root, children templ.Component) ma
 	if err := Container(ContainerProps{Config: config}).Render(templ.WithChildren(context.Background(), chart), &out); err != nil {
 		t.Fatal(err)
 	}
-	_, rest, ok := strings.Cut(out.String(), `<script type="application/json" data-tui-chart-model>`)
+	_, rest, ok := strings.Cut(out.String(), `<script type="application/json" data-templ-chart-model>`)
 	if !ok {
 		t.Fatal("model script missing")
 	}

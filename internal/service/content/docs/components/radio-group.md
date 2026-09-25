@@ -109,22 +109,25 @@ Use `aria-invalid` on `radiogroup.Item` and `Invalid` on `field.Field` to show v
 
 The `radiogroup.RadioGroup` component shares the name and the selected value with its items.
 
-| Prop       | Type     | Default |
-| ---------- | -------- | ------- |
-| `Name`     | `string` | random  |
-| `Value`    | `string` | -       |
-| `Disabled` | `bool`   | `false` |
-| `Class`    | `string` | -       |
+| Prop           | Type      | Default |
+| -------------- | --------- | ------- |
+| `Name`         | `string`  | random  |
+| `Value`        | `*string` | -       |
+| `DefaultValue` | `string`  | -       |
+| `Disabled`     | `bool`    | `false` |
+| `ReadOnly`     | `bool`    | `false` |
+| `Required`     | `bool`    | `false` |
+| `Form`         | `string`  | -       |
+| `Class`        | `string`  | -       |
+
+`Value` controls the selection: the group fires `radio-group-value-change` and the page commits the change. `DefaultValue` lets the browser own it.
 
 ### RadioGroupItem
 
-The `radiogroup.Item` component is a single radio button with a hidden native input.
+The `radiogroup.Item` component is a single radio button with a hidden native input. Name, form and the checked state come from the group.
 
 | Prop       | Type     | Default |
 | ---------- | -------- | ------- |
-| `Name`     | `string` | group   |
 | `Value`    | `string` | -       |
-| `Checked`  | `bool`   | `false` |
 | `Disabled` | `bool`   | `false` |
-| `Form`     | `string` | -       |
 | `Class`    | `string` | -       |

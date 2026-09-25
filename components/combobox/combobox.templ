@@ -38,8 +38,8 @@ type ctxState struct {
 	value           string
 	values          []string
 	valueControlled bool
-	initialOpen     bool
-	openControlled  bool
+	open            *bool
+	defaultOpen     bool
 	multiple        bool
 	autoHighlight   bool
 	disabled        bool
@@ -97,13 +97,6 @@ func initialValues(p Props) []string {
 		return p.Values
 	}
 	return p.DefaultValues
-}
-
-func initialOpen(p Props) bool {
-	if p.Open != nil {
-		return *p.Open
-	}
-	return p.DefaultOpen
 }
 
 type InputProps struct {
@@ -213,21 +206,23 @@ templ Combobox(props ...Props) {
 	if p.ID == "" {
 		{{ p.ID = utils.RandomID() }}
 	}
-	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, name: p.Name, value: initialValue(p), values: initialValues(p), valueControlled: p.Value != nil || p.Values != nil, initialOpen: initialOpen(p), openControlled: p.Open != nil, multiple: p.Multiple, autoHighlight: p.AutoHighlight, disabled: p.Disabled, readOnly: p.ReadOnly, required: p.Required, form: p.Form}) }}
+	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, name: p.Name, value: initialValue(p), values: initialValues(p), valueControlled: p.Value != nil || p.Values != nil, open: p.Open, defaultOpen: p.DefaultOpen, multiple: p.Multiple, autoHighlight: p.AutoHighlight, disabled: p.Disabled, readOnly: p.ReadOnly, required: p.Required, form: p.Form}) }}
 	{ children... }
 }
 
 // Trigger returns the attributes that turn any element (usually a button)
 // into the combobox trigger — the asChild equivalent, used for the popup
-// pattern where the search input lives inside the content.
+// pattern where the search input lives inside the content. Like Base UI's
+// ComboboxTrigger with the input inside the popup, it has
+// aria-haspopup="dialog". data-templ-combobox-anchor is the port marker for
+// the positioning anchor Base UI keeps in context.
 func Trigger(ctx context.Context) templ.Attributes {
 	s := state(ctx)
 	return templ.Attributes{
-		"data-tui-combobox-anchor":  s.id,
-		"data-tui-combobox-trigger": true,
-		"aria-controls":             s.id,
-		"aria-haspopup":             "listbox",
-		"aria-expanded":             "false",
+		"data-templ-combobox-anchor": s.id,
+		"aria-controls":              s.id,
+		"aria-haspopup":              "dialog",
+		"aria-expanded":              "false",
 	}
 }
 
@@ -246,8 +241,7 @@ templ Value(props ...ValueProps) {
 	} else {
 		<span
 			data-slot="combobox-value"
-			data-tui-combobox-value-display
-			data-tui-combobox-placeholder={ p.Placeholder }
+			data-templ-placeholder={ p.Placeholder }
 			if p.Class != "" {
 				class={ p.Class }
 			}
@@ -266,14 +260,13 @@ templ Input(props ...InputProps) {
 	{{ s := state(ctx) }}
 	@inputgroup.InputGroup(inputgroup.Props{
 		Class:      utils.CN("cn-combobox-input w-auto", p.Class),
-		Attributes: templ.Attributes{"data-tui-combobox-anchor": s.id},
+		Attributes: templ.Attributes{"data-templ-combobox-anchor": s.id},
 	}) {
 		if s.name != "" {
 			<input
 				type="hidden"
 				name={ s.name }
 				value={ s.value }
-				data-tui-combobox-hidden
 				aria-hidden="true"
 				tabindex="-1"
 				required?={ s.required }
@@ -284,12 +277,11 @@ templ Input(props ...InputProps) {
 		}
 		{{
 			attrs := templ.Attributes{
-				"data-tui-combobox-input": "",
-				"role":                    "combobox",
-				"aria-controls":           s.id,
-				"aria-expanded":           "false",
-				"aria-autocomplete":       "list",
-				"autocomplete":            "off",
+				"role":              "combobox",
+				"aria-controls":     s.id,
+				"aria-expanded":     "false",
+				"aria-autocomplete": "list",
+				"autocomplete":      "off",
 			}
 			for k, v := range p.Attributes {
 				attrs[k] = v
@@ -309,12 +301,18 @@ templ Input(props ...InputProps) {
 				@inputgroup.Button(inputgroup.ButtonProps{
 					Size:     inputgroup.ButtonSizeIconXs,
 					Disabled: s.disabled,
+					// Base UI's ComboboxTrigger next to an input: aria-haspopup
+					// listbox, aria-controls and aria-expanded.
 					Attributes: templ.Attributes{
-						"data-tui-combobox-trigger": "",
-						"data-slot":                 "input-group-button",
-						"tabindex":                  "-1",
+						"data-slot":     "input-group-button",
+						"tabindex":      "-1",
+						"aria-haspopup": "listbox",
+						"aria-controls": s.id,
+						"aria-expanded": "false",
 					},
-					Class: "cn-combobox-trigger group-has-[[data-tui-combobox-clear]:not([hidden])]/input-group:hidden data-pressed:bg-transparent",
+					// shadcn hides the trigger while Base UI's Clear is mounted;
+					// ours stays mounted and toggles hidden, hence :not([hidden]).
+					Class: "cn-combobox-trigger group-has-[[data-slot=combobox-clear]:not([hidden])]/input-group:hidden data-pressed:bg-transparent",
 				}) {
 					@icon.ChevronDown(icon.Props{Class: "cn-combobox-trigger-icon pointer-events-none"})
 				}
@@ -325,10 +323,9 @@ templ Input(props ...InputProps) {
 					Disabled: s.disabled,
 					Class:    "cn-combobox-clear",
 					Attributes: templ.Attributes{
-						"data-tui-combobox-clear": "",
-						"data-slot":               "combobox-clear",
-						"tabindex":                "-1",
-						"hidden":                  s.value == "" && len(s.values) == 0,
+						"data-slot": "combobox-clear",
+						"tabindex":  "-1",
+						"hidden":    s.value == "" && len(s.values) == 0,
 					},
 				}) {
 					@icon.X(icon.Props{Class: "cn-combobox-clear-icon pointer-events-none"})
@@ -356,31 +353,35 @@ templ Content(props ...ContentProps) {
 	{{ s := state(ctx) }}
 	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
-	<div data-tui-combobox-portal hidden>
+	<div data-templ-portal hidden>
 		<div
 			id={ s.id }
-			data-tui-combobox-content
-			data-tui-combobox-value-controlled?={ s.valueControlled }
-			data-tui-combobox-open-controlled?={ s.openControlled }
-			data-tui-combobox-readonly?={ s.readOnly }
-			data-tui-combobox-initial-open={ strconv.FormatBool(s.initialOpen) }
-			data-tui-combobox-side={ string(p.Side) }
-			data-tui-combobox-align={ string(p.Align) }
-			data-tui-combobox-side-offset={ strconv.Itoa(p.SideOffset) }
+			if s.valueControlled {
+				if s.multiple {
+					data-templ-value={ templ.JSONString(s.values) }
+				} else {
+					data-templ-value={ s.value }
+				}
+			}
+			if s.open != nil {
+				data-templ-open={ strconv.FormatBool(*s.open) }
+			}
+			data-templ-default-open?={ s.open == nil && s.defaultOpen }
+			data-templ-read-only?={ s.readOnly }
+			data-templ-side={ string(p.Side) }
+			data-templ-align={ string(p.Align) }
+			data-templ-side-offset={ strconv.Itoa(p.SideOffset) }
 			if p.AlignOffset != 0 {
-				data-tui-combobox-align-offset={ strconv.Itoa(p.AlignOffset) }
+				data-templ-align-offset={ strconv.Itoa(p.AlignOffset) }
 			}
-			if s.autoHighlight {
-				data-tui-combobox-auto-highlight
-			}
+			data-templ-auto-highlight?={ s.autoHighlight }
 			data-closed
 			hidden
-			data-tui-portal
+			data-base-ui-portal
 			class="pointer-events-none isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
 				data-slot="combobox-content"
-				data-tui-combobox-popup
 				data-chips={ utils.IfElse(s.multiple, "true", "false") }
 				data-closed
 				role="listbox"
@@ -390,15 +391,12 @@ templ Content(props ...ContentProps) {
 				class={
 					utils.CN(
 						// 1:1 base/ui/combobox.tsx ComboboxContent, the look comes from
-						// cn-combobox-content (animations key on Base UI's data-open/data-closed attributes).
-						// The --available-height/--available-width/--anchor-width/
-						// --transform-origin variables become our JS variable names.
-						"cn-combobox-content cn-combobox-content-logical cn-menu-target cn-menu-translucent group/combobox-content relative max-h-(--tui-combobox-available-height) w-(--tui-combobox-anchor-width) max-w-(--tui-combobox-available-width) min-w-[calc(var(--tui-combobox-anchor-width)+--spacing(7))] origin-(--tui-combobox-transform-origin) data-[chips=true]:min-w-(--tui-combobox-anchor-width)",
-						// JS wiring: the positioner wrapper is pointer-events-none, the popup
-						// stays mounted after animate-out until hidePopover runs, and the
-						// vendored cn-combobox-list reads --available-height, which we bridge
-						// to our JS variable here.
-						"pointer-events-auto data-closed:fill-mode-forwards [--available-height:var(--tui-combobox-available-height)]",
+						// cn-combobox-content (animations key on Base UI's data-open/data-closed
+						// attributes); the JS sets Base UI's positioner variables.
+						"cn-combobox-content cn-combobox-content-logical cn-menu-target cn-menu-translucent group/combobox-content relative max-h-(--available-height) w-(--anchor-width) max-w-(--available-width) min-w-[calc(var(--anchor-width)+--spacing(7))] origin-(--transform-origin) data-[chips=true]:min-w-(--anchor-width)",
+						// JS wiring: the positioner wrapper is pointer-events-none and the
+						// popup stays mounted after animate-out until hidePopover runs.
+						"pointer-events-auto data-closed:fill-mode-forwards",
 						p.Class,
 					),
 				}
@@ -420,7 +418,6 @@ templ List(props ...ListProps) {
 			id={ p.ID }
 		}
 		data-slot="combobox-list"
-		data-tui-combobox-list
 		class={ utils.CN("cn-combobox-list overflow-y-auto overscroll-contain", p.Class) }
 		{ p.Attributes... }
 	>
@@ -456,7 +453,6 @@ templ Group(props ...GroupProps) {
 		}
 		role="group"
 		data-slot="combobox-group"
-		data-tui-combobox-group
 		class={ utils.CN("cn-combobox-group", p.Class) }
 		{ p.Attributes... }
 	>
@@ -507,10 +503,9 @@ templ Item(props ...ItemProps) {
 		id={ p.ID }
 		role="option"
 		data-slot="combobox-item"
-		data-tui-combobox-item
-		data-tui-combobox-value={ p.Value }
+		data-templ-value={ p.Value }
 		if p.Label != "" {
-			data-tui-combobox-label={ p.Label }
+			data-templ-label={ p.Label }
 		}
 		if selected {
 			data-selected="true"
@@ -572,8 +567,7 @@ templ Chips(props ...ChipsProps) {
 			id={ p.ID }
 		}
 		data-slot="combobox-chips"
-		data-tui-combobox-anchor={ s.id }
-		data-tui-combobox-chips
+		data-templ-combobox-anchor={ s.id }
 		class={ utils.CN("cn-combobox-chips", p.Class) }
 		{ p.Attributes... }
 	>
@@ -583,7 +577,6 @@ templ Chips(props ...ChipsProps) {
 					type="hidden"
 					name={ s.name }
 					value={ v }
-					data-tui-combobox-hidden
 					aria-hidden="true"
 					tabindex="-1"
 					required?={ s.required }
@@ -594,7 +587,7 @@ templ Chips(props ...ChipsProps) {
 			}
 		}
 		{ children... }
-		<template data-tui-combobox-chip-template>
+		<template>
 			@Chip()
 		</template>
 	</div>
@@ -611,7 +604,6 @@ templ ChipsInput(props ...ChipsInputProps) {
 		if p.ID != "" {
 			id={ p.ID }
 		}
-		data-tui-combobox-input
 		data-slot="combobox-chip-input"
 		role="combobox"
 		aria-controls={ s.id }
@@ -638,8 +630,7 @@ templ Chip(props ...ChipProps) {
 			id={ p.ID }
 		}
 		data-slot="combobox-chip"
-		data-tui-combobox-chip
-		data-tui-combobox-value={ p.Value }
+		data-templ-value={ p.Value }
 		class={
 			utils.CN(
 				"cn-combobox-chip has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-disabled:opacity-50",
@@ -648,16 +639,15 @@ templ Chip(props ...ChipProps) {
 		}
 		{ p.Attributes... }
 	>
-		<span data-tui-combobox-chip-label>{ p.Value }</span>
+		<span>{ p.Value }</span>
 		if !p.HideRemove {
 			@button.Button(button.Props{
 				Variant: button.VariantGhost,
 				Size:    button.SizeIconXs,
 				Class:   "cn-combobox-chip-remove",
 				Attributes: templ.Attributes{
-					"data-slot":                     "combobox-chip-remove",
-					"data-tui-combobox-chip-remove": "",
-					"tabindex":                      "-1",
+					"data-slot": "combobox-chip-remove",
+					"tabindex":  "-1",
 				},
 			}) {
 				@icon.X(icon.Props{Class: "cn-combobox-chip-indicator-icon pointer-events-none"})

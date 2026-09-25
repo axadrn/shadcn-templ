@@ -185,9 +185,9 @@ templ checkboxExampleInTable() {
 			let updatingCheckboxExampleTable = false;
 			document.addEventListener('change', (e) => {
 				const demo = e.target.closest('[data-checkbox-example-table]');
-				if (!demo || !e.target.matches('[data-tui-checkbox-input]') || updatingCheckboxExampleTable) return;
+				if (!demo || !e.target.matches('[data-slot=checkbox] + input') || updatingCheckboxExampleTable) return;
 				const all = demo.querySelector('[data-select-all]')?.nextElementSibling;
-				const rows = [...demo.querySelectorAll('tbody [data-tui-checkbox-input]')];
+				const rows = [...demo.querySelectorAll('tbody [data-slot=checkbox] + input')];
 				const setChecked = (input, checked) => {
 					if (input.checked === checked) return;
 					input.checked = checked;

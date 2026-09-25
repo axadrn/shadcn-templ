@@ -28,7 +28,6 @@ type Props struct {
 type ctxState struct {
 	id          string
 	value       string
-	controlled  bool
 	orientation Orientation
 }
 
@@ -76,7 +75,6 @@ type TriggerProps struct {
 	Attributes templ.Attributes
 	Value      string
 	Disabled   bool
-	TabsID     string
 }
 
 type ContentProps struct {
@@ -84,7 +82,6 @@ type ContentProps struct {
 	Class      string
 	Attributes templ.Attributes
 	Value      string
-	TabsID     string
 }
 
 templ Tabs(props ...Props) {
@@ -105,16 +102,14 @@ templ Tabs(props ...Props) {
 			id={ p.ID }
 		}
 		class={ utils.CN("cn-tabs group/tabs flex data-horizontal:flex-col", p.Class) }
-		data-tui-tabs
+		data-slot="tabs"
 		data-orientation={ string(p.Orientation) }
-		data-horizontal?={ p.Orientation == OrientationHorizontal }
-		data-vertical?={ p.Orientation == OrientationVertical }
-		data-tui-tabs-id={ tabsID }
-		data-tui-tabs-controlled?={ p.Value != nil }
-		data-tui-tabs-value={ value }
+		if p.Value != nil {
+			data-templ-value={ *p.Value }
+		}
 		{ p.Attributes... }
 	>
-		{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: tabsID, value: value, controlled: p.Value != nil, orientation: p.Orientation}) }}
+		{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: tabsID, value: value, orientation: p.Orientation}) }}
 		{ children... }
 	</div>
 }
@@ -127,8 +122,7 @@ templ List(props ...ListProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	{{ tabsID := IDFromContext(ctx) }}
-	<div
+		<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
@@ -136,7 +130,9 @@ templ List(props ...ListProps) {
 		if orientation(ctx) == OrientationVertical {
 			aria-orientation="vertical"
 		}
-		data-activate-on-focus?={ p.ActivateOnFocus }
+		data-slot="tabs-list"
+		data-orientation={ string(orientation(ctx)) }
+		data-templ-activate-on-focus?={ p.ActivateOnFocus }
 		class={
 			utils.CN(
 				"cn-tabs-list group/tabs-list inline-flex w-fit items-center justify-center text-muted-foreground group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
@@ -145,8 +141,6 @@ templ List(props ...ListProps) {
 			),
 		}
 		data-variant={ string(listVariant(p.Variant)) }
-		data-tui-tabs-list
-		data-tui-tabs-id={ tabsID }
 		{ p.Attributes... }
 	>
 		{ children... }
@@ -160,10 +154,7 @@ templ Trigger(props ...TriggerProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	{{ tabsID := p.TabsID }}
-	if tabsID == "" {
-		{{ tabsID = IDFromContext(ctx) }}
-	}
+	{{ tabsID := IDFromContext(ctx) }}
 	if p.Value == "" {
 		<span class="text-xs text-destructive">Error: Tab Trigger missing required 'Value' attribute.</span>
 	}
@@ -190,11 +181,11 @@ templ Trigger(props ...TriggerProps) {
 				p.Class,
 			),
 		}
-		data-tui-tabs-trigger
-		data-tui-tabs-id={ tabsID }
-		data-tui-tabs-value={ p.Value }
-		data-tui-tabs-state={ utils.IfElse(tabsIsActive(ctx, p.Value), "active", "inactive") }
-		data-active?={ tabsIsActive(ctx, p.Value) }
+		data-slot="tabs-trigger"
+		data-templ-value={ p.Value }
+		data-orientation={ string(orientation(ctx)) }
+		data-active?={ active }
+		data-disabled?={ p.Disabled }
 		{ p.Attributes... }
 	>
 		{ children... }
@@ -208,10 +199,7 @@ templ Content(props ...ContentProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	{{ tabsID := p.TabsID }}
-	if tabsID == "" {
-		{{ tabsID = IDFromContext(ctx) }}
-	}
+	{{ tabsID := IDFromContext(ctx) }}
 	if p.Value == "" {
 		<span class="text-xs text-destructive">Error: Tab Content missing required 'Value' attribute.</span>
 		return templ.NopComponent
@@ -231,10 +219,10 @@ templ Content(props ...ContentProps) {
 				p.Class,
 			),
 		}
-		data-tui-tabs-content
-		data-tui-tabs-id={ tabsID }
-		data-tui-tabs-value={ p.Value }
-		data-tui-tabs-state={ utils.IfElse(tabsIsActive(ctx, p.Value), "active", "inactive") }
+		data-slot="tabs-content"
+		data-templ-value={ p.Value }
+		data-orientation={ string(orientation(ctx)) }
+		data-hidden?={ !tabsIsActive(ctx, p.Value) }
 		{ p.Attributes... }
 	>
 		{ children... }

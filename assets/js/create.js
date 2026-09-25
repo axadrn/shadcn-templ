@@ -17,14 +17,14 @@
      components/*-picker.tsx       -> picker behavior on the SSRd DOM
      components/welcome-dialog.tsx -> first-visit dialog
 
-   Data comes from window.tuiPreset (codec), window.tuiCreateConfig and
-   window.tuiCreateThemes. The DOM contract is data-tui-create-* attributes,
+   Data comes from window.templPreset (codec), window.templCreateConfig and
+   window.templCreateThemes. The DOM contract is data-templ-create-* attributes,
    SSRd by internal/ui/pages/create.templ. */
 (function () {
   "use strict";
 
-  if (window.__tuiCreateInitialized) return;
-  window.__tuiCreateInitialized = true;
+  if (window.__templCreateInitialized) return;
+  window.__templCreateInitialized = true;
 
   var MAC_REGEX = /Mac|iPhone|iPad|iPod/;
   var PRESET_FLAG_PATTERN = /^--preset\b\s+(.+)$/i;
@@ -64,8 +64,8 @@
   var CHECK_SVG =
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 pointer-coarse:size-5"><path d="M20 6 9 17l-5-5"></path></svg>';
 
-  var preset = window.tuiPreset;
-  var cfg = window.tuiCreateConfig;
+  var preset = window.templPreset;
+  var cfg = window.templCreateConfig;
 
   var params = null;
   var overrideValue = null; // hover preview, never committed (preview-override.tsx)
@@ -93,7 +93,7 @@
   // ----- config lookups -------------------------------------------------------
 
   function themes() {
-    return window.tuiCreateThemes || [];
+    return window.templCreateThemes || [];
   }
 
   function getTheme(name) {
@@ -350,7 +350,7 @@
   // ----- preview iframe sync (preview.tsx + use-iframe-sync) -----------------
 
   function frameEl() {
-    return document.querySelector("[data-tui-create-preview]");
+    return document.querySelector("[data-templ-create-preview]");
   }
 
   function isSameParams(a, b) {
@@ -673,7 +673,7 @@
 
   function confirmReset() {
     reset();
-    window.tui.dialog.close("create-reset-dialog");
+    window.templ.dialog.close("create-reset-dialog");
   }
 
   // ----- open preset (open-preset.tsx + lib/parse-preset-input.ts) -----------
@@ -689,13 +689,13 @@
   function openPresetDialog() {
     // open-preset.tsx clears the input when the dialog closes; clearing on
     // open keeps reopen state fresh without a drawer close event.
-    document.querySelectorAll("[data-tui-create-preset-form]").forEach(function (form) {
-      var inputEl = form.querySelector("[data-tui-create-preset-input]");
+    document.querySelectorAll("[data-templ-create-preset-form]").forEach(function (form) {
+      var inputEl = form.querySelector("[data-templ-create-preset-input]");
       if (inputEl) inputEl.value = "";
       updatePresetForm(form);
     });
-    if (isMobileViewport()) window.tui.drawer.open("create-open-preset-drawer");
-    else window.tui.dialog.open("create-open-preset-dialog");
+    if (isMobileViewport()) window.templ.drawer.open("create-open-preset-drawer");
+    else window.templ.dialog.open("create-open-preset-dialog");
   }
 
   function applyPresetCode(code) {
@@ -709,9 +709,9 @@
   }
 
   function updatePresetForm(form) {
-    var inputEl = form.querySelector("[data-tui-create-preset-input]");
-    var submit = form.querySelector("[data-tui-create-preset-submit]");
-    var fieldRoot = form.querySelector("[data-tui-create-preset-field]");
+    var inputEl = form.querySelector("[data-templ-create-preset-input]");
+    var submit = form.querySelector("[data-templ-create-preset-submit]");
+    var fieldRoot = form.querySelector("[data-templ-create-preset-field]");
     if (!inputEl) return;
     var code = parsePresetInput(inputEl.value);
     var isInvalid = inputEl.value.trim().length > 0 && code === null;
@@ -724,15 +724,15 @@
   }
 
   function submitPresetForm(form) {
-    var inputEl = form.querySelector("[data-tui-create-preset-input]");
+    var inputEl = form.querySelector("[data-templ-create-preset-input]");
     if (!inputEl) return;
     var code = parsePresetInput(inputEl.value);
     if (!code) return;
     applyPresetCode(code);
     inputEl.value = "";
     updatePresetForm(form);
-    window.tui.dialog.close("create-open-preset-dialog");
-    window.tui.drawer.close("create-open-preset-drawer");
+    window.templ.dialog.close("create-open-preset-dialog");
+    window.templ.drawer.close("create-open-preset-drawer");
   }
 
   // ----- get code dialog (project-form.tsx) ----------------------------------
@@ -773,38 +773,37 @@
   function renderProjectForm() {
     // ToggleGroup value={[activeTab]}: the group is controlled, so this is
     // the single source of truth for its pressed state.
-    var group = document.querySelector("[data-tui-create-tabs]");
+    var group = document.querySelector("[data-templ-create-tabs]");
     if (group) {
-      group.setAttribute("data-tui-toggle-group-value", activeTab);
-      group.querySelectorAll("[data-tui-toggle]").forEach(function (toggle) {
-        var on = toggle.getAttribute("data-tui-toggle-value") === activeTab;
+      group.querySelectorAll("[data-slot=toggle-group-item]").forEach(function (toggle) {
+        var on = toggle.getAttribute("data-templ-value") === activeTab;
         toggle.toggleAttribute("data-pressed", on);
         toggle.setAttribute("aria-pressed", String(on));
       });
     }
-    document.querySelectorAll("[data-tui-create-tab]").forEach(function (panel) {
-      panel.hidden = panel.getAttribute("data-tui-create-tab") !== activeTab;
+    document.querySelectorAll("[data-templ-create-tab]").forEach(function (panel) {
+      panel.hidden = panel.getAttribute("data-templ-create-tab") !== activeTab;
     });
 
     // Live commands and the theme CSS.
-    document.querySelectorAll('[data-tui-create-command="init"]').forEach(function (el) {
+    document.querySelectorAll('[data-templ-create-command="init"]').forEach(function (el) {
       el.textContent = initCommand();
     });
-    document.querySelectorAll('[data-tui-create-command="apply"]').forEach(function (el) {
+    document.querySelectorAll('[data-templ-create-command="apply"]').forEach(function (el) {
       el.textContent = applyCommand();
     });
-    var css = document.querySelector("[data-tui-create-css]");
+    var css = document.querySelector("[data-templ-create-css]");
     if (css) css.textContent = generateThemeCss();
 
     // Copy flashes: icon buttons swap Copy -> Check, footer buttons swap
     // their label to "Copied".
-    document.querySelectorAll("[data-tui-create-copy-target]").forEach(function (button) {
-      var isCopied = copiedTarget === button.getAttribute("data-tui-create-copy-target");
-      var copyIcon = button.querySelector('[data-tui-create-copy-icon="copy"]');
-      var checkIcon = button.querySelector('[data-tui-create-copy-icon="check"]');
+    document.querySelectorAll("[data-templ-create-copy-target]").forEach(function (button) {
+      var isCopied = copiedTarget === button.getAttribute("data-templ-create-copy-target");
+      var copyIcon = button.querySelector('[data-templ-create-copy-icon="copy"]');
+      var checkIcon = button.querySelector('[data-templ-create-copy-icon="check"]');
       if (copyIcon) copyIcon.hidden = isCopied;
       if (checkIcon) checkIcon.hidden = !isCopied;
-      var idleLabel = button.getAttribute("data-tui-create-copy-label");
+      var idleLabel = button.getAttribute("data-templ-create-copy-label");
       if (idleLabel) button.textContent = isCopied ? "Copied" : idleLabel;
     });
   }
@@ -894,24 +893,24 @@
   // ----- picker popups (picker.tsx behavior) ---------------------------------
 
   function contentFor(param) {
-    return document.querySelector('[data-tui-create-content="' + param + '"]');
+    return document.querySelector('[data-templ-create-content="' + param + '"]');
   }
 
   function triggerFor(param) {
-    return document.querySelector('[data-tui-create-trigger="' + param + '"]');
+    return document.querySelector('[data-templ-create-trigger="' + param + '"]');
   }
 
   function customizerCard() {
-    return document.querySelector('[data-tui-create] [data-slot="card"]');
+    return document.querySelector('[data-templ-create] [data-slot="card"]');
   }
 
   function shieldEl() {
-    return document.querySelector("[data-tui-create-shield]");
+    return document.querySelector("[data-templ-create-shield]");
   }
 
   function enabledItems(content) {
     return Array.from(
-      content.querySelectorAll("[data-tui-create-item], [data-tui-create-action]")
+      content.querySelectorAll("[data-templ-create-item], [data-templ-create-action]")
     ).filter(function (el) {
       return !el.hasAttribute("data-disabled");
     });
@@ -985,8 +984,8 @@
 
   function previewItem(item) {
     if (isMobileViewport()) return;
-    var group = item.closest("[data-tui-create-radiogroup]");
-    var name = group && group.getAttribute("data-tui-create-radiogroup");
+    var group = item.closest("[data-templ-create-radiogroup]");
+    var name = group && group.getAttribute("data-templ-create-radiogroup");
     var handler = name && GROUPS[name];
     if (handler && handler.preview) handler.preview(item.getAttribute("data-value"));
   }
@@ -994,7 +993,7 @@
   // ----- rendering ------------------------------------------------------------
 
   function setValue(param, text) {
-    var el = document.querySelector('[data-tui-create-value="' + param + '"]');
+    var el = document.querySelector('[data-templ-create-value="' + param + '"]');
     if (el && text) el.textContent = text;
   }
 
@@ -1032,7 +1031,7 @@
   }
 
   function setSwatch(param, color) {
-    var el = document.querySelector('[data-tui-create-indicator="' + param + '"]');
+    var el = document.querySelector('[data-templ-create-indicator="' + param + '"]');
     if (el) el.style.setProperty("--color", color);
   }
 
@@ -1046,7 +1045,7 @@
 
   function radioItemHTML(value, label) {
     return (
-      '<div role="menuitemradio" tabindex="-1" data-slot="dropdown-menu-radio-item" data-tui-create-item data-value="' +
+      '<div role="menuitemradio" tabindex="-1" data-slot="dropdown-menu-radio-item" data-templ-create-item data-value="' +
       escapeHTML(value) +
       '" aria-checked="false" data-checked="false" class="' +
       RADIO_ITEM_CLASS +
@@ -1062,7 +1061,7 @@
   // (theme-picker.tsx / chart-color-picker.tsx: base-colored themes first,
   // then the colored themes).
   function rebuildThemeList(groupName) {
-    var group = document.querySelector('[data-tui-create-radiogroup="' + groupName + '"]');
+    var group = document.querySelector('[data-templ-create-radiogroup="' + groupName + '"]');
     if (!group) return;
     var available = cfg.getThemesForBaseColor(params.baseColor);
     var baseItems = available.filter(function (t) {
@@ -1091,10 +1090,10 @@
   }
 
   function syncGroup(name) {
-    var group = document.querySelector('[data-tui-create-radiogroup="' + name + '"]');
+    var group = document.querySelector('[data-templ-create-radiogroup="' + name + '"]');
     if (!group) return;
     var value = GROUPS[name].value(params);
-    group.querySelectorAll("[data-tui-create-item]").forEach(function (item) {
+    group.querySelectorAll("[data-templ-create-item]").forEach(function (item) {
       var checked = item.getAttribute("data-value") === value;
       item.setAttribute("data-checked", String(checked));
       item.setAttribute("aria-checked", String(checked));
@@ -1104,21 +1103,21 @@
   }
 
   function renderLocks() {
-    document.querySelectorAll("[data-tui-create-lock]").forEach(function (button) {
-      var locked = locks.has(button.getAttribute("data-tui-create-lock"));
+    document.querySelectorAll("[data-templ-create-lock]").forEach(function (button) {
+      var locked = locks.has(button.getAttribute("data-templ-create-lock"));
       button.setAttribute("data-locked", String(locked));
       button.title = locked ? "Unlock" : "Lock";
       button.setAttribute("aria-label", locked ? "Unlock" : "Lock");
-      var lockedIcon = button.querySelector('[data-tui-create-lock-icon="locked"]');
-      var unlockedIcon = button.querySelector('[data-tui-create-lock-icon="unlocked"]');
+      var lockedIcon = button.querySelector('[data-templ-create-lock-icon="locked"]');
+      var unlockedIcon = button.querySelector('[data-templ-create-lock-icon="unlocked"]');
       if (lockedIcon) lockedIcon.hidden = !locked;
       if (unlockedIcon) unlockedIcon.hidden = locked;
     });
   }
 
   function renderHistoryItems() {
-    setDisabled(document.querySelector('[data-tui-create-action="undo"]'), !canGoBack());
-    setDisabled(document.querySelector('[data-tui-create-action="redo"]'), !canGoForward());
+    setDisabled(document.querySelector('[data-templ-create-action="undo"]'), !canGoBack());
+    setDisabled(document.querySelector('[data-templ-create-action="redo"]'), !canGoForward());
   }
 
   function setupShortcutLabels() {
@@ -1128,7 +1127,7 @@
       redo: isMac ? "⇧⌘Z" : "Ctrl+Shift+Z",
     };
     Object.keys(labels).forEach(function (key) {
-      var el = document.querySelector('[data-tui-create-shortcut="' + key + '"]');
+      var el = document.querySelector('[data-templ-create-shortcut="' + key + '"]');
       if (el) el.textContent = labels[key];
     });
   }
@@ -1160,7 +1159,7 @@
     setValue("menuAccent", accent ? accent.label : "");
 
     // Trailing indicators.
-    var styleIndicator = document.querySelector('[data-tui-create-indicator="style"]');
+    var styleIndicator = document.querySelector('[data-templ-create-indicator="style"]');
     var styleEntry = cfg.STYLES.find(function (s) {
       return s.name === p.style;
     });
@@ -1172,14 +1171,14 @@
     setSwatch("baseColor", swatchColor(p.baseColor, true));
     setSwatch("theme", swatchColor(p.theme, false));
     setSwatch("chartColor", swatchColor(p.chartColor, false));
-    var headingIndicator = document.querySelector('[data-tui-create-indicator="fontHeading"]');
+    var headingIndicator = document.querySelector('[data-templ-create-indicator="fontHeading"]');
     if (headingIndicator) {
       headingIndicator.style.fontFamily = fontFamilyOf(headingFont || bodyFont);
     }
-    var fontIndicator = document.querySelector('[data-tui-create-indicator="font"]');
+    var fontIndicator = document.querySelector('[data-templ-create-indicator="font"]');
     if (fontIndicator) fontIndicator.style.fontFamily = fontFamilyOf(bodyFont);
     document
-      .querySelectorAll('[data-tui-create-indicator="menuAccent"] path')
+      .querySelectorAll('[data-templ-create-indicator="menuAccent"] path')
       .forEach(function (path) {
         path.setAttribute("data-accent", p.menuAccent);
       });
@@ -1193,7 +1192,7 @@
 
     // Inherit item label = current body font (font-picker.tsx inheritFontLabel).
     var inheritItem = document.querySelector(
-      '[data-tui-create-content="fontHeading"] [data-value="inherit"]'
+      '[data-templ-create-content="fontHeading"] [data-value="inherit"]'
     );
     if (inheritItem) {
       var inheritLabel = bodyFont ? bodyFont.name : "Body font";
@@ -1208,15 +1207,15 @@
     var radiusTrigger = triggerFor("radius");
     if (radiusTrigger) radiusTrigger.disabled = isRadiusLocked(p);
     var largeItem = document.querySelector(
-      '[data-tui-create-content="radius"] [data-value="large"]'
+      '[data-templ-create-content="radius"] [data-value="large"]'
     );
     setDisabled(largeItem, p.style === "rhea");
     var invertedItem = document.querySelector(
-      '[data-tui-create-radiogroup="menuColorColor"] [data-value="inverted"]'
+      '[data-templ-create-radiogroup="menuColorColor"] [data-value="inverted"]'
     );
     setDisabled(invertedItem, isDark());
     var boldItem = document.querySelector(
-      '[data-tui-create-radiogroup="menuAccent"] [data-value="bold"]'
+      '[data-templ-create-radiogroup="menuAccent"] [data-value="bold"]'
     );
     setDisabled(boldItem, isTranslucentMenuColor(p.menuColor));
 
@@ -1227,23 +1226,23 @@
     if (menuSurfaceChoice(p) === "solid") lastSolidMenuAccent = p.menuAccent;
 
     // Copy preset button label IS the command.
-    var copyButton = document.querySelector("[data-tui-create-copy]");
-    var copyLabel = document.querySelector("[data-tui-create-copy-label]");
+    var copyButton = document.querySelector("[data-templ-create-copy]");
+    var copyLabel = document.querySelector("[data-templ-create-copy-label]");
     var label = copied ? "Copied" : "--preset " + getPresetCode(p);
     if (copyLabel) copyLabel.textContent = label;
     if (copyButton) copyButton.title = label;
 
     // Preview switcher + action menu selection.
-    document.querySelectorAll("[data-tui-create-preview-item]").forEach(function (button) {
+    document.querySelectorAll("[data-templ-create-preview-item]").forEach(function (button) {
       button.setAttribute(
         "data-active",
-        String(button.getAttribute("data-tui-create-preview-item") === p.item)
+        String(button.getAttribute("data-templ-create-preview-item") === p.item)
       );
     });
-    document.querySelectorAll("[data-tui-create-registry-item]").forEach(function (el) {
+    document.querySelectorAll("[data-templ-create-registry-item]").forEach(function (el) {
       el.setAttribute(
         "data-checked",
-        String(el.getAttribute("data-tui-create-registry-item") === p.item)
+        String(el.getAttribute("data-templ-create-registry-item") === p.item)
       );
     });
 
@@ -1272,7 +1271,7 @@
       dismissed = localStorage.getItem(WELCOME_STORAGE_KEY);
     } catch (e) {}
     if (dismissed) return;
-    window.tui.dialog.open("create-welcome-dialog");
+    window.templ.dialog.open("create-welcome-dialog");
   }
 
   // ----- shortcuts ------------------------------------------------------------
@@ -1289,7 +1288,7 @@
   function runMenuAction(action) {
     switch (action) {
       case "navigate":
-        window.tui.dialog.open("create-action-menu");
+        window.templ.dialog.open("create-action-menu");
         break;
       case "open-preset":
         openPresetDialog();
@@ -1307,7 +1306,7 @@
         goForward();
         break;
       case "reset":
-        window.tui.dialog.open("create-reset-dialog");
+        window.templ.dialog.open("create-reset-dialog");
         break;
     }
   }
@@ -1340,7 +1339,7 @@
       }
       if (e.key === "Enter" || e.key === " ") {
         var active = document.activeElement;
-        if (active instanceof Element && active.closest("[data-tui-create-content]")) {
+        if (active instanceof Element && active.closest("[data-templ-create-content]")) {
           e.preventDefault();
           active.click();
           return;
@@ -1354,7 +1353,7 @@
       // forwards Cmd/Ctrl+K too (action-menu.tsx), so both open it here.
       if (key === "p" || key === "k") {
         e.preventDefault();
-        window.tui.dialog.toggle("create-action-menu");
+        window.templ.dialog.toggle("create-action-menu");
         return;
       }
       // use-history: Cmd/Ctrl+Z, Shift+Cmd/Ctrl+Z, Ctrl+Y.
@@ -1383,8 +1382,8 @@
     // use-reset: Shift+R opens the dialog; pressed again it confirms.
     if (e.key === "R" && e.shiftKey) {
       e.preventDefault();
-      if (window.tui.dialog.isOpen("create-reset-dialog")) confirmReset();
-      else window.tui.dialog.open("create-reset-dialog");
+      if (window.templ.dialog.isOpen("create-reset-dialog")) confirmReset();
+      else window.templ.dialog.open("create-reset-dialog");
       return;
     }
     // use-open-preset: o opens the preset dialog.
@@ -1416,7 +1415,7 @@
     }
 
     var type = event.data.type;
-    if (type === "tui-create-ready") {
+    if (type === "templ-create-ready") {
       lastSentParams = null;
       sendParams();
       return;
@@ -1493,7 +1492,7 @@
   // ----- wiring ---------------------------------------------------------------
 
   function init() {
-    if (!document.querySelector("[data-tui-create]")) return;
+    if (!document.querySelector("[data-templ-create]")) return;
     if (!preset || !cfg) return;
 
     handleInitialPreset();
@@ -1523,10 +1522,10 @@
     // Open/close pickers. pointerdown, like Base UI's trigger.
     document.addEventListener("pointerdown", function (e) {
       if (!(e.target instanceof Element)) return;
-      if (e.target.closest("[data-tui-create-content]")) return;
-      var trigger = e.target.closest("[data-tui-create-trigger]");
+      if (e.target.closest("[data-templ-create-content]")) return;
+      var trigger = e.target.closest("[data-templ-create-trigger]");
       if (trigger) {
-        var param = trigger.getAttribute("data-tui-create-trigger");
+        var param = trigger.getAttribute("data-templ-create-trigger");
         if (openPickerParam === param) closePicker();
         else openPicker(param);
         return;
@@ -1537,11 +1536,11 @@
     document.addEventListener("click", function (e) {
       if (!(e.target instanceof Element)) return;
 
-      var item = e.target.closest("[data-tui-create-item]");
-      if (item && item.closest("[data-tui-create-content]")) {
+      var item = e.target.closest("[data-templ-create-item]");
+      if (item && item.closest("[data-templ-create-content]")) {
         if (item.hasAttribute("data-disabled")) return;
-        var group = item.closest("[data-tui-create-radiogroup]");
-        var name = group && group.getAttribute("data-tui-create-radiogroup");
+        var group = item.closest("[data-templ-create-radiogroup]");
+        var name = group && group.getAttribute("data-templ-create-radiogroup");
         var handler = name && GROUPS[name];
         if (handler) handler.commit(item.getAttribute("data-value"));
         // PickerRadioItem closeOnClick={isMobile}: desktop keeps the menu open.
@@ -1549,45 +1548,45 @@
         return;
       }
 
-      var action = e.target.closest("[data-tui-create-action]");
+      var action = e.target.closest("[data-templ-create-action]");
       if (action) {
         if (action.hasAttribute("data-disabled")) return;
         closePicker();
-        runMenuAction(action.getAttribute("data-tui-create-action"));
+        runMenuAction(action.getAttribute("data-templ-create-action"));
         return;
       }
 
-      if (e.target.closest("[data-tui-create-copy]")) {
+      if (e.target.closest("[data-templ-create-copy]")) {
         copyPresetCommand();
         return;
       }
-      if (e.target.closest("[data-tui-create-open-preset]")) {
+      if (e.target.closest("[data-templ-create-open-preset]")) {
         openPresetDialog();
         return;
       }
-      if (e.target.closest("[data-tui-create-shuffle]")) {
+      if (e.target.closest("[data-templ-create-shuffle]")) {
         randomize();
         return;
       }
-      if (e.target.closest("[data-tui-create-reset-confirm]")) {
+      if (e.target.closest("[data-templ-create-reset-confirm]")) {
         confirmReset();
         return;
       }
-      var previewItemButton = e.target.closest("[data-tui-create-preview-item]");
+      var previewItemButton = e.target.closest("[data-templ-create-preview-item]");
       if (previewItemButton) {
-        setItem(previewItemButton.getAttribute("data-tui-create-preview-item"));
+        setItem(previewItemButton.getAttribute("data-templ-create-preview-item"));
         return;
       }
-      var copyTarget = e.target.closest("[data-tui-create-copy-target]");
+      var copyTarget = e.target.closest("[data-templ-create-copy-target]");
       if (copyTarget) {
-        copyProjectTarget(copyTarget.getAttribute("data-tui-create-copy-target"));
+        copyProjectTarget(copyTarget.getAttribute("data-templ-create-copy-target"));
       }
     });
 
     // Get Code tabs (project-form.tsx onValueChange: consume the proposed
     // group value directly; an empty selection falls back to "new-project").
     document.addEventListener("toggle-group-value-change", function (e) {
-      var group = e.target instanceof Element && e.target.closest("[data-tui-create-tabs]");
+      var group = e.target instanceof Element && e.target.closest("[data-templ-create-tabs]");
       if (!group) return;
       activeTab = e.detail.value[0] || "new-project";
       renderProjectForm();
@@ -1597,8 +1596,8 @@
     // moves; focus covers keyboard browsing (picker.tsx PickerRadioItem).
     document.addEventListener("mousemove", function (e) {
       if (!(e.target instanceof Element)) return;
-      var item = e.target.closest("[data-tui-create-item]");
-      if (!item || !item.closest("[data-tui-create-content]")) return;
+      var item = e.target.closest("[data-templ-create-item]");
+      if (!item || !item.closest("[data-templ-create-content]")) return;
       if (item.hasAttribute("data-disabled")) return;
       if (document.activeElement !== item) item.focus({ preventScroll: true });
       previewItem(item);
@@ -1606,24 +1605,24 @@
 
     document.addEventListener("focusin", function (e) {
       if (!(e.target instanceof Element)) return;
-      var item = e.target.closest("[data-tui-create-item]");
-      if (!item || !item.closest("[data-tui-create-content]")) return;
+      var item = e.target.closest("[data-templ-create-item]");
+      if (!item || !item.closest("[data-templ-create-content]")) return;
       if (item.hasAttribute("data-disabled")) return;
       previewItem(item);
     });
 
     // Leaving the popup reverts the preview instantly (PickerContent
     // onMouseLeave={clearOverride}).
-    document.querySelectorAll("[data-tui-create-content]").forEach(function (content) {
+    document.querySelectorAll("[data-templ-create-content]").forEach(function (content) {
       content.addEventListener("mouseleave", function () {
         clearOverride();
       });
     });
 
     // Lock buttons (shuffle only).
-    document.querySelectorAll("[data-tui-create-lock]").forEach(function (button) {
+    document.querySelectorAll("[data-templ-create-lock]").forEach(function (button) {
       button.addEventListener("click", function () {
-        var param = button.getAttribute("data-tui-create-lock");
+        var param = button.getAttribute("data-templ-create-lock");
         if (locks.has(param)) locks.delete(param);
         else locks.add(param);
         renderLocks();
@@ -1632,14 +1631,14 @@
 
     // Open preset forms (dialog + drawer share the markup).
     document.addEventListener("submit", function (e) {
-      var form = e.target instanceof Element && e.target.closest("[data-tui-create-preset-form]");
+      var form = e.target instanceof Element && e.target.closest("[data-templ-create-preset-form]");
       if (!form) return;
       e.preventDefault();
       submitPresetForm(form);
     });
 
     document.addEventListener("input", function (e) {
-      var form = e.target instanceof Element && e.target.closest("[data-tui-create-preset-form]");
+      var form = e.target instanceof Element && e.target.closest("[data-templ-create-preset-form]");
       if (form) updatePresetForm(form);
     });
 
@@ -1655,10 +1654,10 @@
     // Action menu selection (command.js command-select event).
     document.addEventListener("command-select", function (e) {
       var el =
-        e.target instanceof Element && e.target.closest("[data-tui-create-registry-item]");
+        e.target instanceof Element && e.target.closest("[data-templ-create-registry-item]");
       if (!el) return;
-      setItem(el.getAttribute("data-tui-create-registry-item"));
-      window.tui.dialog.close("create-action-menu");
+      setItem(el.getAttribute("data-templ-create-registry-item"));
+      window.templ.dialog.close("create-action-menu");
     });
 
     // Welcome dialog dismissal flag.

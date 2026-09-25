@@ -11,7 +11,7 @@ templ ToastPromise() {
 	}
 	<script nonce={ templ.GetNonce(ctx) }>
 		document.getElementById("toast-promise-trigger").addEventListener("click", () => {
-			window.tui.toast.promise(
+			window.templ.toast.promise(
 				new Promise((resolve) => {
 					window.setTimeout(() => resolve({ name: "Event" }), 2000);
 				}),

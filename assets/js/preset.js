@@ -302,7 +302,7 @@
   };
 
   if (typeof window !== "undefined") {
-    window.tuiPreset = api;
+    window.templPreset = api;
   }
   if (typeof module !== "undefined" && module.exports) {
     module.exports = api;

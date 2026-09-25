@@ -2,7 +2,6 @@ package togglegroup
 
 import (
 	"strconv"
-	"strings"
 
 	"github.com/axadrn/shadcn-templ/v2/components/toggle"
 	"github.com/axadrn/shadcn-templ/v2/utils"
@@ -61,17 +60,17 @@ templ ToggleGroup(props ...Props) {
 	if p.Value != nil {
 		{{ values = p.Value }}
 	}
-	{{ ctx = toggle.WithGroupDefaults(ctx, p.Variant, p.Size, spacing, values, true, p.Value != nil) }}
+	{{ ctx = toggle.WithGroupDefaults(ctx, p.Variant, p.Size, spacing, values, true) }}
 	<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
 		role="group"
 		data-slot="toggle-group"
-		data-tui-toggle-group
 		data-multiple?={ p.Multiple }
-		data-tui-toggle-group-controlled?={ p.Value != nil }
-		data-tui-toggle-group-value={ strings.Join(values, " ") }
+		if p.Value != nil {
+			data-templ-value={ templ.JSONString(p.Value) }
+		}
 		if p.Variant != "" {
 			data-variant={ string(p.Variant) }
 		}
@@ -80,8 +79,6 @@ templ ToggleGroup(props ...Props) {
 		}
 		data-spacing={ strconv.Itoa(spacing) }
 		data-orientation={ string(p.Orientation) }
-		data-horizontal?={ p.Orientation == OrientationHorizontal }
-		data-vertical?={ p.Orientation == OrientationVertical }
 		style={ "--gap: " + strconv.Itoa(spacing) }
 		class={
 			utils.CN(

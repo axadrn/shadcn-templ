@@ -307,7 +307,7 @@ templ inputGroupExampleWithTooltip() {
 				@field.Label(field.LabelProps{For: "input-dropdown-21"}) {
 					Dropdown
 				}
-				<div data-tui-inputgroup-example-country-field>
+				<div data-templ-inputgroup-example-country-field>
 					@inputgroup.InputGroup() {
 						@inputgroup.Input(inputgroup.InputProps{ID: "input-dropdown-21"})
 						@inputgroup.Addon() {
@@ -316,7 +316,7 @@ templ inputGroupExampleWithTooltip() {
 									Class:      "text-muted-foreground tabular-nums",
 									Attributes: dropdownmenu.Trigger(ctx),
 								}) {
-									<span data-tui-inputgroup-example-country>+1</span>
+									<span data-templ-inputgroup-example-country>+1</span>
 									@icon.ChevronDown()
 								}
 								@dropdownmenu.Content(dropdownmenu.ContentProps{
@@ -343,10 +343,10 @@ templ inputGroupExampleWithTooltip() {
 				// menu item writes its label into the trigger.
 				<script nonce={ templ.GetNonce(ctx) }>
 					document.addEventListener('click', (e) => {
-						const item = e.target.closest?.('[data-tui-dropdownmenu-item]');
-						const root = e.target.closest?.('[data-tui-inputgroup-example-country-field]');
+						const item = e.target.closest?.('[data-slot="dropdown-menu-item"]');
+						const root = e.target.closest?.('[data-templ-inputgroup-example-country-field]');
 						if (!item || !root) return;
-						const label = root.querySelector('[data-tui-inputgroup-example-country]');
+						const label = root.querySelector('[data-templ-inputgroup-example-country]');
 						if (label) label.textContent = item.textContent.trim();
 					});
 				</script>

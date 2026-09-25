@@ -59,7 +59,7 @@ templ Layout() {
 ## Usage
 
 ```js showLineNumbers
-const id = window.tui.toast.add({
+const id = window.templ.toast.add({
 	title: "Event created",
 	description: "Sunday, December 3 at 9:00 AM",
 })
@@ -76,12 +76,12 @@ Set the `type` option to render a status icon. The built-in renderer recognizes 
 Pass button props with `actionProps` to render an action.
 
 ```js showLineNumbers
-const id = window.tui.toast.add({
+const id = window.templ.toast.add({
 	title: "Event created",
 	actionProps: {
 		children: "Undo",
 		onClick() {
-			window.tui.toast.close(id)
+			window.templ.toast.close(id)
 		},
 	},
 })
@@ -107,7 +107,7 @@ The `toast.Toaster` component hosts the toasts, mount it once in your layout.
 
 ### toast
 
-The `window.tui.toast` object is the toast manager pendant.
+The `window.templ.toast` object is the toast manager pendant.
 
 | Function  | Signature                                    | Description                                              |
 | --------- | -------------------------------------------- | -------------------------------------------------------- |

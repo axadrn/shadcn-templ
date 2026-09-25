@@ -123,7 +123,6 @@ templ sidebarDemoTeamSwitcher() {
 					Class:      "min-w-56 rounded-lg",
 					Align:      dropdownmenu.AlignStart,
 					Side:       dropdownmenu.SideRight,
-					MobileSide: dropdownmenu.SideBottom,
 					SideOffset: 4,
 				}) {
 					@dropdownmenu.Group() {
@@ -158,6 +157,17 @@ templ sidebarDemoTeamSwitcher() {
 			}
 		}
 	}
+	<script type="module" nonce={ templ.GetNonce(ctx) }>
+		// The pendant of useSidebar().isMobile in the block: the menu reads
+		// its side when it opens, onMobileChange keeps it current until the
+		// block is swapped out.
+		// side={isMobile ? "bottom" : "right"}
+		const menu = document.getElementById("sidebar-demo-team-menu");
+		window.templ.sidebar.onMobileChange((isMobile) => {
+			if (!menu?.isConnected) return false;
+			menu.setAttribute("data-templ-side", isMobile ? "bottom" : "right");
+		});
+	</script>
 }
 
 func logoHidden(i int) string {
@@ -211,13 +221,13 @@ templ sidebarDemoNavProjects() {
 			Projects
 		}
 		@sidebar.Menu() {
-			for _, item := range sidebarDemoProjects {
+			for i, item := range sidebarDemoProjects {
 				@sidebar.MenuItem() {
 					@sidebar.MenuButton(sidebar.MenuButtonProps{Href: item.URL}) {
 						@item.Icon()
 						<span>{ item.Name }</span>
 					}
-					@dropdownmenu.DropdownMenu() {
+					@dropdownmenu.DropdownMenu(dropdownmenu.Props{ID: "sidebar-demo-sidebar-demo-menu-" + strconv.Itoa(i)}) {
 						@sidebar.MenuAction(sidebar.MenuActionProps{
 							ShowOnHover: true,
 							Attributes:  dropdownmenu.Trigger(ctx),
@@ -226,11 +236,9 @@ templ sidebarDemoNavProjects() {
 							<span class="sr-only">More</span>
 						}
 						@dropdownmenu.Content(dropdownmenu.ContentProps{
-							Class:       "w-48 rounded-lg",
-							Side:        dropdownmenu.SideRight,
-							Align:       dropdownmenu.AlignStart,
-							MobileSide:  dropdownmenu.SideBottom,
-							MobileAlign: dropdownmenu.AlignEnd,
+							Class: "w-48 rounded-lg",
+							Side:  dropdownmenu.SideRight,
+							Align: dropdownmenu.AlignStart,
 						}) {
 							@dropdownmenu.Item() {
 								@icon.Folder(icon.Props{Class: "text-muted-foreground"})
@@ -257,12 +265,26 @@ templ sidebarDemoNavProjects() {
 			}
 		}
 	}
+	<script type="module" nonce={ templ.GetNonce(ctx) }>
+		// The pendant of useSidebar().isMobile in the block: the menu reads
+		// its side when it opens, onMobileChange keeps it current until the
+		// block is swapped out.
+		// side={isMobile ? "bottom" : "right"} align={isMobile ? "end" : "start"}
+		const menus = [...document.querySelectorAll('[id^="sidebar-demo-sidebar-demo-menu-"][data-templ-side]')];
+		window.templ.sidebar.onMobileChange((isMobile) => {
+			if (!menus[0]?.isConnected) return false;
+			menus.forEach((menu) => {
+				menu.setAttribute("data-templ-side", isMobile ? "bottom" : "right");
+				menu.setAttribute("data-templ-align", isMobile ? "end" : "start");
+			});
+		});
+	</script>
 }
 
 templ sidebarDemoNavUser() {
 	@sidebar.Menu() {
 		@sidebar.MenuItem() {
-			@dropdownmenu.DropdownMenu() {
+			@dropdownmenu.DropdownMenu(dropdownmenu.Props{ID: "sidebar-demo-sidebar-demo-menu"}) {
 				@sidebar.MenuButton(sidebar.MenuButtonProps{
 					Size:       sidebar.MenuButtonSizeLg,
 					Class:      "data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground",
@@ -284,7 +306,6 @@ templ sidebarDemoNavUser() {
 					Class:      "min-w-56 rounded-lg",
 					Side:       dropdownmenu.SideRight,
 					Align:      dropdownmenu.AlignEnd,
-					MobileSide: dropdownmenu.SideBottom,
 					SideOffset: 4,
 				}) {
 					@dropdownmenu.Group() {
@@ -336,6 +357,17 @@ templ sidebarDemoNavUser() {
 			}
 		}
 	}
+	<script type="module" nonce={ templ.GetNonce(ctx) }>
+		// The pendant of useSidebar().isMobile in the block: the menu reads
+		// its side when it opens, onMobileChange keeps it current until the
+		// block is swapped out.
+		// side={isMobile ? "bottom" : "right"}
+		const menu = document.getElementById("sidebar-demo-sidebar-demo-menu");
+		window.templ.sidebar.onMobileChange((isMobile) => {
+			if (!menu?.isConnected) return false;
+			menu.setAttribute("data-templ-side", isMobile ? "bottom" : "right");
+		});
+	</script>
 }
 
 templ SidebarDemo() {

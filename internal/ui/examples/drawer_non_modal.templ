@@ -3,10 +3,11 @@ package examples
 import (
 	"github.com/axadrn/shadcn-templ/v2/components/button"
 	"github.com/axadrn/shadcn-templ/v2/components/drawer"
+	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
 templ DrawerNonModal() {
-	@drawer.Drawer(drawer.Props{DisableModal: true, DisableDismissible: true, SwipeDirection: drawer.SwipeDirectionRight}) {
+	@drawer.Drawer(drawer.Props{Modal: utils.Ptr(false), DisablePointerDismissal: true, SwipeDirection: drawer.SwipeDirectionRight}) {
 		@button.Button(button.Props{Variant: button.VariantOutline, Attributes: drawer.Trigger(ctx)}) {
 			Non Modal
 		}

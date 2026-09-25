@@ -57,10 +57,9 @@ templ Toaster(props ...ToasterProps) {
 			id={ p.ID }
 		}
 		data-slot="toast-viewport"
-		data-tui-toaster
-		data-tui-portal
-		data-tui-toaster-timeout={ strconv.Itoa(p.Timeout) }
-		data-tui-toaster-limit={ strconv.Itoa(p.Limit) }
+		data-base-ui-portal
+		data-templ-timeout={ strconv.Itoa(p.Timeout) }
+		data-templ-limit={ strconv.Itoa(p.Limit) }
 		class={ utils.CN(
 			"pointer-events-none fixed inset-x-4 bottom-4 z-50 mx-auto w-auto max-w-sm outline-none sm:right-4 sm:left-auto sm:mx-0 sm:w-full",
 			p.Class,
@@ -83,18 +82,18 @@ templ Toast(props ...Props) {
 		if p.ID != "" {
 			id={ p.ID }
 		}
-		data-tui-toast-ssr
+		data-templ-toast
 		if p.Type != "" {
-			data-type={ string(p.Type) }
+			data-templ-type={ string(p.Type) }
 		}
 		if p.Timeout > 0 {
-			data-tui-toast-timeout={ strconv.Itoa(p.Timeout) }
+			data-templ-timeout={ strconv.Itoa(p.Timeout) }
 		}
 		if p.Title != "" {
-			data-tui-toast-title={ p.Title }
+			data-templ-title={ p.Title }
 		}
 		if p.Description != "" {
-			data-tui-toast-description={ p.Description }
+			data-templ-description={ p.Description }
 		}
 		class={ p.Class }
 	></div>

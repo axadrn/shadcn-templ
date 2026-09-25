@@ -22,8 +22,8 @@ const radioStateKey ctxKey = "contextmenuRadioState"
 
 type ctxState struct {
 	id          string
-	initialOpen bool
-	controlled  bool
+	open        *bool
+	defaultOpen bool
 }
 
 // menuID returns the id shared by Root, Trigger and Content via ctx.
@@ -38,13 +38,6 @@ type Props struct {
 	ID          string
 	Open        *bool
 	DefaultOpen bool
-}
-
-func initialOpen(p Props) bool {
-	if p.Open != nil {
-		return *p.Open
-	}
-	return p.DefaultOpen
 }
 
 type TriggerProps struct {
@@ -83,7 +76,8 @@ type ItemProps struct {
 	Inset               bool
 	Href                string
 	Target              string
-	DisableCloseOnClick bool
+	// CloseOnClick is Base UI's Menu.Item closeOnClick; nil means true.
+	CloseOnClick *bool
 }
 
 type CheckboxItemProps struct {
@@ -113,9 +107,8 @@ type RadioItemProps struct {
 }
 
 type radioState struct {
-	value      string
-	controlled bool
-	disabled   bool
+	value    string
+	disabled bool
 }
 
 func initialChecked(p CheckboxItemProps) bool {
@@ -165,13 +158,6 @@ type SubProps struct {
 	DefaultOpen bool
 }
 
-func initialSubOpen(p SubProps) bool {
-	if p.Open != nil {
-		return *p.Open
-	}
-	return p.DefaultOpen
-}
-
 type SubTriggerProps struct {
 	ID         string
 	Class      string
@@ -215,7 +201,7 @@ func checkItemClasses(cnClass string, disabled bool) string {
 // class list, the look comes from cn-context-menu-content (animations key on
 // Base UI's data-open/data-closed attributes). The --available-height/--transform-origin
 // variables become our JS variable names.
-const contentClasses = "cn-context-menu-content cn-context-menu-content-logical cn-menu-target cn-menu-translucent z-50 max-h-(--tui-contextmenu-available-height) origin-(--tui-contextmenu-transform-origin) overflow-x-hidden overflow-y-auto outline-none"
+const contentClasses = "cn-context-menu-content cn-context-menu-content-logical cn-menu-target cn-menu-translucent z-50 max-h-(--available-height) origin-(--transform-origin) overflow-x-hidden overflow-y-auto outline-none"
 
 // Root renders no element: it only generates the id that links Trigger and
 // Content (via ctx).
@@ -227,7 +213,7 @@ templ ContextMenu(props ...Props) {
 	if p.ID == "" {
 		{{ p.ID = utils.RandomID() }}
 	}
-	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, initialOpen: initialOpen(p), controlled: p.Open != nil}) }}
+	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, open: p.Open, defaultOpen: p.DefaultOpen}) }}
 	{ children... }
 }
 
@@ -241,8 +227,7 @@ templ Trigger(props ...TriggerProps) {
 			id={ p.ID }
 		}
 		data-slot="context-menu-trigger"
-		data-tui-contextmenu-trigger
-		data-tui-contextmenu-for={ menuID(ctx) }
+		data-templ-context-menu-trigger={ menuID(ctx) }
 		class={ utils.CN("cn-context-menu-trigger select-none", p.Class) }
 		{ p.Attributes... }
 	>
@@ -263,7 +248,7 @@ templ Portal(props ...PortalProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	<div data-tui-contextmenu-portal hidden { p.Attributes... }>
+	<div data-templ-portal hidden { p.Attributes... }>
 		{ children... }
 	</div>
 }
@@ -285,20 +270,20 @@ templ Content(props ...ContentProps) {
 	@Portal() {
 		<div
 			id={ menuID(ctx) }
-			data-tui-contextmenu-content
-			data-tui-contextmenu-initial-open={ strconv.FormatBool(s.initialOpen) }
-			data-tui-contextmenu-controlled?={ s.controlled }
-			data-tui-contextmenu-side={ string(p.Side) }
-			data-tui-contextmenu-side-offset={ strconv.Itoa(p.SideOffset) }
-			data-tui-contextmenu-align-offset={ strconv.Itoa(p.AlignOffset) }
+			data-templ-side={ string(p.Side) }
+			data-templ-side-offset={ strconv.Itoa(p.SideOffset) }
+			data-templ-align-offset={ strconv.Itoa(p.AlignOffset) }
+			if s.open != nil {
+				data-templ-open={ strconv.FormatBool(*s.open) }
+			}
+			data-templ-default-open?={ s.open == nil && s.defaultOpen }
 			data-closed
 			hidden
-			data-tui-portal
+			data-base-ui-portal
 			class="pointer-events-none isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
 				data-slot="context-menu-content"
-				data-tui-contextmenu-popup
 				data-closed
 				role="menu"
 				tabindex="-1"
@@ -340,9 +325,8 @@ templ Item(props ...ItemProps) {
 			data-slot="context-menu-item"
 			data-variant={ string(p.Variant) }
 			data-inset?={ p.Inset }
-			data-tui-contextmenu-item
-			if p.DisableCloseOnClick {
-				data-tui-contextmenu-disable-close-on-click="true"
+			if p.CloseOnClick != nil && !*p.CloseOnClick {
+				data-templ-close-on-click="false"
 			}
 			if p.Disabled {
 				aria-disabled="true"
@@ -360,9 +344,8 @@ templ Item(props ...ItemProps) {
 			data-slot="context-menu-item"
 			data-variant={ string(p.Variant) }
 			data-inset?={ p.Inset }
-			data-tui-contextmenu-item
-			if p.DisableCloseOnClick {
-				data-tui-contextmenu-disable-close-on-click="true"
+			if p.CloseOnClick != nil && !*p.CloseOnClick {
+				data-templ-close-on-click="false"
 			}
 			disabled?={ p.Disabled }
 			role="menuitem"
@@ -387,8 +370,7 @@ templ CheckboxItem(props ...CheckboxItemProps) {
 		id={ p.ID }
 		type="button"
 		data-slot="context-menu-checkbox-item"
-		data-tui-contextmenu-checkbox-item
-		data-tui-contextmenu-checkbox-controlled?={ p.Checked != nil }
+		data-templ-checked?={ p.Checked != nil }
 		role="menuitemcheckbox"
 		if checked {
 			data-checked
@@ -414,16 +396,16 @@ templ RadioGroup(props ...RadioGroupProps) {
 		{{ p = props[0] }}
 	}
 	{{ value := initialRadioValue(p) }}
-	{{ ctx = context.WithValue(ctx, radioStateKey, radioState{value: value, controlled: p.Value != nil, disabled: p.Disabled}) }}
+	{{ ctx = context.WithValue(ctx, radioStateKey, radioState{value: value, disabled: p.Disabled}) }}
 	<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
 		role="group"
 		data-slot="context-menu-radio-group"
-		data-tui-contextmenu-radio-group
-		data-tui-contextmenu-radio-controlled?={ p.Value != nil }
-		data-tui-contextmenu-radio-value={ value }
+		if p.Value != nil {
+			data-templ-value={ *p.Value }
+		}
 		data-disabled?={ p.Disabled }
 		class={ utils.CN("", p.Class) }
 		{ p.Attributes... }
@@ -447,9 +429,8 @@ templ RadioItem(props ...RadioItemProps) {
 		id={ p.ID }
 		type="button"
 		data-slot="context-menu-radio-item"
-		data-tui-contextmenu-radio-item
 		if p.Value != "" {
-			data-tui-contextmenu-radio-value={ p.Value }
+			data-templ-value={ p.Value }
 		}
 		role="menuitemradio"
 		if checked {
@@ -549,9 +530,10 @@ templ Sub(props ...SubProps) {
 			id={ p.ID }
 		}
 		data-slot="context-menu-sub"
-		data-tui-contextmenu-sub
-		data-tui-contextmenu-sub-open={ strconv.FormatBool(initialSubOpen(p)) }
-		data-tui-contextmenu-sub-controlled?={ p.Open != nil }
+		if p.Open != nil {
+			data-templ-open={ strconv.FormatBool(*p.Open) }
+		}
+		data-templ-default-open?={ p.Open == nil && p.DefaultOpen }
 		class={ utils.CN("", p.Class) }
 		{ p.Attributes... }
 	>
@@ -571,7 +553,6 @@ templ SubTrigger(props ...SubTriggerProps) {
 		type="button"
 		data-slot="context-menu-sub-trigger"
 		data-inset?={ p.Inset }
-		data-tui-contextmenu-sub-trigger
 		data-closed
 		role="menuitem"
 		aria-haspopup="menu"
@@ -603,7 +584,6 @@ templ SubContent(props ...SubContentProps) {
 			id={ p.ID }
 		}
 		data-slot="context-menu-sub-content"
-		data-tui-contextmenu-sub-content
 		data-closed
 		role="menu"
 		tabindex="-1"
@@ -614,7 +594,7 @@ templ SubContent(props ...SubContentProps) {
 				// the cn classes (animations key on Base UI's state attributes). max-h
 				// drops out because our JS only sets the available-height variable on
 				// the root positioner.
-				"cn-context-menu-content cn-context-menu-content-logical cn-menu-target cn-menu-translucent cn-context-menu-subcontent z-50 origin-(--tui-contextmenu-transform-origin) overflow-x-hidden overflow-y-auto outline-none",
+				"cn-context-menu-content cn-context-menu-content-logical cn-menu-target cn-menu-translucent cn-context-menu-subcontent z-50 origin-(--transform-origin) overflow-x-hidden overflow-y-auto outline-none",
 				// JS wiring: floatingui positions the sub content as a fixed layer and
 				// toggles the hidden class around the exit animation.
 				"hidden fixed inset-auto left-0 top-0 data-closed:fill-mode-forwards",

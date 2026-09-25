@@ -252,7 +252,7 @@ func CodeCollapsibleWrapper() templ.Component {
 			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div data-tui-docs-collapsible data-open=\"false\" class=\"group/collapsible relative md:-mx-1\"><div class=\"absolute top-1.5 right-9 z-10 flex items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div data-templ-docs-collapsible data-open=\"false\" class=\"group/collapsible relative md:-mx-1\"><div class=\"absolute top-1.5 right-9 z-10 flex items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -278,7 +278,7 @@ func CodeCollapsibleWrapper() templ.Component {
 			Variant:    button.VariantGhost,
 			Size:       button.SizeSm,
 			Class:      "h-7 rounded-md px-2 text-muted-foreground",
-			Attributes: templ.Attributes{"data-tui-docs-collapsible-toggle": true},
+			Attributes: templ.Attributes{"data-templ-docs-collapsible-toggle": true},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -291,7 +291,7 @@ func CodeCollapsibleWrapper() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><button type=\"button\" data-tui-docs-collapsible-toggle class=\"absolute inset-x-0 -bottom-2 flex h-20 items-center justify-center rounded-b-lg bg-gradient-to-b from-code/70 to-code text-sm text-muted-foreground group-data-[open=true]/collapsible:hidden\">Expand</button></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><button type=\"button\" data-templ-docs-collapsible-toggle class=\"absolute inset-x-0 -bottom-2 flex h-20 items-center justify-center rounded-b-lg bg-gradient-to-b from-code/70 to-code text-sm text-muted-foreground group-data-[open=true]/collapsible:hidden\">Expand</button></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -323,7 +323,7 @@ func CollapsibleCodeBlock(file string) templ.Component {
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div data-tui-docs-code data-tui-code-line-numbers data-open=\"false\" class=\"group/code relative border-t\"><div class=\"relative group-data-[open=true]/code:hidden\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div data-templ-docs-code data-templ-code-line-numbers data-open=\"false\" class=\"group/code relative border-t\"><div class=\"relative group-data-[open=true]/code:hidden\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -357,7 +357,7 @@ func CollapsibleCodeBlock(file string) templ.Component {
 			Variant:    button.VariantOutline,
 			Size:       button.SizeSm,
 			Class:      "relative z-10 h-8 rounded-lg bg-background px-3 text-sm text-foreground shadow-none hover:bg-muted dark:bg-background dark:text-foreground dark:hover:bg-muted",
-			Attributes: templ.Attributes{"data-tui-docs-code-toggle": true},
+			Attributes: templ.Attributes{"data-templ-docs-code-toggle": true},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var12), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -429,7 +429,7 @@ func sourcePreviewLines(file string, maxLines int) string {
 // InstallTabTriggerClass restyles our tabs trigger to shadcn's docs mdx
 // TabsTrigger (default variant, underline via border-b-2; the list height
 // clamps the trigger so the underline sits tight under the text).
-const InstallTabTriggerClass = "rounded-none border-0 border-b-2 border-transparent bg-transparent px-0 pt-1 pb-3 text-base text-muted-foreground hover:text-primary data-[tui-tabs-state=active]:border-primary data-[tui-tabs-state=active]:bg-transparent data-[tui-tabs-state=active]:!shadow-none data-[tui-tabs-state=active]:text-foreground dark:data-[tui-tabs-state=active]:border-primary dark:data-[tui-tabs-state=active]:bg-transparent"
+const InstallTabTriggerClass = "rounded-none border-0 border-b-2 border-transparent bg-transparent px-0 pt-1 pb-3 text-base text-muted-foreground hover:text-primary data-active:border-primary data-active:bg-transparent data-active:!shadow-none data-active:text-foreground dark:data-active:border-primary dark:data-active:bg-transparent"
 
 // DocsPageHeader: title, description and the copy-page/prev-next controls
 // (no breadcrumbs, like shadcn).
@@ -643,7 +643,7 @@ func CopyPageMenu() templ.Component {
 			Variant:    button.VariantSecondary,
 			Size:       button.SizeSm,
 			Class:      "h-8 shadow-none md:h-7 md:text-[0.8rem]",
-			Attributes: templ.Attributes{"data-tui-docs-copy-md": true, "data-copied": "false"},
+			Attributes: templ.Attributes{"data-templ-docs-copy-md": true, "data-copied": "false"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var20), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -1066,7 +1066,7 @@ func DocsCodeToggleScript() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\">\n\t\tdocument.addEventListener('click', (e) => {\n\t\t\tif (!(e.target instanceof Element)) return;\n\t\t\tconst collapsibleToggle = e.target.closest('[data-tui-docs-collapsible-toggle]');\n\t\t\tif (collapsibleToggle) {\n\t\t\t\tconst wrapper = collapsibleToggle.closest('[data-tui-docs-collapsible]');\n\t\t\t\tif (wrapper) wrapper.dataset.open = wrapper.dataset.open === 'true' ? 'false' : 'true';\n\t\t\t\treturn;\n\t\t\t}\n\t\t\tconst toggle = e.target.closest('[data-tui-docs-code-toggle]');\n\t\t\tif (toggle) {\n\t\t\t\tconst block = toggle.closest('[data-tui-docs-code]');\n\t\t\t\tif (block) block.dataset.open = 'true';\n\t\t\t\treturn;\n\t\t\t}\n\t\t\tconst copy = e.target.closest('[data-tui-docs-copy-md]');\n\t\t\tif (copy) {\n\t\t\t\tfetch(window.location.pathname + '.md')\n\t\t\t\t\t.then((r) => (r.ok ? r.text() : Promise.reject()))\n\t\t\t\t\t.then((text) => navigator.clipboard.writeText(text))\n\t\t\t\t\t.then(() => {\n\t\t\t\t\t\tcopy.setAttribute('data-copied', 'true');\n\t\t\t\t\t\tsetTimeout(() => copy.setAttribute('data-copied', 'false'), 1500);\n\t\t\t\t\t})\n\t\t\t\t\t.catch(() => {});\n\t\t\t}\n\t\t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\">\n\t\tdocument.addEventListener('click', (e) => {\n\t\t\tif (!(e.target instanceof Element)) return;\n\t\t\tconst collapsibleToggle = e.target.closest('[data-templ-docs-collapsible-toggle]');\n\t\t\tif (collapsibleToggle) {\n\t\t\t\tconst wrapper = collapsibleToggle.closest('[data-templ-docs-collapsible]');\n\t\t\t\tif (wrapper) wrapper.dataset.open = wrapper.dataset.open === 'true' ? 'false' : 'true';\n\t\t\t\treturn;\n\t\t\t}\n\t\t\tconst toggle = e.target.closest('[data-templ-docs-code-toggle]');\n\t\t\tif (toggle) {\n\t\t\t\tconst block = toggle.closest('[data-templ-docs-code]');\n\t\t\t\tif (block) block.dataset.open = 'true';\n\t\t\t\treturn;\n\t\t\t}\n\t\t\tconst copy = e.target.closest('[data-templ-docs-copy-md]');\n\t\t\tif (copy) {\n\t\t\t\tfetch(window.location.pathname + '.md')\n\t\t\t\t\t.then((r) => (r.ok ? r.text() : Promise.reject()))\n\t\t\t\t\t.then((text) => navigator.clipboard.writeText(text))\n\t\t\t\t\t.then(() => {\n\t\t\t\t\t\tcopy.setAttribute('data-copied', 'true');\n\t\t\t\t\t\tsetTimeout(() => copy.setAttribute('data-copied', 'false'), 1500);\n\t\t\t\t\t})\n\t\t\t\t\t.catch(() => {});\n\t\t\t}\n\t\t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

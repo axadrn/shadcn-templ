@@ -30,8 +30,8 @@ const stateKey ctxKey = "tooltipState"
 
 type ctxState struct {
 	id          string
-	initialOpen bool
-	controlled  bool
+	open        *bool
+	defaultOpen bool
 }
 
 func state(ctx context.Context) ctxState {
@@ -46,24 +46,27 @@ func state(ctx context.Context) ctxState {
 // own element:
 //
 //	@button.Button(button.Props{Attributes: tooltip.Trigger(ctx)}) { ... }
+//
+// The element keeps its own data-slot; data-base-ui-tooltip-trigger is the
+// identifier Base UI's TooltipTrigger renders for exactly that case.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
-		"data-tui-tooltip-trigger": true,
-		"aria-describedby":         state(ctx).id,
+		"data-base-ui-tooltip-trigger": true,
+		"aria-describedby":             state(ctx).id,
 	}
+}
+
+// DisableTrigger turns trigger attributes into a disabled trigger, Base UI's
+// TooltipTrigger disabled prop: no identifier, data-trigger-disabled instead.
+func DisableTrigger(attrs templ.Attributes) {
+	delete(attrs, "data-base-ui-tooltip-trigger")
+	attrs["data-trigger-disabled"] = true
 }
 
 type Props struct {
 	ID          string
 	Open        *bool
 	DefaultOpen bool
-}
-
-func initialOpen(p Props) bool {
-	if p.Open != nil {
-		return *p.Open
-	}
-	return p.DefaultOpen
 }
 
 type ContentProps struct {
@@ -106,7 +109,7 @@ func Tooltip(props ...Props) templ.Component {
 		if p.ID == "" {
 			p.ID = utils.RandomID()
 		}
-		ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, initialOpen: initialOpen(p), controlled: p.Open != nil})
+		ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, open: p.Open, defaultOpen: p.DefaultOpen})
 		templ_7745c5c3_Err = templ_7745c5c3_Var1.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -147,7 +150,7 @@ func Content(props ...ContentProps) templ.Component {
 			p.SideOffset = 4
 		}
 		s := state(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div data-tui-tooltip-portal hidden>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div data-templ-portal hidden>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -172,62 +175,68 @@ func Content(props ...ContentProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(s.id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/tooltip/tooltip.templ`, Line: 102, Col: 12}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/tooltip/tooltip.templ`, Line: 105, Col: 12}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" data-slot=\"tooltip-content\" data-tui-tooltip-content data-tui-tooltip-side=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" data-slot=\"tooltip-content\" data-templ-side=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Side))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/tooltip/tooltip.templ`, Line: 105, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/tooltip/tooltip.templ`, Line: 107, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" data-tui-tooltip-side-offset=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" data-templ-side-offset=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(p.SideOffset))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/tooltip/tooltip.templ`, Line: 106, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/tooltip/tooltip.templ`, Line: 108, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" data-tui-tooltip-initial-open=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatBool(s.initialOpen))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/tooltip/tooltip.templ`, Line: 107, Col: 68}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if s.controlled {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " data-tui-tooltip-controlled")
+		if s.open != nil {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " data-templ-open=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatBool(*s.open))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/tooltip/tooltip.templ`, Line: 110, Col: 49}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " data-closed hidden data-tui-portal role=\"tooltip\" class=\"")
+		if s.open == nil && s.defaultOpen {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " data-templ-default-open")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " data-closed hidden data-base-ui-portal role=\"tooltip\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -240,7 +249,7 @@ func Content(props ...ContentProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -248,7 +257,7 @@ func Content(props ...ContentProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, ">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, ">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -256,7 +265,7 @@ func Content(props ...ContentProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<span data-tui-tooltip-arrow data-closed class=\"cn-tooltip-arrow cn-tooltip-arrow-logical absolute z-50 bg-foreground fill-foreground data-[side=bottom]:top-1 data-[side=left]:top-1/2! data-[side=left]:-right-1 data-[side=left]:-translate-y-1/2 data-[side=right]:top-1/2! data-[side=right]:-left-1 data-[side=right]:-translate-y-1/2 data-[side=top]:-bottom-2.5\"></span></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<span aria-hidden=\"true\" data-closed class=\"cn-tooltip-arrow cn-tooltip-arrow-logical absolute z-50 bg-foreground fill-foreground data-[side=bottom]:top-1 data-[side=left]:top-1/2! data-[side=left]:-right-1 data-[side=left]:-translate-y-1/2 data-[side=right]:top-1/2! data-[side=right]:-left-1 data-[side=right]:-translate-y-1/2 data-[side=top]:-bottom-2.5\"></span></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

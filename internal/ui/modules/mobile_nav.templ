@@ -24,7 +24,7 @@ templ MobileNav(class string) {
 			class,
 		),
 		Attributes: templ.Attributes{
-			"data-tui-mobile-nav-trigger": "",
+			"data-templ-mobile-nav-trigger": "",
 			"aria-expanded":               "false",
 			"aria-controls":               "mobile-nav",
 		},
@@ -42,9 +42,9 @@ templ MobileNav(class string) {
 	}
 	<div
 		id="mobile-nav"
-		data-tui-mobile-nav
+		data-templ-mobile-nav
 		hidden
-		class="no-scrollbar fixed left-0 z-50 h-(--tui-mobile-nav-available-height) w-svw overflow-y-auto rounded-none border-none bg-background/90 p-0 shadow-none backdrop-blur duration-100"
+		class="no-scrollbar fixed left-0 z-50 h-(--templ-mobile-nav-available-height) w-svw overflow-y-auto rounded-none border-none bg-background/90 p-0 shadow-none backdrop-blur duration-100"
 	>
 		<div class="flex flex-col gap-12 overflow-auto px-6 py-6">
 			<div class="flex flex-col gap-4">
@@ -119,7 +119,7 @@ templ mobileNavScript() {
 			var SIDE_OFFSET = 14;
 
 			function trigger() {
-				return document.querySelector("[data-tui-mobile-nav-trigger]");
+				return document.querySelector("[data-templ-mobile-nav-trigger]");
 			}
 
 			function panel() {
@@ -132,7 +132,7 @@ templ mobileNavScript() {
 				if (!t || !p) return;
 				var top = t.getBoundingClientRect().bottom + SIDE_OFFSET;
 				p.style.top = top + "px";
-				p.style.setProperty("--tui-mobile-nav-available-height", window.innerHeight - top + "px");
+				p.style.setProperty("--templ-mobile-nav-available-height", window.innerHeight - top + "px");
 			}
 
 			function setOpen(open) {
@@ -146,7 +146,7 @@ templ mobileNavScript() {
 
 			document.addEventListener("click", function (e) {
 				if (!(e.target instanceof Element)) return;
-				var t = e.target.closest("[data-tui-mobile-nav-trigger]");
+				var t = e.target.closest("[data-templ-mobile-nav-trigger]");
 				if (t) {
 					var p = panel();
 					if (p) setOpen(p.hidden);

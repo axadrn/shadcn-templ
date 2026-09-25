@@ -275,7 +275,7 @@ func NavUser(user User) templ.Component {
 								var templ_7745c5c3_Var15 string
 								templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/nav_user.templ`, Line: 50, Col: 55}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/nav_user.templ`, Line: 49, Col: 55}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 								if templ_7745c5c3_Err != nil {
@@ -288,7 +288,7 @@ func NavUser(user User) templ.Component {
 								var templ_7745c5c3_Var16 string
 								templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/nav_user.templ`, Line: 52, Col: 22}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/nav_user.templ`, Line: 51, Col: 22}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 								if templ_7745c5c3_Err != nil {
@@ -470,7 +470,6 @@ func NavUser(user User) templ.Component {
 						Class:      "min-w-56",
 						Side:       dropdownmenu.SideRight,
 						Align:      dropdownmenu.AlignEnd,
-						MobileSide: dropdownmenu.SideBottom,
 						SideOffset: 4,
 					}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
@@ -478,7 +477,7 @@ func NavUser(user User) templ.Component {
 					}
 					return nil
 				})
-				templ_7745c5c3_Err = dropdownmenu.DropdownMenu().Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = dropdownmenu.DropdownMenu(dropdownmenu.Props{ID: "dashboard01-nav-user-menu"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -491,6 +490,23 @@ func NavUser(user User) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = sidebar.Menu().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<script type=\"module\" nonce=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var22 string
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/nav_user.templ`, Line: 81, Col: 50}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\">\n\t\t// The pendant of useSidebar().isMobile in the block: the menu reads\n\t\t// its side when it opens, onMobileChange keeps it current until the\n\t\t// block is swapped out.\n\t\t// side={isMobile ? \"bottom\" : \"right\"}\n\t\tconst menu = document.getElementById(\"dashboard01-nav-user-menu\");\n\t\twindow.templ.sidebar.onMobileChange((isMobile) => {\n\t\t\tif (!menu?.isConnected) return false;\n\t\t\tmenu.setAttribute(\"data-templ-side\", isMobile ? \"bottom\" : \"right\");\n\t\t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

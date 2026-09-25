@@ -1,6 +1,9 @@
 (function () {
   "use strict";
 
+  // Base UI's Toast.Viewport, shadcn's toast-viewport slot.
+  var VIEWPORT = '[data-slot="toast-viewport"]';
+
   // Vanilla port of shadcn's base/toast (Base UI Toast): the class strings,
   // CSS variables and stacking behavior mirror components/ui/toast.tsx.
 
@@ -59,7 +62,7 @@
   };
 
   function viewportOf(el) {
-    return el ? el.closest("[data-tui-toaster]") : document.querySelector("[data-tui-toaster]");
+    return el ? el.closest(VIEWPORT) : document.querySelector(VIEWPORT);
   }
 
   function toastsOf(vp) {
@@ -72,7 +75,7 @@
 
   function layout(vp) {
     var list = toastsOf(vp);
-    var limit = parseInt(vp.getAttribute("data-tui-toaster-limit"), 10) || 3;
+    var limit = parseInt(vp.getAttribute("data-templ-limit"), 10) || 3;
     var expanded = vp.hasAttribute("data-expanded");
 
     // Natural heights first: with the per-toast vars cleared, h-(--height)
@@ -111,22 +114,22 @@
   function startTimer(t) {
     if (t.getAttribute("data-type") === "loading") return;
     var vp = viewportOf(t);
-    var timeout = parseInt(t.getAttribute("data-tui-toast-timeout"), 10);
+    var timeout = parseInt(t.getAttribute("data-templ-timeout"), 10);
     if (!timeout) {
-      timeout = parseInt(vp.getAttribute("data-tui-toaster-timeout"), 10) || 5000;
+      timeout = parseInt(vp.getAttribute("data-templ-timeout"), 10) || 5000;
     }
-    var remaining = t._tuiRemaining != null ? t._tuiRemaining : timeout;
-    t._tuiDeadline = Date.now() + remaining;
-    t._tuiTimer = window.setTimeout(function () {
+    var remaining = t._templRemaining != null ? t._templRemaining : timeout;
+    t._templDeadline = Date.now() + remaining;
+    t._templTimer = window.setTimeout(function () {
       dismiss(t);
     }, remaining);
   }
 
   function stopTimer(t) {
-    if (t._tuiTimer) {
-      window.clearTimeout(t._tuiTimer);
-      t._tuiTimer = null;
-      t._tuiRemaining = Math.max(0, (t._tuiDeadline || 0) - Date.now());
+    if (t._templTimer) {
+      window.clearTimeout(t._templTimer);
+      t._templTimer = null;
+      t._templRemaining = Math.max(0, (t._templDeadline || 0) - Date.now());
     }
   }
 
@@ -140,9 +143,9 @@
     t.setAttribute("data-slot", "toast");
     t.setAttribute("role", "status");
     t.setAttribute("aria-atomic", "true");
-    t.id = opts.id || "tui-toast-" + ++seq;
+    t.id = opts.id || "templ-toast-" + ++seq;
     if (opts.type) t.setAttribute("data-type", opts.type);
-    if (opts.timeout) t.setAttribute("data-tui-toast-timeout", String(opts.timeout));
+    if (opts.timeout) t.setAttribute("data-templ-timeout", String(opts.timeout));
     t.style.setProperty("--toast-swipe-movement-x", "0px");
     t.style.setProperty("--toast-swipe-movement-y", "0px");
 
@@ -241,15 +244,15 @@
 
   document.addEventListener("pointerover", function (e) {
     if (!(e.target instanceof Element)) return;
-    var vp = e.target.closest("[data-tui-toaster]");
+    var vp = e.target.closest(VIEWPORT);
     if (vp) setExpanded(vp, true);
   });
 
   document.addEventListener("pointerout", function (e) {
     if (!(e.target instanceof Element)) return;
-    var vp = e.target.closest("[data-tui-toaster]");
+    var vp = e.target.closest(VIEWPORT);
     if (!vp) return;
-    if (e.relatedTarget instanceof Element && e.relatedTarget.closest("[data-tui-toaster]") === vp) return;
+    if (e.relatedTarget instanceof Element && e.relatedTarget.closest(VIEWPORT) === vp) return;
     setExpanded(vp, false);
   });
 
@@ -267,15 +270,15 @@
     if (!(e.target instanceof Element)) return;
     var t = e.target.closest('[data-slot="toast"]');
     if (!t || e.target.closest("button")) return;
-    t._tuiSwipe = { x: e.clientX, y: e.clientY };
+    t._templSwipe = { x: e.clientX, y: e.clientY };
   });
 
   document.addEventListener("pointermove", function (e) {
     if (!(e.target instanceof Element)) return;
     var t = e.target.closest('[data-slot="toast"]');
-    if (!t || !t._tuiSwipe) return;
-    var dx = Math.max(0, e.clientX - t._tuiSwipe.x);
-    var dy = Math.max(0, e.clientY - t._tuiSwipe.y);
+    if (!t || !t._templSwipe) return;
+    var dx = Math.max(0, e.clientX - t._templSwipe.x);
+    var dy = Math.max(0, e.clientY - t._templSwipe.y);
     t.style.setProperty("--toast-swipe-movement-x", dx + "px");
     t.style.setProperty("--toast-swipe-movement-y", dy + "px");
   });
@@ -283,10 +286,10 @@
   document.addEventListener("pointerup", function (e) {
     if (!(e.target instanceof Element)) return;
     var t = e.target.closest('[data-slot="toast"]');
-    if (!t || !t._tuiSwipe) return;
-    var dx = Math.max(0, e.clientX - t._tuiSwipe.x);
-    var dy = Math.max(0, e.clientY - t._tuiSwipe.y);
-    t._tuiSwipe = null;
+    if (!t || !t._templSwipe) return;
+    var dx = Math.max(0, e.clientX - t._templSwipe.x);
+    var dy = Math.max(0, e.clientY - t._templSwipe.y);
+    t._templSwipe = null;
     if (dy >= SWIPE_THRESHOLD && dy >= dx) {
       dismiss(t, "down");
     } else if (dx >= SWIPE_THRESHOLD) {
@@ -346,7 +349,7 @@
         }
         var vp = viewportOf(t);
         if (vp) layout(vp);
-        t._tuiRemaining = null;
+        t._templRemaining = null;
         startTimer(t);
       }
       Promise.resolve(p)
@@ -360,19 +363,19 @@
     },
   };
 
-  window.tui = window.tui || {};
-  window.tui.toast = api;
+  window.templ = window.templ || {};
+  window.templ.toast = api;
 
   // ----- SSR/htmx adoption --------------------------------------------------
 
   function init() {
-    document.querySelectorAll("[data-tui-toast-ssr]").forEach(function (stub) {
+    document.querySelectorAll("[data-templ-toast]").forEach(function (stub) {
       var opts = {
         id: stub.id || undefined,
-        title: stub.getAttribute("data-tui-toast-title") || "",
-        description: stub.getAttribute("data-tui-toast-description") || "",
-        type: stub.getAttribute("data-type") || "",
-        timeout: parseInt(stub.getAttribute("data-tui-toast-timeout"), 10) || 0,
+        title: stub.getAttribute("data-templ-title") || "",
+        description: stub.getAttribute("data-templ-description") || "",
+        type: stub.getAttribute("data-templ-type") || "",
+        timeout: parseInt(stub.getAttribute("data-templ-timeout"), 10) || 0,
       };
       stub.remove();
       createToast(opts);

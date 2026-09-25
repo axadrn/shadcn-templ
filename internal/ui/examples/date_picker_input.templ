@@ -62,7 +62,7 @@ templ DatePickerInput() {
 				if (!(e.target instanceof Element) || !e.target.closest("#date-picker-input")) return;
 				if (!e.detail.value) return;
 				input.value = fmt(e.detail.value);
-				window.tui.popover.close(e.target.closest("#date-picker-input"));
+				window.templ.popover.close(e.target.closest("#date-picker-input"));
 			});
 			input.addEventListener("input", () => {
 				const date = new Date(input.value);
@@ -76,7 +76,7 @@ templ DatePickerInput() {
 			input.addEventListener("keydown", (e) => {
 				if (e.key === "ArrowDown") {
 					e.preventDefault();
-					window.tui.popover.open(document.getElementById("date-picker-input"));
+					window.templ.popover.open(document.getElementById("date-picker-input"));
 				}
 			});
 		})();

@@ -1,6 +1,8 @@
 package hovercard
 
 import (
+	"bytes"
+	"context"
 	"os"
 	"strings"
 	"testing"
@@ -8,8 +10,14 @@ import (
 
 func TestControlledOpenOverridesDefaultOpen(t *testing.T) {
 	open := false
-	if initialOpen(Props{Open: &open, DefaultOpen: true}) {
-		t.Fatal("controlled false must override defaultOpen true")
+	ctx := context.WithValue(context.Background(), stateKey, ctxState{id: "h", open: &open, defaultOpen: true})
+	var output bytes.Buffer
+	if err := Content().Render(ctx, &output); err != nil {
+		t.Fatal(err)
+	}
+	html := output.String()
+	if !strings.Contains(html, `data-templ-open="false"`) || strings.Contains(html, `data-templ-default-open`) {
+		t.Fatalf("controlled false must override defaultOpen true: %s", html)
 	}
 }
 
@@ -22,7 +30,7 @@ func TestClientRequestsCancelableOpenChanges(t *testing.T) {
 	for _, want := range []string{
 		`new CustomEvent("hovercard-open-change"`,
 		`cancelable: true`,
-		`data-tui-hovercard-controlled`,
+		`data-templ-open`,
 		`FloatingUIDOM.autoUpdate(trigger, content, update`,
 		`layoutShift: typeof IntersectionObserver !== "undefined"`,
 	} {

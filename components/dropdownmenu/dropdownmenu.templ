@@ -40,8 +40,8 @@ const radioStateKey ctxKey = "dropdownmenuRadioState"
 
 type ctxState struct {
 	id          string
-	initialOpen bool
-	controlled  bool
+	open        *bool
+	defaultOpen bool
 }
 
 func state(ctx context.Context) ctxState {
@@ -72,14 +72,15 @@ func triggerID(menuID string) string {
 
 // Trigger returns the attributes that turn any element (usually a button)
 // into the menu trigger — the asChild equivalent: no wrapper element, so the
-// trigger composes cleanly inside ButtonGroup and friends.
+// trigger composes cleanly inside ButtonGroup and friends. The element keeps
+// its own data-slot; dropdownmenu.js finds it by aria-haspopup="menu" and the
+// aria-controls link to the menu, as Base UI's MenuTrigger renders them.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
-		"data-tui-dropdownmenu-trigger": true,
-		"id":                            triggerID(state(ctx).id),
-		"aria-controls":                 state(ctx).id,
-		"aria-haspopup":                 "menu",
-		"aria-expanded":                 "false",
+		"id":            triggerID(state(ctx).id),
+		"aria-controls": state(ctx).id,
+		"aria-haspopup": "menu",
+		"aria-expanded": "false",
 	}
 }
 
@@ -87,13 +88,6 @@ type Props struct {
 	ID          string
 	Open        *bool
 	DefaultOpen bool
-}
-
-func initialOpen(p Props) bool {
-	if p.Open != nil {
-		return *p.Open
-	}
-	return p.DefaultOpen
 }
 
 type ContentProps struct {
@@ -104,12 +98,6 @@ type ContentProps struct {
 	Side Side
 	// Align along the trigger edge. Defaults to start.
 	Align Align
-	// MobileSide/MobileAlign are the vanilla pendant of passing responsive
-	// side/align values from useSidebar. They apply below md while the normal
-	// Side/Align remain the desktop preference; collision avoidance still
-	// runs for both placements.
-	MobileSide  Side
-	MobileAlign Align
 	// SideOffset is the gap to the trigger in px. Defaults to 4.
 	SideOffset int
 	// AlignOffset shifts the menu along the aligned edge in px. Defaults to 0.
@@ -138,7 +126,8 @@ type ItemProps struct {
 	Inset               bool
 	Href                string
 	Target              string
-	DisableCloseOnClick bool
+	// CloseOnClick is Base UI's Menu.Item closeOnClick; nil means true.
+	CloseOnClick *bool
 }
 
 type CheckboxItemProps struct {
@@ -168,9 +157,8 @@ type RadioItemProps struct {
 }
 
 type radioState struct {
-	value      string
-	controlled bool
-	disabled   bool
+	value    string
+	disabled bool
 }
 
 func initialChecked(p CheckboxItemProps) bool {
@@ -207,12 +195,7 @@ type SubProps struct {
 	DefaultOpen bool
 }
 
-func initialSubOpen(p SubProps) bool {
-	if p.Open != nil {
-		return *p.Open
-	}
-	return p.DefaultOpen
-}
+
 
 type SubTriggerProps struct {
 	ID         string
@@ -263,7 +246,7 @@ templ DropdownMenu(props ...Props) {
 	if p.ID == "" {
 		{{ p.ID = utils.RandomID() }}
 	}
-	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, initialOpen: initialOpen(p), controlled: p.Open != nil}) }}
+	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, open: p.Open, defaultOpen: p.DefaultOpen}) }}
 	{ children... }
 }
 
@@ -280,7 +263,7 @@ templ Portal(props ...PortalProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	<div data-tui-dropdownmenu-portal hidden { p.Attributes... }>
+	<div data-templ-portal hidden { p.Attributes... }>
 		{ children... }
 	</div>
 }
@@ -305,27 +288,21 @@ templ Content(props ...ContentProps) {
 	@Portal() {
 		<div
 			id={ s.id }
-			data-tui-dropdownmenu-content
-			data-tui-dropdownmenu-side={ string(p.Side) }
-			data-tui-dropdownmenu-align={ string(p.Align) }
-			if p.MobileSide != "" {
-				data-tui-dropdownmenu-mobile-side={ string(p.MobileSide) }
+			data-templ-side={ string(p.Side) }
+			data-templ-align={ string(p.Align) }
+			data-templ-side-offset={ strconv.Itoa(p.SideOffset) }
+			data-templ-align-offset={ strconv.Itoa(p.AlignOffset) }
+			if s.open != nil {
+				data-templ-open={ strconv.FormatBool(*s.open) }
 			}
-			if p.MobileAlign != "" {
-				data-tui-dropdownmenu-mobile-align={ string(p.MobileAlign) }
-			}
-			data-tui-dropdownmenu-side-offset={ strconv.Itoa(p.SideOffset) }
-			data-tui-dropdownmenu-align-offset={ strconv.Itoa(p.AlignOffset) }
-			data-tui-dropdownmenu-initial-open={ strconv.FormatBool(s.initialOpen) }
-			data-tui-dropdownmenu-controlled?={ s.controlled }
+			data-templ-default-open?={ s.open == nil && s.defaultOpen }
 			data-closed
 			hidden
-			data-tui-portal
+			data-base-ui-portal
 			class="pointer-events-none isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
 				data-slot="dropdown-menu-content"
-				data-tui-dropdownmenu-popup
 				data-closed
 				role="menu"
 				aria-labelledby={ triggerID(s.id) }
@@ -406,9 +383,8 @@ templ Item(props ...ItemProps) {
 			data-slot="dropdown-menu-item"
 			data-variant={ string(p.Variant) }
 			data-inset?={ p.Inset }
-			data-tui-dropdownmenu-item
-			if p.DisableCloseOnClick {
-				data-tui-dropdownmenu-disable-close-on-click="true"
+			if p.CloseOnClick != nil && !*p.CloseOnClick {
+				data-templ-close-on-click="false"
 			}
 			if p.Disabled {
 				aria-disabled="true"
@@ -428,9 +404,8 @@ templ Item(props ...ItemProps) {
 			data-slot="dropdown-menu-item"
 			data-variant={ string(p.Variant) }
 			data-inset?={ p.Inset }
-			data-tui-dropdownmenu-item
-			if p.DisableCloseOnClick {
-				data-tui-dropdownmenu-disable-close-on-click="true"
+			if p.CloseOnClick != nil && !*p.CloseOnClick {
+				data-templ-close-on-click="false"
 			}
 			disabled?={ p.Disabled }
 			role="menuitem"
@@ -454,8 +429,7 @@ templ CheckboxItem(props ...CheckboxItemProps) {
 		}
 		type="button"
 		data-slot="dropdown-menu-checkbox-item"
-		data-tui-dropdownmenu-checkbox-item
-		data-tui-dropdownmenu-checkbox-controlled?={ p.Checked != nil }
+		data-templ-checked?={ p.Checked != nil }
 		role="menuitemcheckbox"
 		if checked {
 			data-checked
@@ -484,16 +458,16 @@ templ RadioGroup(props ...RadioGroupProps) {
 		{{ p = props[0] }}
 	}
 	{{ value := initialRadioValue(p) }}
-	{{ ctx = context.WithValue(ctx, radioStateKey, radioState{value: value, controlled: p.Value != nil, disabled: p.Disabled}) }}
+	{{ ctx = context.WithValue(ctx, radioStateKey, radioState{value: value, disabled: p.Disabled}) }}
 	<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
 		role="group"
 		data-slot="dropdown-menu-radio-group"
-		data-tui-dropdownmenu-radio-group
-		data-tui-dropdownmenu-radio-controlled?={ p.Value != nil }
-		data-tui-dropdownmenu-radio-value={ value }
+		if p.Value != nil {
+			data-templ-value={ *p.Value }
+		}
 		data-disabled?={ p.Disabled }
 		class={ utils.CN("", p.Class) }
 		{ p.Attributes... }
@@ -516,9 +490,8 @@ templ RadioItem(props ...RadioItemProps) {
 		}
 		type="button"
 		data-slot="dropdown-menu-radio-item"
-		data-tui-dropdownmenu-radio-item
 		if p.Value != "" {
-			data-tui-dropdownmenu-radio-value={ p.Value }
+			data-templ-value={ p.Value }
 		}
 		role="menuitemradio"
 		if checked {
@@ -590,9 +563,10 @@ templ Sub(props ...SubProps) {
 			id={ p.ID }
 		}
 		data-slot="dropdown-menu-sub"
-		data-tui-dropdownmenu-sub
-		data-tui-dropdownmenu-sub-open={ strconv.FormatBool(initialSubOpen(p)) }
-		data-tui-dropdownmenu-sub-controlled?={ p.Open != nil }
+		if p.Open != nil {
+			data-templ-open={ strconv.FormatBool(*p.Open) }
+		}
+		data-templ-default-open?={ p.Open == nil && p.DefaultOpen }
 		class={ utils.CN("", p.Class) }
 		{ p.Attributes... }
 	>
@@ -613,7 +587,6 @@ templ SubTrigger(props ...SubTriggerProps) {
 		type="button"
 		data-slot="dropdown-menu-sub-trigger"
 		data-inset?={ p.Inset }
-		data-tui-dropdownmenu-sub-trigger
 		role="menuitem"
 		aria-haspopup="menu"
 		aria-expanded="false"
@@ -644,7 +617,6 @@ templ SubContent(props ...SubContentProps) {
 			id={ p.ID }
 		}
 		data-slot="dropdown-menu-sub-content"
-		data-tui-dropdownmenu-sub-content
 		data-closed
 		role="menu"
 		aria-labelledby={ triggerID(subState(ctx).id) }

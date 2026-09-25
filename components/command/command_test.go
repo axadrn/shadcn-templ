@@ -14,10 +14,10 @@ func TestDialogForwardsOpenStateToDialogRoot(t *testing.T) {
 		t.Fatal(err)
 	}
 	html := out.String()
-	if !strings.Contains(html, `data-tui-dialog-controlled`) {
+	if !strings.Contains(html, `data-templ-open="false"`) {
 		t.Fatal("controlled command dialog is missing the dialog controlled marker")
 	}
-	if strings.Contains(html, `data-tui-dialog-initial-open="true"`) {
+	if strings.Contains(html, `data-templ-default-open`) {
 		t.Fatal("controlled false must override defaultOpen true")
 	}
 }

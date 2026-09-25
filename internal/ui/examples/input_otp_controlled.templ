@@ -20,7 +20,7 @@ templ InputOTPControlled() {
 	<script nonce={ templ.GetNonce(ctx) }>
 		document.addEventListener('input', (e) => {
 			const demo = e.target.closest?.('[data-otp-controlled-demo]');
-			if (!demo || !e.target.hasAttribute('data-tui-inputotp-input')) return;
+			if (!demo || !e.target.hasAttribute('data-input-otp')) return;
 			const value = e.target.value;
 			demo.querySelector('[data-otp-status]').textContent =
 				value === '' ? 'Enter your one-time password.' : 'You entered: ' + value;

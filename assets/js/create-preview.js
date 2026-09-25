@@ -10,12 +10,12 @@
      - a #design-system-theme-vars style element built like buildRegistryTheme
      - the cn-menu-target / [data-menu-translucent] menu color toggling with
        a MutationObserver and transition suppression
-   Replies tui-create-ready so the parent sends the initial params. */
+   Replies templ-create-ready so the parent sends the initial params. */
 (function () {
   "use strict";
 
-  if (window.__tuiCreatePreviewInitialized) return;
-  window.__tuiCreatePreviewInitialized = true;
+  if (window.__templCreatePreviewInitialized) return;
+  window.__templCreatePreviewInitialized = true;
 
   var THEME_STYLE_ELEMENT_ID = "design-system-theme-vars";
   var MANAGED_BODY_CLASS_PREFIXES = ["style-", "base-color-"];
@@ -27,15 +27,15 @@
     "  }\n" +
     "}\n";
 
-  var preset = window.tuiPreset;
-  var cfg = window.tuiCreateConfig;
+  var preset = window.templPreset;
+  var cfg = window.templCreateConfig;
 
   var lastParams = null;
   var currentMenuColor = null;
   var menuFrameId = 0;
 
   function themes() {
-    return window.tuiCreateThemes || [];
+    return window.templCreateThemes || [];
   }
 
   function getTheme(name) {
@@ -405,7 +405,7 @@
 
     // Tell the parent we are ready for the initial params.
     if (window.parent && window.parent !== window) {
-      window.parent.postMessage({ type: "tui-create-ready" }, window.location.origin);
+      window.parent.postMessage({ type: "templ-create-ready" }, window.location.origin);
     }
   }
 

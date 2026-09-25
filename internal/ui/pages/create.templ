@@ -39,7 +39,7 @@ const (
 )
 
 // Default style icon (Nova) from registry/styles.tsx; create.js swaps it per
-// state from window.tuiCreateConfig.STYLES.
+// state from window.templCreateConfig.STYLES.
 const createNovaIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" role="img" color="currentColor" class="size-4"><path d="M2 12C2 9.19974 2 7.79961 2.54497 6.73005C3.02433 5.78924 3.78924 5.02433 4.73005 4.54497C5.79961 4 7.19974 4 10 4H14C16.8003 4 18.2004 4 19.27 4.54497C20.2108 5.02433 20.9757 5.78924 21.455 6.73005C22 7.79961 22 9.19974 22 12C22 14.8003 22 16.2004 21.455 17.27C20.9757 18.2108 20.2108 18.9757 19.27 19.455C18.2004 20 16.8003 20 14 20H10C7.19974 20 5.79961 20 4.73005 19.455C3.78924 18.9757 3.02433 18.2108 2.54497 17.27C2 16.2004 2 14.8003 2 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path></svg>`
 
 // Lucide logo from icon-library-picker.tsx logos.lucide.
@@ -160,7 +160,7 @@ templ Create() {
 		<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL("/assets/js/create.js") }></script>
 		// create/page.tsx shell.
 		<main
-			data-tui-create
+			data-templ-create
 			class="section-soft relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden [--customizer-width:--spacing(48)] [--gap:--spacing(4)] md:[--gap:--spacing(6)] 2xl:[--customizer-width:--spacing(56)]"
 		>
 			<div
@@ -173,9 +173,9 @@ templ Create() {
 			// PickerContent portal: position:fixed popups must not live inside
 			// the backdrop-blur card (backdrop-filter creates a containing
 			// block), so like Base UI's portal they render at shell level.
-			<div data-tui-create-portal>
+			<div data-templ-create-portal>
 				// The transparent hover shield from PickerContent's portal.
-				<div data-tui-create-shield hidden class="fixed inset-y-0 right-0 left-62 z-40 bg-transparent"></div>
+				<div data-templ-create-shield hidden class="fixed inset-y-0 right-0 left-62 z-40 bg-transparent"></div>
 				@createMainMenuContent()
 				@createPickerContent("style", "") {
 					@createRadioGroup("style") {
@@ -287,7 +287,7 @@ templ createPreviewHost() {
 		<div class="relative z-0 mx-auto flex w-full flex-1 flex-col overflow-hidden">
 			<div class="absolute inset-0 bg-muted dark:bg-muted/30"></div>
 			<iframe
-				data-tui-create-preview
+				data-templ-create-preview
 				class="z-10 size-full flex-1"
 				title="Preview"
 			></iframe>
@@ -305,7 +305,7 @@ templ createPreviewSwitchButton(label, item string) {
 		Size:    button.SizeSm,
 		Class:   "h-7 min-w-8 cursor-pointer rounded-lg px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground data-[active=true]:bg-accent data-[active=true]:text-accent-foreground",
 		Attributes: templ.Attributes{
-			"data-tui-create-preview-item": item,
+			"data-templ-create-preview-item": item,
 			"data-active":                  utils.IfElse(item == "preview-02", "true", "false"),
 		},
 	}) {
@@ -326,26 +326,26 @@ templ createCustomizer() {
 		@card.Content(card.ContentProps{Class: "no-scrollbar min-h-0 flex-1 overflow-x-auto overflow-y-hidden md:overflow-y-auto"}) {
 			@field.Group(field.GroupProps{Class: "flex-row gap-2.5 py-px **:data-[slot=field-separator]:-mx-4 **:data-[slot=field-separator]:w-auto md:flex-col md:gap-3.25"}) {
 				@createPickerRow("style", "Style", "Nova", "") {
-					<div data-tui-create-indicator="style" class="pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center select-none md:right-2.5">
+					<div data-templ-create-indicator="style" class="pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center select-none md:right-2.5">
 						@templ.Raw(createNovaIcon)
 					</div>
 				}
 				@field.Separator(field.SeparatorProps{Class: "hidden md:block"})
 				@createPickerRow("baseColor", "Base Color", "Neutral", "") {
-					<div data-tui-create-indicator="baseColor" class="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 rounded-full bg-(--color) select-none md:right-2.5"></div>
+					<div data-templ-create-indicator="baseColor" class="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 rounded-full bg-(--color) select-none md:right-2.5"></div>
 				}
 				@createPickerRow("theme", "Theme", "Neutral", "") {
-					<div data-tui-create-indicator="theme" class="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 rounded-full bg-(--color) select-none md:right-2.5"></div>
+					<div data-templ-create-indicator="theme" class="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 rounded-full bg-(--color) select-none md:right-2.5"></div>
 				}
 				@createPickerRow("chartColor", "Chart Color", "Neutral", "") {
-					<div data-tui-create-indicator="chartColor" class="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 rounded-full bg-(--color) select-none md:right-2.5"></div>
+					<div data-templ-create-indicator="chartColor" class="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 rounded-full bg-(--color) select-none md:right-2.5"></div>
 				}
 				@field.Separator(field.SeparatorProps{Class: "hidden md:block"})
 				@createPickerRow("fontHeading", "Heading", "Inter", "") {
-					<div data-tui-create-indicator="fontHeading" class="pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-base text-foreground select-none md:right-2.5">Aa</div>
+					<div data-templ-create-indicator="fontHeading" class="pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-base text-foreground select-none md:right-2.5">Aa</div>
 				}
 				@createPickerRow("font", "Font", "Inter", "") {
-					<div data-tui-create-indicator="font" class="pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-base text-foreground select-none md:right-2.5">Aa</div>
+					<div data-templ-create-indicator="font" class="pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-base text-foreground select-none md:right-2.5">Aa</div>
 				}
 				@field.Separator(field.SeparatorProps{Class: "hidden md:block"})
 				@createPickerRow("iconLibrary", "Icon Library", "Lucide", "") {
@@ -375,7 +375,7 @@ templ createCustomizer() {
 					<div class="pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-base text-foreground select-none md:right-2.5">
 						// accent-picker.tsx trigger svg; create.js keeps
 						// data-accent in sync with the state.
-						<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24" fill="none" class="size-4 text-foreground" data-tui-create-indicator="menuAccent">
+						<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24" fill="none" class="size-4 text-foreground" data-templ-create-indicator="menuAccent">
 							<path d="M19 12.1294L12.9388 18.207C11.1557 19.9949 10.2641 20.8889 9.16993 20.9877C8.98904 21.0041 8.80705 21.0041 8.62616 20.9877C7.53195 20.8889 6.64039 19.9949 4.85726 18.207L2.83687 16.1811C1.72104 15.0622 1.72104 13.2482 2.83687 12.1294M19 12.1294L10.9184 4.02587M19 12.1294H2.83687M10.9184 4.02587L2.83687 12.1294M10.9184 4.02587L8.89805 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-accent="subtle" class="fill-muted-foreground/30 data-[accent=bold]:fill-foreground"></path>
 							<path d="M22 20C22 21.1046 21.1046 22 20 22C18.8954 22 18 21.1046 18 20C18 18.8954 20 17 20 17C20 17 22 18.8954 22 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-accent="subtle" class="fill-muted-foreground/30 data-[accent=bold]:fill-foreground"></path>
 						</svg>
@@ -389,16 +389,16 @@ templ createCustomizer() {
 				Variant: button.VariantOutline,
 				Class:   utils.CN(createFooterButtonClass, "min-w-0 flex-1 md:flex-none"),
 				Attributes: templ.Attributes{
-					"data-tui-create-copy": true,
+					"data-templ-create-copy": true,
 					"title":                "--preset b0",
 				},
 			}) {
-				<span class="block min-w-0 truncate" data-tui-create-copy-label>--preset b0</span>
+				<span class="block min-w-0 truncate" data-templ-create-copy-label>--preset b0</span>
 			}
 			@button.Button(button.Props{
 				Variant:    button.VariantOutline,
 				Class:      utils.CN(createFooterButtonClass, "max-w-20 min-w-0 flex-1 sm:max-w-none md:flex-none"),
-				Attributes: templ.Attributes{"data-tui-create-open-preset": true},
+				Attributes: templ.Attributes{"data-templ-create-open-preset": true},
 			}) {
 				<span class="hidden md:inline">Open Preset</span>
 				<span class="md:hidden">Open</span>
@@ -406,7 +406,7 @@ templ createCustomizer() {
 			@button.Button(button.Props{
 				Variant:    button.VariantOutline,
 				Class:      utils.CN(createFooterButtonClass, "max-w-20 min-w-0 flex-1 sm:max-w-none md:flex-none"),
-				Attributes: templ.Attributes{"data-tui-create-shuffle": true},
+				Attributes: templ.Attributes{"data-templ-create-shuffle": true},
 			}) {
 				<span class="w-full truncate text-center font-medium">Shuffle</span>
 			}
@@ -428,7 +428,7 @@ templ createPickerRow(param, label, value, wrapperClass string) {
 	<div class={ utils.CN("group/picker relative", wrapperClass) }>
 		<button
 			type="button"
-			data-tui-create-trigger={ param }
+			data-templ-create-trigger={ param }
 			data-slot="dropdown-menu-trigger"
 			aria-haspopup="menu"
 			aria-expanded="false"
@@ -437,9 +437,9 @@ templ createPickerRow(param, label, value, wrapperClass string) {
 			<div class="flex flex-col justify-start text-left">
 				<div class="text-xs text-muted-foreground">{ label }</div>
 				if param == "fontHeading" || param == "font" || param == "menuColor" {
-					<div class="line-clamp-1 max-w-[80%] truncate text-sm font-medium text-foreground" data-tui-create-value={ param }>{ value }</div>
+					<div class="line-clamp-1 max-w-[80%] truncate text-sm font-medium text-foreground" data-templ-create-value={ param }>{ value }</div>
 				} else {
-					<div class="text-sm font-medium text-foreground" data-tui-create-value={ param }>{ value }</div>
+					<div class="text-sm font-medium text-foreground" data-templ-create-value={ param }>{ value }</div>
 				}
 			</div>
 			{ children... }
@@ -455,16 +455,16 @@ templ createLockButton(param string) {
 		type="button"
 		title="Lock"
 		aria-label="Lock"
-		data-tui-create-lock={ param }
+		data-templ-create-lock={ param }
 		data-locked="false"
 		class={ createLockClass }
 	>
-		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-foreground" data-tui-create-lock-icon="locked" hidden>
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-foreground" data-templ-create-lock-icon="locked" hidden>
 			<path d="M4.26781 18.8447C4.49269 20.515 5.87613 21.8235 7.55966 21.9009C8.97627 21.966 10.4153 22 12 22C13.5847 22 15.0237 21.966 16.4403 21.9009C18.1239 21.8235 19.5073 20.515 19.7322 18.8447C19.879 17.7547 20 16.6376 20 15.5C20 14.3624 19.879 13.2453 19.7322 12.1553C19.5073 10.485 18.1239 9.17649 16.4403 9.09909C15.0237 9.03397 13.5847 9 12 9C10.4153 9 8.97627 9.03397 7.55966 9.09909C5.87613 9.17649 4.49269 10.485 4.26781 12.1553C4.12104 13.2453 4 14.3624 4 15.5C4 16.6376 4.12104 17.7547 4.26781 18.8447Z"></path>
 			<path d="M7.5 9V6.5C7.5 4.01472 9.51472 2 12 2C14.4853 2 16.5 4.01472 16.5 6.5V9" stroke-linecap="round" stroke-linejoin="round"></path>
 			<path d="M12.125 15.5H12M12.25 15.5C12.25 15.6381 12.1381 15.75 12 15.75C11.8619 15.75 11.75 15.6381 11.75 15.5C11.75 15.3619 11.8619 15.25 12 15.25C12.1381 15.25 12.25 15.3619 12.25 15.5Z" stroke-linecap="round"></path>
 		</svg>
-		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-foreground" data-tui-create-lock-icon="unlocked">
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-foreground" data-templ-create-lock-icon="unlocked">
 			<path d="M4.26781 18.8447C4.49269 20.515 5.87613 21.8235 7.55966 21.9009C8.97627 21.966 10.4153 22 12 22C13.5847 22 15.0237 21.966 16.4403 21.9009C18.1239 21.8235 19.5073 20.515 19.7322 18.8447C19.879 17.7547 20 16.6376 20 15.5C20 14.3624 19.879 13.2453 19.7322 12.1553C19.5073 10.485 18.1239 9.17649 16.4403 9.09909C15.0237 9.03397 13.5847 9 12 9C10.4153 9 8.97627 9.03397 7.55965 9.09909C5.87613 9.17649 4.49269 10.485 4.26781 12.1553C4.12104 13.2453 4 14.3624 4 15.5C4 16.6376 4.12104 17.7547 4.26781 18.8447Z"></path>
 			<path d="M7.5 9V6.5C7.5 4.01472 9.51472 2 12 2C13.9593 2 15.5 3.5 16 5" stroke-linecap="round" stroke-linejoin="round"></path>
 			<path d="M12.125 15.5H12M12.25 15.5C12.25 15.6381 12.1381 15.75 12 15.75C11.8619 15.75 11.75 15.6381 11.75 15.5C11.75 15.3619 11.8619 15.25 12 15.25C12.1381 15.25 12.25 15.3619 12.25 15.5Z" stroke-linecap="round"></path>
@@ -477,7 +477,7 @@ templ createLockButton(param string) {
 templ createMainMenuTrigger() {
 	<button
 		type="button"
-		data-tui-create-trigger="mainmenu"
+		data-templ-create-trigger="mainmenu"
 		data-slot="dropdown-menu-trigger"
 		aria-haspopup="menu"
 		aria-expanded="false"
@@ -495,7 +495,7 @@ templ createMainMenuTrigger() {
 // exact order, shortcuts filled per platform by create.js.
 templ createMainMenuContent() {
 	<div
-		data-tui-create-content="mainmenu"
+		data-templ-create-content="mainmenu"
 		data-slot="dropdown-menu-content"
 		role="menu"
 		hidden
@@ -503,7 +503,7 @@ templ createMainMenuContent() {
 	>
 		@createGroup() {
 			@createMenuActionItem("navigate", "Navigate...") {
-				<span data-slot="dropdown-menu-shortcut" data-tui-create-shortcut="navigate" class={ createShortcutClass }>⌘P</span>
+				<span data-slot="dropdown-menu-shortcut" data-templ-create-shortcut="navigate" class={ createShortcutClass }>⌘P</span>
 			}
 			@createMenuActionItem("open-preset", "Open Preset...") {
 				<span data-slot="dropdown-menu-shortcut" class={ createShortcutClass }>O</span>
@@ -518,10 +518,10 @@ templ createMainMenuContent() {
 		@createPopupSeparator()
 		@createGroup() {
 			@createMenuActionItem("undo", "Undo") {
-				<span data-slot="dropdown-menu-shortcut" data-tui-create-shortcut="undo" class={ createShortcutClass }>⌘Z</span>
+				<span data-slot="dropdown-menu-shortcut" data-templ-create-shortcut="undo" class={ createShortcutClass }>⌘Z</span>
 			}
 			@createMenuActionItem("redo", "Redo") {
-				<span data-slot="dropdown-menu-shortcut" data-tui-create-shortcut="redo" class={ createShortcutClass }>⇧⌘Z</span>
+				<span data-slot="dropdown-menu-shortcut" data-templ-create-shortcut="redo" class={ createShortcutClass }>⇧⌘Z</span>
 			}
 			@createPopupSeparator()
 			@createMenuActionItem("reset", "Reset") {
@@ -536,7 +536,7 @@ templ createMenuActionItem(action, label string) {
 		role="menuitem"
 		tabindex="-1"
 		data-slot="dropdown-menu-item"
-		data-tui-create-action={ action }
+		data-templ-create-action={ action }
 		class={ createMenuItemClass }
 	>
 		{ label }
@@ -548,7 +548,7 @@ templ createMenuActionItem(action, label string) {
 // shell level and positioned by create.js.
 templ createPickerContent(param, extraClass string) {
 	<div
-		data-tui-create-content={ param }
+		data-templ-create-content={ param }
 		data-slot="dropdown-menu-content"
 		role="menu"
 		hidden
@@ -559,7 +559,7 @@ templ createPickerContent(param, extraClass string) {
 }
 
 templ createRadioGroup(name string) {
-	<div data-slot="dropdown-menu-radio-group" role="group" data-tui-create-radiogroup={ name }>
+	<div data-slot="dropdown-menu-radio-group" role="group" data-templ-create-radiogroup={ name }>
 		{ children... }
 	</div>
 }
@@ -586,7 +586,7 @@ templ createRadioItem(value, label string, checked, disabled bool) {
 		role="menuitemradio"
 		tabindex="-1"
 		data-slot="dropdown-menu-radio-item"
-		data-tui-create-item
+		data-templ-create-item
 		data-value={ value }
 		aria-checked={ utils.IfElse(checked, "true", "false") }
 		data-checked={ utils.IfElse(checked, "true", "false") }
@@ -648,7 +648,7 @@ templ createFontGroups() {
 templ createOpenPresetDialog() {
 	@dialog.Dialog(dialog.Props{ID: "create-open-preset-dialog"}) {
 		@dialog.Content(dialog.ContentProps{Class: "dark"}) {
-			<form data-tui-create-preset-form>
+			<form data-templ-create-preset-form>
 				@dialog.Header() {
 					@dialog.Title() {
 						Open Preset
@@ -671,7 +671,7 @@ templ createOpenPresetDialog() {
 					@button.Button(button.Props{
 						Type:       button.TypeSubmit,
 						Disabled:   true,
-						Attributes: templ.Attributes{"data-tui-create-preset-submit": true},
+						Attributes: templ.Attributes{"data-templ-create-preset-submit": true},
 					}) {
 						Open
 					}
@@ -693,7 +693,7 @@ templ createOpenPresetDrawer() {
 					Paste a preset code to load a saved configuration.
 				}
 			}
-			<form data-tui-create-preset-form>
+			<form data-templ-create-preset-form>
 				<div class="px-4 py-2">
 					@createPresetField("create-preset-code-mobile")
 				</div>
@@ -702,7 +702,7 @@ templ createOpenPresetDrawer() {
 						Type:       button.TypeSubmit,
 						Class:      "h-10",
 						Disabled:   true,
-						Attributes: templ.Attributes{"data-tui-create-preset-submit": true},
+						Attributes: templ.Attributes{"data-templ-create-preset-submit": true},
 					}) {
 						Open
 					}
@@ -721,7 +721,7 @@ templ createOpenPresetDrawer() {
 }
 
 templ createPresetField(id string) {
-	@field.Field(field.Props{Attributes: templ.Attributes{"data-tui-create-preset-field": true}}) {
+	@field.Field(field.Props{Attributes: templ.Attributes{"data-templ-create-preset-field": true}}) {
 		@field.Label(field.LabelProps{For: id, Class: "sr-only"}) {
 			Preset code
 		}
@@ -731,7 +731,7 @@ templ createPresetField(id string) {
 				Placeholder: "b2D0wqNxT or --preset b2D0wqNxT",
 				Class:       "h-10 md:h-8",
 				Attributes: templ.Attributes{
-					"data-tui-create-preset-input": true,
+					"data-templ-create-preset-input": true,
 					"autocapitalize":               "none",
 					"autocorrect":                  "off",
 					"spellcheck":                   "false",
@@ -757,7 +757,7 @@ templ createResetDialog() {
 				@alertdialog.Cancel() {
 					Cancel
 				}
-				@alertdialog.Action(alertdialog.ActionProps{Attributes: templ.Attributes{"data-tui-create-reset-confirm": true}}) {
+				@alertdialog.Action(alertdialog.ActionProps{Attributes: templ.Attributes{"data-templ-create-reset-confirm": true}}) {
 					Reset
 				}
 			}
@@ -796,7 +796,7 @@ templ createCodeDialog() {
 						Value: []string{"new-project"},
 						Attributes: templ.Attributes{
 							"aria-label":           "Project type",
-							"data-tui-create-tabs": true,
+							"data-templ-create-tabs": true,
 						},
 					}) {
 						@togglegroup.Item(togglegroup.ItemProps{Value: "new-project"}) {
@@ -810,7 +810,7 @@ templ createCodeDialog() {
 						}
 					}
 				}
-				<div class="no-scrollbar overflow-y-auto" data-tui-create-tab="new-project">
+				<div class="no-scrollbar overflow-y-auto" data-templ-create-tab="new-project">
 					@field.Group(field.GroupProps{Class: "px-6 py-4"}) {
 						@field.Set(field.SetProps{Class: "gap-3"}) {
 							@field.Legend(field.LegendProps{Variant: field.LegendVariantLabel}) {
@@ -830,7 +830,7 @@ templ createCodeDialog() {
 						</div>
 					}
 				</div>
-				<div class="no-scrollbar overflow-y-auto" data-tui-create-tab="existing-project" hidden>
+				<div class="no-scrollbar overflow-y-auto" data-templ-create-tab="existing-project" hidden>
 					@field.Group(field.GroupProps{Class: "px-6 py-4"}) {
 						@field.Set(field.SetProps{Class: "gap-3"}) {
 							@field.Legend(field.LegendProps{Variant: field.LegendVariantLabel}) {
@@ -849,7 +849,7 @@ templ createCodeDialog() {
 						</div>
 					}
 				</div>
-				<div class="no-scrollbar overflow-y-auto" data-tui-create-tab="theme" hidden>
+				<div class="no-scrollbar overflow-y-auto" data-templ-create-tab="theme" hidden>
 					@field.Group(field.GroupProps{Class: "min-w-0 px-6 py-4"}) {
 						@field.Set(field.SetProps{Class: "min-w-0 gap-3"}) {
 							@field.Legend(field.LegendProps{Variant: field.LegendVariantLabel}) {
@@ -864,7 +864,7 @@ templ createCodeDialog() {
 									@createCopyIconButton("theme", "Copy theme")
 								</div>
 								<div class="relative no-scrollbar max-h-[45svh] overflow-auto border-t bg-popover p-3">
-									<pre class="min-w-max font-mono leading-normal whitespace-pre"><code data-tui-create-css></code></pre>
+									<pre class="min-w-max font-mono leading-normal whitespace-pre"><code data-templ-create-css></code></pre>
 								</div>
 							</div>
 						}
@@ -909,7 +909,7 @@ templ createApplyModeGrid() {
 // runner: the reference header row keeps its layout (pm TabsList left, icon
 // copy button right) with a static "shadcn-templ" label in the TabsList slot, the
 // command sits in the bg-popover content row. create.js keeps the command
-// text live with the current preset code (data-tui-create-command).
+// text live with the current preset code (data-templ-create-command).
 templ createCommandBox(target, command, initial string) {
 	<div class="w-full min-w-0 overflow-hidden rounded-xl border-0 ring-1 ring-border">
 		<div class="flex items-center gap-2 py-1 pr-1.5 pl-3">
@@ -918,7 +918,7 @@ templ createCommandBox(target, command, initial string) {
 		</div>
 		<div class="relative overflow-hidden border-t bg-popover p-3">
 			<div class="no-scrollbar overflow-x-auto">
-				<code class="font-mono text-sm whitespace-nowrap" data-tui-create-command={ command }>{ initial }</code>
+				<code class="font-mono text-sm whitespace-nowrap" data-templ-create-command={ command }>{ initial }</code>
 			</div>
 		</div>
 	</div>
@@ -932,12 +932,12 @@ templ createCopyIconButton(target, srLabel string) {
 		Variant:    button.VariantGhost,
 		Size:       button.SizeIconSm,
 		Class:      "ml-auto",
-		Attributes: templ.Attributes{"data-tui-create-copy-target": target},
+		Attributes: templ.Attributes{"data-templ-create-copy-target": target},
 	}) {
-		<span data-tui-create-copy-icon="copy">
+		<span data-templ-create-copy-icon="copy">
 			@icon.Copy()
 		</span>
-		<span data-tui-create-copy-icon="check" hidden>
+		<span data-templ-create-copy-icon="check" hidden>
 			@icon.Check()
 		</span>
 		<span class="sr-only">{ srLabel }</span>
@@ -950,8 +950,8 @@ templ createCopyButton(target, label string) {
 	@button.Button(button.Props{
 		Class: "h-9 w-full",
 		Attributes: templ.Attributes{
-			"data-tui-create-copy-target": target,
-			"data-tui-create-copy-label":  label,
+			"data-templ-create-copy-target": target,
+			"data-templ-create-copy-label":  label,
 		},
 	}) {
 		{ label }
@@ -1059,7 +1059,7 @@ templ createActionMenuItem(name, title, keywords string, checked bool) {
 		Value: title + " " + keywords,
 		Class: "px-2",
 		Attributes: templ.Attributes{
-			"data-tui-create-registry-item": name,
+			"data-templ-create-registry-item": name,
 			"data-checked":                  utils.IfElse(checked, "true", "false"),
 		},
 	}) {

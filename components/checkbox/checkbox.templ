@@ -46,7 +46,6 @@ templ Checkbox(props ...Props) {
 	{{ checked := initialChecked(p) }}
 	<span
 		data-slot="checkbox"
-		data-tui-checkbox
 		role="checkbox"
 		if p.Indeterminate {
 			aria-checked="mixed"
@@ -74,7 +73,7 @@ templ Checkbox(props ...Props) {
 		}
 		aria-readonly?={ p.ReadOnly }
 		aria-required?={ p.Required }
-		data-tui-checkbox-controlled?={ p.Checked != nil }
+		data-templ-checked?={ p.Checked != nil }
 		class={
 			utils.CN(
 				// 1:1 base/ui/checkbox.tsx: structure lives here, the look comes
@@ -113,7 +112,6 @@ templ Checkbox(props ...Props) {
 	// validation popups anchor near the control).
 	<input
 		type="checkbox"
-		data-tui-checkbox-input
 		aria-hidden="true"
 		tabindex="-1"
 		checked?={ checked }

@@ -24,9 +24,10 @@
 (function () {
   "use strict";
 
-  const GROUP = "[data-tui-resizable-group]";
-  const PANEL = "[data-tui-resizable-panel]";
-  const HANDLE = "[data-tui-resizable-handle]";
+  // react-resizable-panels' own markers: Group, Panel and Separator.
+  const GROUP = "[data-group]";
+  const PANEL = "[data-panel]";
+  const HANDLE = "[data-separator]";
   const CURSOR_FLAG_HORIZONTAL_MIN = 0b0001;
   const CURSOR_FLAG_HORIZONTAL_MAX = 0b0010;
   const CURSOR_FLAG_VERTICAL_MIN = 0b0100;
@@ -64,7 +65,7 @@
   }
 
   function orientationOf(group) {
-    return group.dataset.orientation === "vertical" ? "vertical" : "horizontal";
+    return group.dataset.templOrientation === "vertical" ? "vertical" : "horizontal";
   }
 
   function directChildren(group, selector) {
@@ -393,13 +394,13 @@
       expandToSize: undefined,
       prevSize: undefined,
       raw: {
-        collapsedSize: element.dataset.collapsedSize || "0%",
-        collapsible: element.hasAttribute("data-collapsible"),
-        defaultSize: element.dataset.defaultSize,
+        collapsedSize: element.dataset.templCollapsedSize || "0%",
+        collapsible: element.hasAttribute("data-templ-collapsible"),
+        defaultSize: element.dataset.templDefaultSize,
         disabled: element.hasAttribute("data-disabled"),
-        groupResizeBehavior: element.dataset.groupResizeBehavior || "preserve-relative-size",
-        maxSize: element.dataset.maxSize || "100%",
-        minSize: element.dataset.minSize || "0%",
+        groupResizeBehavior: element.dataset.templGroupResizeBehavior || "preserve-relative-size",
+        maxSize: element.dataset.templMaxSize || "100%",
+        minSize: element.dataset.templMinSize || "0%",
       },
     };
   }
@@ -409,13 +410,13 @@
       element,
       id: element.id,
       disabled: element.getAttribute("aria-disabled") === "true",
-      disableDoubleClick: element.hasAttribute("data-disable-double-click"),
+      disableDoubleClick: element.hasAttribute("data-templ-disable-double-click"),
     };
   }
 
   function parseDefaultLayout(group) {
-    if (!group.dataset.defaultLayout) return undefined;
-    try { return JSON.parse(group.dataset.defaultLayout); } catch (_) { return undefined; }
+    if (!group.dataset.templDefaultLayout) return undefined;
+    try { return JSON.parse(group.dataset.templDefaultLayout); } catch (_) { return undefined; }
   }
 
   function stateFor(group) {
@@ -431,11 +432,11 @@
       element: group,
       id: group.id,
       orientation,
-      disabled: group.hasAttribute("data-disabled"),
-      disableCursor: group.hasAttribute("data-disable-cursor"),
+      disabled: group.hasAttribute("data-templ-disabled"),
+      disableCursor: group.hasAttribute("data-templ-disable-cursor"),
       resizeTargetMinimumSize: {
-        coarse: Number.parseFloat(group.dataset.resizeTargetCoarse) || 20,
-        fine: Number.parseFloat(group.dataset.resizeTargetFine) || 10,
+        coarse: Number.parseFloat(group.dataset.templResizeTargetMinimumSizeCoarse) || 20,
+        fine: Number.parseFloat(group.dataset.templResizeTargetMinimumSizeFine) || 10,
       },
       panels: sortByElementOffset(orientation, panelElements.map(panelRecord)),
       separators: sortByElementOffset(orientation, separatorElements.map(separatorRecord)),
@@ -914,7 +915,7 @@
     const cursor = cursorForInteraction();
     if (!cursorStyleElement) {
       cursorStyleElement = document.createElement("style");
-      cursorStyleElement.dataset.tuiResizableCursor = "";
+      cursorStyleElement.dataset.templResizableCursor = "";
       document.head.appendChild(cursorStyleElement);
     }
     cursorStyleElement.textContent = cursor ? `*, *:hover { cursor: ${cursor} !important; }` : "";
@@ -1249,8 +1250,8 @@
     });
   }
 
-  window.tui = window.tui || {};
-  window.tui.resizable = api;
+  window.templ = window.templ || {};
+  window.templ.resizable = api;
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => initialize());
   else initialize();
   new MutationObserver((records) => records.forEach((record) => {

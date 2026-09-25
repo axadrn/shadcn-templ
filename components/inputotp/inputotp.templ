@@ -74,9 +74,9 @@ templ InputOTP(props ...Props) {
 	{{ ctx = context.WithValue(ctx, stateKey, ctxState{value: p.Value}) }}
 	<div
 		data-slot="input-otp"
-		data-tui-inputotp
+		data-input-otp-container
 		if p.Pattern != "" {
-			data-tui-inputotp-pattern={ p.Pattern }
+			data-templ-pattern={ p.Pattern }
 		}
 		class={ utils.CN("cn-input-otp relative flex items-center has-disabled:opacity-50", p.Class) }
 		{ p.Attributes... }
@@ -86,7 +86,7 @@ templ InputOTP(props ...Props) {
 			if p.ID != "" {
 				id={ p.ID }
 			}
-			data-tui-inputotp-input
+			data-input-otp
 			type="text"
 			inputmode="numeric"
 			autocomplete="one-time-code"
@@ -142,8 +142,7 @@ templ Slot(props ...SlotProps) {
 			id={ p.ID }
 		}
 		data-slot="input-otp-slot"
-		data-tui-inputotp-slot
-		data-tui-inputotp-index={ strconv.Itoa(p.Index) }
+		data-templ-index={ strconv.Itoa(p.Index) }
 		class={
 			utils.CN(
 				"cn-input-otp-slot relative flex items-center justify-center data-[active=true]:z-10",
@@ -152,10 +151,10 @@ templ Slot(props ...SlotProps) {
 		}
 		{ p.Attributes... }
 	>
-		<span data-tui-inputotp-char>{ char }</span>
+		<span>{ char }</span>
 		// input-otp only mounts the caret in the active empty slot; ours starts
 		// hidden and inputotp.js toggles hidden/flex.
-		<div data-tui-inputotp-caret class="cn-input-otp-caret pointer-events-none absolute inset-0 hidden items-center justify-center">
+		<div class="cn-input-otp-caret pointer-events-none absolute inset-0 hidden items-center justify-center">
 			<div class="cn-input-otp-caret-line"></div>
 		</div>
 	</div>

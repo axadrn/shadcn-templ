@@ -3,10 +3,10 @@
 
   // Copy button click delegation
   document.addEventListener("click", (e) => {
-    const copyButton = e.target.closest("[data-copy-button]");
+    const copyButton = e.target.closest("[data-templ-copy-button]");
     if (!copyButton) return;
 
-    const targetId = copyButton.dataset.targetId;
+    const targetId = copyButton.dataset.templTargetId;
     if (!targetId) {
       console.error("CopyButton: No target-id specified");
       return;
@@ -28,9 +28,9 @@
 
     // Get icon elements
     const iconClipboard = copyButton.querySelector(
-      "[data-copy-icon-clipboard]",
+      "[data-templ-copy-icon-clipboard]",
     );
-    const iconCheck = copyButton.querySelector("[data-copy-icon-check]");
+    const iconCheck = copyButton.querySelector("[data-templ-copy-icon-check]");
 
     if (!iconClipboard || !iconCheck) return;
 
@@ -42,7 +42,7 @@
       const tooltipText = copyButton
         .closest(".inline-block")
         ?.parentElement?.parentElement?.querySelector(
-          "[data-copy-tooltip-text]",
+          "[data-templ-copy-tooltip-text]",
         );
       const originalText = tooltipText?.textContent;
       if (tooltipText) {

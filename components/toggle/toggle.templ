@@ -32,14 +32,13 @@ const (
 
 type groupState struct {
 	initialized bool
-	controlled  bool
 	pressed     map[string]bool
 }
 
 // WithGroupDefaults stores a group's variant/size/spacing in the context so
 // child Toggles inherit them and style themselves as group items. Used by the
 // togglegroup component.
-func WithGroupDefaults(ctx context.Context, variant Variant, size Size, spacing int, values []string, initialized bool, controlled bool) context.Context {
+func WithGroupDefaults(ctx context.Context, variant Variant, size Size, spacing int, values []string, initialized bool) context.Context {
 	ctx = context.WithValue(ctx, variantKey, variant)
 	ctx = context.WithValue(ctx, sizeKey, size)
 	ctx = context.WithValue(ctx, spacingKey, spacing)
@@ -47,7 +46,7 @@ func WithGroupDefaults(ctx context.Context, variant Variant, size Size, spacing 
 	for _, value := range values {
 		pressed[value] = true
 	}
-	ctx = context.WithValue(ctx, groupStateKey, groupState{initialized: initialized, controlled: controlled, pressed: pressed})
+	ctx = context.WithValue(ctx, groupStateKey, groupState{initialized: initialized, pressed: pressed})
 	return ctx
 }
 
@@ -72,12 +71,12 @@ func spacingFromCtx(ctx context.Context) (int, bool) {
 	return s, ok
 }
 
-func pressedFromGroup(ctx context.Context, value string) (pressed bool, initialized bool, controlled bool) {
+func pressedFromGroup(ctx context.Context, value string) (pressed bool, initialized bool) {
 	state, ok := ctx.Value(groupStateKey).(groupState)
 	if !ok {
-		return false, false, false
+		return false, false
 	}
-	return state.pressed[value], state.initialized, state.controlled
+	return state.pressed[value], state.initialized
 }
 
 type Props struct {
@@ -145,7 +144,7 @@ templ Toggle(props ...Props) {
 	}
 	{{ spacing, inGroup := spacingFromCtx(ctx) }}
 	{{ pressed := initialPressed(p) }}
-	{{ groupPressed, groupInitialized, groupControlled := pressedFromGroup(ctx, p.Value) }}
+	{{ groupPressed, groupInitialized := pressedFromGroup(ctx, p.Value) }}
 	if groupInitialized {
 		{{ pressed = groupPressed }}
 	}
@@ -165,16 +164,16 @@ templ Toggle(props ...Props) {
 		if p.ID != "" {
 			id={ p.ID }
 		}
-		data-tui-toggle
 		if p.Value != "" {
-			data-tui-toggle-value={ p.Value }
+			data-templ-value={ p.Value }
 		}
 		aria-pressed={ strconv.FormatBool(pressed) }
 		if pressed {
 			data-pressed
 		}
-		data-tui-toggle-controlled?={ p.Pressed != nil || groupControlled }
+		data-templ-pressed?={ p.Pressed != nil }
 		disabled?={ p.Disabled }
+		data-disabled?={ p.Disabled }
 		class={ utils.CN(map[string]bool{groupItemClasses(): inGroup}, baseClasses, variantClasses(p.Variant), sizeClasses(p.Size), p.Class) }
 		{ p.Attributes... }
 	>

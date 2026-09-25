@@ -25,7 +25,6 @@ func TestPanelUsesUpstreamTwoLayerOverflowStructure(t *testing.T) {
 		`data-panel`,
 		`flex-basis:50%`,
 		`overflow:visible`,
-		`data-tui-resizable-panel-content`,
 		`max-height:100%;max-width:100%;flex-grow:1;overflow:auto`,
 	} {
 		if !strings.Contains(html, want) {
@@ -66,8 +65,8 @@ func TestGroupUsesUpstreamHitTargetDefaults(t *testing.T) {
 	for _, want := range []string{
 		`data-slot="resizable-panel-group"`,
 		`data-group`,
-		`data-resize-target-coarse="20"`,
-		`data-resize-target-fine="10"`,
+		`data-templ-resize-target-minimum-size-coarse="20"`,
+		`data-templ-resize-target-minimum-size-fine="10"`,
 		`cn-resizable-panel-group`,
 		`touch-action:pan-y`,
 	} {

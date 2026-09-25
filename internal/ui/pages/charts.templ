@@ -227,11 +227,11 @@ templ chartsPageScript() {
 				f.classList.add("opacity-100");
 			};
 			document.addEventListener("load", (e) => {
-				if (e.target instanceof Element && e.target.matches("[data-tui-chart-iframe]")) {
+				if (e.target instanceof Element && e.target.matches("[data-templ-chart-iframe]")) {
 					revealIframe(e.target);
 				}
 			}, true);
-			document.querySelectorAll("[data-tui-chart-iframe]").forEach((f) => {
+			document.querySelectorAll("[data-templ-chart-iframe]").forEach((f) => {
 				const d = f.contentDocument;
 				if (d && d.readyState === "complete" && d.URL !== "about:blank") {
 					revealIframe(f);
@@ -242,17 +242,17 @@ templ chartsPageScript() {
 			// for two seconds.
 			document.addEventListener("click", (e) => {
 				if (!(e.target instanceof Element)) return;
-				const btn = e.target.closest("[data-tui-chart-copy]");
+				const btn = e.target.closest("[data-templ-chart-copy]");
 				if (!btn) return;
-				const name = btn.getAttribute("data-tui-chart-copy");
-				const code = document.querySelector(`[data-tui-chart-code="${name}"]`);
+				const name = btn.getAttribute("data-templ-chart-copy");
+				const code = document.querySelector(`[data-templ-chart-code="${name}"]`);
 				if (!code) return;
 				navigator.clipboard.writeText(code.value);
-				btn.querySelector("[data-tui-chart-copy-idle]").classList.add("hidden");
-				btn.querySelector("[data-tui-chart-copy-done]").classList.remove("hidden");
+				btn.querySelector("[data-templ-chart-copy-idle]").classList.add("hidden");
+				btn.querySelector("[data-templ-chart-copy-done]").classList.remove("hidden");
 				setTimeout(() => {
-					btn.querySelector("[data-tui-chart-copy-idle]").classList.remove("hidden");
-					btn.querySelector("[data-tui-chart-copy-done]").classList.add("hidden");
+					btn.querySelector("[data-templ-chart-copy-idle]").classList.remove("hidden");
+					btn.querySelector("[data-templ-chart-copy-done]").classList.add("hidden");
 				}, 2000);
 			});
 

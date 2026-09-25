@@ -1,27 +1,31 @@
 (function () {
   "use strict";
 
+  // input-otp's own markers: the container and the input.
+  const ROOT = "[data-input-otp-container]";
+  const INPUT = "[data-input-otp]";
+
   // Pendant of the input-otp library: one invisible real input over the
   // container drives everything, the slots only display state.
 
   function roots() {
-    return document.querySelectorAll("[data-tui-inputotp]");
+    return document.querySelectorAll(ROOT);
   }
 
   function inputOf(root) {
-    return root.querySelector("[data-tui-inputotp-input]");
+    return root.querySelector(INPUT);
   }
 
   function slotsOf(root) {
-    return Array.from(root.querySelectorAll("[data-tui-inputotp-slot]")).sort(
+    return Array.from(root.querySelectorAll('[data-slot="input-otp-slot"]')).sort(
       (a, b) =>
-        parseInt(a.getAttribute("data-tui-inputotp-index")) -
-        parseInt(b.getAttribute("data-tui-inputotp-index")),
+        parseInt(a.getAttribute("data-templ-index")) -
+        parseInt(b.getAttribute("data-templ-index")),
     );
   }
 
   function sanitize(root, value) {
-    const pattern = root.getAttribute("data-tui-inputotp-pattern");
+    const pattern = root.getAttribute("data-templ-pattern");
     let out = "";
     for (const ch of value) {
       if (!pattern || new RegExp(pattern).test(ch)) out += ch;
@@ -74,9 +78,9 @@
     const start = input.selectionStart;
     const end = input.selectionEnd;
     slots.forEach((slot, i) => {
-      const charEl = slot.querySelector("[data-tui-inputotp-char]");
+      const charEl = slot.querySelector(":scope > span");
       if (charEl) charEl.textContent = value[i] || "";
-      const caretEl = slot.querySelector("[data-tui-inputotp-caret]");
+      const caretEl = slot.querySelector(":scope > div");
       let active = false;
       if (focused) {
         if (start === end) {
@@ -96,8 +100,8 @@
   }
 
   function initRoot(root) {
-    if (root.dataset.tuiInputotpInit === "true") return;
-    root.dataset.tuiInputotpInit = "true";
+    if (root._templInit) return;
+    root._templInit = true;
     const input = inputOf(root);
     if (!input) return;
     input.maxLength = slotsOf(root).length;
@@ -110,8 +114,8 @@
   }
 
   document.addEventListener("input", (e) => {
-    if (!(e.target instanceof Element) || !e.target.hasAttribute("data-tui-inputotp-input")) return;
-    const root = e.target.closest("[data-tui-inputotp]");
+    if (!(e.target instanceof Element) || !e.target.matches(INPUT)) return;
+    const root = e.target.closest(ROOT);
     const clean = sanitize(root, e.target.value);
     if (clean !== e.target.value) {
       e.target.value = clean;
@@ -121,9 +125,9 @@
   });
 
   document.addEventListener("focusin", (e) => {
-    if (!(e.target instanceof Element) || !e.target.hasAttribute("data-tui-inputotp-input")) return;
+    if (!(e.target instanceof Element) || !e.target.matches(INPUT)) return;
     const input = e.target;
-    const root = input.closest("[data-tui-inputotp]");
+    const root = input.closest(ROOT);
     forceEndSelection(root);
     render(root);
     // Chrome restores the previous caret position right after focus,
@@ -138,9 +142,9 @@
 
   // Arrow navigation moves the single-character selection like input-otp.
   document.addEventListener("keydown", (e) => {
-    if (!(e.target instanceof Element) || !e.target.hasAttribute("data-tui-inputotp-input")) return;
+    if (!(e.target instanceof Element) || !e.target.matches(INPUT)) return;
     const input = e.target;
-    const root = input.closest("[data-tui-inputotp]");
+    const root = input.closest(ROOT);
     const max = slotsOf(root).length;
     const len = input.value.length;
     const start = input.selectionStart || 0;
@@ -172,15 +176,15 @@
   });
 
   document.addEventListener("focusout", (e) => {
-    if (!(e.target instanceof Element) || !e.target.hasAttribute("data-tui-inputotp-input")) return;
-    render(e.target.closest("[data-tui-inputotp]"));
+    if (!(e.target instanceof Element) || !e.target.matches(INPUT)) return;
+    render(e.target.closest(ROOT));
   });
 
   // Pointer presses always land on the invisible input; defer so the
   // browser's own caret placement is overridden.
   document.addEventListener("pointerup", (e) => {
-    if (!(e.target instanceof Element) || !e.target.hasAttribute("data-tui-inputotp-input")) return;
-    const root = e.target.closest("[data-tui-inputotp]");
+    if (!(e.target instanceof Element) || !e.target.matches(INPUT)) return;
+    const root = e.target.closest(ROOT);
     requestAnimationFrame(() => {
       forceEndSelection(root);
       render(root);
@@ -189,8 +193,8 @@
 
   document.addEventListener("selectionchange", () => {
     const el = document.activeElement;
-    if (!(el instanceof Element) || !el.hasAttribute("data-tui-inputotp-input")) return;
-    const root = el.closest("[data-tui-inputotp]");
+    if (!(el instanceof Element) || !el.matches(INPUT)) return;
+    const root = el.closest(ROOT);
     normalizeSelection(root);
     render(root);
   });

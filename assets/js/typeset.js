@@ -17,13 +17,13 @@
      components/docs-panel.tsx       -> install docs + prompt, copy buttons
      components/get-code-drawer.tsx  -> swipe direction per viewport
 
-   Font data comes from window.tuiCreateConfig.FONTS. The DOM contract is
-   data-tui-typeset-* attributes, SSRd by internal/ui/pages/typeset.templ. */
+   Font data comes from window.templCreateConfig.FONTS. The DOM contract is
+   data-templ-typeset-* attributes, SSRd by internal/ui/pages/typeset.templ. */
 (function () {
   "use strict";
 
-  if (window.__tuiTypesetInitialized) return;
-  window.__tuiTypesetInitialized = true;
+  if (window.__templTypesetInitialized) return;
+  window.__templTypesetInitialized = true;
 
   var MAC_REGEX = /Mac|iPhone|iPad|iPod/;
   var PREVIEW_OVERRIDE_DEBOUNCE_MS = 50;
@@ -87,7 +87,7 @@
     return key !== "item";
   });
 
-  var cfg = window.tuiCreateConfig;
+  var cfg = window.templCreateConfig;
 
   var params = null;
   var overrideValue = null; // hover preview, never committed (preview-override.tsx)
@@ -289,7 +289,7 @@
   // ----- preview iframe sync (preview.tsx) -----------------------------------
 
   function frameEl() {
-    return document.querySelector("[data-tui-typeset-preview]");
+    return document.querySelector("[data-templ-typeset-preview]");
   }
 
   function isSameParams(a, b) {
@@ -428,19 +428,19 @@
   // ----- picker popups (picker.tsx behavior, like create.js) -----------------
 
   function contentFor(param) {
-    return document.querySelector('[data-tui-typeset-content="' + param + '"]');
+    return document.querySelector('[data-templ-typeset-content="' + param + '"]');
   }
 
   function triggerFor(param) {
-    return document.querySelector('[data-tui-typeset-trigger="' + param + '"]');
+    return document.querySelector('[data-templ-typeset-trigger="' + param + '"]');
   }
 
   function customizerCard() {
-    return document.querySelector('[data-tui-typeset] [data-slot="card"]');
+    return document.querySelector('[data-templ-typeset] [data-slot="card"]');
   }
 
   function shieldEl() {
-    return document.querySelector("[data-tui-typeset-shield]");
+    return document.querySelector("[data-templ-typeset-shield]");
   }
 
   function isMobileViewport() {
@@ -449,7 +449,7 @@
 
   function enabledItems(content) {
     return Array.from(
-      content.querySelectorAll("[data-tui-typeset-item], [data-tui-typeset-action]")
+      content.querySelectorAll("[data-templ-typeset-item], [data-templ-typeset-action]")
     ).filter(function (el) {
       return !el.hasAttribute("data-disabled");
     });
@@ -523,8 +523,8 @@
 
   function previewItem(item) {
     if (isMobileViewport()) return;
-    var group = item.closest("[data-tui-typeset-radiogroup]");
-    var name = group && group.getAttribute("data-tui-typeset-radiogroup");
+    var group = item.closest("[data-templ-typeset-radiogroup]");
+    var name = group && group.getAttribute("data-templ-typeset-radiogroup");
     if (!name) return;
     var value = coerce(name, item.getAttribute("data-value"));
     if (value !== null) {
@@ -627,8 +627,8 @@
   // The install prompt (docs-panel.tsx), with the templ/Go surfaces in step 5
   // where shadcn lists the React ones.
   function promptText() {
-    var baseEl = document.querySelector("[data-tui-typeset-base]");
-    var origin = (baseEl && baseEl.getAttribute("data-tui-typeset-base")) || window.location.origin;
+    var baseEl = document.querySelector("[data-templ-typeset-base]");
+    var origin = (baseEl && baseEl.getAttribute("data-templ-typeset-base")) || window.location.origin;
     return (
       "Install shadcn-templ/typeset in this project.\n\n" +
       "Typeset is a single stylesheet that styles rendered markdown: wrap the output in a `typeset` container and everything inside (headings, lists, tables, code, blockquotes, math) is styled. Everything outside is untouched.\n\n" +
@@ -654,11 +654,11 @@
   }
 
   function renderDocs() {
-    setAllText("[data-tui-typeset-preset-code]", presetBlock());
-    setAllText("[data-tui-typeset-usage-code]", usageBlock());
-    setAllText("[data-tui-typeset-fonts-css]", fontsCss());
-    setAllText("[data-tui-typeset-prompt]", promptText());
-    document.querySelectorAll("[data-tui-typeset-copy-css]").forEach(function (button) {
+    setAllText("[data-templ-typeset-preset-code]", presetBlock());
+    setAllText("[data-templ-typeset-usage-code]", usageBlock());
+    setAllText("[data-templ-typeset-fonts-css]", fontsCss());
+    setAllText("[data-templ-typeset-prompt]", promptText());
+    document.querySelectorAll("[data-templ-typeset-copy-css]").forEach(function (button) {
       button.disabled = rawCss === null;
     });
   }
@@ -666,12 +666,12 @@
   // ----- copy buttons (docs-panel.tsx CopyCssButton / CopyPromptButton) ------
 
   function flashCopied(button) {
-    var copyIcon = button.querySelector('[data-tui-typeset-copy-icon="copy"]');
-    var checkIcon = button.querySelector('[data-tui-typeset-copy-icon="check"]');
+    var copyIcon = button.querySelector('[data-templ-typeset-copy-icon="copy"]');
+    var checkIcon = button.querySelector('[data-templ-typeset-copy-icon="check"]');
     if (copyIcon) copyIcon.hidden = true;
     if (checkIcon) checkIcon.hidden = false;
-    clearTimeout(button.__tuiCopyTimer);
-    button.__tuiCopyTimer = setTimeout(function () {
+    clearTimeout(button.__templCopyTimer);
+    button.__templCopyTimer = setTimeout(function () {
       if (copyIcon) copyIcon.hidden = false;
       if (checkIcon) checkIcon.hidden = true;
     }, 2000);
@@ -690,7 +690,7 @@
   // ----- rendering ------------------------------------------------------------
 
   function setValue(param, text) {
-    var el = document.querySelector('[data-tui-typeset-value="' + param + '"]');
+    var el = document.querySelector('[data-templ-typeset-value="' + param + '"]');
     if (el && text) el.textContent = text;
   }
 
@@ -713,10 +713,10 @@
   }
 
   function syncGroup(name) {
-    var group = document.querySelector('[data-tui-typeset-radiogroup="' + name + '"]');
+    var group = document.querySelector('[data-templ-typeset-radiogroup="' + name + '"]');
     if (!group) return;
     var value = params[name];
-    group.querySelectorAll("[data-tui-typeset-item]").forEach(function (item) {
+    group.querySelectorAll("[data-templ-typeset-item]").forEach(function (item) {
       var checked = item.getAttribute("data-value") === value;
       item.setAttribute("data-checked", String(checked));
       item.setAttribute("aria-checked", String(checked));
@@ -726,21 +726,21 @@
   }
 
   function renderLocks() {
-    document.querySelectorAll("[data-tui-typeset-lock]").forEach(function (button) {
-      var locked = locks.has(button.getAttribute("data-tui-typeset-lock"));
+    document.querySelectorAll("[data-templ-typeset-lock]").forEach(function (button) {
+      var locked = locks.has(button.getAttribute("data-templ-typeset-lock"));
       button.setAttribute("data-locked", String(locked));
       button.title = locked ? "Unlock" : "Lock";
       button.setAttribute("aria-label", locked ? "Unlock" : "Lock");
-      var lockedIcon = button.querySelector('[data-tui-typeset-lock-icon="locked"]');
-      var unlockedIcon = button.querySelector('[data-tui-typeset-lock-icon="unlocked"]');
+      var lockedIcon = button.querySelector('[data-templ-typeset-lock-icon="locked"]');
+      var unlockedIcon = button.querySelector('[data-templ-typeset-lock-icon="unlocked"]');
       if (lockedIcon) lockedIcon.hidden = !locked;
       if (unlockedIcon) unlockedIcon.hidden = locked;
     });
   }
 
   function renderHistoryItems() {
-    setDisabled(document.querySelector('[data-tui-typeset-action="undo"]'), !canGoBack());
-    setDisabled(document.querySelector('[data-tui-typeset-action="redo"]'), !canGoForward());
+    setDisabled(document.querySelector('[data-templ-typeset-action="undo"]'), !canGoBack());
+    setDisabled(document.querySelector('[data-templ-typeset-action="redo"]'), !canGoForward());
   }
 
   function setupShortcutLabels() {
@@ -749,7 +749,7 @@
       redo: isMac ? "⇧⌘Z" : "Ctrl+Shift+Z",
     };
     Object.keys(labels).forEach(function (key) {
-      var el = document.querySelector('[data-tui-typeset-shortcut="' + key + '"]');
+      var el = document.querySelector('[data-templ-typeset-shortcut="' + key + '"]');
       if (el) el.textContent = labels[key];
     });
   }
@@ -772,13 +772,13 @@
     // Aa indicators in the current families.
     var indicators = { body: bodyFont, heading: headingFont, mono: monoFont };
     Object.keys(indicators).forEach(function (param) {
-      var el = document.querySelector('[data-tui-typeset-indicator="' + param + '"]');
+      var el = document.querySelector('[data-templ-typeset-indicator="' + param + '"]');
       if (el && indicators[param]) el.style.fontFamily = indicators[param].value;
     });
 
     // Inherit item label = current body font (font-picker.tsx bodyFont.label).
     var inheritItem = document.querySelector(
-      '[data-tui-typeset-content="heading"] [data-value="inherit"]'
+      '[data-templ-typeset-content="heading"] [data-value="inherit"]'
     );
     if (inheritItem && bodyFont) {
       var textNode = Array.from(inheritItem.childNodes).find(function (node) {
@@ -792,13 +792,13 @@
     ["measure", "heading", "body", "mono", "scale", "leading", "flow"].forEach(syncGroup);
 
     // Toolbar pills + open in new tab (toolbar.tsx).
-    document.querySelectorAll("[data-tui-typeset-fixture]").forEach(function (button) {
+    document.querySelectorAll("[data-templ-typeset-fixture]").forEach(function (button) {
       button.setAttribute(
         "data-active",
-        String(button.getAttribute("data-tui-typeset-fixture") === p.item)
+        String(button.getAttribute("data-templ-typeset-fixture") === p.item)
       );
     });
-    var open = document.querySelector("[data-tui-typeset-open]");
+    var open = document.querySelector("[data-templ-typeset-open]");
     if (open) open.setAttribute("href", previewSrc(p));
 
     renderDocs();
@@ -814,7 +814,7 @@
   function syncDrawerDirection() {
     var dialog = document.getElementById("typeset-get-code");
     if (!dialog) return;
-    var popup = dialog.querySelector("[data-tui-drawer-popup]");
+    var popup = dialog.querySelector('[data-slot="drawer-popup"]');
     if (!popup) return;
     var mobile = isMobileViewport();
     popup.setAttribute("data-swipe-direction", mobile ? "down" : "right");
@@ -880,7 +880,7 @@
       }
       if (e.key === "Enter" || e.key === " ") {
         var active = document.activeElement;
-        if (active instanceof Element && active.closest("[data-tui-typeset-content]")) {
+        if (active instanceof Element && active.closest("[data-templ-typeset-content]")) {
           e.preventDefault();
           active.click();
           return;
@@ -953,7 +953,7 @@
   // ----- wiring ---------------------------------------------------------------
 
   function init() {
-    if (!document.querySelector("[data-tui-typeset]")) return;
+    if (!document.querySelector("[data-templ-typeset]")) return;
     if (!cfg) return;
 
     params = readParams();
@@ -988,10 +988,10 @@
     // Open/close pickers. pointerdown, like Base UI's trigger.
     document.addEventListener("pointerdown", function (e) {
       if (!(e.target instanceof Element)) return;
-      if (e.target.closest("[data-tui-typeset-content]")) return;
-      var trigger = e.target.closest("[data-tui-typeset-trigger]");
+      if (e.target.closest("[data-templ-typeset-content]")) return;
+      var trigger = e.target.closest("[data-templ-typeset-trigger]");
       if (trigger) {
-        var param = trigger.getAttribute("data-tui-typeset-trigger");
+        var param = trigger.getAttribute("data-templ-typeset-trigger");
         if (openPickerParam === param) closePicker();
         else openPicker(param);
         return;
@@ -1002,11 +1002,11 @@
     document.addEventListener("click", function (e) {
       if (!(e.target instanceof Element)) return;
 
-      var item = e.target.closest("[data-tui-typeset-item]");
-      if (item && item.closest("[data-tui-typeset-content]")) {
+      var item = e.target.closest("[data-templ-typeset-item]");
+      if (item && item.closest("[data-templ-typeset-content]")) {
         if (item.hasAttribute("data-disabled")) return;
-        var group = item.closest("[data-tui-typeset-radiogroup]");
-        var name = group && group.getAttribute("data-tui-typeset-radiogroup");
+        var group = item.closest("[data-templ-typeset-radiogroup]");
+        var name = group && group.getAttribute("data-templ-typeset-radiogroup");
         if (name) {
           var value = coerce(name, item.getAttribute("data-value"));
           if (value !== null) {
@@ -1020,32 +1020,32 @@
         return;
       }
 
-      var action = e.target.closest("[data-tui-typeset-action]");
+      var action = e.target.closest("[data-templ-typeset-action]");
       if (action) {
         if (action.hasAttribute("data-disabled")) return;
         closePicker();
-        runMenuAction(action.getAttribute("data-tui-typeset-action"));
+        runMenuAction(action.getAttribute("data-templ-typeset-action"));
         return;
       }
 
-      if (e.target.closest("[data-tui-typeset-shuffle]")) {
+      if (e.target.closest("[data-templ-typeset-shuffle]")) {
         shuffle();
         return;
       }
 
-      var pill = e.target.closest("[data-tui-typeset-fixture]");
+      var pill = e.target.closest("[data-templ-typeset-fixture]");
       if (pill) {
-        setParams({ item: pill.getAttribute("data-tui-typeset-fixture") });
+        setParams({ item: pill.getAttribute("data-templ-typeset-fixture") });
         return;
       }
 
-      var copyCss = e.target.closest("[data-tui-typeset-copy-css]");
+      var copyCss = e.target.closest("[data-templ-typeset-copy-css]");
       if (copyCss) {
         copyText(copyCss, rawCss);
         return;
       }
 
-      var copyPrompt = e.target.closest("[data-tui-typeset-copy-prompt]");
+      var copyPrompt = e.target.closest("[data-templ-typeset-copy-prompt]");
       if (copyPrompt) {
         copyText(copyPrompt, promptText());
       }
@@ -1055,8 +1055,8 @@
     // moves; focus covers keyboard browsing (picker.tsx PickerRadioItem).
     document.addEventListener("mousemove", function (e) {
       if (!(e.target instanceof Element)) return;
-      var item = e.target.closest("[data-tui-typeset-item]");
-      if (!item || !item.closest("[data-tui-typeset-content]")) return;
+      var item = e.target.closest("[data-templ-typeset-item]");
+      if (!item || !item.closest("[data-templ-typeset-content]")) return;
       if (item.hasAttribute("data-disabled")) return;
       if (document.activeElement !== item) item.focus({ preventScroll: true });
       previewItem(item);
@@ -1064,24 +1064,24 @@
 
     document.addEventListener("focusin", function (e) {
       if (!(e.target instanceof Element)) return;
-      var item = e.target.closest("[data-tui-typeset-item]");
-      if (!item || !item.closest("[data-tui-typeset-content]")) return;
+      var item = e.target.closest("[data-templ-typeset-item]");
+      if (!item || !item.closest("[data-templ-typeset-content]")) return;
       if (item.hasAttribute("data-disabled")) return;
       previewItem(item);
     });
 
     // Leaving the popup reverts the preview instantly (PickerContent
     // onMouseLeave={clearOverride}).
-    document.querySelectorAll("[data-tui-typeset-content]").forEach(function (content) {
+    document.querySelectorAll("[data-templ-typeset-content]").forEach(function (content) {
       content.addEventListener("mouseleave", function () {
         clearOverride();
       });
     });
 
     // Lock buttons (shuffle only).
-    document.querySelectorAll("[data-tui-typeset-lock]").forEach(function (button) {
+    document.querySelectorAll("[data-templ-typeset-lock]").forEach(function (button) {
       button.addEventListener("click", function () {
-        var param = button.getAttribute("data-tui-typeset-lock");
+        var param = button.getAttribute("data-templ-typeset-lock");
         if (LOCKABLE.indexOf(param) === -1) return;
         if (locks.has(param)) locks.delete(param);
         else locks.add(param);

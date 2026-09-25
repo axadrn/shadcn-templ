@@ -6,6 +6,7 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/components/input"
 	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
 templ ButtonGroupSelect() {
@@ -15,7 +16,7 @@ templ ButtonGroupSelect() {
 				@selectcomp.Trigger(selectcomp.TriggerProps{Class: "font-mono"}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "$"})
 				}
-				@selectcomp.Content(selectcomp.ContentProps{DisableAlignItemWithTrigger: true, Align: selectcomp.AlignStart}) {
+				@selectcomp.Content(selectcomp.ContentProps{AlignItemWithTrigger: utils.Ptr(false), Align: selectcomp.AlignStart}) {
 					@selectcomp.Group() {
 						@selectcomp.Item(selectcomp.ItemProps{Value: "$", Label: "$"}) {
 							$ <span class="text-muted-foreground">US Dollar</span>

@@ -35,8 +35,6 @@ templ Separator(props ...Props) {
 		}
 		data-slot="separator"
 		data-orientation={ string(p.Orientation) }
-		data-horizontal?={ p.Orientation == OrientationHorizontal }
-		data-vertical?={ p.Orientation == OrientationVertical }
 		role="separator"
 		aria-orientation={ string(p.Orientation) }
 		class={

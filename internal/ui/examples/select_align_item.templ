@@ -58,12 +58,11 @@ templ SelectAlignItem() {
 			if (!sw) return;
 			sw.addEventListener("change", () => {
 				// Looked up on toggle: the content is portaled to <body> at init.
-				// Toggles the component's real flag (the ContentProps
-				// DisableAlignItemWithTrigger pendant of Base UI's
-				// alignItemWithTrigger prop).
+				// Toggles the component's real flag, the rendered form of Base
+				// UI's alignItemWithTrigger prop (ContentProps.AlignItemWithTrigger).
 				const content = document.getElementById("align-item-select");
 				if (!content) return;
-				content.toggleAttribute("data-tui-select-disable-align-item-with-trigger", !sw.checked);
+				content.setAttribute("data-templ-align-item-with-trigger", String(sw.checked));
 			});
 		})();
 	</script>

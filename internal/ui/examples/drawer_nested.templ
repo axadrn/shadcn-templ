@@ -110,7 +110,7 @@ templ DrawerNested() {
 			const apply = () => {
 				for (const id of ids) {
 					const dialog = findDialog(id);
-					const popup = dialog?.querySelector('[data-tui-drawer-popup]');
+					const popup = dialog?.querySelector('[data-slot="drawer-popup"]');
 					if (!popup) continue;
 					popup.setAttribute("data-swipe-direction", mq.matches ? "down" : "right");
 					popup.setAttribute("data-swipe-axis", mq.matches ? "y" : "x");

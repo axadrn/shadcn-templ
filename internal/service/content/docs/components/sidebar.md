@@ -160,8 +160,8 @@ For multiple sidebars in your application, you can use the `--sidebar-width` and
 
 To trigger the sidebar, you use the `cmd+b` keyboard shortcut on Mac and `ctrl+b` on Windows.
 
-```go showLineNumbers title="components/sidebar/sidebar.templ"
-sidebarKeyboardShortcut = "b"
+```js showLineNumbers title="components/sidebar/sidebar.js"
+const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 ```
 
 ## Sidebar
@@ -198,7 +198,7 @@ in a `sidebar.Inset` component.
 
 ## useSidebar
 
-The `window.tui.sidebar` API is the `useSidebar` pendant and is used to control the sidebar.
+The `window.templ.sidebar` API is the `useSidebar` pendant and is used to control the sidebar.
 
 ```js showLineNumbers
 const {
@@ -208,8 +208,21 @@ const {
 	openMobile,
 	setOpenMobile,
 	isMobile,
+	onMobileChange,
 	toggleSidebar,
-} = window.tui.sidebar
+} = window.templ.sidebar
+```
+
+Where a shadcn block writes `side={isMobile ? "bottom" : "right"}`, the templ block keeps the same ternary in a module script:
+
+```html showLineNumbers
+<script type="module">
+	const menu = document.getElementById("nav-user-menu");
+	window.templ.sidebar.onMobileChange((isMobile) => {
+		if (!menu?.isConnected) return false; // swapped out: unsubscribe
+		menu.setAttribute("data-templ-side", isMobile ? "bottom" : "right");
+	});
+</script>
 ```
 
 | Property        | Type                        | Description                                   |
@@ -220,6 +233,7 @@ const {
 | `openMobile`    | `() => boolean`             | Whether the sidebar is open on mobile.        |
 | `setOpenMobile` | `(open: boolean) => void`   | Sets the open state of the sidebar on mobile. |
 | `isMobile`      | `() => boolean`             | Whether the sidebar is on mobile.             |
+| `onMobileChange` | `(fn: (isMobile: boolean) => void \| false) => void` | Calls `fn` now and whenever `isMobile` changes, the pendant of re-rendering on `useSidebar().isMobile`. Return `false` from `fn` to unsubscribe, e.g. once its element left the page. |
 | `toggleSidebar` | `() => void`                | Toggles the sidebar. Desktop and mobile.      |
 
 For multiple sidebars, every function optionally takes the sidebar ID as its last argument, e.g. `toggleSidebar("left-nav")`. Without an ID the first sidebar on the page is addressed.
@@ -418,7 +432,7 @@ The `sidebar.MenuSkeleton` component is used to render a skeleton for a `sidebar
 Use the `sidebar.Trigger` component to render a button that toggles the sidebar.
 
 ```templ showLineNumbers
-<button onclick="window.tui.sidebar.toggleSidebar()">Toggle Sidebar</button>
+<button onclick="window.templ.sidebar.toggleSidebar()">Toggle Sidebar</button>
 ```
 
 ## SidebarRail

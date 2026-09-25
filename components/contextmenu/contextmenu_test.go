@@ -10,8 +10,14 @@ import (
 
 func TestControlledOpenOverridesDefaultOpen(t *testing.T) {
 	open := false
-	if initialOpen(Props{Open: &open, DefaultOpen: true}) {
-		t.Fatal("controlled false must override defaultOpen true")
+	ctx := context.WithValue(context.Background(), stateKey, ctxState{id: "m", open: &open, defaultOpen: true})
+	var output bytes.Buffer
+	if err := Content().Render(ctx, &output); err != nil {
+		t.Fatal(err)
+	}
+	html := output.String()
+	if !strings.Contains(html, `data-templ-open="false"`) || strings.Contains(html, `data-templ-default-open`) {
+		t.Fatalf("controlled false must override defaultOpen true: %s", html)
 	}
 }
 
@@ -58,17 +64,13 @@ func TestClientRequestsCancelableRootAndItemChanges(t *testing.T) {
 
 func TestSubControlledOpenOverridesDefaultOpen(t *testing.T) {
 	open := false
-	if initialSubOpen(SubProps{Open: &open, DefaultOpen: true}) {
-		t.Fatal("controlled false must override submenu defaultOpen true")
-	}
-
 	var output bytes.Buffer
 	if err := Sub(SubProps{Open: &open, DefaultOpen: true}).Render(context.Background(), &output); err != nil {
 		t.Fatal(err)
 	}
 	html := output.String()
-	if !strings.Contains(html, `data-tui-contextmenu-sub-open="false"`) ||
-		!strings.Contains(html, `data-tui-contextmenu-sub-controlled`) {
+	if !strings.Contains(html, `data-templ-open="false"`) ||
+		strings.Contains(html, `data-templ-default-open`) {
 		t.Fatalf("rendered controlled submenu is missing state markers: %s", html)
 	}
 }

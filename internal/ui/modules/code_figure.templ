@@ -39,7 +39,7 @@ templ CodeFigure(p CodeFigureProps) {
 				utils.IfElse(p.ShowLineNumbers, "[&_pre]:px-0", "[&_pre]:px-4"),
 			) }
 			if p.ShowLineNumbers {
-				data-tui-code-line-numbers
+				data-templ-code-line-numbers
 			}
 		>
 			@templ.Raw(highlighted)

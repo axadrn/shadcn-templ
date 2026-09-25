@@ -171,7 +171,7 @@ You can configure the carousel using the `Align`, `Loop`, `Autoplay` and `Interv
 
 ## API
 
-The carousel exposes its selection state on the root element as `data-tui-carousel-selected` and `data-tui-carousel-count`.
+The carousel reports its selection through the bubbling `carousel-select` event, whose detail carries `selected` (starting at 1) and `count`.
 
 <ComponentPreview name="carousel-api" previewClassName="sm:h-[32rem]" />
 
@@ -179,7 +179,7 @@ The carousel exposes its selection state on the root element as `data-tui-carous
 <script>
 	const carousel = document.getElementById("my-carousel");
 	carousel.addEventListener("carousel-select", (e) => {
-		const current = e.detail.selected + 1;
+		const current = e.detail.selected;
 		const count = e.detail.count;
 	});
 </script>

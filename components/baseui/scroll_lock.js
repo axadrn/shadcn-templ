@@ -282,7 +282,7 @@
 
       body.scrollTop = scrollTop;
       body.scrollLeft = scrollLeft;
-      html.setAttribute('data-tui-scroll-locked', '');
+      html.setAttribute('data-base-ui-scroll-locked', '');
       html.style.scrollBehavior = 'unset';
     }
 
@@ -293,7 +293,7 @@
       if (!updateGutterOnly) {
         html.scrollTop = scrollTop;
         html.scrollLeft = scrollLeft;
-        html.removeAttribute('data-tui-scroll-locked');
+        html.removeAttribute('data-base-ui-scroll-locked');
         html.style.scrollBehavior = originalHtmlScrollBehavior;
       }
     }
@@ -411,8 +411,8 @@
       : () => {};
   }
 
-  window.tui = window.tui || {};
-  window.tui.scrollLock = {
+  window.templ = window.templ || {};
+  window.templ.scrollLock = {
     acquire: (referenceElement) => SCROLL_LOCKER.acquire(referenceElement),
     anchoredPopup: anchoredPopupScrollLock,
   };

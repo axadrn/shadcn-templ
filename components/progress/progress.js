@@ -9,7 +9,7 @@
   }
 
   function updateProgress(progressBar) {
-    const indicator = progressBar.querySelector('[data-tui-progress-indicator]');
+    const indicator = progressBar.querySelector('[data-slot="progress-indicator"]');
     if (!indicator) return;
 
     const value = parseFloat(progressBar.getAttribute('aria-valuenow') || '0');
@@ -22,7 +22,7 @@
     const complete = value >= max;
     setStatus(progressBar, complete);
     progressBar
-      .querySelectorAll('[data-tui-progress-part]')
+      .querySelectorAll('[data-slot^="progress-"]')
       .forEach((part) => setStatus(part, complete));
 
     const valueEl = progressBar.querySelector('[data-slot="progress-value"]');
@@ -36,8 +36,8 @@
   });
 
   function observeBar(bar) {
-    if (bar.hasAttribute('data-tui-progress-observed')) return;
-    bar.setAttribute('data-tui-progress-observed', 'true');
+    if (bar._templProgress) return;
+    bar._templProgress = true;
 
     // Pendant of Base UI's label registration: a Label child links itself to
     // the root via aria-labelledby.
@@ -56,7 +56,7 @@
   // Bars present at load register immediately; bars swapped in later (e.g.
   // htmx) register via the childList observer.
   function init() {
-    document.querySelectorAll('[role="progressbar"]').forEach(observeBar);
+    document.querySelectorAll('[data-slot="progress"]').forEach(observeBar);
   }
 
   if (document.readyState === 'loading') {

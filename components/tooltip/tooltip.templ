@@ -22,8 +22,8 @@ const stateKey ctxKey = "tooltipState"
 
 type ctxState struct {
 	id          string
-	initialOpen bool
-	controlled  bool
+	open        *bool
+	defaultOpen bool
 }
 
 func state(ctx context.Context) ctxState {
@@ -38,24 +38,27 @@ func state(ctx context.Context) ctxState {
 // own element:
 //
 //	@button.Button(button.Props{Attributes: tooltip.Trigger(ctx)}) { ... }
+//
+// The element keeps its own data-slot; data-base-ui-tooltip-trigger is the
+// identifier Base UI's TooltipTrigger renders for exactly that case.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
-		"data-tui-tooltip-trigger": true,
-		"aria-describedby":         state(ctx).id,
+		"data-base-ui-tooltip-trigger": true,
+		"aria-describedby":             state(ctx).id,
 	}
+}
+
+// DisableTrigger turns trigger attributes into a disabled trigger, Base UI's
+// TooltipTrigger disabled prop: no identifier, data-trigger-disabled instead.
+func DisableTrigger(attrs templ.Attributes) {
+	delete(attrs, "data-base-ui-tooltip-trigger")
+	attrs["data-trigger-disabled"] = true
 }
 
 type Props struct {
 	ID          string
 	Open        *bool
 	DefaultOpen bool
-}
-
-func initialOpen(p Props) bool {
-	if p.Open != nil {
-		return *p.Open
-	}
-	return p.DefaultOpen
 }
 
 type ContentProps struct {
@@ -78,7 +81,7 @@ templ Tooltip(props ...Props) {
 	if p.ID == "" {
 		{{ p.ID = utils.RandomID() }}
 	}
-	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, initialOpen: initialOpen(p), controlled: p.Open != nil}) }}
+	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, open: p.Open, defaultOpen: p.DefaultOpen}) }}
 	{ children... }
 }
 
@@ -97,18 +100,19 @@ templ Content(props ...ContentProps) {
 	// Hidden until the script portals it to <body> on open. The wrapper
 	// carries no data-slot, so sibling rules such as the button group's
 	// rounding ignore it.
-	<div data-tui-tooltip-portal hidden>
+	<div data-templ-portal hidden>
 		<div
 			id={ s.id }
 			data-slot="tooltip-content"
-			data-tui-tooltip-content
-			data-tui-tooltip-side={ string(p.Side) }
-			data-tui-tooltip-side-offset={ strconv.Itoa(p.SideOffset) }
-			data-tui-tooltip-initial-open={ strconv.FormatBool(s.initialOpen) }
-			data-tui-tooltip-controlled?={ s.controlled }
+			data-templ-side={ string(p.Side) }
+			data-templ-side-offset={ strconv.Itoa(p.SideOffset) }
+			if s.open != nil {
+				data-templ-open={ strconv.FormatBool(*s.open) }
+			}
+			data-templ-default-open?={ s.open == nil && s.defaultOpen }
 			data-closed
 			hidden
-			data-tui-portal
+			data-base-ui-portal
 			role="tooltip"
 			class={
 				utils.CN(
@@ -125,7 +129,7 @@ templ Content(props ...ContentProps) {
 		>
 			{ children... }
 			<span
-				data-tui-tooltip-arrow
+				aria-hidden="true"
 				data-closed
 				class="cn-tooltip-arrow cn-tooltip-arrow-logical absolute z-50 bg-foreground fill-foreground data-[side=bottom]:top-1 data-[side=left]:top-1/2! data-[side=left]:-right-1 data-[side=left]:-translate-y-1/2 data-[side=right]:top-1/2! data-[side=right]:-left-1 data-[side=right]:-translate-y-1/2 data-[side=top]:-bottom-2.5"
 			></span>

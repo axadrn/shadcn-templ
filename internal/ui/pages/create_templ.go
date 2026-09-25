@@ -47,7 +47,7 @@ const (
 )
 
 // Default style icon (Nova) from registry/styles.tsx; create.js swaps it per
-// state from window.tuiCreateConfig.STYLES.
+// state from window.templCreateConfig.STYLES.
 const createNovaIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" role="img" color="currentColor" class="size-4"><path d="M2 12C2 9.19974 2 7.79961 2.54497 6.73005C3.02433 5.78924 3.78924 5.02433 4.73005 4.54497C5.79961 4 7.19974 4 10 4H14C16.8003 4 18.2004 4 19.27 4.54497C20.2108 5.02433 20.9757 5.78924 21.455 6.73005C22 7.79961 22 9.19974 22 12C22 14.8003 22 16.2004 21.455 17.27C20.9757 18.2108 20.2108 18.9757 19.27 19.455C18.2004 20 16.8003 20 14 20H10C7.19974 20 5.79961 20 4.73005 19.455C3.78924 18.9757 3.02433 18.2108 2.54497 17.27C2 16.2004 2 14.8003 2 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path></svg>`
 
 // Lucide logo from icon-library-picker.tsx logos.lucide.
@@ -319,7 +319,7 @@ func Create() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"></script>  <main data-tui-create class=\"section-soft relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden [--customizer-width:--spacing(48)] [--gap:--spacing(4)] md:[--gap:--spacing(6)] 2xl:[--customizer-width:--spacing(56)]\"><div data-slot=\"designer\" class=\"flex min-h-0 flex-1 flex-col gap-(--gap) p-(--gap) pt-[calc(var(--gap)*0.25)] md:flex-row-reverse\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"></script>  <main data-templ-create class=\"section-soft relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden [--customizer-width:--spacing(48)] [--gap:--spacing(4)] md:[--gap:--spacing(6)] 2xl:[--customizer-width:--spacing(56)]\"><div data-slot=\"designer\" class=\"flex min-h-0 flex-1 flex-col gap-(--gap) p-(--gap) pt-[calc(var(--gap)*0.25)] md:flex-row-reverse\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -331,7 +331,7 @@ func Create() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div><div data-tui-create-portal><div data-tui-create-shield hidden class=\"fixed inset-y-0 right-0 left-62 z-40 bg-transparent\"></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div><div data-templ-create-portal><div data-templ-create-shield hidden class=\"fixed inset-y-0 right-0 left-62 z-40 bg-transparent\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1101,7 +1101,7 @@ func createPreviewHost() templ.Component {
 			templ_7745c5c3_Var42 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"relative flex flex-1 flex-col justify-center overflow-hidden rounded-2xl ring ring-foreground/10 md:ring-muted dark:ring-foreground/10\"><div class=\"relative z-0 mx-auto flex w-full flex-1 flex-col overflow-hidden\"><div class=\"absolute inset-0 bg-muted dark:bg-muted/30\"></div><iframe data-tui-create-preview class=\"z-10 size-full flex-1\" title=\"Preview\"></iframe></div><div class=\"dark absolute right-3 bottom-3 z-20 flex items-center gap-1 rounded-xl bg-card/90 p-1 shadow-xl backdrop-blur-xl\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"relative flex flex-1 flex-col justify-center overflow-hidden rounded-2xl ring ring-foreground/10 md:ring-muted dark:ring-foreground/10\"><div class=\"relative z-0 mx-auto flex w-full flex-1 flex-col overflow-hidden\"><div class=\"absolute inset-0 bg-muted dark:bg-muted/30\"></div><iframe data-templ-create-preview class=\"z-10 size-full flex-1\" title=\"Preview\"></iframe></div><div class=\"dark absolute right-3 bottom-3 z-20 flex items-center gap-1 rounded-xl bg-card/90 p-1 shadow-xl backdrop-blur-xl\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1170,8 +1170,8 @@ func createPreviewSwitchButton(label, item string) templ.Component {
 			Size:    button.SizeSm,
 			Class:   "h-7 min-w-8 cursor-pointer rounded-lg px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground data-[active=true]:bg-accent data-[active=true]:text-accent-foreground",
 			Attributes: templ.Attributes{
-				"data-tui-create-preview-item": item,
-				"data-active":                  utils.IfElse(item == "preview-02", "true", "false"),
+				"data-templ-create-preview-item": item,
+				"data-active":                    utils.IfElse(item == "preview-02", "true", "false"),
 			},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var44), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -1278,7 +1278,7 @@ func createCustomizer() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<div data-tui-create-indicator=\"style\" class=\"pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center select-none md:right-2.5\">")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<div data-templ-create-indicator=\"style\" class=\"pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center select-none md:right-2.5\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -1320,7 +1320,7 @@ func createCustomizer() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div data-tui-create-indicator=\"baseColor\" class=\"pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 rounded-full bg-(--color) select-none md:right-2.5\"></div>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div data-templ-create-indicator=\"baseColor\" class=\"pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 rounded-full bg-(--color) select-none md:right-2.5\"></div>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -1346,7 +1346,7 @@ func createCustomizer() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<div data-tui-create-indicator=\"theme\" class=\"pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 rounded-full bg-(--color) select-none md:right-2.5\"></div>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<div data-templ-create-indicator=\"theme\" class=\"pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 rounded-full bg-(--color) select-none md:right-2.5\"></div>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -1372,7 +1372,7 @@ func createCustomizer() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<div data-tui-create-indicator=\"chartColor\" class=\"pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 rounded-full bg-(--color) select-none md:right-2.5\"></div>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<div data-templ-create-indicator=\"chartColor\" class=\"pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 rounded-full bg-(--color) select-none md:right-2.5\"></div>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -1406,7 +1406,7 @@ func createCustomizer() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "<div data-tui-create-indicator=\"fontHeading\" class=\"pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-base text-foreground select-none md:right-2.5\">Aa</div>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "<div data-templ-create-indicator=\"fontHeading\" class=\"pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-base text-foreground select-none md:right-2.5\">Aa</div>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -1432,7 +1432,7 @@ func createCustomizer() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "<div data-tui-create-indicator=\"font\" class=\"pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-base text-foreground select-none md:right-2.5\">Aa</div>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "<div data-templ-create-indicator=\"font\" class=\"pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-base text-foreground select-none md:right-2.5\">Aa</div>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -1560,7 +1560,7 @@ func createCustomizer() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<div class=\"pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-base text-foreground select-none md:right-2.5\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"128\" height=\"128\" viewBox=\"0 0 24 24\" fill=\"none\" class=\"size-4 text-foreground\" data-tui-create-indicator=\"menuAccent\"><path d=\"M19 12.1294L12.9388 18.207C11.1557 19.9949 10.2641 20.8889 9.16993 20.9877C8.98904 21.0041 8.80705 21.0041 8.62616 20.9877C7.53195 20.8889 6.64039 19.9949 4.85726 18.207L2.83687 16.1811C1.72104 15.0622 1.72104 13.2482 2.83687 12.1294M19 12.1294L10.9184 4.02587M19 12.1294H2.83687M10.9184 4.02587L2.83687 12.1294M10.9184 4.02587L8.89805 2\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" data-accent=\"subtle\" class=\"fill-muted-foreground/30 data-[accent=bold]:fill-foreground\"></path> <path d=\"M22 20C22 21.1046 21.1046 22 20 22C18.8954 22 18 21.1046 18 20C18 18.8954 20 17 20 17C20 17 22 18.8954 22 20Z\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" data-accent=\"subtle\" class=\"fill-muted-foreground/30 data-[accent=bold]:fill-foreground\"></path></svg></div>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<div class=\"pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-base text-foreground select-none md:right-2.5\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"128\" height=\"128\" viewBox=\"0 0 24 24\" fill=\"none\" class=\"size-4 text-foreground\" data-templ-create-indicator=\"menuAccent\"><path d=\"M19 12.1294L12.9388 18.207C11.1557 19.9949 10.2641 20.8889 9.16993 20.9877C8.98904 21.0041 8.80705 21.0041 8.62616 20.9877C7.53195 20.8889 6.64039 19.9949 4.85726 18.207L2.83687 16.1811C1.72104 15.0622 1.72104 13.2482 2.83687 12.1294M19 12.1294L10.9184 4.02587M19 12.1294H2.83687M10.9184 4.02587L2.83687 12.1294M10.9184 4.02587L8.89805 2\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" data-accent=\"subtle\" class=\"fill-muted-foreground/30 data-[accent=bold]:fill-foreground\"></path> <path d=\"M22 20C22 21.1046 21.1046 22 20 22C18.8954 22 18 21.1046 18 20C18 18.8954 20 17 20 17C20 17 22 18.8954 22 20Z\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" data-accent=\"subtle\" class=\"fill-muted-foreground/30 data-[accent=bold]:fill-foreground\"></path></svg></div>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -1614,7 +1614,7 @@ func createCustomizer() templ.Component {
 						}()
 					}
 					ctx = templ.InitializeContext(ctx)
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "<span class=\"block min-w-0 truncate\" data-tui-create-copy-label>--preset b0</span>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "<span class=\"block min-w-0 truncate\" data-templ-create-copy-label>--preset b0</span>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -1624,8 +1624,8 @@ func createCustomizer() templ.Component {
 					Variant: button.VariantOutline,
 					Class:   utils.CN(createFooterButtonClass, "min-w-0 flex-1 md:flex-none"),
 					Attributes: templ.Attributes{
-						"data-tui-create-copy": true,
-						"title":                "--preset b0",
+						"data-templ-create-copy": true,
+						"title":                  "--preset b0",
 					},
 				}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var62), templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
@@ -1656,7 +1656,7 @@ func createCustomizer() templ.Component {
 				templ_7745c5c3_Err = button.Button(button.Props{
 					Variant:    button.VariantOutline,
 					Class:      utils.CN(createFooterButtonClass, "max-w-20 min-w-0 flex-1 sm:max-w-none md:flex-none"),
-					Attributes: templ.Attributes{"data-tui-create-open-preset": true},
+					Attributes: templ.Attributes{"data-templ-create-open-preset": true},
 				}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var63), templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -1686,7 +1686,7 @@ func createCustomizer() templ.Component {
 				templ_7745c5c3_Err = button.Button(button.Props{
 					Variant:    button.VariantOutline,
 					Class:      utils.CN(createFooterButtonClass, "max-w-20 min-w-0 flex-1 sm:max-w-none md:flex-none"),
-					Attributes: templ.Attributes{"data-tui-create-shuffle": true},
+					Attributes: templ.Attributes{"data-templ-create-shuffle": true},
 				}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var64), templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -1807,14 +1807,14 @@ func createPickerRow(param, label, value, wrapperClass string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "<button type=\"button\" data-tui-create-trigger=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "<button type=\"button\" data-templ-create-trigger=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var71 string
 		templ_7745c5c3_Var71, templ_7745c5c3_Err = templ.JoinStringErrs(param)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 431, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 431, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var71))
 		if templ_7745c5c3_Err != nil {
@@ -1851,14 +1851,14 @@ func createPickerRow(param, label, value, wrapperClass string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if param == "fontHeading" || param == "font" || param == "menuColor" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "<div class=\"line-clamp-1 max-w-[80%] truncate text-sm font-medium text-foreground\" data-tui-create-value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "<div class=\"line-clamp-1 max-w-[80%] truncate text-sm font-medium text-foreground\" data-templ-create-value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var74 string
 			templ_7745c5c3_Var74, templ_7745c5c3_Err = templ.JoinStringErrs(param)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 440, Col: 117}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 440, Col: 119}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var74))
 			if templ_7745c5c3_Err != nil {
@@ -1871,7 +1871,7 @@ func createPickerRow(param, label, value, wrapperClass string) templ.Component {
 			var templ_7745c5c3_Var75 string
 			templ_7745c5c3_Var75, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 440, Col: 127}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 440, Col: 129}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var75))
 			if templ_7745c5c3_Err != nil {
@@ -1882,14 +1882,14 @@ func createPickerRow(param, label, value, wrapperClass string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "<div class=\"text-sm font-medium text-foreground\" data-tui-create-value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "<div class=\"text-sm font-medium text-foreground\" data-templ-create-value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var76 string
 			templ_7745c5c3_Var76, templ_7745c5c3_Err = templ.JoinStringErrs(param)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 442, Col: 83}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 442, Col: 85}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var76))
 			if templ_7745c5c3_Err != nil {
@@ -1902,7 +1902,7 @@ func createPickerRow(param, label, value, wrapperClass string) templ.Component {
 			var templ_7745c5c3_Var77 string
 			templ_7745c5c3_Var77, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 442, Col: 93}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 442, Col: 95}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var77))
 			if templ_7745c5c3_Err != nil {
@@ -1965,14 +1965,14 @@ func createLockButton(param string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "<button type=\"button\" title=\"Lock\" aria-label=\"Lock\" data-tui-create-lock=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "<button type=\"button\" title=\"Lock\" aria-label=\"Lock\" data-templ-create-lock=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var80 string
 		templ_7745c5c3_Var80, templ_7745c5c3_Err = templ.JoinStringErrs(param)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 458, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 458, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var80))
 		if templ_7745c5c3_Err != nil {
@@ -1991,7 +1991,7 @@ func createLockButton(param string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" class=\"size-5 text-foreground\" data-tui-create-lock-icon=\"locked\" hidden><path d=\"M4.26781 18.8447C4.49269 20.515 5.87613 21.8235 7.55966 21.9009C8.97627 21.966 10.4153 22 12 22C13.5847 22 15.0237 21.966 16.4403 21.9009C18.1239 21.8235 19.5073 20.515 19.7322 18.8447C19.879 17.7547 20 16.6376 20 15.5C20 14.3624 19.879 13.2453 19.7322 12.1553C19.5073 10.485 18.1239 9.17649 16.4403 9.09909C15.0237 9.03397 13.5847 9 12 9C10.4153 9 8.97627 9.03397 7.55966 9.09909C5.87613 9.17649 4.49269 10.485 4.26781 12.1553C4.12104 13.2453 4 14.3624 4 15.5C4 16.6376 4.12104 17.7547 4.26781 18.8447Z\"></path> <path d=\"M7.5 9V6.5C7.5 4.01472 9.51472 2 12 2C14.4853 2 16.5 4.01472 16.5 6.5V9\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M12.125 15.5H12M12.25 15.5C12.25 15.6381 12.1381 15.75 12 15.75C11.8619 15.75 11.75 15.6381 11.75 15.5C11.75 15.3619 11.8619 15.25 12 15.25C12.1381 15.25 12.25 15.3619 12.25 15.5Z\" stroke-linecap=\"round\"></path></svg> <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" class=\"size-5 text-foreground\" data-tui-create-lock-icon=\"unlocked\"><path d=\"M4.26781 18.8447C4.49269 20.515 5.87613 21.8235 7.55966 21.9009C8.97627 21.966 10.4153 22 12 22C13.5847 22 15.0237 21.966 16.4403 21.9009C18.1239 21.8235 19.5073 20.515 19.7322 18.8447C19.879 17.7547 20 16.6376 20 15.5C20 14.3624 19.879 13.2453 19.7322 12.1553C19.5073 10.485 18.1239 9.17649 16.4403 9.09909C15.0237 9.03397 13.5847 9 12 9C10.4153 9 8.97627 9.03397 7.55965 9.09909C5.87613 9.17649 4.49269 10.485 4.26781 12.1553C4.12104 13.2453 4 14.3624 4 15.5C4 16.6376 4.12104 17.7547 4.26781 18.8447Z\"></path> <path d=\"M7.5 9V6.5C7.5 4.01472 9.51472 2 12 2C13.9593 2 15.5 3.5 16 5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M12.125 15.5H12M12.25 15.5C12.25 15.6381 12.1381 15.75 12 15.75C11.8619 15.75 11.75 15.6381 11.75 15.5C11.75 15.3619 11.8619 15.25 12 15.25C12.1381 15.25 12.25 15.3619 12.25 15.5Z\" stroke-linecap=\"round\"></path></svg></button>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" class=\"size-5 text-foreground\" data-templ-create-lock-icon=\"locked\" hidden><path d=\"M4.26781 18.8447C4.49269 20.515 5.87613 21.8235 7.55966 21.9009C8.97627 21.966 10.4153 22 12 22C13.5847 22 15.0237 21.966 16.4403 21.9009C18.1239 21.8235 19.5073 20.515 19.7322 18.8447C19.879 17.7547 20 16.6376 20 15.5C20 14.3624 19.879 13.2453 19.7322 12.1553C19.5073 10.485 18.1239 9.17649 16.4403 9.09909C15.0237 9.03397 13.5847 9 12 9C10.4153 9 8.97627 9.03397 7.55966 9.09909C5.87613 9.17649 4.49269 10.485 4.26781 12.1553C4.12104 13.2453 4 14.3624 4 15.5C4 16.6376 4.12104 17.7547 4.26781 18.8447Z\"></path> <path d=\"M7.5 9V6.5C7.5 4.01472 9.51472 2 12 2C14.4853 2 16.5 4.01472 16.5 6.5V9\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M12.125 15.5H12M12.25 15.5C12.25 15.6381 12.1381 15.75 12 15.75C11.8619 15.75 11.75 15.6381 11.75 15.5C11.75 15.3619 11.8619 15.25 12 15.25C12.1381 15.25 12.25 15.3619 12.25 15.5Z\" stroke-linecap=\"round\"></path></svg> <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" class=\"size-5 text-foreground\" data-templ-create-lock-icon=\"unlocked\"><path d=\"M4.26781 18.8447C4.49269 20.515 5.87613 21.8235 7.55966 21.9009C8.97627 21.966 10.4153 22 12 22C13.5847 22 15.0237 21.966 16.4403 21.9009C18.1239 21.8235 19.5073 20.515 19.7322 18.8447C19.879 17.7547 20 16.6376 20 15.5C20 14.3624 19.879 13.2453 19.7322 12.1553C19.5073 10.485 18.1239 9.17649 16.4403 9.09909C15.0237 9.03397 13.5847 9 12 9C10.4153 9 8.97627 9.03397 7.55965 9.09909C5.87613 9.17649 4.49269 10.485 4.26781 12.1553C4.12104 13.2453 4 14.3624 4 15.5C4 16.6376 4.12104 17.7547 4.26781 18.8447Z\"></path> <path d=\"M7.5 9V6.5C7.5 4.01472 9.51472 2 12 2C13.9593 2 15.5 3.5 16 5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M12.125 15.5H12M12.25 15.5C12.25 15.6381 12.1381 15.75 12 15.75C11.8619 15.75 11.75 15.6381 11.75 15.5C11.75 15.3619 11.8619 15.25 12 15.25C12.1381 15.25 12.25 15.3619 12.25 15.5Z\" stroke-linecap=\"round\"></path></svg></button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2027,7 +2027,7 @@ func createMainMenuTrigger() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "<button type=\"button\" data-tui-create-trigger=\"mainmenu\" data-slot=\"dropdown-menu-trigger\" aria-haspopup=\"menu\" aria-expanded=\"false\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "<button type=\"button\" data-templ-create-trigger=\"mainmenu\" data-slot=\"dropdown-menu-trigger\" aria-haspopup=\"menu\" aria-expanded=\"false\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2076,7 +2076,7 @@ func createMainMenuContent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, "<div data-tui-create-content=\"mainmenu\" data-slot=\"dropdown-menu-content\" role=\"menu\" hidden class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, "<div data-templ-create-content=\"mainmenu\" data-slot=\"dropdown-menu-content\" role=\"menu\" hidden class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2122,7 +2122,7 @@ func createMainMenuContent() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "<span data-slot=\"dropdown-menu-shortcut\" data-tui-create-shortcut=\"navigate\" class=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "<span data-slot=\"dropdown-menu-shortcut\" data-templ-create-shortcut=\"navigate\" class=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -2316,7 +2316,7 @@ func createMainMenuContent() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "<span data-slot=\"dropdown-menu-shortcut\" data-tui-create-shortcut=\"undo\" class=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "<span data-slot=\"dropdown-menu-shortcut\" data-templ-create-shortcut=\"undo\" class=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -2360,7 +2360,7 @@ func createMainMenuContent() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "<span data-slot=\"dropdown-menu-shortcut\" data-tui-create-shortcut=\"redo\" class=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "<span data-slot=\"dropdown-menu-shortcut\" data-templ-create-shortcut=\"redo\" class=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -2475,14 +2475,14 @@ func createMenuActionItem(action, label string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "<div role=\"menuitem\" tabindex=\"-1\" data-slot=\"dropdown-menu-item\" data-tui-create-action=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "<div role=\"menuitem\" tabindex=\"-1\" data-slot=\"dropdown-menu-item\" data-templ-create-action=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var113 string
 		templ_7745c5c3_Var113, templ_7745c5c3_Err = templ.JoinStringErrs(action)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 539, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 539, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var113))
 		if templ_7745c5c3_Err != nil {
@@ -2554,14 +2554,14 @@ func createPickerContent(param, extraClass string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 115, "<div data-tui-create-content=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 115, "<div data-templ-create-content=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var118 string
 		templ_7745c5c3_Var118, templ_7745c5c3_Err = templ.JoinStringErrs(param)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 551, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 551, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var118))
 		if templ_7745c5c3_Err != nil {
@@ -2617,14 +2617,14 @@ func createRadioGroup(name string) templ.Component {
 			templ_7745c5c3_Var120 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 119, "<div data-slot=\"dropdown-menu-radio-group\" role=\"group\" data-tui-create-radiogroup=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 119, "<div data-slot=\"dropdown-menu-radio-group\" role=\"group\" data-templ-create-radiogroup=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var121 string
 		templ_7745c5c3_Var121, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 562, Col: 90}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 562, Col: 92}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var121))
 		if templ_7745c5c3_Err != nil {
@@ -2819,7 +2819,7 @@ func createRadioItem(value, label string, checked, disabled bool) templ.Componen
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 129, "<div role=\"menuitemradio\" tabindex=\"-1\" data-slot=\"dropdown-menu-radio-item\" data-tui-create-item data-value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 129, "<div role=\"menuitemradio\" tabindex=\"-1\" data-slot=\"dropdown-menu-radio-item\" data-templ-create-item data-value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -3158,7 +3158,7 @@ func createOpenPresetDialog() templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 140, "<form data-tui-create-preset-form>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 140, "<form data-templ-create-preset-form>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -3303,7 +3303,7 @@ func createOpenPresetDialog() templ.Component {
 					templ_7745c5c3_Err = button.Button(button.Props{
 						Type:       button.TypeSubmit,
 						Disabled:   true,
-						Attributes: templ.Attributes{"data-tui-create-preset-submit": true},
+						Attributes: templ.Attributes{"data-templ-create-preset-submit": true},
 					}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var152), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -3446,7 +3446,7 @@ func createOpenPresetDrawer() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 153, " <form data-tui-create-preset-form><div class=\"px-4 py-2\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 153, " <form data-templ-create-preset-form><div class=\"px-4 py-2\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -3492,7 +3492,7 @@ func createOpenPresetDrawer() templ.Component {
 						Type:       button.TypeSubmit,
 						Class:      "h-10",
 						Disabled:   true,
-						Attributes: templ.Attributes{"data-tui-create-preset-submit": true},
+						Attributes: templ.Attributes{"data-templ-create-preset-submit": true},
 					}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var160), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -3630,10 +3630,10 @@ func createPresetField(id string) templ.Component {
 					Placeholder: "b2D0wqNxT or --preset b2D0wqNxT",
 					Class:       "h-10 md:h-8",
 					Attributes: templ.Attributes{
-						"data-tui-create-preset-input": true,
-						"autocapitalize":               "none",
-						"autocorrect":                  "off",
-						"spellcheck":                   "false",
+						"data-templ-create-preset-input": true,
+						"autocapitalize":                 "none",
+						"autocorrect":                    "off",
+						"spellcheck":                     "false",
 					},
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
@@ -3647,7 +3647,7 @@ func createPresetField(id string) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = field.Field(field.Props{Attributes: templ.Attributes{"data-tui-create-preset-field": true}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var163), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = field.Field(field.Props{Attributes: templ.Attributes{"data-templ-create-preset-field": true}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var163), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -3827,7 +3827,7 @@ func createResetDialog() templ.Component {
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = alertdialog.Action(alertdialog.ActionProps{Attributes: templ.Attributes{"data-tui-create-reset-confirm": true}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var174), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = alertdialog.Action(alertdialog.ActionProps{Attributes: templ.Attributes{"data-templ-create-reset-confirm": true}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var174), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -4029,8 +4029,8 @@ func createCodeDialog() templ.Component {
 						Class: "**:data-[slot=toggle-group-item]:data-pressed:bg-neutral-700/70",
 						Value: []string{"new-project"},
 						Attributes: templ.Attributes{
-							"aria-label":           "Project type",
-							"data-tui-create-tabs": true,
+							"aria-label":             "Project type",
+							"data-templ-create-tabs": true,
 						},
 					}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var179), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
@@ -4042,7 +4042,7 @@ func createCodeDialog() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 175, "<div class=\"no-scrollbar overflow-y-auto\" data-tui-create-tab=\"new-project\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 175, "<div class=\"no-scrollbar overflow-y-auto\" data-templ-create-tab=\"new-project\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -4164,7 +4164,7 @@ func createCodeDialog() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 181, "</div><div class=\"no-scrollbar overflow-y-auto\" data-tui-create-tab=\"existing-project\" hidden>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 181, "</div><div class=\"no-scrollbar overflow-y-auto\" data-templ-create-tab=\"existing-project\" hidden>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -4294,7 +4294,7 @@ func createCodeDialog() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 188, "</div><div class=\"no-scrollbar overflow-y-auto\" data-tui-create-tab=\"theme\" hidden>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 188, "</div><div class=\"no-scrollbar overflow-y-auto\" data-templ-create-tab=\"theme\" hidden>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -4378,7 +4378,7 @@ func createCodeDialog() templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 193, "</div><div class=\"relative no-scrollbar max-h-[45svh] overflow-auto border-t bg-popover p-3\"><pre class=\"min-w-max font-mono leading-normal whitespace-pre\"><code data-tui-create-css></code></pre></div></div>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 193, "</div><div class=\"relative no-scrollbar max-h-[45svh] overflow-auto border-t bg-popover p-3\"><pre class=\"min-w-max font-mono leading-normal whitespace-pre\"><code data-templ-create-css></code></pre></div></div>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -4612,7 +4612,7 @@ func createApplyModeGrid() templ.Component {
 // runner: the reference header row keeps its layout (pm TabsList left, icon
 // copy button right) with a static "shadcn-templ" label in the TabsList slot, the
 // command sits in the bg-popover content row. create.js keeps the command
-// text live with the current preset code (data-tui-create-command).
+// text live with the current preset code (data-templ-create-command).
 func createCommandBox(target, command, initial string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -4642,14 +4642,14 @@ func createCommandBox(target, command, initial string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 198, "</div><div class=\"relative overflow-hidden border-t bg-popover p-3\"><div class=\"no-scrollbar overflow-x-auto\"><code class=\"font-mono text-sm whitespace-nowrap\" data-tui-create-command=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 198, "</div><div class=\"relative overflow-hidden border-t bg-popover p-3\"><div class=\"no-scrollbar overflow-x-auto\"><code class=\"font-mono text-sm whitespace-nowrap\" data-templ-create-command=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var208 string
 		templ_7745c5c3_Var208, templ_7745c5c3_Err = templ.JoinStringErrs(command)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 921, Col: 87}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 921, Col: 89}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var208))
 		if templ_7745c5c3_Err != nil {
@@ -4662,7 +4662,7 @@ func createCommandBox(target, command, initial string) templ.Component {
 		var templ_7745c5c3_Var209 string
 		templ_7745c5c3_Var209, templ_7745c5c3_Err = templ.JoinStringErrs(initial)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 921, Col: 99}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 921, Col: 101}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var209))
 		if templ_7745c5c3_Err != nil {
@@ -4712,7 +4712,7 @@ func createCopyIconButton(target, srLabel string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 201, "<span data-tui-create-copy-icon=\"copy\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 201, "<span data-templ-create-copy-icon=\"copy\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -4720,7 +4720,7 @@ func createCopyIconButton(target, srLabel string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 202, "</span> <span data-tui-create-copy-icon=\"check\" hidden>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 202, "</span> <span data-templ-create-copy-icon=\"check\" hidden>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -4751,7 +4751,7 @@ func createCopyIconButton(target, srLabel string) templ.Component {
 			Variant:    button.VariantGhost,
 			Size:       button.SizeIconSm,
 			Class:      "ml-auto",
-			Attributes: templ.Attributes{"data-tui-create-copy-target": target},
+			Attributes: templ.Attributes{"data-templ-create-copy-target": target},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var211), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -4809,8 +4809,8 @@ func createCopyButton(target, label string) templ.Component {
 		templ_7745c5c3_Err = button.Button(button.Props{
 			Class: "h-9 w-full",
 			Attributes: templ.Attributes{
-				"data-tui-create-copy-target": target,
-				"data-tui-create-copy-label":  label,
+				"data-templ-create-copy-target": target,
+				"data-templ-create-copy-label":  label,
 			},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var214), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -5088,8 +5088,8 @@ func createActionMenuItem(name, title, keywords string, checked bool) templ.Comp
 			Value: title + " " + keywords,
 			Class: "px-2",
 			Attributes: templ.Attributes{
-				"data-tui-create-registry-item": name,
-				"data-checked":                  utils.IfElse(checked, "true", "false"),
+				"data-templ-create-registry-item": name,
+				"data-checked":                    utils.IfElse(checked, "true", "false"),
 			},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var223), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {

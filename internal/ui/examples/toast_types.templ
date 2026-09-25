@@ -35,7 +35,7 @@ templ ToastTypes() {
 		document.getElementById("toast-types").addEventListener("click", (e) => {
 			const btn = e.target.closest("[data-toast-description]");
 			if (!btn) return;
-			window.tui.toast.add({
+			window.templ.toast.add({
 				type: btn.getAttribute("data-toast-type") || undefined,
 				description: btn.getAttribute("data-toast-description"),
 			});

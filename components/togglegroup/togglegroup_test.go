@@ -15,11 +15,8 @@ func TestControlledValueOverridesDefaultValue(t *testing.T) {
 		t.Fatal(err)
 	}
 	html := output.String()
-	if !strings.Contains(html, `data-tui-toggle-group-controlled`) {
-		t.Fatalf("rendered ToggleGroup is missing controlled marker: %s", html)
-	}
-	if strings.Contains(html, `data-tui-toggle-group-value="bold"`) {
-		t.Fatalf("controlled empty value must override the default: %s", html)
+	if !strings.Contains(html, `data-templ-value="[]"`) {
+		t.Fatalf("controlled empty value must be rendered and override the default: %s", html)
 	}
 }
 
@@ -33,7 +30,7 @@ func TestClientRequestsCancelableGroupValueChanges(t *testing.T) {
 		`new CustomEvent("toggle-group-value-change"`,
 		`cancelable: true`,
 		`detail: { value: groupValue }`,
-		`group.hasAttribute("data-tui-toggle-group-controlled")`,
+		`group.hasAttribute("data-templ-value")`,
 	} {
 		if !strings.Contains(js, want) {
 			t.Fatalf("client behavior is missing %q", want)

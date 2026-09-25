@@ -17,7 +17,7 @@ func TestInteractiveBaseBlockPendantsAreRendered(t *testing.T) {
 		"data-dashboard01-sortable",
 		"data-dashboard01-drag-handle",
 		"data-dashboard01-save=\"Cover page\"",
-		"window.tui?.toast?.promise",
+		"window.templ?.toast?.promise",
 		"data-dashboard01-drawer-trigger",
 		"mobile ? \"down\" : \"right\"",
 	} {

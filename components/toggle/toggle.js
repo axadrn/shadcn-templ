@@ -1,4 +1,6 @@
 (function () {
+  const TOGGLE = '[data-slot="toggle"], [data-slot="toggle-group-item"]';
+
   function isOn(el) {
     return el.hasAttribute("data-pressed");
   }
@@ -8,14 +10,19 @@
     el.setAttribute("aria-pressed", on ? "true" : "false");
   }
 
+  function items(group) {
+    return group.querySelectorAll('[data-slot="toggle-group-item"]');
+  }
+
   function values(group) {
-    return [...group.querySelectorAll('[data-tui-toggle][data-pressed]')]
-      .map((toggle) => toggle.getAttribute("data-tui-toggle-value"))
+    return [...items(group)]
+      .filter(isOn)
+      .map((toggle) => toggle.getAttribute("data-templ-value"))
       .filter(Boolean);
   }
 
   function nextValues(group, toggle, nextPressed) {
-    const value = toggle.getAttribute("data-tui-toggle-value");
+    const value = toggle.getAttribute("data-templ-value");
     if (!value) return values(group);
     if (!group.hasAttribute("data-multiple")) return nextPressed ? [value] : [];
     const next = new Set(values(group));
@@ -31,17 +38,17 @@
         cancelable: true,
         detail: {
           pressed,
-          value: toggle.getAttribute("data-tui-toggle-value"),
+          value: toggle.getAttribute("data-templ-value"),
         },
       }),
     );
   }
 
   document.addEventListener("click", (e) => {
-    const toggle = e.target.closest("[data-tui-toggle]");
+    const toggle = e.target.closest(TOGGLE);
     if (!toggle || toggle.disabled) return;
 
-    const group = toggle.closest("[data-tui-toggle-group]");
+    const group = toggle.closest('[data-slot="toggle-group"]');
     const nextPressed = !isOn(toggle);
     if (!dispatchToggleChange(toggle, nextPressed)) return;
     const groupValue = group ? nextValues(group, toggle, nextPressed) : null;
@@ -55,26 +62,18 @@
       );
       if (!accepted) return;
     }
+    // Controlled: the Base UI pressed prop on the toggle, or the value prop
+    // on its group. The owner commits the change.
     if (
-      toggle.hasAttribute("data-tui-toggle-controlled") ||
-      (group && group.hasAttribute("data-tui-toggle-group-controlled"))
+      toggle.hasAttribute("data-templ-pressed") ||
+      (group && group.hasAttribute("data-templ-value"))
     ) {
       return;
     }
 
     if (group && !group.hasAttribute("data-multiple")) {
-      group
-        .querySelectorAll("[data-tui-toggle]")
-        .forEach((t) => setState(t, false));
-      setState(toggle, nextPressed);
-    } else {
-      setState(toggle, nextPressed);
+      items(group).forEach((t) => setState(t, false));
     }
-
-    // Expose the group's active value(s) so CSS/HTMX can react without custom JS.
-    if (group) {
-      const on = values(group);
-      group.setAttribute("data-tui-toggle-group-value", on.join(" "));
-    }
+    setState(toggle, nextPressed);
   });
 })();

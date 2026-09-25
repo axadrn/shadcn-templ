@@ -75,9 +75,9 @@ templ CheckboxTable() {
 		let updatingCheckboxTable = false;
 		document.addEventListener('change', (e) => {
 			const demo = e.target.closest('[data-checkbox-table-demo]');
-			if (!demo || !e.target.matches('[data-tui-checkbox-input]') || updatingCheckboxTable) return;
+			if (!demo || !e.target.matches('[data-slot=checkbox] + input') || updatingCheckboxTable) return;
 			const all = demo.querySelector('[data-select-all]')?.nextElementSibling;
-			const rows = [...demo.querySelectorAll('tbody [data-tui-checkbox-input]')];
+			const rows = [...demo.querySelectorAll('tbody [data-slot=checkbox] + input')];
 			const setChecked = (input, checked) => {
 				if (input.checked === checked) return;
 				input.checked = checked;

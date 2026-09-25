@@ -15,7 +15,7 @@ func TestRootOwnsInitialAndControlledValues(t *testing.T) {
 		t.Fatal(err)
 	}
 	html := output.String()
-	for _, want := range []string{`data-tui-accordion`, `data-tui-accordion-controlled`, `data-tui-accordion-value=""`} {
+	for _, want := range []string{`data-slot="accordion"`, `data-templ-value="[]"`} {
 		if !strings.Contains(html, want) {
 			t.Fatalf("rendered accordion is missing %q: %s", want, html)
 		}
@@ -28,7 +28,7 @@ func TestClientRequestsCancelableValueChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	js := string(source)
-	for _, want := range []string{`new CustomEvent("accordion-value-change"`, `cancelable: true`, `data-tui-accordion-controlled`} {
+	for _, want := range []string{`new CustomEvent("accordion-value-change"`, `cancelable: true`, `data-templ-value`} {
 		if !strings.Contains(js, want) {
 			t.Fatalf("client behavior is missing %q", want)
 		}

@@ -38,8 +38,9 @@ type DialogProps struct {
 	// state after the initial render, matching Dialog.Root's public surface.
 	Open        *bool
 	DefaultOpen bool
-	// DisableDismissible keeps the dialog open on backdrop presses.
-	DisableDismissible bool
+	// DisablePointerDismissal is Base UI's disablePointerDismissal: backdrop
+	// presses keep the dialog open.
+	DisablePointerDismissal bool
 	// Title is the dialog's screen-reader title. Defaults to "Command Palette".
 	Title string
 	// Description is the dialog's screen-reader description. Defaults to
@@ -117,13 +118,13 @@ templ Command(props ...Props) {
 	<div
 		id={ p.ID }
 		data-slot="command"
-		data-tui-command
+		cmdk-root
 		tabindex="-1"
 		class={ utils.CN("cn-command flex size-full flex-col overflow-hidden", p.Class) }
 		{ p.Attributes... }
 	>
 		// cmdk renders a screen-reader-only label tied to the input.
-		<label data-tui-command-label id={ p.ID + "-label" } for={ p.ID + "-input" } class="sr-only">{ p.Label }</label>
+		<label cmdk-label id={ p.ID + "-label" } for={ p.ID + "-input" } class="sr-only">{ p.Label }</label>
 		{ children... }
 	</div>
 }
@@ -142,10 +143,10 @@ templ Dialog(props ...DialogProps) {
 		{{ p.Description = "Search for a command to run..." }}
 	}
 	@dialog.Dialog(dialog.Props{
-		ID:                 p.ID,
-		Open:               p.Open,
-		DefaultOpen:        p.DefaultOpen,
-		DisableDismissible: p.DisableDismissible,
+		ID:                      p.ID,
+		Open:                    p.Open,
+		DefaultOpen:             p.DefaultOpen,
+		DisablePointerDismissal: p.DisablePointerDismissal,
 	}) {
 		@dialog.Header(dialog.HeaderProps{Class: "sr-only"}) {
 			@dialog.Title() {
@@ -182,7 +183,7 @@ templ Input(props ...InputProps) {
 			<input
 				id={ p.ID }
 				data-slot="command-input"
-				data-tui-command-input
+				cmdk-input
 				type="text"
 				autocomplete="off"
 				autocorrect="off"
@@ -218,7 +219,7 @@ templ List(props ...ListProps) {
 	<div
 		id={ s.id + "-list" }
 		data-slot="command-list"
-		data-tui-command-list
+		cmdk-list
 		role="listbox"
 		tabindex="-1"
 		aria-label={ p.Label }
@@ -227,7 +228,7 @@ templ List(props ...ListProps) {
 	>
 		// cmdk's list sizer: filtering hides and sorting reorders the
 		// groups and items inside it.
-		<div data-tui-command-list-sizer>
+		<div cmdk-list-sizer>
 			{ children... }
 		</div>
 	</div>
@@ -242,7 +243,7 @@ templ Empty(props ...EmptyProps) {
 	}
 	<div
 		data-slot="command-empty"
-		data-tui-command-empty
+		cmdk-empty
 		role="presentation"
 		hidden
 		class={ utils.CN("cn-command-empty", p.Class) }
@@ -263,7 +264,7 @@ templ Group(props ...GroupProps) {
 	<div
 		id={ p.ID }
 		data-slot="command-group"
-		data-tui-command-group
+		cmdk-group
 		role="presentation"
 		if p.Heading != "" {
 			data-value={ p.Heading }
@@ -277,7 +278,7 @@ templ Group(props ...GroupProps) {
 			<div cmdk-group-heading aria-hidden="true" id={ p.ID + "-heading" }>{ p.Heading }</div>
 		}
 		<div
-			data-tui-command-group-items
+			cmdk-group-items
 			role="group"
 			if p.Heading != "" {
 				aria-labelledby={ p.ID + "-heading" }
@@ -298,7 +299,7 @@ templ Item(props ...ItemProps) {
 			id={ p.ID }
 		}
 		data-slot="command-item"
-		data-tui-command-item
+		cmdk-item
 		role="option"
 		if p.Value != "" {
 			data-value={ p.Value }
@@ -338,10 +339,10 @@ templ Separator(props ...SeparatorProps) {
 	}
 	<div
 		data-slot="command-separator"
-		data-tui-command-separator
+		cmdk-separator
 		role="separator"
 		if p.AlwaysRender {
-			data-tui-command-always-render
+			data-templ-always-render
 		}
 		class={ utils.CN("cn-command-separator", p.Class) }
 		{ p.Attributes... }

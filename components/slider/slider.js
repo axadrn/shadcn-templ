@@ -7,15 +7,15 @@
 
   function config(root) {
     return {
-      min: parseFloat(root.getAttribute("data-min") || "0"),
-      max: parseFloat(root.getAttribute("data-max") || "100"),
-      step: parseFloat(root.getAttribute("data-step") || "1") || 1,
-      vertical: root.hasAttribute("data-vertical"),
+      min: parseFloat(root.getAttribute("data-templ-min") || "0"),
+      max: parseFloat(root.getAttribute("data-templ-max") || "100"),
+      step: parseFloat(root.getAttribute("data-templ-step") || "1") || 1,
+      vertical: root.getAttribute("data-orientation") === "vertical",
     };
   }
 
   function thumbsOf(root) {
-    return [...root.querySelectorAll("[data-tui-slider-thumb]")];
+    return [...root.querySelectorAll('[data-slot="slider-thumb"]')];
   }
 
   function valuesOf(root) {
@@ -45,7 +45,7 @@
         t.style.left = "calc(" + (f * 100).toFixed(4) + "% - " + (f * THUMB).toFixed(2) + "px)";
       }
     });
-    const range = root.querySelector("[data-tui-slider-range]");
+    const range = root.querySelector('[data-slot="slider-range"]');
     if (range) {
       const fs = values.map((v) => fraction(v, c));
       const lo = values.length > 1 ? Math.min(...fs) : 0;
@@ -68,7 +68,7 @@
         }
       }
     }
-    root.querySelectorAll("[data-tui-slider-input]").forEach((input, i) => {
+    root.querySelectorAll(':scope > input[type="hidden"]').forEach((input, i) => {
       if (values[i] != null) input.value = String(values[i]);
     });
   }
@@ -95,7 +95,7 @@
     detail: { values: nextValues },
   });
   const accepted = root.dispatchEvent(change);
-  if (!accepted || root.hasAttribute("data-tui-slider-controlled")) return;
+  if (!accepted || root.hasAttribute("data-templ-value")) return;
     thumbsOf(root)[index].setAttribute("aria-valuenow", String(v));
     render(root);
   }
@@ -103,7 +103,7 @@
   // Inverts the edge alignment: the usable span is the track minus one thumb.
   function valueFromPointer(root, e) {
     const c = config(root);
-    const track = root.querySelector("[data-tui-slider-track]");
+    const track = root.querySelector('[data-slot="slider-track"]');
     const rect = track.getBoundingClientRect();
     let f;
     if (c.vertical) {
@@ -135,13 +135,14 @@
 
   document.addEventListener("pointerdown", (e) => {
     if (e.button !== 0 || !(e.target instanceof Element)) return;
-    const control = e.target.closest("[data-tui-slider-control]");
-    if (!control) return;
-    const root = control.closest("[data-tui-slider]");
+    const root = e.target.closest('[data-slot="slider"]');
     if (!root || root.hasAttribute("data-disabled")) return;
+    // SliderControl has no slot in shadcn; it is the track's parent.
+    const control = root.querySelector('[data-slot="slider-track"]').parentElement;
+    if (!control.contains(e.target)) return;
     e.preventDefault();
     const v = valueFromPointer(root, e);
-    const pressedThumb = e.target.closest("[data-tui-slider-thumb]");
+    const pressedThumb = e.target.closest('[data-slot="slider-thumb"]');
     const index = pressedThumb ? thumbsOf(root).indexOf(pressedThumb) : nearestThumb(root, v);
     drag = { root, index };
     if (!pressedThumb) setValue(root, index, v);
@@ -159,9 +160,9 @@
 
   document.addEventListener("keydown", (e) => {
     if (!(e.target instanceof Element)) return;
-    const thumb = e.target.closest("[data-tui-slider-thumb]");
+    const thumb = e.target.closest('[data-slot="slider-thumb"]');
     if (!thumb) return;
-    const root = thumb.closest("[data-tui-slider]");
+    const root = thumb.closest('[data-slot="slider"]');
     if (!root || root.hasAttribute("data-disabled")) return;
     const c = config(root);
     const index = thumbsOf(root).indexOf(thumb);

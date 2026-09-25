@@ -3,27 +3,30 @@
 
   const SIDEBAR_COOKIE_NAME = "sidebar_state";
   const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+  const SIDEBAR_KEYBOARD_SHORTCUT = "b";
   const MOBILE_QUERY = "(max-width: 767px)";
 
+  // shadcn has one SidebarProvider context; the port marker names each
+  // sidebar so several can live on a page.
+  const WRAPPER = "[data-templ-sidebar-id]";
+
   function wrapperFor(sidebarId) {
-    return document.querySelector(
-      '[data-tui-sidebar-wrapper][data-tui-sidebar-id="' + sidebarId + '"]',
-    );
+    return document.querySelector('[data-templ-sidebar-id="' + sidebarId + '"]');
   }
 
   // SidebarProvider.openMobile survives the Sheet's viewport-driven unmount.
   function openMobileOf(sidebarId) {
-    return !!anyWrapper(sidebarId)?.hasAttribute("data-tui-sidebar-open-mobile");
+    return !!anyWrapper(sidebarId)?._templOpenMobile;
   }
 
   // SidebarProvider.setOpenMobile: state is independent of the mounted Sheet.
   function setOpenMobile(open, sidebarId) {
     const wrapper = anyWrapper(sidebarId);
     if (!wrapper) return;
-    wrapper.toggleAttribute("data-tui-sidebar-open-mobile", !!open);
+    wrapper._templOpenMobile = !!open;
     if (!window.matchMedia(MOBILE_QUERY).matches) return;
-    const popup = document.getElementById(wrapper.getAttribute("data-tui-sidebar-id") + "-mobile");
-    const dialog = window.tui?.dialog;
+    const popup = document.getElementById(wrapper.getAttribute("data-templ-sidebar-id") + "-mobile");
+    const dialog = window.templ?.dialog;
     if (!popup || !dialog) return;
     if (open && !dialog.isOpen(popup)) dialog.open(popup);
     else if (!open && dialog.isOpen(popup)) dialog.close(popup);
@@ -32,10 +35,10 @@
   // The sidebar content renders once and moves between the desktop container
   // and the mobile sheet, depending on the viewport.
   function init() {
-    document.querySelectorAll("[data-tui-sidebar-content]").forEach((content) => {
-      const sidebarId = content.getAttribute("data-tui-sidebar-content");
+    document.querySelectorAll("[data-templ-sidebar-content]").forEach((content) => {
+      const sidebarId = content.getAttribute("data-templ-sidebar-content");
       const portal = document.querySelector(
-        '[data-tui-sidebar-mobile-portal="' + sidebarId + '"]',
+        '[data-templ-sidebar-mobile-portal="' + sidebarId + '"]',
       );
       if (!portal) return;
 
@@ -50,7 +53,7 @@
 
       // Mount/unmount the Sheet with open={openMobile}, as in shadcn's Sidebar.
       const popup = document.getElementById(sidebarId + "-mobile");
-      const dialog = window.tui?.dialog;
+      const dialog = window.templ?.dialog;
       if (!popup || !dialog) return;
       if (isMobile && openMobileOf(sidebarId) && !dialog.isOpen(popup)) {
         dialog.open(popup);
@@ -80,7 +83,7 @@
 
     const wrapper = wrapperFor(sidebarId);
     if (!wrapper) return;
-    const mode = wrapper.getAttribute("data-tui-sidebar-collapsible-mode");
+    const mode = wrapper.getAttribute("data-templ-collapsible");
     if (mode === "none") return;
 
     const collapsed = wrapper.getAttribute("data-state") !== "collapsed";
@@ -91,10 +94,13 @@
 
     // Menu button tooltips only show while collapsed to icons.
     const tooltipsDisabled = !(collapsed && mode === "icon");
-    wrapper.querySelectorAll("[data-tui-tooltip-trigger]").forEach((trigger) => {
+    // Tooltip triggers either carry Base UI's identifier or, disabled,
+    // data-trigger-disabled (TooltipTrigger disabled prop).
+    wrapper.querySelectorAll("[data-base-ui-tooltip-trigger], [data-trigger-disabled]").forEach((trigger) => {
       // An explicit tooltip.hidden pendant pins the state.
-      if (trigger.hasAttribute("data-tui-sidebar-tooltip-fixed")) return;
-      trigger.toggleAttribute("data-tui-tooltip-disabled", tooltipsDisabled);
+      if (trigger.hasAttribute("data-templ-tooltip-hidden")) return;
+      trigger.toggleAttribute("data-trigger-disabled", tooltipsDisabled);
+      trigger.toggleAttribute("data-base-ui-tooltip-trigger", !tooltipsDisabled);
     });
 
     document.cookie =
@@ -107,9 +113,10 @@
 
   document.addEventListener("click", (e) => {
     if (!(e.target instanceof Element)) return;
-    const trigger = e.target.closest("[data-tui-sidebar-trigger]");
+    // SidebarTrigger and SidebarRail; the port marker names their sidebar.
+    const trigger = e.target.closest("[data-templ-sidebar-trigger]");
     if (!trigger) return;
-    const targetId = trigger.getAttribute("data-tui-sidebar-target");
+    const targetId = trigger.getAttribute("data-templ-sidebar-trigger");
     if (targetId) toggleSidebar(targetId);
   });
 
@@ -127,11 +134,11 @@
   function anyWrapper(sidebarId) {
     return sidebarId
       ? wrapperFor(sidebarId)
-      : document.querySelector("[data-tui-sidebar-wrapper]");
+      : document.querySelector(WRAPPER);
   }
 
-  window.tui = window.tui || {};
-  window.tui.sidebar = {
+  window.templ = window.templ || {};
+  window.templ.sidebar = {
     state(sidebarId) {
       return anyWrapper(sidebarId)?.getAttribute("data-state") || null;
     },
@@ -142,7 +149,7 @@
       const wrapper = anyWrapper(sidebarId);
       if (!wrapper) return;
       if (this.open(sidebarId) !== open) {
-        toggleSidebar(wrapper.getAttribute("data-tui-sidebar-id"));
+        toggleSidebar(wrapper.getAttribute("data-templ-sidebar-id"));
       }
     },
     openMobile(sidebarId) {
@@ -154,20 +161,30 @@
     isMobile() {
       return window.matchMedia(MOBILE_QUERY).matches;
     },
+    // The subscription half of useSidebar().isMobile: calls fn with the
+    // current value now and again whenever it changes, like a re-render.
+    // fn returns false when its elements are gone (the unmount pendant),
+    // which unsubscribes it.
+    onMobileChange(fn) {
+      const query = window.matchMedia(MOBILE_QUERY);
+      const listener = () => {
+        if (fn(query.matches) === false) query.removeEventListener("change", listener);
+      };
+      query.addEventListener("change", listener);
+      listener();
+    },
     toggleSidebar(sidebarId) {
       const wrapper = anyWrapper(sidebarId);
-      if (wrapper) toggleSidebar(wrapper.getAttribute("data-tui-sidebar-id"));
+      if (wrapper) toggleSidebar(wrapper.getAttribute("data-templ-sidebar-id"));
     },
   };
 
   // Cmd/Ctrl + shortcut key toggles the sidebar.
   document.addEventListener("keydown", (e) => {
     if (!(e.ctrlKey || e.metaKey) || e.key.length !== 1) return;
-    const wrapper = document.querySelector("[data-tui-sidebar-wrapper]");
-    if (!wrapper) return;
-    const shortcut = wrapper.getAttribute("data-tui-sidebar-keyboard-shortcut");
-    if (!shortcut || shortcut.toLowerCase() !== e.key.toLowerCase()) return;
+    const wrapper = document.querySelector(WRAPPER);
+    if (!wrapper || e.key.toLowerCase() !== SIDEBAR_KEYBOARD_SHORTCUT) return;
     e.preventDefault();
-    toggleSidebar(wrapper.getAttribute("data-tui-sidebar-id"));
+    toggleSidebar(wrapper.getAttribute("data-templ-sidebar-id"));
   });
 })();

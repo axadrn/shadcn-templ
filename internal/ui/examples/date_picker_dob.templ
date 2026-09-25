@@ -42,7 +42,7 @@ templ DatePickerDob() {
 				if (!(e.target instanceof Element) || !e.target.closest("#date-picker-dob")) return;
 				const trigger = document.querySelector('[aria-controls="date-picker-dob"]');
 				trigger.querySelector("span").textContent = e.detail.value ? e.detail.value.toLocaleDateString() : "Select date";
-				if (e.detail.value) window.tui.popover.close(e.target.closest("#date-picker-dob"));
+				if (e.detail.value) window.templ.popover.close(e.target.closest("#date-picker-dob"));
 			});
 		})();
 	</script>

@@ -19,7 +19,7 @@
     if (event.key !== "Escape") return;
     const contents = event.currentTarget === document
       ? allContents()
-      : [event.currentTarget.hasAttribute("data-tui-contextmenu-content")
+      : [isPositioner(event.currentTarget)
         ? event.currentTarget
         : contentFor(event.currentTarget)];
     let handled = false;
@@ -32,22 +32,39 @@
     return handled;
   }
 
+  // The menu's element is the positioner (no slot upstream) around the
+  // [data-slot=context-menu-content] popup.
+  const POPUP = '[data-slot="context-menu-content"]';
+  const SUB = '[data-slot="context-menu-sub"]';
+  const SUB_TRIGGER = '[data-slot="context-menu-sub-trigger"]';
+  const SUB_CONTENT = '[data-slot="context-menu-sub-content"]';
+  // Base UI links ContextMenu.Trigger and its menu through context only; the
+  // port marker carries the menu id.
+  const TRIGGER = "[data-templ-context-menu-trigger]";
+
+  function isPositioner(el) {
+    return !!(el && el.firstElementChild && el.firstElementChild.matches(POPUP));
+  }
+
   function allContents() {
-    return document.querySelectorAll("[data-tui-contextmenu-content]");
+    return [...document.querySelectorAll(POPUP)].map((p) => p.parentElement).filter(isPositioner);
+  }
+
+  function positionerOf(target) {
+    const popup = target && target.closest && target.closest(POPUP);
+    return popup && isPositioner(popup.parentElement) ? popup.parentElement : null;
   }
 
   function contentFor(trigger) {
-    return document.getElementById(trigger.getAttribute("data-tui-contextmenu-for") || "");
+    return document.getElementById(trigger.getAttribute("data-templ-context-menu-trigger") || "");
   }
 
   function triggerFor(content) {
-    return document.querySelector(
-      '[data-tui-contextmenu-trigger][data-tui-contextmenu-for="' + content.id + '"]',
-    );
+    return document.querySelector('[data-templ-context-menu-trigger="' + content.id + '"]');
   }
 
   function popupFor(content) {
-    return content.querySelector("[data-tui-contextmenu-popup]");
+    return content.firstElementChild;
   }
 
   function setOpenState(element, open) {
@@ -88,14 +105,14 @@
 
   // Moves the content to <body> (shadcn portals it the same way).
   // The unmount half of the React portal pendant: a portaled content lives
-  // as long as its SSR declaration site (_tuiPortalOwner) stays in the
+  // as long as its SSR declaration site (_templPortalOwner) stays in the
   // document. Trigger-presence heuristics judged mid-swap moments wrongly -
   // multi-phase swap layers briefly disconnect the new triggers.
   function removeOrphanedContents(content) {
-    document.querySelectorAll("body > [data-tui-contextmenu-content]").forEach((c) => {
-      if (c !== content && c._tuiPortalOwner && !c._tuiPortalOwner.isConnected) {
-        c._tuiReleaseScroll?.();
-        c._tuiReleaseScroll = null;
+    allContents().filter((c) => c.parentElement === document.body).forEach((c) => {
+      if (c !== content && c._templPortalOwner && !c._templPortalOwner.isConnected) {
+        c._templReleaseScroll?.();
+        c._templReleaseScroll = null;
         c.remove();
       }
     });
@@ -105,7 +122,7 @@
     listenForEscape(content);
     removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
-      if (!content._tuiPortalOwner) content._tuiPortalOwner = content.parentElement;
+      if (!content._templPortalOwner) content._templPortalOwner = content.parentElement;
       document.body.appendChild(content);
     }
   }
@@ -123,11 +140,11 @@
     const { computePosition, offset, flip, shift, size } = window.FloatingUIDOM;
     // Base UI context menu placement: right-start against the cursor,
     // sideOffset 0, alignOffset 4.
-    const side = content.getAttribute("data-tui-contextmenu-side") || "right";
+    const side = content.getAttribute("data-templ-side") || "right";
     const sideOffset =
-      parseInt(content.getAttribute("data-tui-contextmenu-side-offset"), 10) || 0;
+      parseInt(content.getAttribute("data-templ-side-offset"), 10) || 0;
     const alignOffset =
-      parseInt(content.getAttribute("data-tui-contextmenu-align-offset"), 10) || 0;
+      parseInt(content.getAttribute("data-templ-align-offset"), 10) || 0;
     const anchor = cursorAnchor(x, y);
 
     return computePosition(anchor, content, {
@@ -141,7 +158,7 @@
           padding: COLLISION_PADDING,
           apply(args) {
             content.style.setProperty(
-              "--tui-contextmenu-available-height",
+              "--available-height",
               args.availableHeight + "px",
             );
           },
@@ -154,7 +171,7 @@
       const popup = popupFor(content);
       if (popup) {
         popup.style.setProperty(
-          "--tui-contextmenu-transform-origin",
+          "--transform-origin",
           anchorOrigin(
             result,
             anchor.getBoundingClientRect(),
@@ -171,7 +188,7 @@
   const ITEM_SELECTOR = '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]';
 
   function containerOf(el) {
-    return el.closest("[data-tui-contextmenu-sub-content], [data-tui-contextmenu-popup]");
+    return el.closest(SUB_CONTENT + ", " + POPUP);
   }
 
   function itemsIn(container) {
@@ -221,7 +238,7 @@
     allContents().forEach((c) => {
     if (c !== content) requestOpenChange(c, false);
     });
-    clearTimeout(content._tuiHide);
+    clearTimeout(content._templHide);
     portal(content);
     // z-index portal like shadcn (no native top layer); re-append
     // keeps paint order = open order.
@@ -230,11 +247,11 @@
 
     if (alreadyOpen) {
       // Right-click somewhere else while open: move over to the new spot.
-      content.querySelectorAll("[data-tui-contextmenu-sub]").forEach(closeSubNow);
+      content.querySelectorAll(SUB).forEach(closeSubNow);
       positionMenu(content, x, y).then(() => {
         if (!content.isConnected || !content.hasAttribute("data-open")) return;
-        content._tuiReleaseScroll?.();
-        content._tuiReleaseScroll = window.tui.scrollLock.anchoredPopup(
+        content._templReleaseScroll?.();
+        content._templReleaseScroll = window.templ.scrollLock.anchoredPopup(
           true, touchOpen, content, triggerFor(content),
         );
       });
@@ -256,8 +273,8 @@
       content.style.transitionProperty = "";
       if (popup) popup.style.transitionProperty = "";
       // useAnchoredPopupScrollLock: a native touch context menu follows the touch rule.
-      content._tuiReleaseScroll?.();
-      content._tuiReleaseScroll = window.tui.scrollLock.anchoredPopup(
+      content._templReleaseScroll?.();
+      content._templReleaseScroll = window.templ.scrollLock.anchoredPopup(
         true, touchOpen, content, triggerFor(content),
       );
       setState(content, "open");
@@ -271,15 +288,15 @@
   function close(content) {
     if (content.hidden) return;
     setState(content, "closed");
-    content.querySelectorAll("[data-tui-contextmenu-sub]").forEach(closeSubNow);
-    clearTimeout(content._tuiHide);
-    content._tuiHide = setTimeout(() => {
+    content.querySelectorAll(SUB).forEach(closeSubNow);
+    clearTimeout(content._templHide);
+    content._templHide = setTimeout(() => {
       if (content.hasAttribute("data-closed") && !content.hidden) {
         content.hidden = true;
       }
     }, EXIT_MS);
-    content._tuiReleaseScroll?.();
-    content._tuiReleaseScroll = null;
+    content._templReleaseScroll?.();
+    content._templReleaseScroll = null;
   }
 
   function closeAll() {
@@ -294,7 +311,7 @@
     detail: { open: nextOpen },
   });
   const accepted = (trigger || content).dispatchEvent(change);
-  if (!accepted || content.hasAttribute("data-tui-contextmenu-controlled")) return false;
+  if (!accepted || content.hasAttribute("data-templ-open")) return false;
   if (nextOpen) openAt(content, x, y, touchOpen);
   else close(content);
   return true;
@@ -308,8 +325,8 @@
 
   function subParts(sub) {
     return {
-      trigger: sub.querySelector("[data-tui-contextmenu-sub-trigger]"),
-      content: sub.querySelector("[data-tui-contextmenu-sub-content]"),
+      trigger: sub.querySelector(SUB_TRIGGER),
+      content: sub.querySelector(SUB_CONTENT),
     };
   }
 
@@ -336,7 +353,7 @@
       content.style.top = result.y + "px";
       content.setAttribute("data-side", result.placement.split("-")[0]);
       content.style.setProperty(
-        "--tui-contextmenu-transform-origin",
+        "--transform-origin",
         anchorOrigin(result, trigger.getBoundingClientRect(), content.getBoundingClientRect(), 0),
       );
       content.offsetHeight; // flush styles before re-enabling transitions
@@ -370,10 +387,10 @@
 
   // Closes immediately (used when the whole menu goes away).
   function closeSubNow(sub) {
-    clearTimeout(sub._tuiOpen);
-    clearTimeout(sub._tuiClose);
-    sub._tuiOpen = null;
-    sub._tuiClose = null;
+    clearTimeout(sub._templOpen);
+    clearTimeout(sub._templClose);
+    sub._templOpen = null;
+    sub._templClose = null;
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
     content.classList.add("hidden");
@@ -392,17 +409,20 @@
 		detail: { open: nextOpen },
 	  }),
 	);
-	if (!accepted || sub.hasAttribute("data-tui-contextmenu-sub-controlled")) return;
-	sub.setAttribute("data-tui-contextmenu-sub-open", String(nextOpen));
+	// Controlled: the Base UI open prop on the SubmenuRoot, the owner commits.
+	if (!accepted || sub.hasAttribute("data-templ-open")) return;
+	sub._templSubOpen = nextOpen;
 	if (nextOpen) openSub(sub, focusFirst);
 	else closeSub(sub);
   }
 
   function syncSubState(menu) {
-	menu.querySelectorAll("[data-tui-contextmenu-sub]").forEach((sub) => {
+	menu.querySelectorAll(SUB).forEach((sub) => {
 	  const { content } = subParts(sub);
 	  if (!content) return;
-	  const shouldOpen = sub.getAttribute("data-tui-contextmenu-sub-open") === "true";
+	  // Last requested state, else the server's open or defaultOpen.
+	  const shouldOpen = sub._templSubOpen ?? (
+	    sub.getAttribute("data-templ-open") === "true" || sub.hasAttribute("data-templ-default-open"));
 	  if (shouldOpen && !content.hasAttribute("data-open")) openSub(sub, false);
 	  else if (!shouldOpen && content.hasAttribute("data-open")) closeSubNow(sub);
 	});
@@ -412,31 +432,31 @@
   // keep it open; everything else in the menu schedules its subs to close.
   document.addEventListener("mouseover", (e) => {
     if (!(e.target instanceof Element)) return;
-    const menu = e.target.closest("[data-tui-contextmenu-content]");
+    const menu = positionerOf(e.target);
     if (!menu) return;
-    const hovered = e.target.closest("[data-tui-contextmenu-sub]");
+    const hovered = e.target.closest(SUB);
 
-    menu.querySelectorAll("[data-tui-contextmenu-sub]").forEach((sub) => {
+    menu.querySelectorAll(SUB).forEach((sub) => {
       const { content } = subParts(sub);
       if (!content) return;
       const isOpen = content.hasAttribute("data-open");
       const onPath = hovered && (sub === hovered || sub.contains(hovered));
 
       if (onPath) {
-        clearTimeout(sub._tuiClose);
-        sub._tuiClose = null;
-        if (!isOpen && !sub._tuiOpen) {
-          sub._tuiOpen = setTimeout(() => {
-            sub._tuiOpen = null;
+        clearTimeout(sub._templClose);
+        sub._templClose = null;
+        if (!isOpen && !sub._templOpen) {
+          sub._templOpen = setTimeout(() => {
+            sub._templOpen = null;
 			requestSubOpenChange(sub, true);
           }, SUB_OPEN_DELAY);
         }
       } else {
-        clearTimeout(sub._tuiOpen);
-        sub._tuiOpen = null;
-        if (isOpen && !sub._tuiClose) {
-          sub._tuiClose = setTimeout(() => {
-            sub._tuiClose = null;
+        clearTimeout(sub._templOpen);
+        sub._templOpen = null;
+        if (isOpen && !sub._templClose) {
+          sub._templClose = setTimeout(() => {
+            sub._templClose = null;
 			requestSubOpenChange(sub, false);
           }, SUB_CLOSE_DELAY);
         }
@@ -448,7 +468,7 @@
   // the menu container when the pointer sits on empty menu space.
   document.addEventListener("pointermove", (e) => {
     if (!(e.target instanceof Element)) return;
-    const content = e.target.closest("[data-tui-contextmenu-content]");
+    const content = positionerOf(e.target);
     if (!content || !content.hasAttribute("data-open")) return;
     const item = e.target.closest(ITEM_SELECTOR);
     if (item && containerOf(item)) {
@@ -465,12 +485,14 @@
   // ----- init (portal on open) --------------------
 
   function init() {
-    document.querySelectorAll("[data-tui-contextmenu-trigger]").forEach(listenForEscape);
+    document.querySelectorAll(TRIGGER).forEach(listenForEscape);
     removeOrphanedContents();
-    document.querySelectorAll("[data-tui-contextmenu-trigger]").forEach((trigger) => {
+    document.querySelectorAll(TRIGGER).forEach((trigger) => {
       const content = contentFor(trigger);
-      if (content && content.getAttribute("data-tui-contextmenu-initial-open") === "true") {
-        content.removeAttribute("data-tui-contextmenu-initial-open");
+      // Server-side open state (Base UI open or defaultOpen), once per element.
+      if (!content || content._templInit) return;
+      content._templInit = true;
+      if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
         const rect = trigger.getBoundingClientRect();
         openAt(content, rect.left + rect.width / 2, rect.top + rect.height / 2);
       }
@@ -492,40 +514,40 @@
 
   document.addEventListener("contextmenu", (e) => {
     if (!(e.target instanceof Element)) return;
-    const trigger = e.target.closest("[data-tui-contextmenu-trigger]");
+    const trigger = e.target.closest(TRIGGER);
     if (!trigger) return;
     const content = contentFor(trigger);
     if (!content) return;
     e.preventDefault();
   requestOpenChange(content, true, e.clientX, e.clientY,
-    (e.pointerType || trigger._tuiOpenMethod) === "touch");
+    (e.pointerType || trigger._templOpenMethod) === "touch");
   });
 
   // Dismiss on PRESS outside, like Base UI.
   document.addEventListener("pointerdown", (e) => {
     if (!(e.target instanceof Element)) return;
-    const trigger = e.target.closest("[data-tui-contextmenu-trigger]");
-    if (trigger) trigger._tuiOpenMethod = e.pointerType;
+    const trigger = e.target.closest(TRIGGER);
+    if (trigger) trigger._templOpenMethod = e.pointerType;
     if (e.button !== 0) return;
-    if (!e.target.closest("[data-tui-contextmenu-content]")) closeAll();
+    if (!positionerOf(e.target)) closeAll();
   });
 
   document.addEventListener("click", (e) => {
     if (!(e.target instanceof Element)) return;
     // Clicking a submenu trigger opens it right away.
-    const subTrigger = e.target.closest("[data-tui-contextmenu-sub-trigger]");
+    const subTrigger = e.target.closest(SUB_TRIGGER);
     if (subTrigger) {
-      const sub = subTrigger.closest("[data-tui-contextmenu-sub]");
+      const sub = subTrigger.closest(SUB);
       if (sub) {
-        clearTimeout(sub._tuiOpen);
-        sub._tuiOpen = null;
+        clearTimeout(sub._templOpen);
+        sub._templOpen = null;
 		requestSubOpenChange(sub, true, e.detail === 0);
       }
       return;
     }
 
     // Checkbox items toggle and keep the menu open.
-    const checkbox = e.target.closest("[data-tui-contextmenu-checkbox-item]");
+    const checkbox = e.target.closest('[data-slot="context-menu-checkbox-item"]');
     if (checkbox) {
       if (!checkbox.disabled) {
         const on = checkbox.hasAttribute("data-checked");
@@ -535,7 +557,7 @@
       detail: { checked: !on },
     });
     const accepted = checkbox.dispatchEvent(change);
-    if (accepted && !checkbox.hasAttribute("data-tui-contextmenu-checkbox-controlled")) {
+    if (accepted && !checkbox.hasAttribute("data-templ-checked")) {
       setChecked(checkbox, !on);
     }
       }
@@ -543,18 +565,18 @@
     }
 
     // Radio items select within their group and keep the menu open.
-    const radio = e.target.closest("[data-tui-contextmenu-radio-item]");
+    const radio = e.target.closest('[data-slot="context-menu-radio-item"]');
     if (radio) {
       if (!radio.disabled) {
-        const group = radio.closest("[data-tui-contextmenu-radio-group]");
+        const group = radio.closest('[data-slot="context-menu-radio-group"]');
     const change = new CustomEvent("contextmenu-value-change", {
       bubbles: true,
       cancelable: true,
-      detail: { value: radio.getAttribute("data-tui-contextmenu-radio-value") },
+      detail: { value: radio.getAttribute("data-templ-value") },
     });
     const accepted = (group || radio).dispatchEvent(change);
-    if (accepted && group && !group.hasAttribute("data-tui-contextmenu-radio-controlled")) {
-          group.querySelectorAll("[data-tui-contextmenu-radio-item]").forEach((r) => {
+    if (accepted && group && !group.hasAttribute("data-templ-value")) {
+          group.querySelectorAll('[data-slot="context-menu-radio-item"]').forEach((r) => {
             setChecked(r, false);
           });
       setChecked(radio, true);
@@ -563,13 +585,13 @@
       return;
     }
 
-    const item = e.target.closest("[data-tui-contextmenu-item]");
+    const item = e.target.closest('[data-slot="context-menu-item"]');
     if (item) {
       if (
         item.getAttribute("aria-disabled") !== "true" &&
-        item.getAttribute("data-tui-contextmenu-disable-close-on-click") !== "true"
+        item.getAttribute("data-templ-close-on-click") !== "false"
       ) {
-        const content = item.closest("[data-tui-contextmenu-content]");
+        const content = positionerOf(item);
     if (content) requestOpenChange(content, false);
       }
     }
@@ -612,19 +634,19 @@
         break;
       }
       case "ArrowRight": {
-        const subTrigger = active.closest("[data-tui-contextmenu-sub-trigger]");
+        const subTrigger = active.closest(SUB_TRIGGER);
         if (subTrigger) {
           e.preventDefault();
-          const sub = subTrigger.closest("[data-tui-contextmenu-sub]");
+          const sub = subTrigger.closest(SUB);
 		  if (sub) requestSubOpenChange(sub, true, true);
         }
         break;
       }
       case "ArrowLeft": {
-        const subContent = active.closest("[data-tui-contextmenu-sub-content]");
+        const subContent = active.closest(SUB_CONTENT);
         if (subContent) {
           e.preventDefault();
-          const sub = subContent.closest("[data-tui-contextmenu-sub]");
+          const sub = subContent.closest(SUB);
           if (sub) {
             const { trigger } = subParts(sub);
 			requestSubOpenChange(sub, false);

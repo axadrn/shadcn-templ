@@ -28,9 +28,9 @@ templ CalendarCustomCellSize() {
 		(() => {
 			const root = () => document.getElementById("calendar-custom-cell-size");
 			function decorate() {
-				root().querySelectorAll("[data-tui-calendar-day]").forEach((btn) => {
+				root().querySelectorAll("td[data-day] > button").forEach((btn) => {
 					if (btn.querySelector("span") || btn.getAttribute("data-outside") === "true") return;
-					const date = new Date(btn.getAttribute("data-tui-calendar-day"));
+					const date = new Date(btn.parentElement.getAttribute("data-day"));
 					const weekend = date.getDay() === 0 || date.getDay() === 6;
 					const price = document.createElement("span");
 					price.textContent = weekend ? "$120" : "$100";

@@ -13,13 +13,11 @@ templ FieldRadio() {
 		@field.Description() {
 			Yearly and lifetime plans offer significant savings.
 		}
-		<div data-slot="radio-group" class="grid gap-3">
+		@radiogroup.RadioGroup(radiogroup.Props{Name: "plan", DefaultValue: "monthly"}) {
 			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
 				@radiogroup.Item(radiogroup.ItemProps{
-					Name:           "plan",
-					Value:          "monthly",
-					ID:             "plan-monthly",
-					DefaultChecked: true,
+					Value: "monthly",
+					ID:    "plan-monthly",
 				})
 				@field.Label(field.LabelProps{
 					For:   "plan-monthly",
@@ -30,7 +28,6 @@ templ FieldRadio() {
 			}
 			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
 				@radiogroup.Item(radiogroup.ItemProps{
-					Name:  "plan",
 					Value: "yearly",
 					ID:    "plan-yearly",
 				})
@@ -43,7 +40,6 @@ templ FieldRadio() {
 			}
 			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
 				@radiogroup.Item(radiogroup.ItemProps{
-					Name:  "plan",
 					Value: "lifetime",
 					ID:    "plan-lifetime",
 				})
@@ -54,6 +50,6 @@ templ FieldRadio() {
 					Lifetime ($299.99)
 				}
 			}
-		</div>
+		}
 	}
 }

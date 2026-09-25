@@ -15,8 +15,9 @@
 
   function setup(root) {
     if (instances.has(root)) return;
-    const viewport = root.querySelector("[data-tui-carousel-viewport]");
-    const track = root.querySelector("[data-tui-carousel-track]");
+    const viewport = root.querySelector('[data-slot="carousel-content"]');
+    // The track is the content's inner div (embla's container, no slot).
+    const track = viewport && viewport.firstElementChild;
     if (!viewport || !track) return;
 
     const state = {
@@ -28,11 +29,11 @@
       target: 0,
       velocity: 0,
       raf: null,
-      horizontal: root.getAttribute("data-tui-carousel-orientation") !== "vertical",
-      align: root.getAttribute("data-tui-carousel-align") || "center",
-      loop: root.getAttribute("data-tui-carousel-loop") === "true",
-      autoplay: root.getAttribute("data-tui-carousel-autoplay") === "true",
-      interval: parseInt(root.getAttribute("data-tui-carousel-interval"), 10) || 5000,
+      horizontal: root.getAttribute("data-templ-orientation") !== "vertical",
+      align: root.getAttribute("data-templ-align") || "center",
+      loop: root.getAttribute("data-templ-loop") === "true",
+      autoplay: root.getAttribute("data-templ-autoplay") === "true",
+      interval: parseInt(root.getAttribute("data-templ-interval"), 10) || 5000,
       timer: null,
     };
     instances.set(root, state);
@@ -58,7 +59,7 @@
   }
 
   function items(state) {
-    return [...state.track.querySelectorAll("[data-tui-carousel-item]")].filter(
+    return [...state.track.querySelectorAll('[data-slot="carousel-item"]')].filter(
       (item) => item.parentElement === state.track,
     );
   }
@@ -151,15 +152,13 @@
       render(state);
     }
 
-    const prev = state.root.querySelector("[data-tui-carousel-prev]");
-    const next = state.root.querySelector("[data-tui-carousel-next]");
+    const prev = state.root.querySelector('[data-slot="carousel-previous"]');
+    const next = state.root.querySelector('[data-slot="carousel-next"]');
     if (prev) prev.disabled = !state.loop && state.index === 0;
     if (next) next.disabled = !state.loop && state.index >= points.length - 1;
 
-    // Expose the selection like embla's select event, attributes for CSS and
-    // a bubbling event for scripts.
-    state.root.setAttribute("data-tui-carousel-selected", state.index + 1);
-    state.root.setAttribute("data-tui-carousel-count", points.length);
+    // Expose the selection like embla's select event, as a bubbling event;
+    // selected counts from 1.
     state.root.dispatchEvent(
       new CustomEvent("carousel-select", {
         bubbles: true,
@@ -262,12 +261,12 @@
 
   document.addEventListener("click", (e) => {
     if (!(e.target instanceof Element)) return;
-    const button = e.target.closest("[data-tui-carousel-prev], [data-tui-carousel-next]");
-    const root = button?.closest("[data-tui-carousel]");
+    const button = e.target.closest('[data-slot="carousel-previous"], [data-slot="carousel-next"]');
+    const root = button?.closest('[data-slot="carousel"]');
     if (!root) return;
     const state = instances.get(root);
     if (!state) return;
-    if (button.hasAttribute("data-tui-carousel-prev")) {
+    if (button.matches('[data-slot="carousel-previous"]')) {
       scrollPrev(state);
     } else {
       scrollNext(state);
@@ -275,14 +274,14 @@
   });
 
   window.addEventListener("resize", () => {
-    document.querySelectorAll("[data-tui-carousel]").forEach((root) => {
+    document.querySelectorAll('[data-slot="carousel"]').forEach((root) => {
       const state = instances.get(root);
       if (state) update(state, false);
     });
   });
 
   function init() {
-    document.querySelectorAll("[data-tui-carousel]").forEach(setup);
+    document.querySelectorAll('[data-slot="carousel"]').forEach(setup);
   }
 
   if (document.readyState === "loading") {
