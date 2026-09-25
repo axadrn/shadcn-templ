@@ -1239,27 +1239,13 @@
     },
   };
 
-  function initialize(root = document) {
-    if (root.matches?.(GROUP)) stateFor(root);
-    root.querySelectorAll?.(GROUP).forEach(stateFor);
-  }
-
-  function cleanup(root) {
-    mounted.forEach((state) => {
-      if (state.element === root || root.contains?.(state.element)) unmount(state);
-    });
-  }
-
   window.templ = window.templ || {};
   window.templ.resizable = api;
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => initialize());
-  else initialize();
-  new MutationObserver((records) => records.forEach((record) => {
-    record.removedNodes.forEach((node) => {
-      if (node instanceof Element) cleanup(node);
-    });
-    record.addedNodes.forEach((node) => {
-      if (node instanceof Element) initialize(node);
-    });
-  })).observe(document.documentElement, { childList: true, subtree: true });
+  window.templ.lifecycle.register(GROUP, {
+    init: stateFor,
+    destroy(group) {
+      const state = byElement.get(group);
+      if (state) unmount(state);
+    },
+  });
 })();

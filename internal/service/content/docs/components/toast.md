@@ -31,6 +31,8 @@ shadcn-templ add toast
 
 <ComponentSource name="toast" title="components/toast/toast.js" />
 
+<ComponentSource name="toast" title="components/baseui/lifecycle.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

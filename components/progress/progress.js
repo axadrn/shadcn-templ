@@ -36,9 +36,6 @@
   });
 
   function observeBar(bar) {
-    if (bar._templProgress) return;
-    bar._templProgress = true;
-
     // Pendant of Base UI's label registration: a Label child links itself to
     // the root via aria-labelledby.
     const label = bar.querySelector('[data-slot="progress-label"]');
@@ -53,19 +50,5 @@
     });
   }
 
-  // Bars present at load register immediately; bars swapped in later (e.g.
-  // htmx) register via the childList observer.
-  function init() {
-    document.querySelectorAll('[data-slot="progress"]').forEach(observeBar);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+  window.templ.lifecycle.register('[data-slot="progress"]', { init: observeBar });
 })();

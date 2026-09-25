@@ -65,22 +65,8 @@
   }
 
   // Moves the content to <body> (shadcn portals it the same way).
-  // The unmount half of the React portal pendant: a portaled content lives
-  // as long as its SSR declaration site (_templPortalOwner) stays in the
-  // document. Trigger-presence heuristics judged mid-swap moments wrongly -
-  // multi-phase swap layers briefly disconnect the new triggers.
-  function removeOrphanedContents(content) {
-    document.querySelectorAll("body > " + CONTENT).forEach((c) => {
-      if (c !== content && c._templPortalOwner && !c._templPortalOwner.isConnected) {
-        stopAutoPositioning(c);
-        c.remove();
-      }
-    });
-  }
-
   function portal(content) {
     listenForEscape(content);
-    removeOrphanedContents(content);
     if (content.parentElement !== document.body) {
       if (!content._templPortalOwner) content._templPortalOwner = content.parentElement;
       document.body.appendChild(content);
@@ -255,29 +241,20 @@
 
   document.addEventListener("keydown", closeOnEscapeKeyDown);
 
-  function init() {
-    removeOrphanedContents();
-    document.querySelectorAll(TRIGGER).forEach(listenForEscape);
-    allContents().forEach((content) => {
-      // Server-side open state (Base UI open or defaultOpen), once per element.
-      if (content._templInit) return;
-      content._templInit = true;
+  window.templ.lifecycle.register(TRIGGER, { init: listenForEscape });
+  // Content stays in its hidden portal node until it opens. It unmounts with
+  // its portal owner: a portaled one is removed from <body> then.
+  window.templ.lifecycle.register(CONTENT, {
+    init(content) {
+      // Server-side open state (Base UI open or defaultOpen).
       if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
         const trigger = triggerFor(content);
         if (trigger) open(content, trigger);
       }
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself, removals release portaled content through the
-  // ownership sweep.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
-
+    },
+    destroy(content) {
+      stopAutoPositioning(content);
+      if (content.isConnected) content.remove();
+    },
+  });
 })();

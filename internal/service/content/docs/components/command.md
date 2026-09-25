@@ -35,6 +35,8 @@ shadcn-templ add command
 
 <ComponentSource name="command" title="components/command/command.js" />
 
+<ComponentSource name="command" title="components/baseui/lifecycle.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

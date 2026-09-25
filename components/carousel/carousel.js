@@ -14,7 +14,6 @@
   const instances = new WeakMap();
 
   function setup(root) {
-    if (instances.has(root)) return;
     const viewport = root.querySelector('[data-slot="carousel-content"]');
     // The track is the content's inner div (embla's container, no slot).
     const track = viewport && viewport.firstElementChild;
@@ -280,17 +279,11 @@
     });
   });
 
-  function init() {
-    document.querySelectorAll('[data-slot="carousel"]').forEach(setup);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+  window.templ.lifecycle.register('[data-slot="carousel"]', {
+    init: setup,
+    destroy(root) {
+      const state = instances.get(root);
+      if (state) stopAutoplay(state);
+    },
+  });
 })();

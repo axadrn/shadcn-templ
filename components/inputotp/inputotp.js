@@ -8,10 +8,6 @@
   // Pendant of the input-otp library: one invisible real input over the
   // container drives everything, the slots only display state.
 
-  function roots() {
-    return document.querySelectorAll(ROOT);
-  }
-
   function inputOf(root) {
     return root.querySelector(INPUT);
   }
@@ -100,17 +96,11 @@
   }
 
   function initRoot(root) {
-    if (root._templInit) return;
-    root._templInit = true;
     const input = inputOf(root);
     if (!input) return;
     input.maxLength = slotsOf(root).length;
     input.value = sanitize(root, input.value);
     render(root);
-  }
-
-  function init() {
-    roots().forEach(initRoot);
   }
 
   document.addEventListener("input", (e) => {
@@ -199,13 +189,5 @@
     render(root);
   });
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+  window.templ.lifecycle.register(ROOT, { init: initRoot });
 })();

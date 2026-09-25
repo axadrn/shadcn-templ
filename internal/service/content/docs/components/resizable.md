@@ -35,6 +35,8 @@ shadcn-templ add resizable
 
 <ComponentSource name="resizable" title="components/resizable/resizable.js" />
 
+<ComponentSource name="resizable" title="components/baseui/lifecycle.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

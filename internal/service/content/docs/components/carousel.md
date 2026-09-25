@@ -35,6 +35,8 @@ shadcn-templ add carousel
 
 <ComponentSource name="carousel" title="components/carousel/carousel.js" />
 
+<ComponentSource name="carousel" title="components/baseui/lifecycle.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

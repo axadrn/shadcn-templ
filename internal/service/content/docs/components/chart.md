@@ -62,6 +62,8 @@ shadcn-templ add chart
 
 <ComponentSource name="chart" title="components/chart/chart.js" />
 
+<ComponentSource name="chart" title="components/baseui/lifecycle.js" />
+
 <Step>Add the following colors to your CSS file</Step>
 
 ```css title="assets/css/globals.css" showLineNumbers

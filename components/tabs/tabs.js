@@ -111,29 +111,18 @@
 
   // Initialize active states: the server marks the active tab; an
   // uncontrolled root without one activates its first enabled tab.
-  function init() {
-    document.querySelectorAll(ROOT).forEach((root) => {
-      const value = activeValue(root);
-      if (value !== null) {
-        setActiveTab(root, value);
-        return;
-      }
-      if (root.hasAttribute("data-templ-value")) return;
-      const first = partsOf(root, TAB).find((t) => t.getAttribute("aria-disabled") !== "true");
-      if (first) setActiveTab(root, first.getAttribute("data-templ-value"));
-    });
+  function init(root) {
+    const value = activeValue(root);
+    if (value !== null) {
+      setActiveTab(root, value);
+      return;
+    }
+    if (root.hasAttribute("data-templ-value")) return;
+    const first = partsOf(root, TAB).find((t) => t.getAttribute("aria-disabled") !== "true");
+    if (first) setActiveTab(root, first.getAttribute("data-templ-value"));
   }
 
-  // Setup on load and mutations
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-  // Re-init on any childList mutation, directly (never rAF-deferred: rAF
-  // does not fire in hidden tabs or throttled iframes): swapped-in markup
-  // wires itself.
-  new MutationObserver(() => init()).observe(document.body, { childList: true, subtree: true });
+  window.templ.lifecycle.register(ROOT, { init });
 
   // Expose public API: setActive(root, value) with the [data-slot=tabs] root.
   window.templ = window.templ || {};

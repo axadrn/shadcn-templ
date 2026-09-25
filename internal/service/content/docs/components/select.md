@@ -31,6 +31,8 @@ shadcn-templ add select
 
 <ComponentSource name="select" title="components/select/select.js" />
 
+<ComponentSource name="select" title="components/baseui/lifecycle.js" />
+
 <ComponentSource name="select" title="components/baseui/scroll_lock.js" />
 
 <ComponentSource name="select" title="components/floatingui/floating_ui_core.js" />

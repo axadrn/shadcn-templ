@@ -31,6 +31,8 @@ shadcn-templ add popover
 
 <ComponentSource name="popover" title="components/popover/popover.js" />
 
+<ComponentSource name="popover" title="components/baseui/lifecycle.js" />
+
 <ComponentSource name="popover" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="popover" title="components/floatingui/floating_ui_dom.js" />

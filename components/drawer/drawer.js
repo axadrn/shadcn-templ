@@ -1299,40 +1299,6 @@
     }
   }
 
-  function init(root = document) {
-    root.querySelectorAll("[data-base-ui-click-trigger][aria-controls]").forEach((t) => {
-      if (drawerFor(t)) listenForEscape(t);
-    });
-    // Self-healing modality: recompute the inert siblings on every DOM
-    // change, so a swap or a missed close event never leaves stale inert.
-    syncInert();
-    // The unmount half of the React portal pendant: a drawer lives as long
-    // as its SSR declaration site (_templPortalOwner) stays in the document.
-    // Ownership keeps programmatic drawers (window.templ.drawer.open) alive
-    // and judges swaps without mid-swap trigger heuristics.
-    document.querySelectorAll("body > " + VIEWPORT).forEach((dialog) => {
-      if (dialog._templPortalOwner && !dialog._templPortalOwner.isConnected) {
-        unwatchSnapResize(dialog);
-        dialog._templReleaseScroll?.();
-        dialog._templReleaseScroll = null;
-        dialog.remove();
-      }
-    });
-    root.querySelectorAll(VIEWPORT).forEach((dialog) => {
-      if (dialog._templDrawerInit) return;
-      ensureDrawer(dialog);
-
-      // Server-side open state (Base UI open or defaultOpen), read once: the
-      // _templDrawerInit guard above keeps a re-init from re-opening it.
-      if (dialog.getAttribute("data-templ-open") === "true" || dialog.hasAttribute("data-templ-default-open")) {
-        openDrawer(dialog);
-      } else {
-        updateState(dialog, dialog.open);
-      }
-    });
-    syncStack();
-  }
-
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
     // Base UI's DrawerTrigger identifier (DialogTrigger), shared with dialog
@@ -1348,20 +1314,37 @@
     }
   });
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => init());
-  } else {
-    init();
-  }
-
-  // Initialize drawers added later (e.g. swapped in via htmx), so a
-  // server-rendered drawer with Open true still opens. Also
-  // release the scroll lock if an open drawer got swapped out of the DOM.
-  new MutationObserver(() => {
-    init();
-  }).observe(document.body, {
-    childList: true,
-    subtree: true,
+  // Base UI's DrawerTrigger identifier (DialogTrigger), shared with dialog
+  // and popover triggers.
+  window.templ.lifecycle.register("[data-base-ui-click-trigger][aria-controls]", {
+    init(trigger) {
+      if (drawerFor(trigger)) listenForEscape(trigger);
+    },
+  });
+  // A drawer lives as long as its SSR declaration site (_templPortalOwner)
+  // stays in the document, which keeps programmatic drawers
+  // (window.templ.drawer.open) alive. Mounting and unmounting recompute the
+  // inert siblings, so a swap never leaves stale inert behind.
+  window.templ.lifecycle.register(VIEWPORT, {
+    init(dialog) {
+      ensureDrawer(dialog);
+      // Server-side open state (Base UI open or defaultOpen).
+      if (dialog.getAttribute("data-templ-open") === "true" || dialog.hasAttribute("data-templ-default-open")) {
+        openDrawer(dialog);
+      } else {
+        updateState(dialog, dialog.open);
+      }
+      syncInert();
+      syncStack();
+    },
+    destroy(dialog) {
+      unwatchSnapResize(dialog);
+      dialog._templReleaseScroll?.();
+      dialog._templReleaseScroll = null;
+      if (dialog.isConnected) dialog.remove();
+      syncInert();
+      syncStack();
+    },
   });
 
   window.templ = window.templ || {};
