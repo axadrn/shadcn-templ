@@ -112,7 +112,9 @@ Done when: `grep -l "computePosition" components/*/*.js` lists only the block an
 
 `components/baseui/floating_focus_manager.js` (`FloatingFocusManager.tsx`: guards, initial focus, return focus, modal trap) and `components/baseui/mark_others.js` (`markOthers.ts`: `aria-hidden` or `inert` outside, exempting `[data-base-ui-portal]`). Dialog first, then drawer, menus, select, combobox, popover. The combobox popup pattern moves focus into its input (carried over).
 
-Done when: `dialog.js` has no `tabbable`, no guard creation and no `aria-hidden` sweep of its own, the combobox popup pattern focuses its input, `check.sh` and `compare.mjs` green.
+Also from task 4: after an outside press shadcn returns focus to the trigger of a menu, select and popover, ours leaves it on the body (`compare.mjs dismiss`, the `down` and `up` steps). And `use_dismiss.js` gets the source's check for elements injected after opening, which needs the `data-base-ui-inert` marker from `mark_others.js`.
+
+Done when: `dialog.js` has no `tabbable`, no guard creation and no `aria-hidden` sweep of its own, the combobox popup pattern focuses its input, focus after an outside press matches shadcn in `compare.mjs dismiss`, `check.sh` and `compare.mjs` green.
 
 ### 8. List navigation and typeahead
 
@@ -141,6 +143,8 @@ Done when: `drawer.templ` renders no `<dialog>`, the drawer suites of `behavior.
 ### 11. Sweep
 
 - [ ] Done
+
+Also from task 4: Base UI's popover trigger opens on `click` (`useClick` with its default event), ours on `pointerdown`. Menu triggers open on `mousedown` in Base UI, dialog triggers on `click`. Compare our trigger events with `useClick` per component and move the popover to `click`.
 
 No component script defines a behavior a block owns (the greps of tasks 2 to 9 together), every difference in task 1's baseline logs is closed or listed in `plans/UPSTREAM.md` as accepted with its reason, a changelog entry if any public behavior changed.
 
