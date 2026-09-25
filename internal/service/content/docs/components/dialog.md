@@ -41,6 +41,12 @@ shadcn-templ add dialog
 
 <ComponentSource name="dialog" title="components/baseui/use_transition_status.js" />
 
+<ComponentSource name="dialog" title="components/baseui/tabbable.js" />
+
+<ComponentSource name="dialog" title="components/baseui/mark_others.js" />
+
+<ComponentSource name="dialog" title="components/baseui/floating_focus_manager.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

@@ -139,7 +139,7 @@ templ Portal(props ...PortalProps) {
 		{{ p = props[0] }}
 	}
 	<div data-templ-portal hidden>
-		<div data-base-ui-portal hidden { p.Attributes... }>
+		<div data-base-ui-portal data-slot="dialog-portal" hidden { p.Attributes... }>
 			{ children... }
 		</div>
 	</div>
@@ -187,6 +187,7 @@ templ Content(props ...ContentProps) {
 			id={ s.id }
 			role="dialog"
 			tabindex="-1"
+			data-base-ui-focusable
 			data-slot="dialog-content"
 			if s.controlled {
 				data-templ-open={ strconv.FormatBool(s.open) }

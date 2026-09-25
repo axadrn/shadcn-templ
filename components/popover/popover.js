@@ -9,7 +9,8 @@
   const CLICK_TRIGGER = "[data-base-ui-click-trigger][aria-controls]";
 
   function isPositioner(el) {
-    return !!(el && el.firstElementChild && el.firstElementChild.matches(POPUP));
+    // The popup is the positioner's slotted child, next to the focus guards.
+    return !!el?.querySelector?.(":scope > " + POPUP);
   }
 
   function allContents() {
@@ -37,19 +38,8 @@
     return popup && isPositioner(popup.parentElement) ? popup.parentElement : null;
   }
 
-  // Focus waits until after the input task:
-  // Chromium's mousedown default focuses the trigger, WebKit's clears focus.
-  // One frame, like Base UI, with a guard for a popup that closed meanwhile.
-  function enqueueFocus(el, shouldFocus) {
-    if (!el) return;
-    requestAnimationFrame(() => {
-      if (shouldFocus && !shouldFocus()) return;
-      el.focus({ preventScroll: true });
-    });
-  }
-
   function popupFor(content) {
-    return content.firstElementChild;
+    return content.querySelector(":scope > " + POPUP);
   }
 
   // The popup renders the transition status, its positioner the open state.
@@ -57,9 +47,14 @@
     return { positioner: content, parts: [popupFor(content)] };
   }
 
-  // Moves the content to <body> (shadcn portals it the same way).
+  // The positioner's parent is the portal node, which moves to <body>
+  // (shadcn portals it the same way).
+  function portalNodeOf(content) {
+    return content.parentElement;
+  }
+
   function portal(content) {
-    window.templ.portal.render(content);
+    window.templ.portal.render(portalNodeOf(content));
     wireAria(content);
   }
 
@@ -109,7 +104,7 @@
     return content.hasAttribute("data-open");
   }
 
-  function requestOpenChange(content, nextOpen, returnFocus) {
+  function requestOpenChange(content, nextOpen, details) {
     if (!content || isOpen(content) === nextOpen) return false;
     const accepted = content.dispatchEvent(
       new CustomEvent("popover-open-change", {
@@ -120,8 +115,46 @@
     );
     if (!accepted || content.hasAttribute("data-templ-open")) return false;
     if (nextOpen) open(content);
-    else close(content, returnFocus);
+    else close(content, details);
     return true;
+  }
+
+  // PopoverPopup's FloatingFocusManager, non modal like shadcn's popover,
+  // with PopoverTrigger's focus guards around the trigger while mounted.
+  function startFocusManager(content) {
+    if (content._templFocus) {
+      content._templFocus.open();
+      return;
+    }
+    const trigger = triggerFor(content);
+    const popup = popupFor(content);
+    const onOpenChange = (open, reason, event) => requestOpenChange(content, open, { reason, event });
+    content._templTriggerGuards = trigger && window.templ.triggerFocusGuards.attach(trigger, {
+      positioner: content,
+      beforeContentFocusGuard: () => content._templFocus?.beforeGuard,
+      onClose: (event) => onOpenChange(false, "focus-out", event),
+    });
+    content._templFocus = window.templ.focusManager.useFloatingFocusManager({
+      floating: content,
+      reference: trigger,
+      triggers: [...document.querySelectorAll('[aria-controls="' + content.id + '"]')],
+      modal: false,
+      openInteractionType: content._templOpenMethod ?? null,
+      // Opened by touch the popup takes focus, so the virtual keyboard stays
+      // closed (createDefaultInitialFocus).
+      initialFocus: (interactionType) => (interactionType === "touch" ? popup : true),
+      restoreFocus: "popup",
+      previousFocusableElement: trigger,
+      nextFocusableElement: content._templTriggerGuards?.focusTarget,
+      onOpenChange,
+    });
+  }
+
+  function stopFocusManager(content) {
+    content._templFocus?.unmount();
+    content._templFocus = null;
+    content._templTriggerGuards?.remove();
+    content._templTriggerGuards = null;
   }
 
   function open(content) {
@@ -138,9 +171,9 @@
       floating: content,
       reference: [...document.querySelectorAll('[aria-controls="' + content.id + '"]')],
       outsidePressEvent: { mouse: "intentional", touch: "sloppy" },
-      // Focus follows an outside press instead of returning to the trigger.
-      onOpenChange: (open, reason) => requestOpenChange(content, open, reason !== "outside-press"),
+      onOpenChange: (open, reason, event) => requestOpenChange(content, open, { reason, event }),
     });
+    startFocusManager(content);
 
     // Positioned first, then the enter animation plays in place.
     const finish = () => {
@@ -153,28 +186,22 @@
         trigger.setAttribute("data-popup-open", "");
         trigger.setAttribute("data-pressed", "");
       }
-      // Base UI moves focus into the popup when it opens.
-      if (popup && !content.contains(document.activeElement)) {
-        enqueueFocus(popup, () => isOpen(content));
-      }
     };
     startAutoPositioning(content).then(finish, finish);
   }
 
-  // returnFocus false skips the focus restore, like Base UI on pointer
-  // dismiss: focus follows the outside press instead of the trigger.
-  function close(content, returnFocus) {
+  // details { reason, event } of the close, for the focus manager.
+  function close(content, details) {
     if (typeof content === "string") content = document.getElementById(content);
     if (!content || content.hidden) return;
     content._templDismiss?.();
     content._templDismiss = null;
-    if (returnFocus !== false && content.contains(document.activeElement)) {
-      const focusTrigger = triggerFor(content);
-      if (focusTrigger) focusTrigger.focus({ preventScroll: true });
-    }
-    // Positioned until it unmounts, like Base UI.
+    content._templFocus?.close(details);
+    // Positioned until it unmounts, like Base UI. Unmounting the focus
+    // manager returns focus.
     window.templ.transition.close(partsOf(content), popupFor(content), () => {
       stopAutoPositioning(content);
+      stopFocusManager(content);
       content.hidden = true;
     });
     const trigger = triggerFor(content);
@@ -185,8 +212,8 @@
     }
   }
 
-  function closeAll(returnFocus) {
-    allContents().forEach((content) => close(content, returnFocus));
+  function closeAll() {
+    allContents().forEach((content) => close(content));
   }
 
   function closeNearest(element) {
@@ -200,39 +227,33 @@
     if (content) requestOpenChange(content, false);
   }
 
-  function toggle(content) {
+  // interactionType is how the trigger opened it (useOpenInteractionType),
+  // null for a programmatic open.
+  function toggle(content, interactionType = null) {
     if (typeof content === "string") content = document.getElementById(content);
     if (!content) return;
+    content._templOpenMethod = interactionType;
     requestOpenChange(content, !isOpen(content));
   }
 
   // Pointer interactions toggle and dismiss on PRESS, exactly like Base UI.
   // Click is never used for open/close, so the stray click the browser fires
   // on body when the popup ends up under the released pointer is harmless.
-  document.addEventListener("pointerdown", (e) => {
-    if (e.button !== 0 || !(e.target instanceof Element)) return;
-    const trigger = triggerOf(e.target);
-    if (trigger) {
-      if (trigger.disabled) return;
-      const content = contentFor(trigger);
-      if (content) toggle(content);
-    }
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!(e.target instanceof Element)) return;
-    const trigger = triggerOf(e.target);
-    if (trigger) {
-      // Keyboard activation only (Enter/Space fire a detail-0 click without
-      // a preceding pointerdown); pointer presses are handled on pointerdown.
-      if (e.detail === 0 && !trigger.disabled) {
-        const content = contentFor(trigger);
-        if (content) toggle(content);
-      }
-    }
-  });
-
-
+  // PopoverTrigger's useClick with its default click event, on every trigger
+  // of the popover.
+  function listenForClick(content) {
+    const cleanups = [...document.querySelectorAll('[aria-controls="' + content.id + '"]')].map((trigger) =>
+      window.templ.click.useClick(trigger, {
+        isOpen: () => isOpen(content),
+        onOpenChange(nextOpen, event, pointerType) {
+          if (trigger.disabled) return;
+          content._templOpenMethod = pointerType || "keyboard";
+          requestOpenChange(content, nextOpen);
+        },
+      }),
+    );
+    return () => cleanups.forEach((cleanup) => cleanup());
+  }
 
   // Content stays in its hidden portal node until it opens. It unmounts with
   // its portal owner: a portaled one is removed from <body> then.
@@ -241,6 +262,7 @@
       const content = popup.parentElement;
       const trigger = isPositioner(content) && triggerFor(content);
       if (!trigger) return;
+      content._templClickCleanup = listenForClick(content);
       // Server-side open state (Base UI open or defaultOpen).
       if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
         open(content);
@@ -249,9 +271,11 @@
     destroy(popup) {
       const content = popup.parentElement;
       if (!isPositioner(content)) return;
+      content._templClickCleanup?.();
       content._templDismiss?.();
       stopAutoPositioning(content);
-      if (content.isConnected) content.remove();
+      stopFocusManager(content);
+      window.templ.portal.remove(portalNodeOf(content));
     },
   });
 

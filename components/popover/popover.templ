@@ -135,9 +135,11 @@ templ Content(props ...ContentProps) {
 		}
 		s := state(ctx)
 	}}
-	// Hidden until the script portals it to <body> on open, so the SSRd
-	// content never participates in layout or sibling CSS.
+	// Hidden until the script portals the portal node on open, so the SSRd
+	// content never participates in layout or sibling CSS. Inside the portal
+	// node Base UI's positioner around the popup.
 	<div data-templ-portal hidden>
+		<div data-base-ui-portal>
 		<div
 			id={ s.id }
 			data-templ-side={ string(p.Side) }
@@ -152,7 +154,7 @@ templ Content(props ...ContentProps) {
 			data-templ-default-open?={ s.open == nil && s.defaultOpen }
 			data-closed
 			hidden
-			data-base-ui-portal
+			role="presentation"
 			class="pointer-events-none isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
@@ -160,6 +162,7 @@ templ Content(props ...ContentProps) {
 				data-closed
 				role="dialog"
 				tabindex="-1"
+				data-base-ui-focusable
 				class={
 					utils.CN(
 						// 1:1 base/ui/popover.tsx PopoverContent, the look comes from
@@ -175,6 +178,7 @@ templ Content(props ...ContentProps) {
 			>
 				{ children... }
 			</div>
+		</div>
 		</div>
 	</div>
 }

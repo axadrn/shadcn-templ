@@ -43,6 +43,12 @@ shadcn-templ add select
 
 <ComponentSource name="select" title="components/baseui/use_anchor_positioning.js" />
 
+<ComponentSource name="select" title="components/baseui/tabbable.js" />
+
+<ComponentSource name="select" title="components/baseui/mark_others.js" />
+
+<ComponentSource name="select" title="components/baseui/floating_focus_manager.js" />
+
 <ComponentSource name="select" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="select" title="components/floatingui/floating_ui_dom.js" />

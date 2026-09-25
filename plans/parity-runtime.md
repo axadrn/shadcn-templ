@@ -110,7 +110,7 @@ Done when: `grep -l "computePosition" components/*/*.js` lists only the block an
 
 ### 7. Focus manager and mark others
 
-- [ ] Done
+- [x] Done
 
 `components/baseui/floating_focus_manager.js` (`FloatingFocusManager.tsx`: guards, initial focus, return focus, modal trap) and `components/baseui/mark_others.js` (`markOthers.ts`: `aria-hidden` or `inert` outside, exempting `[data-base-ui-portal]`). Dialog first, then drawer, menus, select, combobox, popover. The combobox popup pattern moves focus into its input (carried over).
 
@@ -126,7 +126,9 @@ Done when: `dialog.js` has no `tabbable`, no guard creation and no `aria-hidden`
 
 Also from task 6: the submenus of both menus get a positioner there but stay nested in the root popup, positioned fixed, because the keyboard handling of the menus still finds them inside the root content. Base UI portals every submenu like a menu (`DropdownMenuSubContent` is a `DropdownMenuContent`), positions it absolute and renders `data-nested` on positioner and popup. With the list navigation rewritten here the submenu portals on open like its root, and `tmp/parity-runtime/position.mjs chromium --offset dropdown-menu-submenu context-menu-submenu` shows shadcn's positioner.
 
-Done when: none of the four consumers handles `ArrowDown` itself, typeahead works in menus as in Base UI, the submenus portal and render `data-nested` like upstream, `check.sh` and `compare.mjs` green.
+Also from task 7: menu and select items are tabbable buttons here, Base UI's items are out of the tab order (`tabindex="-1"`, the highlighted one `0`), so the focus managers of the menus and the select name the popup or the selected item as `initialFocus`. With the list navigation owning the item tabindex, those scripts drop that and the focus manager's default applies, as in `MenuPopup` and `SelectPopup`. The submenus get their `MenuPopup` focus manager too (non modal, no initial focus, no return focus), once they portal.
+
+Done when: none of the four consumers handles `ArrowDown` itself, typeahead works in menus as in Base UI, the submenus portal and render `data-nested` like upstream and have their focus manager, no focus manager names an item as initial focus, `check.sh` and `compare.mjs` green.
 
 ### 9. Composite roving tab stop
 
@@ -148,7 +150,7 @@ Done when: `drawer.templ` renders no `<dialog>`, the drawer suites of `behavior.
 
 - [ ] Done
 
-Also from task 4: Base UI's popover trigger opens on `click` (`useClick` with its default event), ours on `pointerdown`. Menu triggers open on `mousedown` in Base UI, dialog triggers on `click`. Compare our trigger events with `useClick` per component and move the popover to `click`.
+Also from task 4: Base UI's popover trigger opens on `click` (`useClick` with its default event), ours on `pointerdown`. Menu triggers open on `mousedown` in Base UI, dialog triggers on `click`. Task 7 ported `useClick` and moved the dropdown menu and the popover to it, check the remaining triggers (dialog, drawer, collapsible) against it.
 
 No component script defines a behavior a block owns (the greps of tasks 2 to 9 together), every difference in task 1's baseline logs is closed or listed in `plans/UPSTREAM.md` as accepted with its reason, a changelog entry if any public behavior changed.
 
@@ -270,5 +272,35 @@ Structure that moves to upstream's:
 The Go tests that looked for the old positioning code in the scripts check the block now: `components/floatingui/positioning_test.go` pins the vendored versions and fails when a script other than the block talks to Floating UI, the component tests look for their block call and options, and the select test fails when the script sets `data-align-trigger`. `behavior.mjs` reads the tooltip, hover card and context menu from their positioner.
 
 Checks: `check.sh` in chromium and webkit, a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 38). The DOM against rt5 differs on the pages with a tooltip, hover card or submenu by the new positioner element, on the docs pages by the new code block, and by `data-align` on positioners and popups. `escape.mjs` 0 failures, `compare.mjs dismiss` unchanged, `compare.mjs` 304 pass and 163 fail, the same lines as after task 5, `transition.mjs` unchanged, `htmx.mjs` 110 of 110 in both engines. One chromium run of `compare.mjs` died once in the context menu family on a page without a body mid load, two reruns of the family and a full rerun were clean.
+
+### Task 7
+
+Five blocks, each a port of the Base UI 1.6.0 source it names:
+
+- `components/baseui/tabbable.js`: Base UI's own `utils/tabbable.ts` (it does not use the tabbable package), with `activeElement` and `contains` from `internals/shadowDom.ts` and `isElementVisible`.
+- `components/baseui/mark_others.js`: `markOthers.ts`, `aria-hidden` or `inert` outside with counters, and the `data-base-ui-inert` marker.
+- `components/baseui/floating_focus_manager.js`: `FloatingFocusManager.tsx` with `FocusGuard` and `enqueueFocus`. The component's effects are one handle: created on mount, `open()` again for a reopen during the exit, `close(details)` when it closes, `unmount()` after the exit animation, which returns focus like the source's unmount cleanup. Guards, the Tab stop without tabbables, pointer tracking, close on focus out with the floating tree as the portal owner chain, restore focus, the outside hidden for a modal manager, initial focus, return focus with the previously focused stack, `handleTabIndex`, the Safari blur. Left out: the ancestor combobox reference in the avoided elements, and the VoiceOver `role="button"` on guards, which needs a screen reader detection the browser does not offer.
+- `components/baseui/portal.js` is now `FloatingPortal.tsx`: a portal node with an id, rendered into the node of an enclosing portal or `<body>` (`useFloatingPortalNode`), and for a non modal focus manager the outside guards with the `aria-owns` span at the declaration site and the tab order handling of the node's tabbables.
+- `components/baseui/use_trigger_focus_guards.js`: `useTriggerFocusGuards.ts`, the guards around the trigger of an open popover or dropdown menu.
+- `components/baseui/use_click.js`: `useClick.ts`, which task 11 was to look at. It is needed here: WebKit does not focus a clicked button, the focus jumps to the sheet popup around it, and a dropdown menu that opened synchronously on `pointerdown` saw that as focus leaving and closed. Base UI opens menus on `mousedown` one frame later, after the browser moved focus. The dropdown menu uses it with `mousedown`, the popover with its default `click`.
+
+The consumers pass their Base UI popup's options: dialog, alert dialog and sheet modal with `restoreFocus: "popup"` and the touch rule for initial focus, drawer the same with the popup as initial focus, popover non modal with its trigger guards, dropdown menu non modal with its trigger guards, context menu modal, select non modal, combobox modal with the input in the anchor (no guards, focus stays in the input, `ComboboxInternalDismissButton` before the input and after the popup) and non modal with the input in the popup, which now takes the initial focus (carried over). Gone: the dialog's own tabbable, guards, `markOthers`, return focus and Tab guard, the drawer's `inert` on every body child and its return focus, the popover's, menus' and select's hand focus on open and on close, the menus' and select's Tab close, which Base UI leaves to the focus out through the guards.
+
+Structure that moves to upstream's:
+
+- Every portaled part is a `[data-base-ui-portal]` node with an id. Dialog, alert dialog and sheet already had it and get shadcn's `data-slot` (`dialog-portal`, `alert-dialog-portal`, `sheet-portal`), the hover card gets `hover-card-portal`. Popover, both menus, select, combobox, tooltip and hover card get the node around their positioner, which carried the attribute itself, and the positioner gets `role="presentation"`.
+- Popups get `data-base-ui-focusable` (`FOCUSABLE_POPUP_PROPS`) where shadcn renders it.
+- A modal dialog and drawer render the `InternalBackdrop` of `DialogPortal` while mounted, which `useDismiss` treats as a backdrop.
+- `useDismiss` got the source's check for elements injected after opening (carried over from task 4).
+- The drawer releases its scroll lock when the close starts, like the dialog.
+- `popupFor` and `isPositioner` of five scripts took the positioner's first child, which is now the inside focus guard, and look for the slotted popup instead.
+
+Kept for task 8, written into its Done when: menu and select items are tabbable buttons here and Base UI's are not, so the menus and the select name the popup or the selected item as `initialFocus` where Base UI's default lands there by itself. The submenus get their focus manager when they portal.
+
+Found on the way: the context menu closes on every scroll and resize, which Base UI does not do. That is for the sweep.
+
+The DOM diff of `check.sh` against rt6 is no signal this time: the new portal node moves every popup one level down and the diff compares elements by position, so everything after it shifts. `tmp/parity-runtime/structure.mjs [example...]` compares the structure with shadcn instead (body children, guards and their parents, `aria-owns`, `aria-hidden`, markers), and dialog, popover, dropdown menu and select match it.
+
+Checks: a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 43, the CLI test looked for `(() =>` in the installed dialog script and looks for its API now), in chromium and webkit. `escape.mjs` 0 failures, `compare.mjs dismiss` 34 pass instead of 30, the focus after an outside press is shadcn's for popover, menus and select (the trigger's slot name aside), `compare.mjs` 308 pass instead of 304 with only drawer and popover lines changed, all better, `position.mjs` and `transition.mjs` unchanged, `htmx.mjs` 110 of 110 in both engines. The behavior suites read tooltip, hover card, popover, context menu, combobox and select through the portal node now.
 
 ## Planner review

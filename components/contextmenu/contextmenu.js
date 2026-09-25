@@ -15,7 +15,8 @@
   const TRIGGER = "[data-templ-context-menu-trigger]";
 
   function isPositioner(el) {
-    return !!(el && el.firstElementChild && el.firstElementChild.matches(POPUP));
+    // The popup is the positioner's slotted child, next to the focus guards.
+    return !!el?.querySelector?.(":scope > " + POPUP);
   }
 
   function allContents() {
@@ -36,7 +37,7 @@
   }
 
   function popupFor(content) {
-    return content.firstElementChild;
+    return content.querySelector(":scope > " + POPUP);
   }
 
   function setOpenState(element, open) {
@@ -57,9 +58,39 @@
 
 
 
-  // Moves the content to <body> (shadcn portals it the same way).
+  // The positioner's parent is the portal node, which moves to <body>
+  // (shadcn portals it the same way).
+  function portalNodeOf(content) {
+    return content.parentElement;
+  }
+
   function portal(content) {
-    window.templ.portal.render(content);
+    window.templ.portal.render(portalNodeOf(content));
+  }
+
+  // MenuPopup's FloatingFocusManager for a context menu: modal, so focus stays
+  // in the menu and the outside is hidden, focus returns on unmount.
+  function startFocusManager(content, touchOpen) {
+    if (content._templFocus) {
+      content._templFocus.open();
+      return;
+    }
+    content._templFocus = window.templ.focusManager.useFloatingFocusManager({
+      floating: content,
+      reference: triggerFor(content),
+      modal: true,
+      openInteractionType: touchOpen ? "touch" : "mouse",
+      // Base UI's items are out of the tab order, so the popup takes focus;
+      // ours are tabbable buttons until task 8 of plans/parity-runtime.md.
+      initialFocus: popupFor(content),
+      restoreFocus: true,
+      onOpenChange: (open) => requestOpenChange(content, open),
+    });
+  }
+
+  function stopFocusManager(content) {
+    content._templFocus?.unmount();
+    content._templFocus = null;
   }
 
   // A zero-size rect at the cursor acts as the anchor element.
@@ -114,17 +145,6 @@
     );
   }
 
-  // Focus waits until after the input task:
-  // Chromium's mousedown default focuses the trigger, WebKit's clears focus.
-  // One frame, like Base UI, with a guard for a popup that closed meanwhile.
-  function enqueueFocus(el, shouldFocus) {
-    if (!el) return;
-    requestAnimationFrame(() => {
-      if (shouldFocus && !shouldFocus()) return;
-      el.focus({ preventScroll: true });
-    });
-  }
-
   function focusItem(item) {
     if (item && document.activeElement !== item) item.focus({ preventScroll: false });
   }
@@ -159,6 +179,7 @@
       reference: triggerFor(content),
       onOpenChange: (open) => requestOpenChange(content, open),
     });
+    startFocusManager(content, touchOpen);
 
     if (alreadyOpen) {
       // Right-click somewhere else while open: move over to the new spot.
@@ -184,10 +205,7 @@
         true, touchOpen, content, triggerFor(content),
       );
       window.templ.transition.open(partsOf(content));
-      if (popup) {
-        syncSubState(popup);
-        enqueueFocus(popup, () => content.hasAttribute("data-open"));
-      }
+      if (popup) syncSubState(popup);
     });
   }
 
@@ -195,9 +213,12 @@
     if (content.hidden) return;
     content._templDismiss?.();
     content._templDismiss = null;
-    // Positioned until it unmounts, like Base UI.
+    content._templFocus?.close();
+    // Positioned until it unmounts, like Base UI. Unmounting the focus
+    // manager returns focus.
     window.templ.transition.close(partsOf(content), popupFor(content), () => {
       stopAutoPositioning(content);
+      stopFocusManager(content);
       content.hidden = true;
     });
     content.querySelectorAll(SUB).forEach(closeSubNow);
@@ -397,7 +418,8 @@
       content._templReleaseScroll?.();
       content._templReleaseScroll = null;
       content._templDismiss?.();
-      if (content.isConnected) content.remove();
+      stopFocusManager(content);
+      window.templ.portal.remove(portalNodeOf(content));
     },
   });
 
@@ -489,11 +511,6 @@
   document.addEventListener("keydown", (e) => {
     const content = anyOpen();
     if (!content) return;
-
-    if (e.key === "Tab") {
-      closeAll();
-      return;
-    }
 
     const active = document.activeElement;
     if (!content.contains(active)) return;

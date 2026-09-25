@@ -354,6 +354,7 @@ templ Content(props ...ContentProps) {
 	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
 	<div data-templ-portal hidden>
+		<div data-base-ui-portal>
 		<div
 			id={ s.id }
 			if s.valueControlled {
@@ -377,7 +378,7 @@ templ Content(props ...ContentProps) {
 			data-templ-auto-highlight?={ s.autoHighlight }
 			data-closed
 			hidden
-			data-base-ui-portal
+			role="presentation"
 			class="pointer-events-none isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
@@ -404,6 +405,7 @@ templ Content(props ...ContentProps) {
 			>
 				{ children... }
 			</div>
+		</div>
 		</div>
 	</div>
 }

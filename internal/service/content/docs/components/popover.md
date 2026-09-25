@@ -41,6 +41,16 @@ shadcn-templ add popover
 
 <ComponentSource name="popover" title="components/baseui/use_anchor_positioning.js" />
 
+<ComponentSource name="popover" title="components/baseui/tabbable.js" />
+
+<ComponentSource name="popover" title="components/baseui/mark_others.js" />
+
+<ComponentSource name="popover" title="components/baseui/floating_focus_manager.js" />
+
+<ComponentSource name="popover" title="components/baseui/use_trigger_focus_guards.js" />
+
+<ComponentSource name="popover" title="components/baseui/use_click.js" />
+
 <ComponentSource name="popover" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="popover" title="components/floatingui/floating_ui_dom.js" />

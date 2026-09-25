@@ -43,6 +43,16 @@ shadcn-templ add dropdown-menu
 
 <ComponentSource name="dropdown-menu" title="components/baseui/use_anchor_positioning.js" />
 
+<ComponentSource name="dropdown-menu" title="components/baseui/tabbable.js" />
+
+<ComponentSource name="dropdown-menu" title="components/baseui/mark_others.js" />
+
+<ComponentSource name="dropdown-menu" title="components/baseui/floating_focus_manager.js" />
+
+<ComponentSource name="dropdown-menu" title="components/baseui/use_trigger_focus_guards.js" />
+
+<ComponentSource name="dropdown-menu" title="components/baseui/use_click.js" />
+
 <ComponentSource name="dropdown-menu" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="dropdown-menu" title="components/floatingui/floating_ui_dom.js" />

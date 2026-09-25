@@ -43,6 +43,12 @@ shadcn-templ add context-menu
 
 <ComponentSource name="context-menu" title="components/baseui/use_anchor_positioning.js" />
 
+<ComponentSource name="context-menu" title="components/baseui/tabbable.js" />
+
+<ComponentSource name="context-menu" title="components/baseui/mark_others.js" />
+
+<ComponentSource name="context-menu" title="components/baseui/floating_focus_manager.js" />
+
 <ComponentSource name="context-menu" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="context-menu" title="components/floatingui/floating_ui_dom.js" />

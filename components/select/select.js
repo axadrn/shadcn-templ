@@ -17,7 +17,8 @@
   const ARROWS = '[data-slot="select-scroll-up-button"], [data-slot="select-scroll-down-button"]';
 
   function isPositioner(el) {
-    return !!(el && el.firstElementChild && el.firstElementChild.matches(POPUP));
+    // The popup is the positioner's slotted child, next to the focus guards.
+    return !!el?.querySelector?.(":scope > " + POPUP);
   }
 
   function allContents() {
@@ -56,29 +57,18 @@
     return item.getAttribute("data-templ-label") || itemTextOf(item).textContent.trim();
   }
 
-  // Focus waits until after the input task:
-  // Chromium's mousedown default focuses the trigger, WebKit's clears focus.
-  // One frame, like Base UI, with a guard for a popup that closed meanwhile.
-  function enqueueFocus(el, shouldFocus) {
-    if (!el) return;
-    requestAnimationFrame(() => {
-      if (shouldFocus && !shouldFocus()) return;
-      el.focus({ preventScroll: true });
-    });
-  }
-
   function valueSpanFor(trigger) {
     return trigger.querySelector('[data-slot="select-value"]');
   }
 
   function popupFor(content) {
-    return content.firstElementChild;
+    return content.querySelector(":scope > " + POPUP);
   }
 
   // Base UI's Select.List has no slot; it is the popup child between the
   // scroll arrows.
   function viewportFor(content) {
-    return content.firstElementChild.querySelector(":scope > :not([data-slot])");
+    return popupFor(content).querySelector(":scope > :not([data-slot])");
   }
 
   function clamp(value, min, max) {
@@ -104,9 +94,38 @@
 
 
 
-  // Moves the content to <body> (shadcn portals it the same way).
+  // The positioner's parent is the portal node, which moves to <body>
+  // (shadcn portals it the same way).
+  function portalNodeOf(content) {
+    return content.parentElement;
+  }
+
   function portal(content) {
-    window.templ.portal.render(content);
+    window.templ.portal.render(portalNodeOf(content));
+  }
+
+  // SelectPopup's FloatingFocusManager: non modal, focus returns to the
+  // trigger on unmount. The selected item takes the initial focus, which is
+  // the list navigation's selectedIndex until task 8 of plans/parity-runtime.md.
+  function startFocusManager(content, trigger) {
+    if (content._templFocus) {
+      content._templFocus.open();
+      return;
+    }
+    content._templFocus = window.templ.focusManager.useFloatingFocusManager({
+      floating: content,
+      reference: trigger,
+      modal: false,
+      openInteractionType: content._templOpenMethod === "programmatic" ? null : content._templOpenMethod,
+      initialFocus: () => content.querySelector(ITEM + "[data-selected]") || content.querySelector(ITEM) || true,
+      restoreFocus: true,
+      onOpenChange: (open) => requestOpenChange(content, open),
+    });
+  }
+
+  function stopFocusManager(content) {
+    content._templFocus?.unmount();
+    content._templFocus = null;
   }
 
   // Clears everything a previous open left behind on the positioner and popup.
@@ -454,13 +473,9 @@
     content._templDismiss ??= window.templ.dismiss.useDismiss({
       floating: content,
       reference: trigger,
-      onOpenChange(open, reason) {
-        const accepted = requestOpenChange(content, open);
-        // Base UI returns focus to the trigger when Escape closes the select.
-        if (reason === "escape-key") trigger.focus();
-        return accepted;
-      },
+      onOpenChange: (open) => requestOpenChange(content, open),
     });
+    startFocusManager(content, trigger);
     content.hidden = false;
 
     // Positioned first, then the enter animation plays in place.
@@ -476,11 +491,6 @@
       trigger.setAttribute("aria-expanded", "true");
       trigger.setAttribute("data-popup-open", "");
       trigger.setAttribute("data-pressed", "");
-      // Base UI moves focus to the selected item when the listbox opens.
-      const selected =
-        content.querySelector(ITEM + "[data-selected]") ||
-        content.querySelector(ITEM);
-      enqueueFocus(selected, () => isOpen(content));
     };
     startAutoPositioning(content, trigger).then(finish, finish);
   }
@@ -496,11 +506,14 @@
       allowUnselectedMouseUp: false,
       dragY: 0,
     };
+    content._templFocus?.close();
     // Aligned mode has no exit animation (animate-none, like shadcn), so
     // the close completes on the next frame. Positioned until it unmounts,
-    // and the alignment fallback holds until then too.
+    // and the alignment fallback holds until then too. Unmounting the focus
+    // manager returns focus.
     window.templ.transition.close(partsOf(content), popupFor(content), () => {
       stopAutoPositioning(content);
+      stopFocusManager(content);
       content._templAlignFallback = false;
       content.hidden = true;
     });
@@ -573,7 +586,6 @@
       }
     }
     requestOpenChange(content, false);
-    trigger.focus();
   }
 
   // Shows the selected item's label in the trigger (server only knows the
@@ -606,7 +618,8 @@
       content._templReleaseScroll?.();
       content._templReleaseScroll = null;
       content._templDismiss?.();
-      if (content.isConnected) content.remove();
+      stopFocusManager(content);
+      window.templ.portal.remove(portalNodeOf(content));
     },
   });
 
@@ -814,8 +827,6 @@
     } else if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       selectItem(content, item);
-    } else if (e.key === "Tab") {
-      requestOpenChange(content, false);
     } else if (e.key.length === 1) {
       clearTimeout(typeTimer);
       typeBuffer += e.key.toLowerCase();

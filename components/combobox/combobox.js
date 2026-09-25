@@ -14,7 +14,8 @@
   const INPUT = '[role="combobox"]';
 
   function isPositioner(el) {
-    return !!(el && el.firstElementChild && el.firstElementChild.matches(POPUP));
+    // The popup is the positioner's slotted child, next to the focus guards.
+    return !!el?.querySelector?.(":scope > " + POPUP);
   }
 
   function allContents() {
@@ -93,7 +94,7 @@
   }
 
   function popupFor(content) {
-    return content.firstElementChild;
+    return content.querySelector(":scope > " + POPUP);
   }
 
   function listFor(content) {
@@ -131,9 +132,65 @@
   }
 
 
-  // Moves the content to <body> (shadcn portals it the same way).
+  // The positioner's parent is the portal node, which moves to <body>
+  // (shadcn portals it the same way).
+  function portalNodeOf(content) {
+    return content.parentElement;
+  }
+
   function portal(content) {
-    window.templ.portal.render(content);
+    window.templ.portal.render(portalNodeOf(content));
+  }
+
+  // ComboboxInternalDismissButton: a visually hidden button for screen
+  // readers, before the input and after the popup while the focus manager is
+  // modal.
+  function createDismissButton(content) {
+    const button = document.createElement("span");
+    button.setAttribute("role", "button");
+    button.setAttribute("aria-label", "Dismiss");
+    button.style.cssText = "clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:-1px;position:absolute";
+    button.addEventListener("click", () => requestOpenChange(content, false));
+    return button;
+  }
+
+  // ComboboxPopup's FloatingFocusManager. With the input in the anchor it is
+  // modal but leaves focus in the input, so there are no guards and the
+  // outside is hidden. With the input in the popup it is non modal and the
+  // input takes the initial focus.
+  function startFocusManager(content) {
+    if (content._templFocus) {
+      content._templFocus.open();
+      return;
+    }
+    const input = inputFor(content);
+    const popup = popupFor(content);
+    const inputInsidePopup = !!input && content.contains(input);
+    const modal = !inputInsidePopup;
+    const trigger = document.querySelector('[aria-haspopup][aria-controls="' + content.id + '"]');
+    if (modal) {
+      content._templDismissButtons = [createDismissButton(content), createDismissButton(content)];
+      input?.before(content._templDismissButtons[0]);
+      popup.after(content._templDismissButtons[1]);
+    }
+    content._templFocus = window.templ.focusManager.useFloatingFocusManager({
+      floating: content,
+      reference: inputInsidePopup ? trigger : input || trigger,
+      triggers: [input, ...document.querySelectorAll('[aria-haspopup][aria-controls="' + content.id + '"]')],
+      modal,
+      openInteractionType: content._templOpenMethod ?? null,
+      initialFocus: inputInsidePopup ? (interactionType) => (interactionType === "touch" ? popup : input) : false,
+      returnFocus: inputInsidePopup,
+      getInsideElements: () => content._templDismissButtons || [],
+      onOpenChange: (open) => requestOpenChange(content, open),
+    });
+  }
+
+  function stopFocusManager(content) {
+    content._templFocus?.unmount();
+    content._templFocus = null;
+    content._templDismissButtons?.forEach((button) => button.remove());
+    content._templDismissButtons = null;
   }
 
   // ComboboxPositioner: useAnchorPositioning with the dropdown collision
@@ -250,6 +307,7 @@
       onOpenChange: (open) => requestOpenChange(content, open),
     });
     content.hidden = false;
+    startFocusManager(content);
 
     applyFilter(content, "");
     // Base UI highlights the current selection on open, else (with
@@ -273,9 +331,12 @@
     if (content.hidden) return;
     content._templDismiss?.();
     content._templDismiss = null;
-    // Positioned until it unmounts, like Base UI.
+    content._templFocus?.close();
+    // Positioned until it unmounts, like Base UI. Unmounting the focus
+    // manager returns focus.
     window.templ.transition.close(partsOf(content), popupFor(content), () => {
       stopAutoPositioning(content);
+      stopFocusManager(content);
       content.hidden = true;
     });
     setExpanded(content, false);
@@ -473,7 +534,8 @@
       if (!isPositioner(content)) return;
       stopAutoPositioning(content);
       content._templDismiss?.();
-      if (content.isConnected) content.remove();
+      stopFocusManager(content);
+      window.templ.portal.remove(portalNodeOf(content));
     },
   });
 
@@ -482,16 +544,19 @@
   // Pointer interactions toggle and dismiss on PRESS, exactly like Base UI.
   // Click is never used for open/close, so the stray click the browser fires
   // on <body> when the popup ends up under the released pointer is harmless.
-  function toggleTrigger(trigger) {
+  function toggleTrigger(trigger, interactionType = null) {
     const content = contentFor(trigger);
     if (!content) return;
+    content._templOpenMethod = interactionType;
     if (content.hasAttribute("data-open")) {
     requestOpenChange(content, false);
     } else {
       const input = inputFor(content);
       if (input && input.disabled) return;
     requestOpenChange(content, true);
-      if (input) requestAnimationFrame(() => input.focus());
+      // The trigger moves focus to an input in the anchor; an input in the
+      // popup is the focus manager's initial focus.
+      if (input && !content.contains(input)) requestAnimationFrame(() => input.focus());
     }
   }
 
@@ -500,7 +565,7 @@
 
     const trigger = triggerOf(e.target);
     if (trigger) {
-      toggleTrigger(trigger);
+      toggleTrigger(trigger, e.pointerType || "mouse");
       return;
     }
 
@@ -546,7 +611,7 @@
     if (trigger) {
       // Keyboard activation only (Enter/Space fire a detail-0 click without
       // a preceding pointerdown); pointer presses are handled on pointerdown.
-      if (e.detail === 0) toggleTrigger(trigger);
+      if (e.detail === 0) toggleTrigger(trigger, "keyboard");
       return;
     }
 
@@ -596,9 +661,6 @@
         if (btn) btn.click();
       }
       return;
-    }
-    if (e.key === "Tab") {
-    requestOpenChange(content, false);
     }
   });
 

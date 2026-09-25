@@ -100,7 +100,7 @@ func TestAddJavaScriptComponentBuildsBundleAtComponentsAlias(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertFileContains("internal/design/scripts_bundle.go", filepath.Base(bundles[0]))
-	assertFileContains("internal/design/dialog/dialog.js", "(() =>")
+	assertFileContains("internal/design/dialog/dialog.js", "window.templ.dialog = {")
 	assertFileContains("internal/shared/shadcn-templ.go", "package shared")
 
 	t.Run("template-only add migrates existing scripts", func(t *testing.T) {

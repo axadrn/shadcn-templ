@@ -248,8 +248,10 @@ templ Portal(props ...PortalProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	<div data-templ-portal hidden { p.Attributes... }>
-		{ children... }
+	<div data-templ-portal hidden>
+		<div data-base-ui-portal { p.Attributes... }>
+			{ children... }
+		</div>
 	</div>
 }
 
@@ -279,7 +281,7 @@ templ Content(props ...ContentProps) {
 			data-templ-default-open?={ s.open == nil && s.defaultOpen }
 			data-closed
 			hidden
-			data-base-ui-portal
+			role="presentation"
 			class="pointer-events-none isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
@@ -287,6 +289,7 @@ templ Content(props ...ContentProps) {
 				data-closed
 				role="menu"
 				tabindex="-1"
+				data-base-ui-focusable
 				class={
 					utils.CN(
 						contentClasses,
