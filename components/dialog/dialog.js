@@ -359,8 +359,7 @@
     openStack.push(state);
     updateNestedAttributes();
 
-    // FloatingPortal appends at open time, keeping paint order = open order.
-    document.body.appendChild(state.root);
+    window.templ.portal.render(state.root);
     state.root.hidden = false;
 
     wireAria(state);
@@ -599,7 +598,6 @@
 
     const parentPopup = root.parentElement?.closest(POPUP);
     if (parentPopup?.id) root._templParent = parentPopup.id;
-    if (!root._templPortalOwner) root._templPortalOwner = root.parentElement;
 
     const state = {
       root,
@@ -720,7 +718,7 @@
       if (dialogFor(trigger)) listenForEscape(trigger);
     },
   });
-  // A dialog lives as long as its SSR declaration site (_templPortalOwner)
+  // A dialog lives as long as its SSR declaration site (the portal owner)
   // stays in the document, including trigger-less programmatic dialogs.
   // Unmounting retires it: aria-hidden marking, scroll lock, portaled DOM.
   window.templ.lifecycle.register(POPUP, {

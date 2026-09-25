@@ -563,7 +563,7 @@
         // native top layer (it would stack above the z-index portaled
         // popups). Modality - scroll lock, inert siblings, focus - is
         // built by hand, like Base UI does.
-        portal(dialog);
+        window.templ.portal.render(dialog);
         dialog.show();
         if (dialog.getAttribute("data-templ-modal") === "true") {
           dialog._templReleaseScroll = window.templ.scrollLock.acquire(dialog);
@@ -1292,13 +1292,6 @@
   }
 
   // Moves the drawer to <body>, the pendant of the reference's DrawerPortal.
-  function portal(dialog) {
-    if (dialog.parentElement !== document.body) {
-      if (!dialog._templPortalOwner) dialog._templPortalOwner = dialog.parentElement;
-      document.body.appendChild(dialog);
-    }
-  }
-
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
     // Base UI's DrawerTrigger identifier (DialogTrigger), shared with dialog
@@ -1321,7 +1314,7 @@
       if (drawerFor(trigger)) listenForEscape(trigger);
     },
   });
-  // A drawer lives as long as its SSR declaration site (_templPortalOwner)
+  // A drawer lives as long as its SSR declaration site (the portal owner)
   // stays in the document, which keeps programmatic drawers
   // (window.templ.drawer.open) alive. Mounting and unmounting recompute the
   // inert siblings, so a swap never leaves stale inert behind.

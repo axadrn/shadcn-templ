@@ -33,6 +33,8 @@ shadcn-templ add combobox
 
 <ComponentSource name="combobox" title="components/baseui/lifecycle.js" />
 
+<ComponentSource name="combobox" title="components/baseui/portal.js" />
+
 <ComponentSource name="combobox" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="combobox" title="components/floatingui/floating_ui_dom.js" />

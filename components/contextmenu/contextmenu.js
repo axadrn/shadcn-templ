@@ -106,10 +106,7 @@
   // Moves the content to <body> (shadcn portals it the same way).
   function portal(content) {
     listenForEscape(content);
-    if (content.parentElement !== document.body) {
-      if (!content._templPortalOwner) content._templPortalOwner = content.parentElement;
-      document.body.appendChild(content);
-    }
+    window.templ.portal.render(content);
   }
 
   // A zero-size rect at the cursor acts as the anchor element.
@@ -225,9 +222,6 @@
     });
     clearTimeout(content._templHide);
     portal(content);
-    // z-index portal like shadcn (no native top layer); re-append
-    // keeps paint order = open order.
-    document.body.appendChild(content);
     content.hidden = false;
 
     if (alreadyOpen) {

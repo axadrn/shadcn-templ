@@ -76,11 +76,11 @@ Checks: the grep, `check.sh`, `node tmp/htmx-616/htmx.mjs` against its server.
 
 ### 3. Portal
 
-- [ ] Done
+- [x] Done
 
 `components/baseui/portal.js`, the `FloatingPortal` pendant as the nine scripts already implement it after `htmx-616`: move to `<body>` on open, `_templPortalOwner` as the declaration site, the orphan sweep that removes portaled content whose owner left the document. The sweep becomes the `destroy` of task 2's lifecycle for the owner.
 
-Done when: `grep -l "_templPortalOwner" components/*/*.js` lists only `portal.js`, `check.sh` green, the htmx probe green.
+Done when: `grep -l "_templPortalOwner" components/*/*.js` lists only `baseui/portal.js` and `baseui/lifecycle.js`, which reads the owner, `check.sh` green, the htmx probe green.
 
 ### 4. Dismiss
 
@@ -179,5 +179,13 @@ Two behaviors change on purpose:
 One fix for free: carousel autoplay kept running after its carousel was removed, `destroy` stops it now. The drawer read its server open state only when no trigger had registered it first, now always.
 
 Checks: `check.sh` in chromium and webkit with 0 DOM changes against t36, a11y 30 of 30, behavior 30 of 30, `go test ./...` green (the inliner test counts component scripts, 32 became 33). `tmp/htmx-616/htmx.mjs` against a rebuilt probe server 110 of 110 in both engines, same as the htmx-616 final run.
+
+### Task 3
+
+`components/baseui/portal.js` is one function, `window.templ.portal.render(element)`: it records the declaration site as the portal owner on the first call and appends the element to `<body>` on every open, so paint order follows open order. The unmount half already lives in `lifecycle.js` since task 2, which reads the owner. So the Done when grep lists both `baseui` files. The nine scripts call `render` instead of their own move plus re-append. Their small `portal()` wrappers stay for now, because they also attach the Escape listener that task 4 removes.
+
+Two details moved to the common path. The dialog records its owner on the first open instead of at registration, which is the same thing, because an unopened dialog is still inside its owner. The drawer used to append only when it was not in `<body>` yet, now it re-appends on every open like the others, so a reopened drawer paints above older popups.
+
+Checks: `check.sh` in chromium and webkit, a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 34). The DOM against t36 differs only on the 19 docs pages that list the new files, each by 19 elements per code block. `htmx.mjs` 110 of 110 in both engines, `compare.mjs` identical to the task 1 baseline in both engines.
 
 ## Planner review

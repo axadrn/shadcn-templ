@@ -33,6 +33,8 @@ shadcn-templ add dialog
 
 <ComponentSource name="dialog" title="components/baseui/lifecycle.js" />
 
+<ComponentSource name="dialog" title="components/baseui/portal.js" />
+
 <ComponentSource name="dialog" title="components/baseui/scroll_lock.js" />
 
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).

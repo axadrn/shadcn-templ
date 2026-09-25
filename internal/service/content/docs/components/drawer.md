@@ -33,6 +33,8 @@ shadcn-templ add drawer
 
 <ComponentSource name="drawer" title="components/baseui/lifecycle.js" />
 
+<ComponentSource name="drawer" title="components/baseui/portal.js" />
+
 <ComponentSource name="drawer" title="components/baseui/scroll_lock.js" />
 
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
