@@ -76,4 +76,22 @@
     }
     setState(toggle, nextPressed);
   });
+
+  // ToggleGroup's CompositeRoot: one tab stop, the arrows by orientation,
+  // Home and End, loop, disabled toggles are skipped.
+  const GROUP = '[data-slot="toggle-group"]';
+  window.templ.lifecycle.register(GROUP, {
+    init(group) {
+      group._templComposite = window.templ.composite.useCompositeRoot(group, {
+        items: () => [...items(group)].filter((item) => item.closest(GROUP) === group),
+        orientation: group.getAttribute("data-orientation") === "vertical" ? "vertical" : "horizontal",
+        rtl: () => getComputedStyle(group).direction === "rtl",
+        enableHomeAndEndKeys: true,
+      });
+    },
+    destroy(group) {
+      group._templComposite?.cleanup();
+      group._templComposite = null;
+    },
+  });
 })();

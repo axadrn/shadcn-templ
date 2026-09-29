@@ -33,6 +33,10 @@ shadcn-templ add tabs
 
 <ComponentSource name="tabs" title="components/baseui/lifecycle.js" />
 
+<ComponentSource name="tabs" title="components/baseui/tabbable.js" />
+
+<ComponentSource name="tabs" title="components/baseui/composite.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

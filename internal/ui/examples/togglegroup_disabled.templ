@@ -6,24 +6,21 @@ import (
 )
 
 templ ToggleGroupDisabled() {
-	@togglegroup.ToggleGroup(togglegroup.Props{Multiple: true}) {
+	@togglegroup.ToggleGroup(togglegroup.Props{Disabled: true}) {
 		@togglegroup.Item(togglegroup.ItemProps{
 			Value:      "bold",
-			Disabled:   true,
 			Attributes: templ.Attributes{"aria-label": "Toggle bold"},
 		}) {
 			@icon.Bold()
 		}
 		@togglegroup.Item(togglegroup.ItemProps{
 			Value:      "italic",
-			Disabled:   true,
 			Attributes: templ.Attributes{"aria-label": "Toggle italic"},
 		}) {
 			@icon.Italic()
 		}
 		@togglegroup.Item(togglegroup.ItemProps{
 			Value:      "strikethrough",
-			Disabled:   true,
 			Attributes: templ.Attributes{"aria-label": "Toggle strikethrough"},
 		}) {
 			@icon.Underline()

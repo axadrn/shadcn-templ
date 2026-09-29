@@ -101,28 +101,6 @@
     openItem(item);
   });
 
-  // WAI-ARIA accordion keyboard support: arrow keys, Home and End move focus
-  // between the triggers of the same accordion.
-  document.addEventListener("keydown", (e) => {
-    if (!(e.target instanceof Element)) return;
-    const trigger = e.target.closest('[data-slot="accordion-trigger"]');
-    if (!trigger) return;
-    const accordion = trigger.closest('[data-slot="accordion"]');
-    if (!accordion) return;
-    const triggers = [...accordion.querySelectorAll('[data-slot="accordion-trigger"]')].filter(
-      (t) => !t.disabled && t.closest('[data-slot="accordion"]') === accordion
-    );
-    const index = triggers.indexOf(trigger);
-    let next;
-    if (e.key === "ArrowDown") next = triggers[(index + 1) % triggers.length];
-    else if (e.key === "ArrowUp") next = triggers[(index - 1 + triggers.length) % triggers.length];
-    else if (e.key === "Home") next = triggers[0];
-    else if (e.key === "End") next = triggers[triggers.length - 1];
-    if (next) {
-      e.preventDefault();
-      next.focus();
-    }
-  });
   window.templ.lifecycle.register('[data-slot="accordion-content"]', {
     init: (panel) => window.templ.collapsiblePanel.mount(panel, VARS, !panel.hidden),
   });

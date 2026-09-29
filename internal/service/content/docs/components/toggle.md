@@ -31,6 +31,12 @@ shadcn-templ add toggle
 
 <ComponentSource name="toggle" title="components/toggle/toggle.js" />
 
+<ComponentSource name="toggle" title="components/baseui/lifecycle.js" />
+
+<ComponentSource name="toggle" title="components/baseui/tabbable.js" />
+
+<ComponentSource name="toggle" title="components/baseui/composite.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

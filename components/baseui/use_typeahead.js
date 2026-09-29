@@ -44,7 +44,7 @@
     function isItemAvailable(index) {
       const element = items()[index];
       if (element && !t().isElementVisible(element)) return false;
-      return disabledIndices == null || !window.templ.listNavigation.isListIndexDisabled([], index, disabledIndices);
+      return disabledIndices == null || !window.templ.composite.isListIndexDisabled([], index, disabledIndices);
     }
 
     function getMatchingIndex(list, value, startIndex = 0) {
