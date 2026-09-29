@@ -243,7 +243,7 @@ templ Content(props ...ContentProps) {
 			data-closed
 			hidden
 			role="presentation"
-			class="pointer-events-none isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
+			class="isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
 				data-slot="select-content"
@@ -261,10 +261,9 @@ templ Content(props ...ContentProps) {
 						// 1:1 base/ui/select.tsx SelectContent, the look comes from
 						// cn-select-content and Base UI's standard positioner variables.
 						"cn-select-content cn-select-content-logical cn-menu-target cn-menu-translucent relative isolate z-50 max-h-(--available-height) w-(--anchor-width) origin-(--transform-origin) overflow-x-hidden overflow-y-auto data-[align-trigger=true]:animate-none",
-						// JS wiring: the positioner wrapper is pointer-events-none, the
-						// scroll arrows/viewport need a flex column, and the popup stays
-						// mounted after animate-out until hidePopover runs.
-						"pointer-events-auto flex flex-col data-closed:fill-mode-forwards",
+						// The scroll arrows and viewport need a flex column, and the popup
+						// stays mounted after animate-out until it unmounts.
+						"flex flex-col data-closed:fill-mode-forwards",
 						p.Class,
 					),
 				}

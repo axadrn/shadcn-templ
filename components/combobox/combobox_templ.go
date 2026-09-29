@@ -800,7 +800,7 @@ func Content(props ...ContentProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, " data-closed hidden role=\"presentation\" class=\"pointer-events-none isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, " data-closed hidden role=\"presentation\" class=\"isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -809,9 +809,8 @@ func Content(props ...ContentProps) templ.Component {
 			// cn-combobox-content (animations key on Base UI's data-open/data-closed
 			// attributes); the JS sets Base UI's positioner variables.
 			"cn-combobox-content cn-combobox-content-logical cn-menu-target cn-menu-translucent group/combobox-content relative max-h-(--available-height) w-(--anchor-width) max-w-(--available-width) min-w-[calc(var(--anchor-width)+--spacing(7))] origin-(--transform-origin) data-[chips=true]:min-w-(--anchor-width)",
-			// JS wiring: the positioner wrapper is pointer-events-none and the
-			// popup stays mounted after animate-out until hidePopover runs.
-			"pointer-events-auto data-closed:fill-mode-forwards",
+			// The popup stays mounted after animate-out until it unmounts.
+			"data-closed:fill-mode-forwards",
 			p.Class,
 		),
 		}
@@ -921,7 +920,7 @@ func List(props ...ListProps) templ.Component {
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 425, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 424, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -1011,7 +1010,7 @@ func Empty(props ...EmptyProps) templ.Component {
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 442, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 441, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
@@ -1101,7 +1100,7 @@ func Group(props ...GroupProps) templ.Component {
 			var templ_7745c5c3_Var37 string
 			templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 459, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 458, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 			if templ_7745c5c3_Err != nil {
@@ -1191,7 +1190,7 @@ func Label(props ...LabelProps) templ.Component {
 			var templ_7745c5c3_Var41 string
 			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 477, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 476, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 			if templ_7745c5c3_Err != nil {
@@ -1301,7 +1300,7 @@ func Item(props ...ItemProps) templ.Component {
 		var templ_7745c5c3_Var45 string
 		templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 510, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 509, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 		if templ_7745c5c3_Err != nil {
@@ -1314,7 +1313,7 @@ func Item(props ...ItemProps) templ.Component {
 		var templ_7745c5c3_Var46 string
 		templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(p.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 513, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 512, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 		if templ_7745c5c3_Err != nil {
@@ -1332,7 +1331,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var47 string
 			templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(p.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 515, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 514, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 			if templ_7745c5c3_Err != nil {
@@ -1447,7 +1446,7 @@ func Separator(props ...SeparatorProps) templ.Component {
 			var templ_7745c5c3_Var51 string
 			templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 555, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 554, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 			if templ_7745c5c3_Err != nil {
@@ -1532,7 +1531,7 @@ func Chips(props ...ChipsProps) templ.Component {
 			var templ_7745c5c3_Var55 string
 			templ_7745c5c3_Var55, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 574, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 573, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 			if templ_7745c5c3_Err != nil {
@@ -1550,7 +1549,7 @@ func Chips(props ...ChipsProps) templ.Component {
 		var templ_7745c5c3_Var56 string
 		templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinStringErrs(s.id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 577, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 576, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 		if templ_7745c5c3_Err != nil {
@@ -1590,7 +1589,7 @@ func Chips(props ...ChipsProps) templ.Component {
 				var templ_7745c5c3_Var58 string
 				templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(s.name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 585, Col: 18}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 584, Col: 18}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var58))
 				if templ_7745c5c3_Err != nil {
@@ -1603,7 +1602,7 @@ func Chips(props ...ChipsProps) templ.Component {
 				var templ_7745c5c3_Var59 string
 				templ_7745c5c3_Var59, templ_7745c5c3_Err = templ.JoinStringErrs(v)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 586, Col: 14}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 585, Col: 14}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var59))
 				if templ_7745c5c3_Err != nil {
@@ -1627,7 +1626,7 @@ func Chips(props ...ChipsProps) templ.Component {
 					var templ_7745c5c3_Var60 string
 					templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(s.form)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 591, Col: 19}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 590, Col: 19}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 					if templ_7745c5c3_Err != nil {
@@ -1708,7 +1707,7 @@ func ChipsInput(props ...ChipsInputProps) templ.Component {
 			var templ_7745c5c3_Var63 string
 			templ_7745c5c3_Var63, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 612, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 611, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var63))
 			if templ_7745c5c3_Err != nil {
@@ -1726,7 +1725,7 @@ func ChipsInput(props ...ChipsInputProps) templ.Component {
 		var templ_7745c5c3_Var64 string
 		templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(s.id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 616, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 615, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 		if templ_7745c5c3_Err != nil {
@@ -1744,7 +1743,7 @@ func ChipsInput(props ...ChipsInputProps) templ.Component {
 			var templ_7745c5c3_Var65 string
 			templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(p.Placeholder)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 621, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 620, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 			if templ_7745c5c3_Err != nil {
@@ -1842,7 +1841,7 @@ func Chip(props ...ChipProps) templ.Component {
 			var templ_7745c5c3_Var69 string
 			templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 637, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 636, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var69))
 			if templ_7745c5c3_Err != nil {
@@ -1860,7 +1859,7 @@ func Chip(props ...ChipProps) templ.Component {
 		var templ_7745c5c3_Var70 string
 		templ_7745c5c3_Var70, templ_7745c5c3_Err = templ.JoinStringErrs(p.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 640, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 639, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var70))
 		if templ_7745c5c3_Err != nil {
@@ -1894,7 +1893,7 @@ func Chip(props ...ChipProps) templ.Component {
 		var templ_7745c5c3_Var72 string
 		templ_7745c5c3_Var72, templ_7745c5c3_Err = templ.JoinStringErrs(p.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 649, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/combobox/combobox.templ`, Line: 648, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var72))
 		if templ_7745c5c3_Err != nil {

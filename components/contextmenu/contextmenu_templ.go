@@ -533,15 +533,14 @@ func Content(props ...ContentProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " data-closed hidden role=\"presentation\" class=\"pointer-events-none isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " data-closed hidden role=\"presentation\" class=\"isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var15 = []any{utils.CN(
 				contentClasses,
-				// JS wiring: the positioner wrapper is pointer-events-none, and the
-				// popup stays mounted after animate-out until hidePopover runs.
-				"pointer-events-auto relative isolate data-closed:fill-mode-forwards",
+				// The popup stays mounted after animate-out until it unmounts.
+				"relative isolate data-closed:fill-mode-forwards",
 				p.Class,
 			),
 			}
@@ -636,7 +635,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 321, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 320, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -649,7 +648,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var20 templ.SafeURL
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(p.Href))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 322, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 321, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -667,7 +666,7 @@ func Item(props ...ItemProps) templ.Component {
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(p.Target)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 324, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 323, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 				if templ_7745c5c3_Err != nil {
@@ -685,7 +684,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Variant))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 327, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 326, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -759,7 +758,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 345, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 344, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -772,7 +771,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Variant))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 348, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 347, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
@@ -879,7 +878,7 @@ func CheckboxItem(props ...CheckboxItemProps) templ.Component {
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 377, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 376, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
@@ -1005,7 +1004,7 @@ func RadioGroup(props ...RadioGroupProps) templ.Component {
 			var templ_7745c5c3_Var34 string
 			templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 413, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 412, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 			if templ_7745c5c3_Err != nil {
@@ -1028,7 +1027,7 @@ func RadioGroup(props ...RadioGroupProps) templ.Component {
 			var templ_7745c5c3_Var35 string
 			templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(*p.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 418, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 417, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 			if templ_7745c5c3_Err != nil {
@@ -1125,7 +1124,7 @@ func RadioItem(props ...RadioItemProps) templ.Component {
 		var templ_7745c5c3_Var39 string
 		templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 440, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 439, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 		if templ_7745c5c3_Err != nil {
@@ -1143,7 +1142,7 @@ func RadioItem(props ...RadioItemProps) templ.Component {
 			var templ_7745c5c3_Var40 string
 			templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(p.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 444, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 443, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 			if templ_7745c5c3_Err != nil {
@@ -1262,7 +1261,7 @@ func Group(props ...GroupProps) templ.Component {
 			var templ_7745c5c3_Var44 string
 			templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 476, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 475, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 			if templ_7745c5c3_Err != nil {
@@ -1352,7 +1351,7 @@ func Label(props ...LabelProps) templ.Component {
 			var templ_7745c5c3_Var48 string
 			templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 494, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 493, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 			if templ_7745c5c3_Err != nil {
@@ -1452,7 +1451,7 @@ func Separator(props ...SeparatorProps) templ.Component {
 			var templ_7745c5c3_Var52 string
 			templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 512, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 511, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 			if templ_7745c5c3_Err != nil {
@@ -1534,7 +1533,7 @@ func Shortcut(props ...ShortcutProps) templ.Component {
 			var templ_7745c5c3_Var56 string
 			templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 528, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 527, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 			if templ_7745c5c3_Err != nil {
@@ -1624,7 +1623,7 @@ func Sub(props ...SubProps) templ.Component {
 			var templ_7745c5c3_Var60 string
 			templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 545, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 544, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 			if templ_7745c5c3_Err != nil {
@@ -1647,7 +1646,7 @@ func Sub(props ...SubProps) templ.Component {
 			var templ_7745c5c3_Var61 string
 			templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatBool(*p.Open))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 549, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 548, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var61))
 			if templ_7745c5c3_Err != nil {
@@ -1728,8 +1727,9 @@ func SubTrigger(props ...SubTriggerProps) templ.Component {
 		}
 		var templ_7745c5c3_Var64 = []any{utils.CN(
 			// 1:1 base/ui/context-menu.tsx ContextMenuSubTrigger, the look comes
-			// from cn-context-menu-sub-trigger (the open highlight keys on our
-			// Base UI data-open/data-closed attributes).
+			// from cn-context-menu-sub-trigger. Its open highlight keys on
+			// data-open, which Base UI does not render on a submenu trigger
+			// (it renders data-popup-open), so it stays off like upstream's.
 			"cn-context-menu-sub-trigger flex cursor-default items-center outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
 			"w-full text-left",
 			p.Class,
@@ -1751,7 +1751,7 @@ func SubTrigger(props ...SubTriggerProps) templ.Component {
 			var templ_7745c5c3_Var65 string
 			templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 566, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 565, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 			if templ_7745c5c3_Err != nil {
@@ -1772,7 +1772,7 @@ func SubTrigger(props ...SubTriggerProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 130, " data-closed role=\"menuitem\" tabindex=\"-1\" aria-haspopup=\"menu\" aria-expanded=\"false\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 130, " role=\"menuitem\" tabindex=\"-1\" aria-haspopup=\"menu\" aria-expanded=\"false\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1850,7 +1850,7 @@ func SubContent(props ...SubContentProps) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 134, "<div data-closed data-nested hidden role=\"presentation\" class=\"pointer-events-none isolate z-50 outline-none fixed inset-auto left-0 top-0\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 134, "<div data-closed data-nested hidden role=\"presentation\" class=\"isolate z-50 outline-none fixed inset-auto left-0 top-0\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1858,9 +1858,8 @@ func SubContent(props ...SubContentProps) templ.Component {
 				// 1:1 base/ui/context-menu.tsx ContextMenuSubContent: the content's
 				// classes merged with cn-context-menu-subcontent.
 				"cn-context-menu-content cn-context-menu-content-logical cn-menu-target cn-menu-translucent z-50 max-h-(--available-height) origin-(--transform-origin) overflow-x-hidden overflow-y-auto outline-none cn-context-menu-subcontent",
-				// The positioner takes no pointer events, the popup does, and it
-				// stays mounted after animate-out until it unmounts.
-				"pointer-events-auto data-closed:fill-mode-forwards",
+				// The popup stays mounted after animate-out until it unmounts.
+				"data-closed:fill-mode-forwards",
 				p.Class,
 			),
 			}
@@ -1880,7 +1879,7 @@ func SubContent(props ...SubContentProps) templ.Component {
 				var templ_7745c5c3_Var70 string
 				templ_7745c5c3_Var70, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 610, Col: 13}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/contextmenu/contextmenu.templ`, Line: 609, Col: 13}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var70))
 				if templ_7745c5c3_Err != nil {

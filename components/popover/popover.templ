@@ -155,7 +155,7 @@ templ Content(props ...ContentProps) {
 			data-closed
 			hidden
 			role="presentation"
-			class="pointer-events-none isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
+			class="isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
 				data-slot="popover-content"
@@ -168,9 +168,8 @@ templ Content(props ...ContentProps) {
 						// 1:1 base/ui/popover.tsx PopoverContent, the look comes from
 						// cn-popover-content and Base UI's standard transform-origin variable.
 						"cn-popover-content cn-popover-content-logical z-50 w-72 origin-(--transform-origin) outline-hidden",
-						// JS wiring: the positioner wrapper is pointer-events-none, and the
-						// popup stays mounted after animate-out until hidePopover runs.
-						"pointer-events-auto data-closed:fill-mode-forwards",
+						// The popup stays mounted after animate-out until it unmounts.
+						"data-closed:fill-mode-forwards",
 						p.Class,
 					),
 				}

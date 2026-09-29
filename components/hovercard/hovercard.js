@@ -4,10 +4,6 @@
   // port marker carries the card id.
   const TRIGGER = "[data-templ-hover-card-trigger]";
 
-  function allContents() {
-    return document.querySelectorAll(CONTENT);
-  }
-
   function contentFor(trigger) {
     return document.getElementById(trigger.getAttribute("data-templ-hover-card-trigger"));
   }
@@ -176,24 +172,33 @@
     content._templPositionCleanup = null;
   }
 
-  function open(content, trigger) {
+  // details { reason, event } of the change, for the hover interaction.
+  function open(content, trigger, details = {}) {
+    content._templOpen = true;
+    content._templOpenEventType = details.event?.type ?? null;
     portal(content);
     positionerOf(content).hidden = false;
     content._templDismiss ??= window.templ.dismiss.useDismiss({
       floating: positionerOf(content),
       reference: trigger,
-      onOpenChange: (open) => requestOpenChange(content, open),
+      onOpenChange: (open, reason, event) => requestOpenChange(content, open, { reason, event }),
     });
+    content._templHover?.openChange(true, details.reason);
 
     // Positioned first, then the enter animation plays in place.
     startAutoPositioning(content, trigger).then(() => {
       if (positionerOf(content).hidden) return; // closed meanwhile
       window.templ.transition.open(statusOf(content));
+      trigger.setAttribute("data-popup-open", "");
     });
   }
 
-  function close(content) {
+  function close(content, details = {}) {
     if (positionerOf(content).hidden) return;
+    content._templOpen = false;
+    content._templOpenEventType = null;
+    content._templHover?.openChange(false, details.reason);
+    triggerFor(content)?.removeAttribute("data-popup-open");
     content._templDismiss?.();
     content._templDismiss = null;
     // Positioned until it unmounts, like Base UI.
@@ -204,60 +209,65 @@
     });
   }
 
-  function requestOpenChange(content, nextOpen) {
-  const trigger = triggerFor(content);
-  const change = new CustomEvent("hovercard-open-change", {
-    bubbles: true,
-    cancelable: true,
-    detail: { open: nextOpen },
-  });
-  const accepted = (trigger || content).dispatchEvent(change);
-  if (!accepted || content.hasAttribute("data-templ-open")) return false;
-  if (nextOpen && trigger) open(content, trigger);
-  else if (!nextOpen) close(content);
-  return true;
-  }
-
-  // Hover intent: entering trigger or card keeps it open; leaving both
-  // schedules the close after the card's close delay.
-  function scheduleOpen(content, trigger) {
-    clearTimeout(content._templClose);
-    content._templClose = null;
-    if (content.hasAttribute("data-open") || content._templOpen) return;
-    // delay is a PreviewCard.Trigger prop, so it lives on the trigger.
-    const delay = parseInt(trigger.getAttribute("data-templ-delay"), 10) || 600;
-    content._templOpen = setTimeout(() => {
-      content._templOpen = null;
-    requestOpenChange(content, true);
-    }, delay);
-  }
-
-  function scheduleClose(content) {
-    clearTimeout(content._templOpen);
-    content._templOpen = null;
-    if (!content.hasAttribute("data-open") || content._templClose) return;
+  function requestOpenChange(content, nextOpen, details) {
+    if (!!content._templOpen === nextOpen) return false;
     const trigger = triggerFor(content);
-    const delay = parseInt(trigger && trigger.getAttribute("data-templ-close-delay"), 10) || 300;
-    content._templClose = setTimeout(() => {
-      content._templClose = null;
-    requestOpenChange(content, false);
-    }, delay);
+    const change = new CustomEvent("hovercard-open-change", {
+      bubbles: true,
+      cancelable: true,
+      detail: { open: nextOpen },
+    });
+    const accepted = (trigger || content).dispatchEvent(change);
+    if (!accepted || content.hasAttribute("data-templ-open")) return false;
+    if (nextOpen && trigger) open(content, trigger, details);
+    else if (!nextOpen) close(content, details);
+    return true;
   }
 
+  // PreviewCardTrigger's useHoverReferenceInteraction and PreviewCardPopup's
+  // useHoverFloatingInteraction, with the trigger's delay and closeDelay.
+  function startHover(content, trigger) {
+    const hover = window.templ.hover;
+    const positioner = positionerOf(content);
+    const delay = () => ({
+      open: parseInt(trigger.getAttribute("data-templ-delay"), 10) || 600,
+      close: parseInt(trigger.getAttribute("data-templ-close-delay"), 10) || 300,
+    });
+    content._templHover = hover.createHoverInteraction({
+      isOpen: () => !!content._templOpen,
+      onOpenChange: (open, reason, event) => requestOpenChange(content, open, { reason, event }),
+      openEventType: () => content._templOpenEventType ?? null,
+      domReference: () => trigger,
+      floating: () => (positioner.hidden ? null : positioner),
+      placement: () => positioner.getAttribute("data-side") || "bottom",
+      triggers: () => [trigger],
+      parentFloating: () => null,
+    });
+    content._templHoverCleanups = [
+      hover.useHoverReferenceInteraction(trigger, content._templHover, {
+        mouseOnly: true,
+        move: false,
+        handleClose: hover.safePolygon(),
+        delay,
+        isClosing: () => window.templ.transition.isEnding(content),
+      }),
+      hover.useHoverFloatingInteraction(content._templHover, { closeDelay: () => delay().close }),
+    ];
+  }
+
+  function stopHover(content) {
+    content._templHoverCleanups?.forEach((cleanup) => cleanup());
+    content._templHoverCleanups = null;
+    content._templHover?.dispose();
+    content._templHover = null;
+  }
+
+  // PreviewCardTrigger's inline rect props: the line of a wrapped link the
+  // pointer is on anchors the card.
   document.addEventListener("mouseover", (e) => {
-    const trigger = e.target.closest(TRIGGER);
-    if (trigger) {
-      const content = contentFor(trigger);
-      if (!content) return;
-      if (!content.hasAttribute("data-open")) updateInlineRectCoords(content, trigger, e.clientX, e.clientY);
-      scheduleOpen(content, trigger);
-      return;
-    }
-    const content = e.target.closest(CONTENT);
-    if (content) {
-      clearTimeout(content._templClose);
-      content._templClose = null;
-    }
+    const trigger = e.target instanceof Element && e.target.closest(TRIGGER);
+    const content = trigger && contentFor(trigger);
+    if (content && !content.hasAttribute("data-open")) updateInlineRectCoords(content, trigger, e.clientX, e.clientY);
   });
 
   document.addEventListener("mousemove", (e) => {
@@ -272,39 +282,20 @@
     if (content) content._templInlineCoords = undefined;
   });
 
-  document.addEventListener("mouseout", (e) => {
-    const from = e.target.closest(TRIGGER + ", " + CONTENT);
-    if (!from) return;
-    const content = from.matches(CONTENT)
-      ? from
-      : contentFor(from);
-    if (!content) return;
-    if (e.relatedTarget) {
-      const to = e.relatedTarget.closest(TRIGGER + ", " + CONTENT);
-      // Only moving between THIS card's trigger and popup keeps it open;
-      // landing on another instance must still close this one.
-      if (to) {
-        const toContent = to.matches(CONTENT)
-          ? to
-          : contentFor(to);
-        if (toContent === content) return;
-      }
-    }
-    scheduleClose(content);
-  });
-
-
   // Content stays in its hidden portal node until it opens. It unmounts with
   // its portal owner: a portaled one is removed from <body> then.
   window.templ.lifecycle.register(CONTENT, {
     init(content) {
+      const trigger = triggerFor(content);
+      if (!trigger) return;
+      startHover(content, trigger);
       // Server-side open state (Base UI open or defaultOpen).
       if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
-        const trigger = triggerFor(content);
-        if (trigger) open(content, trigger);
+        open(content, trigger);
       }
     },
     destroy(content) {
+      stopHover(content);
       stopAutoPositioning(content);
       content._templDismiss?.();
       window.templ.portal.remove(portalNodeOf(content));

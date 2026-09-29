@@ -57,6 +57,8 @@ shadcn-templ add dropdown-menu
 
 <ComponentSource name="dropdown-menu" title="components/baseui/use_typeahead.js" />
 
+<ComponentSource name="dropdown-menu" title="components/baseui/use_hover.js" />
+
 <ComponentSource name="dropdown-menu" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="dropdown-menu" title="components/floatingui/floating_ui_dom.js" />

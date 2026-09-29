@@ -26,6 +26,7 @@ After `parity-attributes` and `parity-runtime`, every existing component follows
 - **Tooltip and hover card get their positioner.** shadcn renders a positioner element around `tooltip-content` and `hover-card-content` that carries the position, `data-side`, `data-align` and the variables, ours positions the content itself. Found by `parity-runtime` task 6.
 - **Example content is upstream's.** Found by `parity-runtime` task 6: shadcn's `select-demo` has a sixth item "Select a fruit" with `value: null`, selected by default, ours has five, so the aligned popup is one item shorter. The example ports copy the upstream items.
 - **Listbox and menu items as upstream renders them.** Found by `parity-runtime` task 8: shadcn's select and combobox popups have `role="presentation"`, the `listbox` role sits on the list inside (`SelectList`, `ComboboxList`). Its menu items are `div` elements with an id (`MenuItem`), ours are `button` or `a`. The trigger of `combobox-popup` (input inside the popup) is `role="combobox"` with `aria-haspopup="dialog"` and `tabindex="0"` (`ComboboxTrigger`), ours has no role, so `compare.mjs` finds no element there, and `combobox.js` tells the input from a trigger by that role today.
+- **`data-rootownerid` on menu popups.** Found by `parity-runtime` task 8b: Base UI's `MenuPopup` renders the root menu's id there, `useHoverFloatingInteraction` uses it as the fallback scope for `safePolygon`. Ours has none.
 - **Both engines.** Every comparison runs in chromium and webkit (`tmp/a11y-600/node_modules` Playwright).
 
 ## Tasks
