@@ -383,7 +383,7 @@ templ Content(props ...ContentProps) {
 			data-closed
 			hidden
 			role="presentation"
-			class="pointer-events-none isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
+			class="isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
 				data-slot="combobox-content"
@@ -400,9 +400,8 @@ templ Content(props ...ContentProps) {
 						// cn-combobox-content (animations key on Base UI's data-open/data-closed
 						// attributes); the JS sets Base UI's positioner variables.
 						"cn-combobox-content cn-combobox-content-logical cn-menu-target cn-menu-translucent group/combobox-content relative max-h-(--available-height) w-(--anchor-width) max-w-(--available-width) min-w-[calc(var(--anchor-width)+--spacing(7))] origin-(--transform-origin) data-[chips=true]:min-w-(--anchor-width)",
-						// JS wiring: the positioner wrapper is pointer-events-none and the
-						// popup stays mounted after animate-out until hidePopover runs.
-						"pointer-events-auto data-closed:fill-mode-forwards",
+						// The popup stays mounted after animate-out until it unmounts.
+						"data-closed:fill-mode-forwards",
 						p.Class,
 					),
 				}

@@ -25,12 +25,16 @@
   }
 
   // usePositioner's inert: a closed positioner takes no pointer events, also
-  // during its exit animation.
+  // during its exit animation. Opening only takes back that none, so a value
+  // safePolygon set stays, as React leaves a style it did not render.
   function setOpen(status, isOpen) {
     const all = [...status.parts, ...status.open];
     set(all, "data-open", isOpen);
     set(all, "data-closed", !isOpen);
-    if (status.positioner) status.positioner.style.pointerEvents = isOpen ? "" : "none";
+    const style = status.positioner?.style;
+    if (!style) return;
+    if (!isOpen) style.pointerEvents = "none";
+    else if (style.pointerEvents === "none") style.pointerEvents = "";
   }
 
   // useAnimationsFinished: runs fn once every animation on the element

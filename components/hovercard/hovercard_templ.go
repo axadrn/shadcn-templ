@@ -232,7 +232,7 @@ func Content(props ...ContentProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" data-closed hidden role=\"presentation\" class=\"pointer-events-none isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" data-closed hidden role=\"presentation\" class=\"isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -240,9 +240,8 @@ func Content(props ...ContentProps) templ.Component {
 			// 1:1 base/ui/hover-card.tsx HoverCardContent, the look comes from
 			// cn-hover-card-content (animations key on Base UI's data-open/data-closed attributes).
 			"cn-hover-card-content cn-hover-card-content-logical z-50 origin-(--transform-origin) outline-hidden",
-			// The positioner takes no pointer events, the popup does, and it
-			// stays mounted after animate-out until it unmounts.
-			"pointer-events-auto data-closed:fill-mode-forwards",
+			// The popup stays mounted after animate-out until it unmounts.
+			"data-closed:fill-mode-forwards",
 			p.Class,
 		),
 		}

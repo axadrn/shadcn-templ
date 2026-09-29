@@ -85,7 +85,7 @@ func TestPositionerStartsFixedForAlignedMode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(source), `class="pointer-events-none isolate fixed`) {
+	if !strings.Contains(string(source), `class="isolate fixed`) {
 		t.Fatal("select positioner must start fixed like Base UI's aligned mode")
 	}
 }

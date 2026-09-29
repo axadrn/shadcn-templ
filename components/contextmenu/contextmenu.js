@@ -1,9 +1,4 @@
 (function () {
-  // Submenu hover intent, like Base UI: open fast, close with a grace delay so
-  // moving the mouse diagonally into the submenu does not flicker.
-  const SUB_OPEN_DELAY = 100;
-  const SUB_CLOSE_DELAY = 300;
-
   // The menu's element is the positioner (no slot upstream) around the
   // [data-slot=context-menu-content] popup.
   const POPUP = '[data-slot="context-menu-content"]';
@@ -42,11 +37,6 @@
 
   function popupFor(content) {
     return content.querySelector(":scope > " + POPUP);
-  }
-
-  function setOpenState(element, open) {
-    element.toggleAttribute("data-open", open);
-    element.toggleAttribute("data-closed", !open);
   }
 
   // The popup renders the transition status, its positioner the open state.
@@ -132,15 +122,6 @@
   // ----- list navigation and typeahead ---------------------------------------
 
   const ITEM_SELECTOR = '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]';
-
-  // The React tree pendant: up through the DOM, and from a portaled node to
-  // where it was declared.
-  function withinTree(root, target) {
-    for (let node = target; node; node = node._templPortalOwner || node.parentNode) {
-      if (node === root) return true;
-    }
-    return false;
-  }
 
   // The menu an item belongs to: the root popup or a submenu's popup.
   function containerOf(el) {
@@ -272,6 +253,7 @@
     content._templDismiss = null;
     content._templFocus?.close();
     const popup = popupFor(content);
+    popup._templAllowMouseEnter = false;
     popup._templNav?.close();
     popup._templTypeahead?.reset();
     // Positioned until it unmounts, like Base UI. Unmounting the focus
@@ -314,6 +296,11 @@
 
   // ----- submenus -------------------------------------------------------------
 
+  // MenuSubmenuTrigger's defaults: hover opens after 100 ms at rest, the
+  // close has no delay.
+  const SUBMENU_DELAY = 100;
+  const SUBMENU_CLOSE_DELAY = 0;
+
   // The sub's trigger and popup. The popup portals on open, so the link is
   // kept from the declaration.
   function subParts(sub) {
@@ -324,17 +311,78 @@
     return { trigger: sub.querySelector(SUB_TRIGGER), content: sub._templSubContent };
   }
 
+  // The store's open state, set when the change is requested.
   function isSubOpen(sub) {
-    return !!subParts(sub).content?.hasAttribute("data-open");
+    return !!sub._templIsOpen;
   }
 
-  // A submenu's MenuRoot: list navigation nested in its parent menu.
+  // The parent menu's popup: the root popup or a submenu's popup.
+  function parentPopupOf(sub) {
+    const { trigger } = subParts(sub);
+    return trigger ? containerOf(trigger) : null;
+  }
+
+  // The subs whose parent menu is this popup.
+  function childSubsOf(popup, all) {
+    return all.filter((sub) => parentPopupOf(sub) === popup);
+  }
+
+  function subsOfTree(sub) {
+    return positionerOf(subParts(sub).trigger)?._templSubs || [];
+  }
+
+  // A submenu's MenuRoot: list navigation nested in its parent menu, the
+  // trigger's useClick and useHoverReferenceInteraction, the popup's
+  // useHoverFloatingInteraction.
   function initSub(sub) {
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
+    const positioner = content.parentElement;
     trigger.addEventListener("blur", onSubTriggerBlur);
     startListNavigation(content, trigger, () => isSubOpen(sub),
       (open) => requestSubOpenChange(sub, open), { nested: true, parentOrientation: "vertical" });
+    const hover = window.templ.hover;
+    const disabled = () => trigger.getAttribute("aria-disabled") === "true";
+    // hoverEnabled of the submenu's store: off after the pointer moved in its
+    // popup or one of its own submenus opened, on again once it closes.
+    const hoverEnabled = () => sub._templHoverEnabled !== false;
+    sub._templHover = hover.createHoverInteraction({
+      isOpen: () => isSubOpen(sub),
+      onOpenChange: (open, reason, event) => requestSubOpenChange(sub, open, { reason, event }),
+      openEventType: () => sub._templOpenEventType ?? null,
+      domReference: () => trigger,
+      floating: () => (positioner.hidden ? null : positioner),
+      placement: () => positioner.getAttribute("data-side") || "right",
+      triggers: () => [trigger],
+      // The scope Base UI resolves for a submenu: the parent menu's popup,
+      // through its data-rootownerid.
+      parentFloating: () => parentPopupOf(sub),
+    });
+    sub._templCleanups = [
+      window.templ.click.useClick(trigger, {
+        event: "mousedown",
+        toggle: false,
+        ignoreMouse: true,
+        stickIfOpen: false,
+        isOpen: () => isSubOpen(sub),
+        openEventType: () => sub._templOpenEventType ?? null,
+        onOpenChange(nextOpen, event) {
+          if (!disabled()) requestSubOpenChange(sub, nextOpen, { reason: "trigger-press", event });
+        },
+      }),
+      hover.useHoverReferenceInteraction(trigger, sub._templHover, {
+        enabled: () => hoverEnabled() && !disabled(),
+        handleClose: hover.safePolygon({ blockPointerEvents: true }),
+        mouseOnly: true,
+        move: true,
+        restMs: SUBMENU_DELAY,
+        delay: { open: SUBMENU_DELAY, close: SUBMENU_CLOSE_DELAY },
+        // The menu opened under a resting pointer: no submenu opens until it moves.
+        shouldOpen: () => parentPopupOf(sub)?._templAllowMouseEnter === true,
+        isClosing: () => window.templ.transition.isEnding(content),
+      }),
+      hover.useHoverFloatingInteraction(sub._templHover, { enabled: hoverEnabled, closeDelay: SUBMENU_CLOSE_DELAY }),
+    ];
   }
 
   function destroySub(sub) {
@@ -342,6 +390,10 @@
     if (!content) return;
     trigger?.removeEventListener("blur", onSubTriggerBlur);
     closeSubNow(sub);
+    sub._templCleanups?.forEach((cleanup) => cleanup());
+    sub._templCleanups = null;
+    sub._templHover?.dispose();
+    sub._templHover = null;
     stopListNavigation(content);
   }
 
@@ -369,10 +421,12 @@
     content._templFocus = null;
   }
 
-  function openSub(sub) {
+  function openSub(sub, details = {}) {
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
     const positioner = content.parentElement;
+    sub._templIsOpen = true;
+    sub._templOpenEventType = details.event?.type ?? null;
     window.templ.portal.render(positioner.parentElement);
     positioner.hidden = false;
     // The submenu's MenuRoot useDismiss: Escape closes only the submenu
@@ -383,6 +437,7 @@
       onOpenChange: (open, reason, event) => requestSubOpenChange(sub, open, { reason, event }),
     });
     startSubFocusManager(sub);
+    sub._templHover?.openChange(true, details.reason);
     // The sub menu's MenuPositioner with the side and offsets of shadcn's
     // ContextMenuSubContent, fixed like every positioner in a context menu.
     stopAutoPositioning(content);
@@ -400,18 +455,29 @@
     positioning.positioned.then(() => {
       if (positioner.hidden) return; // closed meanwhile
       window.templ.transition.open({ positioner, parts: [content] });
-      setOpenState(trigger, true);
+      trigger.setAttribute("data-popup-open", "");
       setSubTriggerOpen(trigger, true);
       content._templNav?.open();
       content._templTypeahead?.reset();
     });
   }
 
+  // The store's reset when a submenu closes: hover on again, no pointer move
+  // seen in its popup yet.
+  function resetSubState(sub, content) {
+    sub._templIsOpen = false;
+    sub._templOpenEventType = null;
+    sub._templHoverEnabled = true;
+    content._templAllowMouseEnter = false;
+  }
+
   // Closes with the exit animation. details { reason, event } of the close,
-  // for the focus manager.
-  function closeSub(sub, details) {
+  // for the focus manager and the hover interaction.
+  function closeSub(sub, details = {}) {
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
+    resetSubState(sub, content);
+    sub._templHover?.openChange(false, details.reason);
     content._templDismiss?.();
     content._templDismiss = null;
     content._templFocus?.close(details);
@@ -422,18 +488,17 @@
       stopSubFocusManager(content);
       content.parentElement.hidden = true;
     });
-    setOpenState(trigger, false);
+    trigger.removeAttribute("data-popup-open");
     setSubTriggerOpen(trigger, false);
   }
 
   // Closes immediately (used when the whole menu goes away).
   function closeSubNow(sub) {
-    clearTimeout(sub._templOpen);
-    clearTimeout(sub._templClose);
-    sub._templOpen = null;
-    sub._templClose = null;
     const { trigger, content } = subParts(sub);
     if (!trigger || !content) return;
+    const wasOpen = isSubOpen(sub);
+    resetSubState(sub, content);
+    if (wasOpen) sub._templHover?.openChange(false);
     stopAutoPositioning(content);
     content._templDismiss?.();
     content._templDismiss = null;
@@ -441,13 +506,13 @@
     stopSubFocusManager(content);
     content.parentElement.hidden = true;
     window.templ.transition.reset({ positioner: content.parentElement, parts: [content] }, false);
-    setOpenState(trigger, false);
+    trigger.removeAttribute("data-popup-open");
     setSubTriggerOpen(trigger, false);
   }
 
-  function requestSubOpenChange(sub, nextOpen, details) {
+  function requestSubOpenChange(sub, nextOpen, details = {}) {
     const { trigger, content } = subParts(sub);
-    if (!trigger || !content || content.hasAttribute("data-open") === nextOpen) return false;
+    if (!trigger || !content || isSubOpen(sub) === nextOpen) return false;
     const accepted = trigger.dispatchEvent(
       new CustomEvent("contextmenu-sub-open-change", {
         bubbles: true,
@@ -458,66 +523,65 @@
     // Controlled: the Base UI open prop on the SubmenuRoot, the owner commits.
     if (!accepted || sub.hasAttribute("data-templ-open")) return false;
     sub._templSubOpen = nextOpen;
-    if (nextOpen) openSub(sub);
-    else closeSub(sub, details);
+    const all = subsOfTree(sub);
+    const parentPopup = parentPopupOf(sub);
+    if (nextOpen) {
+      // MenuPositioner's menuopenchange: the parent menu stops closing on
+      // hover, a sibling submenu closes.
+      if (parentPopup?._templSub) parentPopup._templSub._templHoverEnabled = false;
+      childSubsOf(parentPopup, all).forEach((other) => {
+        if (other !== sub) requestSubOpenChange(other, false, { reason: "sibling-open" });
+      });
+      openSub(sub, details);
+    } else {
+      // A submenu closes with its parent.
+      childSubsOf(content, all).forEach((child) => requestSubOpenChange(child, false, details));
+      closeSub(sub, details);
+    }
     return true;
   }
 
   function syncSubState(content) {
     content._templSubs?.forEach((sub) => {
-      const { content: subContent } = subParts(sub);
-      if (!subContent) return;
+      if (!subParts(sub).content) return;
       // Last requested state, else the server's open or defaultOpen.
       const shouldOpen = sub._templSubOpen ?? (
         sub.getAttribute("data-templ-open") === "true" || sub.hasAttribute("data-templ-default-open"));
-      if (shouldOpen && !subContent.hasAttribute("data-open")) openSub(sub);
-      else if (!shouldOpen && subContent.hasAttribute("data-open")) closeSubNow(sub);
+      if (shouldOpen && !isSubOpen(sub)) openSub(sub);
+      else if (!shouldOpen && isSubOpen(sub)) closeSubNow(sub);
     });
   }
 
-  // The sub an element sits in, following portaled submenus to their sub.
-  function subOf(target) {
-    for (let node = target; node; node = node._templPortalOwner || node.parentNode) {
-      if (node.matches?.(SUB)) return node;
-    }
-    return null;
+  // The popup's onMouseMove and onClick in MenuRoot, and the items'
+  // itemhover: a pointer move allows hover opening in that menu, turns off
+  // the hover close of a submenu, and a move over another item of the parent
+  // menu closes the open submenu there.
+  function menuPopupOf(target) {
+    const popup = target.closest?.(SUB_CONTENT + ", " + POPUP);
+    if (!popup) return null;
+    return popup.matches(SUB_CONTENT) || isPositioner(popup.parentElement) ? popup : null;
   }
 
-  // Hover intent: while the pointer is over a sub (trigger or its content),
-  // keep it open; everything else in the menu schedules its subs to close.
-  // Task 8b of plans/parity-runtime.md replaces it with useHover.
-  document.addEventListener("mouseover", (e) => {
+  document.addEventListener("mousemove", (e) => {
     if (!(e.target instanceof Element)) return;
-    const menu = positionerOf(e.target);
-    if (!menu) return;
-    const hovered = subOf(e.target);
-
-    menu._templSubs?.forEach((sub) => {
-      const { content } = subParts(sub);
-      if (!content) return;
-      const isOpen = content.hasAttribute("data-open");
-      const onPath = hovered && withinTree(sub, hovered);
-
-      if (onPath) {
-        clearTimeout(sub._templClose);
-        sub._templClose = null;
-        if (!isOpen && !sub._templOpen) {
-          sub._templOpen = setTimeout(() => {
-            sub._templOpen = null;
-            requestSubOpenChange(sub, true);
-          }, SUB_OPEN_DELAY);
-        }
-      } else {
-        clearTimeout(sub._templOpen);
-        sub._templOpen = null;
-        if (isOpen && !sub._templClose) {
-          sub._templClose = setTimeout(() => {
-            sub._templClose = null;
-            requestSubOpenChange(sub, false);
-          }, SUB_CLOSE_DELAY);
-        }
+    const popup = menuPopupOf(e.target);
+    if (!popup) return;
+    popup._templAllowMouseEnter = true;
+    if (popup._templSub) popup._templSub._templHoverEnabled = false;
+    const item = e.target.closest(ITEM_SELECTOR);
+    if (!item || containerOf(item) !== popup) return;
+    const root = positionerOf(popup);
+    childSubsOf(popup, root?._templSubs || []).forEach((sub) => {
+      if (isSubOpen(sub) && subParts(sub).trigger !== item) {
+        requestSubOpenChange(sub, false, { reason: "sibling-open", event: e });
       }
     });
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!(e.target instanceof Element)) return;
+    const sub = menuPopupOf(e.target)?._templSub;
+    if (sub) sub._templHoverEnabled = false;
   });
 
   // ----- init (portal on open) --------------------
@@ -580,18 +644,6 @@
 
   document.addEventListener("click", (e) => {
     if (!(e.target instanceof Element)) return;
-    // Clicking a submenu trigger opens it right away.
-    const subTrigger = e.target.closest(SUB_TRIGGER);
-    if (subTrigger) {
-      const sub = subTrigger.closest(SUB);
-      if (sub) {
-        clearTimeout(sub._templOpen);
-        sub._templOpen = null;
-        requestSubOpenChange(sub, true);
-      }
-      return;
-    }
-
     // Checkbox items toggle and keep the menu open.
     const checkbox = e.target.closest('[data-slot="context-menu-checkbox-item"]');
     if (checkbox) {

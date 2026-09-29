@@ -132,7 +132,7 @@ Done when: none of the four consumers handles `ArrowDown` itself, typeahead work
 
 ### 8b. Hover
 
-- [ ] Done
+- [x] Done
 
 `components/baseui/use_hover.js` and `safe_polygon.js` from `useHover`, `useHoverReferenceInteraction`, `useHoverFloatingInteraction`, `useHoverInteractionSharedState` and `safePolygon.ts`: open and close delays, rest time, the safe triangle toward the popup, `closeDelay`, and the per trigger hover state. Consumers: tooltip, hover card and the submenu triggers of both menus, which each have their own simplified hover intent today. Found in task 8, the plan's Context table did not list it.
 
@@ -161,6 +161,8 @@ Done when: `drawer.templ` renders no `<dialog>`, the drawer suites of `behavior.
 - [ ] Done
 
 Also from task 4: Base UI's popover trigger opens on `click` (`useClick` with its default event), ours on `pointerdown`. Menu triggers open on `mousedown` in Base UI, dialog triggers on `click`. Task 7 ported `useClick` and moved the dropdown menu and the popover to it, check the remaining triggers (dialog, drawer, collapsible) against it. And from task 7: the context menu closes on every scroll and resize (`contextmenu.js`), Base UI's does not.
+
+Also from task 8b: `useFocus` is not a block yet. The tooltip opens on focus with its own `focusin` and `focusout` handlers, the hover card does not open on focus at all, Base UI's `PreviewCardTrigger` does (`useFocus` with the trigger's delay). And the tooltip has no delay group: Base UI's `TooltipProvider` (`useDelayGroup`) opens a neighbouring tooltip at once within its `timeout` and renders `data-instant` on the popup. The submenu code of `dropdownmenu.js` and `contextmenu.js` is the same apart from the event names and the positioning, Base UI has one `Menu` for both; check whether one shared script is the simpler pendant.
 
 No component script defines a behavior a block owns (the greps of tasks 2 to 9 together), every difference in task 1's baseline logs is closed or listed in `plans/UPSTREAM.md` as accepted with its reason, a changelog entry if any public behavior changed.
 
@@ -349,5 +351,27 @@ Checks: a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 4
 `htmx.mjs` had checked nothing since the rename to `templ`: it still asked for `data-tui-*` and `_tuiPortalOwner`, and port 8099 was held by a two day old probe server that served the old bundle, so every "110 of 110" in the logs of tasks 2 to 7 came from that old build. The probe now reads the portal nodes (`[data-base-ui-portal]` in their `[data-templ-portal]` holder, `_templPortalOwner`) and loads the site stylesheet, which the fixture page lacks and which puts the dialog popup over Base UI's internal backdrop. Rebuilt and run on a free port it is 110 of 110 against this task. The old servers on 8095 to 8099 still run, they are not this task's.
 
 Found on the way, written into plan 3's decisions: shadcn's select and combobox popups have `role="presentation"` with the listbox on the list inside, its menu items are `div` elements with an id, and the `combobox-popup` trigger is `role="combobox"`.
+
+### Task 8b
+
+`components/baseui/use_hover.js` ports `useHoverReferenceInteraction.ts`, `useHoverFloatingInteraction.ts`, `useHoverInteractionSharedState.ts`, `useHoverShared.ts` and `safePolygon.ts`. `createHoverInteraction(context)` is the shared `HoverInteraction` of one popup, with the floating root context as functions (open state, `setOpen`, the open event's type, the active trigger, the mounted positioner, the side, the triggers, the parent's floating element). The consumer calls `openChange(open, reason)` after every change, the store's `openchange` event. The floating tree is every open hover context, a child is one whose floating element lies in this one's tree through the portal owners, and `floating.closed` is a small listener set in the block.
+
+The consumers pass their Base UI options:
+
+- Tooltip: `TooltipTrigger` with `mouseOnly`, no `move`, `safePolygon()`, the rest delay and close delay of shadcn's `TooltipProvider` (0). `TooltipPopup` with close delay 0.
+- Hover card: `PreviewCardTrigger` with `mouseOnly`, no `move`, `safePolygon()` and the trigger's `delay` and `closeDelay` (600 and 300). `PreviewCardPopup` with the close delay. The trigger renders `data-popup-open` while open, like upstream's.
+- Submenus of both menus: `MenuSubmenuTrigger` with `delay` 100 as open and rest delay, `closeDelay` 0, `mouseOnly`, `move`, `safePolygon({ blockPointerEvents: true })`, `shouldOpen` from the parent menu's `allowMouseEnter`, and `useClick` with `mousedown`, `ignoreMouse` and no toggle, so a mouse press does nothing and the keyboard click opens. `MenuPopup` with the floating interaction while hover is enabled. The menu tree logic of `MenuRoot` and `MenuPositioner` comes along: a moving pointer allows hover opening in that menu and turns off the hover close of a submenu (`hoverEnabled`), a click in a submenu too, an opening submenu turns it off for its parent submenu and closes its open sibling, a submenu closes with its parent, and a pointer move over another item of the parent menu closes the open submenu there (`itemhover`). The open state is set when the change is requested, like the store's, not when the positioned popup renders `data-open`.
+
+Gone: the tooltip's `mouseover` and `mouseout` handlers, the hover card's open and close timers, the menus' `SUB_OPEN_DELAY` and `SUB_CLOSE_DELAY` hover intent and their click handler on submenu triggers.
+
+Structure that moves to upstream's:
+
+- The positioners of popover, both menus and their submenus, select, combobox, tooltip and hover card lose `pointer-events-none`, their popups `pointer-events-auto`. The pair was left from the Popover API, and the popup's own `pointer-events-auto` kept the parent's items hoverable while `safePolygon` blocked the menu, so crossing one closed the submenu. A closed positioner takes no pointer events through the transition block, as before. The drawer keeps its classes for task 10.
+- `safePolygon` blocks the parent menu's popup, the scope Base UI resolves through the popup's `data-rootownerid`, and leaves `pointer-events: auto` on the submenu's positioner. The transition block took that value back on open, it now only takes back the `none` it set itself, like React leaves a style it did not render.
+- The context menu's submenu trigger renders `data-popup-open` instead of `data-open` and `data-closed`, like Base UI. shadcn's style keys that trigger's open highlight on `data-open`, so the highlight stays off on both sides.
+
+Checks: a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 46, the select test looked for the old positioner class), in chromium and webkit. The DOM against rt8 differs by the removed pointer event classes, the context menu submenu trigger's attributes, the new code blocks on four docs pages and the calendar's today. `escape.mjs` 0 failures, `compare.mjs dismiss` 37 pass instead of 36, `compare.mjs` 381 pass and 86 fail in both engines, instead of 367 and 96 in chromium, 379 and 88 in webkit. `compare.mjs hover` 17 of 21 in both engines, the four fails are the dropdown trigger's slot name. `position.mjs` unchanged apart from the submenu positioner's `pointer-events: auto`, which shadcn's has too, `transition.mjs` unchanged apart from sampling jitter, `htmx.mjs` 110 of 110 in both engines.
+
+Harness: the behavior suite moves the pointer to the context menu's checkbox item before it clicks. Playwright checks the target before it moves the pointer, and a pointer resting on a submenu trigger blocks the parent menu until it moves, on shadcn's side too. `compare.mjs hover` rests on the trigger, moves into the popup and out for the tooltip and the hover card, and for both submenus rests on the submenu trigger, crosses the item below it diagonally into the submenu and rests on that item. For this target our preview's layout is `display: block`, as in `position.mjs`, because the preview's flex column stretches a lone trigger (plan 3 task 1) and a stretched dropdown menu puts its submenu below instead of beside it.
 
 ## Planner review

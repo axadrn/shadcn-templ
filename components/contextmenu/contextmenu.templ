@@ -280,7 +280,7 @@ templ Content(props ...ContentProps) {
 			data-closed
 			hidden
 			role="presentation"
-			class="pointer-events-none isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
+			class="isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
 				data-slot="context-menu-content"
@@ -291,9 +291,8 @@ templ Content(props ...ContentProps) {
 				class={
 					utils.CN(
 						contentClasses,
-						// JS wiring: the positioner wrapper is pointer-events-none, and the
-						// popup stays mounted after animate-out until hidePopover runs.
-						"pointer-events-auto relative isolate data-closed:fill-mode-forwards",
+						// The popup stays mounted after animate-out until it unmounts.
+						"relative isolate data-closed:fill-mode-forwards",
 						p.Class,
 					),
 				}
@@ -568,7 +567,6 @@ templ SubTrigger(props ...SubTriggerProps) {
 		type="button"
 		data-slot="context-menu-sub-trigger"
 		data-inset?={ p.Inset }
-		data-closed
 		role="menuitem"
 		tabindex="-1"
 		aria-haspopup="menu"
@@ -576,8 +574,9 @@ templ SubTrigger(props ...SubTriggerProps) {
 		class={
 			utils.CN(
 				// 1:1 base/ui/context-menu.tsx ContextMenuSubTrigger, the look comes
-				// from cn-context-menu-sub-trigger (the open highlight keys on our
-				// Base UI data-open/data-closed attributes).
+				// from cn-context-menu-sub-trigger. Its open highlight keys on
+				// data-open, which Base UI does not render on a submenu trigger
+				// (it renders data-popup-open), so it stays off like upstream's.
 				"cn-context-menu-sub-trigger flex cursor-default items-center outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
 				"w-full text-left",
 				p.Class,
@@ -603,7 +602,7 @@ templ SubContent(props ...SubContentProps) {
 			data-nested
 			hidden
 			role="presentation"
-			class="pointer-events-none isolate z-50 outline-none fixed inset-auto left-0 top-0"
+			class="isolate z-50 outline-none fixed inset-auto left-0 top-0"
 		>
 		<div
 			if p.ID != "" {
@@ -620,9 +619,8 @@ templ SubContent(props ...SubContentProps) {
 					// 1:1 base/ui/context-menu.tsx ContextMenuSubContent: the content's
 					// classes merged with cn-context-menu-subcontent.
 					"cn-context-menu-content cn-context-menu-content-logical cn-menu-target cn-menu-translucent z-50 max-h-(--available-height) origin-(--transform-origin) overflow-x-hidden overflow-y-auto outline-none cn-context-menu-subcontent",
-					// The positioner takes no pointer events, the popup does, and it
-					// stays mounted after animate-out until it unmounts.
-					"pointer-events-auto data-closed:fill-mode-forwards",
+					// The popup stays mounted after animate-out until it unmounts.
+					"data-closed:fill-mode-forwards",
 					p.Class,
 				),
 			}
