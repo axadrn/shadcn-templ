@@ -64,38 +64,13 @@
     return doSwitch(orientation, vertical, horizontal);
   }
 
-  // ----- utils/composite.ts ----------------------------------------------------
-
-  function isIndexOutOfListBounds(list, index) {
-    return index < 0 || index >= list.length;
-  }
-
-  function isListIndexDisabled(list, index, disabledIndices) {
-    const isExplicitlyDisabled = typeof disabledIndices === "function"
-      ? disabledIndices(index)
-      : disabledIndices?.includes(index) ?? false;
-    if (isExplicitlyDisabled) return true;
-    const element = list[index];
-    if (!element) return false;
-    if (!t().isElementVisible(element)) return true;
-    return !disabledIndices && (element.hasAttribute("disabled") || element.getAttribute("aria-disabled") === "true");
-  }
-
-  function findNonDisabledListIndex(list, { startingIndex = -1, decrement = false, disabledIndices, amount = 1 } = {}) {
-    let index = startingIndex;
-    do {
-      index += decrement ? -amount : amount;
-    } while (index >= 0 && index <= list.length - 1 && isListIndexDisabled(list, index, disabledIndices));
-    return index;
-  }
-
-  function getMinListIndex(list, disabledIndices) {
-    return findNonDisabledListIndex(list, { disabledIndices });
-  }
-
-  function getMaxListIndex(list, disabledIndices) {
-    return findNonDisabledListIndex(list, { decrement: true, startingIndex: list.length, disabledIndices });
-  }
+  // utils/composite.ts, see composite.js.
+  const c = () => window.templ.composite;
+  const isIndexOutOfListBounds = (...args) => c().isIndexOutOfListBounds(...args);
+  const isListIndexDisabled = (...args) => c().isListIndexDisabled(...args);
+  const findNonDisabledListIndex = (...args) => c().findNonDisabledListIndex(...args);
+  const getMinListIndex = (...args) => c().getMinListIndex(...args);
+  const getMaxListIndex = (...args) => c().getMaxListIndex(...args);
 
   const isTypeableCombobox = (element) => !!element && element.getAttribute("role") === "combobox" &&
     element.matches("input:not([type='hidden']):not([disabled]),[contenteditable]:not([contenteditable='false']),textarea:not([disabled])");
@@ -457,5 +432,5 @@
   }
 
   window.templ = window.templ || {};
-  window.templ.listNavigation = { useListNavigation, isListIndexDisabled };
+  window.templ.listNavigation = { useListNavigation };
 })();

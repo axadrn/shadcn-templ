@@ -3,13 +3,11 @@
 
   // Vanilla port of Base UI's radio group: the item behavior comes from
   // radio/root/RadioRoot.tsx, the group behavior from
-  // radio-group/RadioGroup.tsx and the arrow-key navigation with roving tab
-  // stop from internals/composite/root/useCompositeRoot.ts (orientation
-  // "both", loopFocus, Home/End disabled, Shift is the only modifier that
-  // does not cancel navigation). Clicks and Space forward to the visually
-  // hidden native radio beside the item; arrow keys move the focus and select
-  // the focused item (RadioGroup marks arrow navigation as touched, the
-  // focused radio then clicks its hidden input).
+  // radio-group/RadioGroup.tsx, the arrow keys and the roving tab stop from
+  // the composite block. Clicks and Space forward to the visually hidden
+  // native radio beside the item; arrow keys move the focus and select the
+  // focused item (RadioGroup marks arrow navigation as touched, the focused
+  // radio then clicks its hidden input).
 
   const GROUP = '[data-slot="radio-group"]';
   const ITEM = '[data-slot="radio-group-item"]';
@@ -79,6 +77,7 @@
     const checked = !!input && input.checked;
     item.setAttribute("aria-checked", String(checked));
     item.toggleAttribute("data-checked", checked);
+    item.toggleAttribute("data-composite-item-active", checked);
     item.toggleAttribute("data-unchecked", !checked);
     const indicator = item.querySelector('[data-slot="radio-group-indicator"]');
     if (indicator) {
@@ -91,17 +90,31 @@
   }
 
   function syncGroup(group) {
-    const items = itemsOf(group);
-    let stop = null;
-    items.forEach((item) => {
-      if (syncItem(item, inputOf(item))) stop = item;
+    itemsOf(group).forEach((item) => syncItem(item, inputOf(item)));
+  }
+
+  // RadioGroup's CompositeRoot: both orientations, loop, no Home and End,
+  // Shift is the only modifier that does not cancel the navigation. Its
+  // default tab stop is the checked radio, else the first enabled one.
+  function initGroup(group) {
+    syncGroup(group);
+    group._templComposite = window.templ.composite.useCompositeRoot(group, {
+      items: () => itemsOf(group),
+      rtl: () => getComputedStyle(group).direction === "rtl",
+      modifierKeys: ["Shift"],
     });
-    // Roving tab stop (useCompositeRoot onMapChange): the checked item is the
-    // group's tab stop, otherwise the first enabled item.
-    if (!stop) stop = items.find((item) => !isDisabled(item, inputOf(item))) || null;
-    items.forEach((item) => {
-      item.setAttribute("tabindex", item === stop ? "0" : "-1");
-    });
+    // RadioGroup's onKeyDownCapture: an arrow key marks the group touched,
+    // so the radio it focuses selects itself.
+    group._templKeyDownCapture = (e) => {
+      if (e.key.startsWith("Arrow")) group._templTouched = true;
+    };
+    group.addEventListener("keydown", group._templKeyDownCapture, true);
+  }
+
+  function destroyGroup(group) {
+    group._templComposite?.cleanup();
+    group._templComposite = null;
+    group.removeEventListener("keydown", group._templKeyDownCapture, true);
   }
 
   function syncByInput(input) {
@@ -154,32 +167,18 @@
       if (input && !isReadOnly(item)) forwardClick(input, e);
       return;
     }
-    if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
-    // isModifierKeySet with modifierKeys=[Shift]: any other modifier cancels.
-    if (e.ctrlKey || e.altKey || e.metaKey) return;
+  });
+
+  // RadioRoot's onFocus: after an arrow key the focused radio selects itself.
+  document.addEventListener("focusin", (e) => {
+    const item = e.target;
+    if (!item.matches || !item.matches(ITEM) || e.defaultPrevented) return;
     const group = item.closest(GROUP);
-    if (!group) return;
-    const rtl = getComputedStyle(group).direction === "rtl";
-    const forward = e.key === "ArrowDown" || e.key === (rtl ? "ArrowLeft" : "ArrowRight");
-    const items = itemsOf(group);
-    const enabled = items.filter((it) => !isDisabled(it, inputOf(it)));
-    if (enabled.length === 0) return;
-    e.preventDefault();
-    let next = enabled.indexOf(item) + (forward ? 1 : -1);
-    // loopFocus wraps around at both ends.
-    if (next < 0) next = enabled.length - 1;
-    if (next >= enabled.length) next = 0;
-    const nextItem = enabled[next];
-    if (nextItem === item) return;
-    // The highlight (and with it the tab stop) follows the arrow navigation.
-    items.forEach((it) => {
-      it.setAttribute("tabindex", it === nextItem ? "0" : "-1");
-    });
-    nextItem.focus();
-    // RadioGroup onKeyDownCapture marks arrow navigation as touched; the
-    // focused radio's onFocus then clicks its hidden input, selecting it.
-    const nextInput = inputOf(nextItem);
-    if (nextInput && !isReadOnly(nextItem)) forwardClick(nextInput, e);
+    if (!group?._templTouched) return;
+    const input = inputOf(item);
+    if (isDisabled(item, input) || isReadOnly(item)) return;
+    group._templTouched = false;
+    if (input) input.click();
   });
 
   // Focus on the hidden input (label clicks, programmatic focus) belongs on
@@ -219,5 +218,5 @@
   }
 
   window.templ.lifecycle.register(ITEM, { init: setupItem });
-  window.templ.lifecycle.register(GROUP, { init: syncGroup });
+  window.templ.lifecycle.register(GROUP, { init: initGroup, destroy: destroyGroup });
 })();

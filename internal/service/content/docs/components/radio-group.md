@@ -29,6 +29,10 @@ shadcn-templ add radio-group
 
 <ComponentSource name="radio-group" title="components/radiogroup/radiogroup.templ" />
 
+<ComponentSource name="radio-group" title="components/baseui/tabbable.js" />
+
+<ComponentSource name="radio-group" title="components/baseui/composite.js" />
+
 <Step>Update the import paths to match your project setup.</Step>
 
 </Steps>

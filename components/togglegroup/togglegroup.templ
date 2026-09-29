@@ -39,6 +39,8 @@ type Props struct {
 	Variant      Variant
 	Size         Size
 	Orientation  Orientation
+	// Disabled disables the group and every toggle in it.
+	Disabled bool
 	// Spacing is the gap between items in Tailwind spacing units. Defaults
 	// to 2; 0 joins the items into one bar (utils.Ptr(0)).
 	Spacing *int
@@ -60,7 +62,7 @@ templ ToggleGroup(props ...Props) {
 	if p.Value != nil {
 		{{ values = p.Value }}
 	}
-	{{ ctx = toggle.WithGroupDefaults(ctx, p.Variant, p.Size, spacing, values, true) }}
+	{{ ctx = toggle.WithGroupDefaults(ctx, p.Variant, p.Size, spacing, values, true, p.Disabled) }}
 	<div
 		if p.ID != "" {
 			id={ p.ID }
@@ -79,6 +81,7 @@ templ ToggleGroup(props ...Props) {
 		}
 		data-spacing={ strconv.Itoa(spacing) }
 		data-orientation={ string(p.Orientation) }
+		data-disabled?={ p.Disabled }
 		style={ "--gap: " + strconv.Itoa(spacing) }
 		class={
 			utils.CN(

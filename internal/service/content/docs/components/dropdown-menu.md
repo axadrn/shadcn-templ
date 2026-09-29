@@ -53,6 +53,8 @@ shadcn-templ add dropdown-menu
 
 <ComponentSource name="dropdown-menu" title="components/baseui/use_click.js" />
 
+<ComponentSource name="dropdown-menu" title="components/baseui/composite.js" />
+
 <ComponentSource name="dropdown-menu" title="components/baseui/use_list_navigation.js" />
 
 <ComponentSource name="dropdown-menu" title="components/baseui/use_typeahead.js" />

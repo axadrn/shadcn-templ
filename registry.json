@@ -377,6 +377,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/composite.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/baseui/use_list_navigation.js",
           "type": "registry:ui"
         },
@@ -515,6 +519,10 @@
         },
         {
           "path": "components/baseui/use_click.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/composite.js",
           "type": "registry:ui"
         },
         {
@@ -974,6 +982,18 @@
         {
           "path": "components/toggle/toggle.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/tabbable.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/composite.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -1049,6 +1069,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/composite.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/baseui/use_list_navigation.js",
           "type": "registry:ui"
         },
@@ -1112,6 +1136,14 @@
         },
         {
           "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/tabbable.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/composite.js",
           "type": "registry:ui"
         }
       ],
@@ -1193,6 +1225,10 @@
         },
         {
           "path": "components/baseui/floating_focus_manager.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/composite.js",
           "type": "registry:ui"
         },
         {
@@ -1350,6 +1386,14 @@
         },
         {
           "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/tabbable.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/composite.js",
           "type": "registry:ui"
         }
       ],

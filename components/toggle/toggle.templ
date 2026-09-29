@@ -33,12 +33,14 @@ const (
 type groupState struct {
 	initialized bool
 	pressed     map[string]bool
+	disabled    bool
 }
 
 // WithGroupDefaults stores a group's variant/size/spacing in the context so
-// child Toggles inherit them and style themselves as group items. Used by the
-// togglegroup component.
-func WithGroupDefaults(ctx context.Context, variant Variant, size Size, spacing int, values []string, initialized bool) context.Context {
+// child Toggles inherit them and style themselves as group items, and the
+// group's disabled state, which disables every toggle (Base UI's
+// groupContext.disabled). Used by the togglegroup component.
+func WithGroupDefaults(ctx context.Context, variant Variant, size Size, spacing int, values []string, initialized bool, disabled bool) context.Context {
 	ctx = context.WithValue(ctx, variantKey, variant)
 	ctx = context.WithValue(ctx, sizeKey, size)
 	ctx = context.WithValue(ctx, spacingKey, spacing)
@@ -46,7 +48,7 @@ func WithGroupDefaults(ctx context.Context, variant Variant, size Size, spacing 
 	for _, value := range values {
 		pressed[value] = true
 	}
-	ctx = context.WithValue(ctx, groupStateKey, groupState{initialized: initialized, pressed: pressed})
+	ctx = context.WithValue(ctx, groupStateKey, groupState{initialized: initialized, pressed: pressed, disabled: disabled})
 	return ctx
 }
 
@@ -69,6 +71,11 @@ func sizeFromCtx(ctx context.Context) Size {
 func spacingFromCtx(ctx context.Context) (int, bool) {
 	s, ok := ctx.Value(spacingKey).(int)
 	return s, ok
+}
+
+func disabledFromGroup(ctx context.Context) bool {
+	state, _ := ctx.Value(groupStateKey).(groupState)
+	return state.disabled
 }
 
 func pressedFromGroup(ctx context.Context, value string) (pressed bool, initialized bool) {
@@ -172,8 +179,8 @@ templ Toggle(props ...Props) {
 			data-pressed
 		}
 		data-templ-pressed?={ p.Pressed != nil }
-		disabled?={ p.Disabled }
-		data-disabled?={ p.Disabled }
+		disabled?={ p.Disabled || disabledFromGroup(ctx) }
+		data-disabled?={ p.Disabled || disabledFromGroup(ctx) }
 		class={ utils.CN(map[string]bool{groupItemClasses(): inGroup}, baseClasses, variantClasses(p.Variant), sizeClasses(p.Size), p.Class) }
 		{ p.Attributes... }
 	>

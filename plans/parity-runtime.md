@@ -142,7 +142,7 @@ Done when: no consumer has its own hover timers or `mouseover`/`mouseout` intent
 
 ### 9. Composite roving tab stop
 
-- [ ] Done
+- [x] Done
 
 `components/baseui/composite.js`, `useCompositeRoot.ts`: one tab stop, arrows by orientation, Home and End, loop. Consumers: accordion, radiogroup, tabs, toggle group (gains roving like Base UI), slider keeps its own thumb keys.
 
@@ -373,5 +373,21 @@ Structure that moves to upstream's:
 Checks: a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 46, the select test looked for the old positioner class), in chromium and webkit. The DOM against rt8 differs by the removed pointer event classes, the context menu submenu trigger's attributes, the new code blocks on four docs pages and the calendar's today. `escape.mjs` 0 failures, `compare.mjs dismiss` 37 pass instead of 36, `compare.mjs` 381 pass and 86 fail in both engines, instead of 367 and 96 in chromium, 379 and 88 in webkit. `compare.mjs hover` 17 of 21 in both engines, the four fails are the dropdown trigger's slot name. `position.mjs` unchanged apart from the submenu positioner's `pointer-events: auto`, which shadcn's has too, `transition.mjs` unchanged apart from sampling jitter, `htmx.mjs` 110 of 110 in both engines.
 
 Harness: the behavior suite moves the pointer to the context menu's checkbox item before it clicks. Playwright checks the target before it moves the pointer, and a pointer resting on a submenu trigger blocks the parent menu until it moves, on shadcn's side too. `compare.mjs hover` rests on the trigger, moves into the popup and out for the tooltip and the hover card, and for both submenus rests on the submenu trigger, crosses the item below it diagonally into the submenu and rests on that item. For this target our preview's layout is `display: block`, as in `position.mjs`, because the preview's flex column stretches a lone trigger (plan 3 task 1) and a stretched dropdown menu puts its submenu below instead of beside it.
+
+### Task 9
+
+`components/baseui/composite.js` ports `useCompositeRoot.ts`, `useCompositeItem.ts` and `composite.ts` of `internals/composite`, with the list helpers of floating-ui-react's `utils/composite.ts` (`isListIndexDisabled`, `findNonDisabledListIndex` and the rest), which moved here from `use_list_navigation.js` and are shared with it and the typeahead. The root takes its default tab stop once on creation (`onMapChange`): the item with `data-composite-item-active`, or the first enabled one when the first is disabled. The items' `tabIndex` follows the highlight, focus on an item highlights it, the arrows move by orientation with loop, optionally Home and End, and native text inputs keep their caret keys.
+
+The consumers pass their Base UI options:
+
+- Tabs: `TabsList` with Home and End, `loopFocus`, the root's orientation and an empty `disabledIndices`, so disabled tabs are reachable. `TabsTab` keeps the highlight on the active tab when the value changes, unless the focus is in the list, and `activateOnFocus` now lives in its focus handler (keyboard, touch or the main mouse button), no longer in the arrow handler.
+- Radio group: `RadioGroup` with both orientations, loop, no Home and End, Shift as the only modifier that does not cancel. Its `onKeyDownCapture` marks an arrow key as touched and `RadioRoot`'s focus handler then clicks the hidden input.
+- Toggle group: `ToggleGroup` with Home and End, loop and its orientation. It had no keyboard handling before, every toggle was a tab stop.
+
+The plan named the accordion as a consumer, but Base UI 1.6's accordion has no arrow key navigation at all, and on the reference the arrows, Home and End do not move the focus between triggers. Our accordion's own WAI-ARIA arrow handler is removed.
+
+Structure that moves to upstream's: the active tab and the checked radio render `data-composite-item-active`. The toggle group gets Base UI's `disabled` prop: `data-disabled` on the group, and every toggle in it is disabled. The `toggle-group-disabled` example is upstream's again, a disabled group instead of disabled items in a multiple group.
+
+Checks: a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 47), in chromium and webkit. The DOM against rt8b differs by `data-composite-item-active`, the toggle group's disabled state and example, and the new code blocks. `compare.mjs` for accordion, tabs, radio group and toggle group all pass in both engines (toggle group 21 of 21, before 18), a Tab walk through `toggle-group-demo`, `tabs-demo` and `radio-group-demo` stops once per group like upstream. `compare.mjs` 384 pass and 83 fail in both engines instead of 381 and 86, `escape.mjs` 0 failures, `compare.mjs dismiss` 37, `compare.mjs hover` unchanged, `transition.mjs` and `position.mjs` unchanged, `htmx.mjs` 110 of 110 in both engines. The first webkit run of `transition.mjs` and `position.mjs` timed out loading pages of the reference app, whose Next dev server had been running for four days; restarted, both runs were clean.
 
 ## Planner review

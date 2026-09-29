@@ -185,6 +185,7 @@ templ Trigger(props ...TriggerProps) {
 		data-templ-value={ p.Value }
 		data-orientation={ string(orientation(ctx)) }
 		data-active?={ active }
+		data-composite-item-active?={ active }
 		data-disabled?={ p.Disabled }
 		{ p.Attributes... }
 	>
