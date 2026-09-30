@@ -159,9 +159,11 @@ templ ChartAreaInteractive() {
 				<span class="@[540px]/card:hidden">Last 3 months</span>
 			}
 			@card.Action() {
+				// Both range controls are controlled by one timeRange like the
+				// TSX, the script below commits it.
 				@togglegroup.ToggleGroup(togglegroup.Props{
-					Variant:      togglegroup.VariantOutline,
-					DefaultValue: []string{"90d"},
+					Variant: togglegroup.VariantOutline,
+					Value:   []string{"90d"},
 					// Spacing 0 is the joined bar of the TSX ToggleGroup default;
 					// px-4! beats the joined mode's px-2 like upstream.
 					Spacing:    utils.Ptr(0),
@@ -174,7 +176,7 @@ templ ChartAreaInteractive() {
 						}
 					}
 				}
-				@selectcomp.Select(selectcomp.Props{DefaultValue: "90d"}) {
+				@selectcomp.Select(selectcomp.Props{Value: utils.Ptr("90d")}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{
 						Class:      "flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden",
 						Size:       selectcomp.SizeSm,
@@ -249,84 +251,60 @@ templ ChartAreaInteractive() {
 	}
 	<script nonce={ templ.GetNonce(ctx) }>
 		(() => {
-			// The two range controls share one state like the TSX's timeRange:
-			// a toggle pick forwards to the matching select item, so select.js
-			// stays the single owner of value, trigger label and the
-			// select-change event chart.js flips the panels on.
+			// The TSX's timeRange state: the toggle group and the mobile select
+			// are controlled by it, a pick in either sets it and both follow,
+			// with the chart panels.
 			if (window.__templDashboard01ChartRange) return;
 			window.__templDashboard01ChartRange = true;
 			const mobile = window.matchMedia("(max-width: 767px)");
 
-			// The content lives in the document from the first render (hidden
-			// portal node), so the trigger's aria-controls always resolves.
-			const selectContent = (trigger) => {
-				const id = trigger && trigger.getAttribute("aria-controls");
-				return id ? document.getElementById(id) : null;
+			const setTimeRange = (card, value) => {
+				if (!card) return;
+				card.querySelectorAll("[data-templ-chart-range-toggle] [data-slot=toggle-group-item]").forEach((t) => {
+					const on = t.getAttribute("data-templ-value") === value;
+					t.toggleAttribute("data-pressed", on);
+					t.setAttribute("aria-pressed", String(on));
+				});
+				const trigger = card.querySelector("[data-templ-chart-range-select]");
+				const content = trigger && document.getElementById(trigger.getAttribute("aria-controls"));
+				const item = content && content.querySelector('[data-slot="select-item"][data-templ-value="' + value + '"]');
+				if (item) {
+					content.querySelectorAll('[data-slot="select-item"]').forEach((candidate) => {
+						const selected = candidate === item;
+						candidate.toggleAttribute("data-selected", selected);
+						candidate.setAttribute("aria-selected", String(selected));
+					});
+					const valueNode = trigger.querySelector('[data-slot="select-value"]');
+					if (valueNode) valueNode.textContent = item.getAttribute("data-templ-label") || item.textContent.trim();
+					trigger.removeAttribute("data-placeholder");
+				}
+				card.querySelectorAll("[data-templ-chart-range]").forEach((el) => {
+					el.hidden = el.getAttribute("data-templ-chart-range") !== value;
+				});
 			};
 
-			// useIsMobile sets 7d whenever the viewport enters mobile. Update the
-			// same uncontrolled select state without opening or focusing it.
-			const setRange = (card, value) => {
-				const trigger = card && card.querySelector("[data-templ-chart-range-select]");
-				const content = selectContent(trigger);
-				const item = content && content.querySelector('[data-slot="select-item"][data-templ-value="' + value + '"]');
-				if (!trigger || !item) return;
-				content.querySelectorAll('[data-slot="select-item"]').forEach((candidate) => {
-					const selected = candidate === item;
-					candidate.toggleAttribute("data-selected", selected);
-					candidate.setAttribute("aria-selected", String(selected));
-				});
-				const label = item.getAttribute("data-templ-label") || item.textContent.trim();
-				const valueNode = trigger.querySelector('[data-slot="select-value"]');
-				if (valueNode) valueNode.textContent = label;
-				trigger.removeAttribute("data-placeholder");
-				trigger.dispatchEvent(new CustomEvent("select-change", {
-					bubbles: true,
-					detail: { value, label },
-				}));
-			};
+			// useIsMobile sets 7d whenever the viewport enters mobile.
 			const syncMobileRange = () => {
 				if (!mobile.matches) return;
-				document.querySelectorAll("[data-dashboard01-chart-range-card]").forEach((card) => setRange(card, "7d"));
+				document.querySelectorAll("[data-dashboard01-chart-range-card]").forEach((card) => setTimeRange(card, "7d"));
 			};
 			if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", syncMobileRange, { once: true });
 			else syncMobileRange();
 			mobile.addEventListener("change", syncMobileRange);
 
-			document.addEventListener("toggle-change", (e) => {
-				if (!(e.target instanceof Element)) return;
-				const group = e.target.closest("[data-templ-chart-range-toggle]");
-				if (!group) return;
-				const value = e.detail && e.detail.value;
-				if (!value) return;
-				// Single-select groups allow unpressing the active item; a
-				// time range must stay active, so re-press it.
-				const toggle = e.target.closest("[data-slot=toggle-group-item]");
-				if (toggle && e.detail.pressed === false) {
-					toggle.setAttribute("data-pressed", "");
-					toggle.setAttribute("aria-pressed", "true");
-				}
-				const card = group.closest("[data-slot=card]");
-				const trigger = card && card.querySelector("[data-templ-chart-range-select]");
-				const content = trigger && document.getElementById(trigger.getAttribute("aria-controls"));
-				const item = content && content.querySelector('[data-slot="select-item"][data-templ-value="' + value + '"]');
-				if (item) item.click();
+			// ToggleGroup onValueChange: setTimeRange(value[0] ?? "90d"), so a
+			// press on the pressed item keeps a range.
+			document.addEventListener("toggle-group-value-change", (e) => {
+				if (!(e.target instanceof Element) || !e.target.matches("[data-templ-chart-range-toggle]")) return;
+				setTimeRange(e.target.closest("[data-slot=card]"), (e.detail && e.detail.value && e.detail.value[0]) || "90d");
 			});
 
-			// A pick in the mobile select presses the matching toggle;
-			// chart.js flips the panels on the same select-change.
+			// Select onValueChange: a non null value sets it.
 			document.addEventListener("select-change", (e) => {
 				if (!(e.target instanceof Element)) return;
 				const trigger = e.target.closest("[data-templ-chart-range-select]");
-				if (!trigger) return;
-				const card = trigger.closest("[data-slot=card]");
-				const group = card && card.querySelector("[data-templ-chart-range-toggle]");
-				if (!group) return;
-				group.querySelectorAll("[data-slot=toggle-group-item]").forEach((t) => {
-					const on = t.getAttribute("data-templ-value") === e.detail.value;
-					t.toggleAttribute("data-pressed", on);
-					t.setAttribute("aria-pressed", String(on));
-				});
+				if (!trigger || !e.detail || e.detail.value == null || e.detail.value === "") return;
+				setTimeRange(trigger.closest("[data-slot=card]"), e.detail.value);
 			});
 		})();
 	</script>
