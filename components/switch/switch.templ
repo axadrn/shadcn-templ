@@ -84,8 +84,8 @@ templ Switch(props ...Props) {
 		}
 		{ p.Attributes... }
 	>
-		// Base UI mirrors data-checked/data-unchecked onto the thumb via the
-		// stateAttributesMapping; switch.js keeps them in sync.
+		// Base UI mirrors data-checked/data-unchecked and data-disabled onto
+		// the thumb via the stateAttributesMapping; switch.js keeps them in sync.
 		<span
 			data-slot="switch-thumb"
 			if checked {
@@ -93,6 +93,7 @@ templ Switch(props ...Props) {
 			} else {
 				data-unchecked
 			}
+			data-disabled?={ p.Disabled }
 			class="cn-switch-thumb pointer-events-none block ring-0 transition-transform"
 		></span>
 	</span>

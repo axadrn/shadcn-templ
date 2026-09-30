@@ -102,7 +102,7 @@
 
   // The React tree pendant, see use_dismiss.js.
   function withinTree(root, target) {
-    for (let node = target; node; node = node._templPortalOwner || node.parentNode) {
+    for (let node = target; node; node = window.templ.portal.treeParent(node)) {
       if (node === root) return true;
     }
     return false;

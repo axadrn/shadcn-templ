@@ -10,6 +10,7 @@
 //   escapeKey          true, or a function read on every key press
 //   outsidePress       true, false, or a function(event) that returns whether to dismiss
 //   outsidePressEvent  "sloppy" (press), "intentional" (click), { mouse, touch }, or a function
+//   referencePress     false, true, or a function: a press on the reference closes
 //   bubbles            true, or { escapeKey, outsidePress }
 //
 // What differs from the source comes from having no React tree:
@@ -51,7 +52,7 @@
   // The React tree pendant: up through the DOM, and from a portaled element
   // on to the place it was declared.
   function withinTree(root, target) {
-    for (let node = target; node; node = node._templPortalOwner || node.parentNode) {
+    for (let node = target; node; node = window.templ.portal.treeParent(node)) {
       if (node === root) return true;
     }
     return false;
@@ -75,6 +76,7 @@
       escapeKey = true,
       outsidePress = true,
       outsidePressEvent = "sloppy",
+      referencePress = false,
     } = options;
     const { reference } = options;
     const references = (reference instanceof Element ? [reference] : [...(reference || [])]).filter(Boolean);
@@ -309,7 +311,15 @@
       touchState = null;
     }
 
+    // The reference's onPointerDown and onClick.
+    function closeOnReferencePress(event) {
+      if (!read(referencePress)) return;
+      close("trigger-press", event);
+    }
+
     const listeners = [
+      ...references.map((reference) => [reference, "pointerdown", closeOnReferencePress]),
+      ...references.map((reference) => [reference, "click", closeOnReferencePress]),
       [document, "keydown", closeOnEscapeKeyDown],
       ...references.map((reference) => [reference, "keydown", closeOnEscapeKeyDown]),
       [floating, "keydown", closeOnEscapeKeyDown],

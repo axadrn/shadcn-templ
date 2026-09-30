@@ -41,7 +41,11 @@ shadcn-templ add tooltip
 
 <ComponentSource name="tooltip" title="components/baseui/use_anchor_positioning.js" />
 
+<ComponentSource name="tooltip" title="components/baseui/tabbable.js" />
+
 <ComponentSource name="tooltip" title="components/baseui/use_hover.js" />
+
+<ComponentSource name="tooltip" title="components/baseui/use_focus.js" />
 
 <ComponentSource name="tooltip" title="components/floatingui/floating_ui_core.js" />
 

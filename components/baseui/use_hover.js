@@ -57,7 +57,7 @@
   // The React tree pendant: up through the DOM, and from a portaled node to
   // where it was declared.
   function withinTree(root, target) {
-    for (let node = target; node; node = node._templPortalOwner || node.parentNode) {
+    for (let node = target; node; node = window.templ.portal.treeParent(node)) {
       if (node === root) return true;
     }
     return false;

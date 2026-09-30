@@ -77,12 +77,14 @@
     content._templOpenEventType = details.event?.type ?? null;
     portal(content);
     positionerOf(content).hidden = false;
+    // TooltipRoot's useDismiss: a press on the trigger closes (closeOnClick).
     content._templDismiss ??= window.templ.dismiss.useDismiss({
       floating: positionerOf(content),
       reference: trigger,
+      referencePress: true,
       onOpenChange: (open, reason, event) => requestOpenChange(trigger, open, { reason, event }),
     });
-    content._templHover?.openChange(true, details.reason);
+    emitOpenChange(content, true, details.reason);
 
     // Positioned first, then the enter animation plays in place.
     startAutoPositioning(content, trigger).then(() => {
@@ -96,7 +98,7 @@
     if (positionerOf(content).hidden) return;
     content._templOpen = false;
     content._templOpenEventType = null;
-    content._templHover?.openChange(false, details.reason);
+    emitOpenChange(content, false, details.reason);
     content._templDismiss?.();
     content._templDismiss = null;
     // Positioned until it unmounts, like Base UI.
@@ -153,9 +155,30 @@
       }),
       hover.useHoverFloatingInteraction(content._templHover, { closeDelay: 0 }),
     ];
+    // TooltipTrigger's useFocus.
+    content._templFocusOpen = window.templ.focus.useFocus(trigger, content._templHover.context);
+    // TooltipTrigger's onPointerDown and onClick: with closeOnClick a press
+    // cancels a pending open (cancelPendingOpen).
+    const cancelPendingOpen = () => {
+      if (!content._templOpen) emitOpenChange(content, false, "trigger-press");
+    };
+    trigger.addEventListener("pointerdown", cancelPendingOpen);
+    trigger.addEventListener("click", cancelPendingOpen);
+    content._templHoverCleanups.push(() => {
+      trigger.removeEventListener("pointerdown", cancelPendingOpen);
+      trigger.removeEventListener("click", cancelPendingOpen);
+    });
+  }
+
+  // The store's openchange event, for the trigger's interactions.
+  function emitOpenChange(content, open, reason) {
+    content._templHover?.openChange(open, reason);
+    content._templFocusOpen?.openChange(open, reason);
   }
 
   function stopHover(content) {
+    content._templFocusOpen?.cleanup();
+    content._templFocusOpen = null;
     content._templHoverCleanups?.forEach((cleanup) => cleanup());
     content._templHoverCleanups = null;
     content._templHover?.dispose();
@@ -163,22 +186,6 @@
   }
 
   // ----- events -------------------------------------------------------------
-
-  // Keyboard: show on focus, hide on blur. Like Base UI, only visible
-  // focus opens the tooltip, so programmatic focus (e.g. a dialog's
-  // autofocus) does not pop it.
-  document.addEventListener("focusin", (e) => {
-    const trigger = e.target.closest(TRIGGER);
-    if (trigger && trigger.matches(":focus-visible")) requestOpenChange(trigger, true, { reason: "trigger-focus", event: e });
-  });
-
-  document.addEventListener("focusout", (e) => {
-    const trigger = e.target.closest(TRIGGER);
-    if (!trigger) return;
-    const content = contentFor(trigger);
-    if (content) requestOpenChange(trigger, false, { reason: "trigger-focus", event: e });
-  });
-
 
   // Content stays in its hidden portal node until it opens. It unmounts with
   // its portal owner: a portaled one is removed from <body> then.

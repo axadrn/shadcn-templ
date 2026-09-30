@@ -183,7 +183,7 @@
       reference: trigger,
       onOpenChange: (open, reason, event) => requestOpenChange(content, open, { reason, event }),
     });
-    content._templHover?.openChange(true, details.reason);
+    emitOpenChange(content, true, details.reason);
 
     // Positioned first, then the enter animation plays in place.
     startAutoPositioning(content, trigger).then(() => {
@@ -197,7 +197,7 @@
     if (positionerOf(content).hidden) return;
     content._templOpen = false;
     content._templOpenEventType = null;
-    content._templHover?.openChange(false, details.reason);
+    emitOpenChange(content, false, details.reason);
     triggerFor(content)?.removeAttribute("data-popup-open");
     content._templDismiss?.();
     content._templDismiss = null;
@@ -253,9 +253,21 @@
       }),
       hover.useHoverFloatingInteraction(content._templHover, { closeDelay: () => delay().close }),
     ];
+    // PreviewCardTrigger's useFocus with the trigger's open delay.
+    content._templFocusOpen = window.templ.focus.useFocus(trigger, content._templHover.context, {
+      delay: () => delay().open,
+    });
+  }
+
+  // The store's openchange event, for the trigger's interactions.
+  function emitOpenChange(content, open, reason) {
+    content._templHover?.openChange(open, reason);
+    content._templFocusOpen?.openChange(open, reason);
   }
 
   function stopHover(content) {
+    content._templFocusOpen?.cleanup();
+    content._templFocusOpen = null;
     content._templHoverCleanups?.forEach((cleanup) => cleanup());
     content._templHoverCleanups = null;
     content._templHover?.dispose();

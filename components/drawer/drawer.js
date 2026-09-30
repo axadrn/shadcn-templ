@@ -1328,16 +1328,26 @@
     return viewport;
   }
 
-  // Moves the drawer to <body>, the pendant of the reference's DrawerPortal.
+  // DrawerTrigger is DialogTrigger: useClick with its default click event.
+  // The identifier is shared with dialog and popover triggers; only those
+  // naming a drawer popup are ours.
+  window.templ.lifecycle.register("[data-base-ui-click-trigger][aria-controls]", {
+    init(trigger) {
+      if (!drawerFor(trigger)) return;
+      trigger._templDrawerClick = window.templ.click.useClick(trigger, {
+        isOpen: () => isDrawerOpen(drawerFor(trigger)),
+        onOpenChange: (nextOpen) => requestOpenChange(drawerFor(trigger), nextOpen),
+      });
+    },
+    destroy(trigger) {
+      trigger._templDrawerClick?.();
+      trigger._templDrawerClick = null;
+    },
+  });
+
+  // DrawerClose.
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
-    // Base UI's DrawerTrigger identifier (DialogTrigger), shared with viewport
-    // and popover triggers; only those naming a drawer viewport are ours.
-    const trigger = event.target.closest("[data-base-ui-click-trigger][aria-controls]");
-    if (trigger && drawerFor(trigger)) {
-      toggleDrawer(drawerFor(trigger));
-      return;
-    }
     const closeButton = event.target.closest("[data-templ-drawer-close]");
     if (closeButton) {
       requestOpenChange(drawerFor(closeButton), false);
