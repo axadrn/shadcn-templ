@@ -37,7 +37,7 @@
   // The root positioner of the menu an element sits in, portaled submenus
   // included.
   function positionerOf(target) {
-    for (let node = target; node; node = node._templPortalOwner || node.parentNode) {
+    for (let node = target; node; node = window.templ.portal.treeParent(node)) {
       if (node.matches?.(POPUP) && isPositioner(node.parentElement)) return node.parentElement;
     }
     return null;

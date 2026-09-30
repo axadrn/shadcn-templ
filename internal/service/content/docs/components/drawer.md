@@ -47,6 +47,8 @@ shadcn-templ add drawer
 
 <ComponentSource name="drawer" title="components/baseui/floating_focus_manager.js" />
 
+<ComponentSource name="drawer" title="components/baseui/use_click.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

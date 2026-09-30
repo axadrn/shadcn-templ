@@ -158,7 +158,7 @@ Done when: `drawer.templ` renders no `<dialog>`, the drawer suites of `behavior.
 
 ### 11. Sweep
 
-- [ ] Done
+- [x] Done
 
 Also from task 4: Base UI's popover trigger opens on `click` (`useClick` with its default event), ours on `pointerdown`. Menu triggers open on `mousedown` in Base UI, dialog triggers on `click`. Task 7 ported `useClick` and moved the dropdown menu and the popover to it, check the remaining triggers (dialog, drawer, collapsible) against it. And from task 7: the context menu closes on every scroll and resize (`contextmenu.js`), Base UI's does not.
 
@@ -401,5 +401,23 @@ The dashboard01 range toggle and the mobile select are controlled by one `timeRa
 Harness: the behavior suite and `escape.mjs` read the drawer's open state through `window.templ.drawer.isOpen` and find the viewport through the popup's id.
 
 Checks: a11y 30 of 30, behavior 30 of 30, `go test ./...` green (the dashboard01 test looks for the controlled range), in chromium and webkit. `grep "showModal\|<dialog"` finds nothing outside the plans. The DOM against rt9 differs on the drawer pages by the new structure and on the dashboard by the controlled range. `compare.mjs family:drawer` 14 pass instead of 12, the rest is the trigger's and the close's slot name, `compare.mjs` 386 pass and 81 fail in both engines instead of 384 and 83, `compare.mjs dismiss` 39 instead of 37, `escape.mjs` 0 failures, `compare.mjs hover` unchanged, `transition.mjs` and `position.mjs` unchanged apart from sampling jitter, `htmx.mjs` 110 of 110 in both engines. On `/view/dashboard-01` a press on the pressed range keeps it pressed.
+
+### Task 11
+
+Triggers: dialog and drawer triggers use `useClick` with its default click event, like `DialogTrigger`, instead of a document click handler. The collapsible keeps its plain click handler, Base UI's `CollapsibleTrigger` has `onClick` too. The context menu no longer closes on scroll and resize; on the reference a resize and a scroll event leave it open.
+
+`components/baseui/use_focus.js` ports `useFocus.ts`: visible focus on the trigger opens, a blur that does not go to the popup, a focus guard or another trigger closes, and a close by Escape or by pressing the trigger blocks the focus from reopening it. The tooltip uses it instead of its own `focusin` and `focusout` handlers, the hover card uses it with the trigger's delay and now opens on keyboard focus like upstream's. `useDismiss` gets the source's `referencePress`: the tooltip closes when its trigger is pressed (`closeOnClick`), and a press while it is closed cancels a pending open (`cancelPendingOpen`).
+
+`window.templ.portal.treeParent(node)` is the one place that follows a portal node to its declaration site. The dismiss, focus manager and hover blocks and both menu scripts walk the tree through it, so `grep -l "_templPortalOwner" components/*/*.js` lists `baseui/portal.js` and `baseui/lifecycle.js` again. The other greps of tasks 2 to 9 hold: `new MutationObserver` in `lifecycle.js` and the progress value observer, `'Escape'` in `use_dismiss.js`, `use_list_navigation.js` (a nested list with both orientations closes on it) and the chart tooltip, `data-ending-style` in the transition block and the toast, whose status Base UI's toast manager drives (task 5, its end waits on the block's `animationsFinished`), `computePosition` in the anchor positioning block and the vendored Floating UI, `ArrowDown` in the list navigation and composite blocks and in scripts Base UI has no block for (command, calendar, input OTP, slider, resizable), `mouseover` only for the hover card's inline rect and the select's scroll arrows, `showModal` nowhere.
+
+A static check of every registry item, each `window.templ.<name>` a script uses against the files of the item and its dependencies, found three holes: `use_hover.js` needs `tabbable.js`, missing for tooltip and hover card since task 8b, and `use_click.js` was missing for dialog, drawer (both new here) and context menu (its submenu triggers, task 8b). The site loads the whole bundle, so only an install of a single component would have broken.
+
+State attributes Base UI renders that were still missing: `data-disabled` on a disabled `Button`, on the switch thumb and on the slider track and range. `compare.mjs family:switch` goes to 18 of 18.
+
+What `compare.mjs all` still shows is owned by plan 3, each in its decisions: the trigger's slot name of dropdown menu, drawer, collapsible and tooltip (a merged part renders what shadcn renders), the select's null item and listbox role, the `combobox-popup` trigger's role, and the slider thumb's input. Nothing is accepted as a difference, `plans/UPSTREAM.md` stays empty there. Also written into plan 3's decisions: `TooltipProvider` with its delay group and `data-instant`, and one shared menu script.
+
+The changelog entry `2026-09-parity-runtime.md` lists what users notice.
+
+Checks: a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 48), in chromium and webkit. `compare.mjs` 392 pass and 75 fail in both engines instead of 386 and 81, and every one of the 75 is a plan 3 decision: 65 trigger slot names, 4 on the select's null item, 3 on the slider thumb's input, 2 on the select's listbox role, 1 on the `combobox-popup` trigger's role. Against task 1's baseline of 308 and 159 that is 84 closed. `compare.mjs dismiss` 39, `compare.mjs hover` unchanged, `escape.mjs` 0 failures, `transition.mjs` and `position.mjs` unchanged apart from sampling jitter, `htmx.mjs` 110 of 110 in both engines. On the reference and here the tooltip and the hover card open on keyboard focus, close on Escape, reopen on a new focus and the tooltip closes on a press on its trigger, alike in both engines.
 
 ## Planner review

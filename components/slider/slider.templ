@@ -162,11 +162,13 @@ templ Slider(props ...Props) {
 			<div
 				data-slot="slider-track"
 				data-orientation={ string(p.Orientation) }
+				data-disabled?={ p.Disabled }
 				class="cn-slider-track relative grow overflow-hidden select-none"
 			>
 				<div
 					data-slot="slider-range"
 					data-orientation={ string(p.Orientation) }
+					data-disabled?={ p.Disabled }
 					class="cn-slider-range select-none data-horizontal:h-full data-vertical:w-full"
 					style={ indicatorStyle(fs, vertical) }
 				></div>

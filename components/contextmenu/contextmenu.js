@@ -21,7 +21,7 @@
   // The root positioner of the menu an element sits in, portaled submenus
   // included.
   function positionerOf(target) {
-    for (let node = target; node; node = node._templPortalOwner || node.parentNode) {
+    for (let node = target; node; node = window.templ.portal.treeParent(node)) {
       if (node.matches?.(POPUP) && isPositioner(node.parentElement)) return node.parentElement;
     }
     return null;
@@ -274,10 +274,6 @@
     const trigger = triggerFor(content);
     trigger?.toggleAttribute("data-popup-open", open);
     trigger?.toggleAttribute("data-pressed", open);
-  }
-
-  function closeAll() {
-  allContents().forEach((content) => requestOpenChange(content, false));
   }
 
   function requestOpenChange(content, nextOpen, x, y, touchOpen = false) {
@@ -694,9 +690,4 @@
       }
     }
   });
-
-  // Context menus close on scroll and resize (Base UI behavior: the anchor is
-  // a point, there is nothing to stay attached to).
-  window.addEventListener("scroll", closeAll, true);
-  window.addEventListener("resize", closeAll);
 })();

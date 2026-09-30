@@ -17,6 +17,12 @@
   let uid = 0;
   const t = () => window.templ.tabbable;
 
+  // The React tree pendant: the parent of a portal node is where it was
+  // declared, of every other node its DOM parent.
+  function treeParent(node) {
+    return node._templPortalOwner || node.parentNode;
+  }
+
   function containerFor(node) {
     return node._templPortalOwner?.closest("[data-base-ui-portal]") || document.body;
   }
@@ -111,5 +117,5 @@
   }
 
   window.templ = window.templ || {};
-  window.templ.portal = { render, remove, setFocusManagerState };
+  window.templ.portal = { render, remove, setFocusManagerState, treeParent };
 })();

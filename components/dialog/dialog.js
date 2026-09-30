@@ -360,15 +360,25 @@
     dialogs.delete(popup);
   }
 
+  // DialogTrigger's useClick with its default click event. Base UI's
+  // DialogTrigger identifier is shared with PopoverTrigger and DrawerTrigger;
+  // only triggers whose aria-controls names a dialog popup are ours.
+  window.templ.lifecycle.register("[data-base-ui-click-trigger][aria-controls]", {
+    init(trigger) {
+      if (!dialogFor(trigger)) return;
+      trigger._templDialogClick = window.templ.click.useClick(trigger, {
+        isOpen: () => isDialogOpen(dialogFor(trigger)),
+        onOpenChange: (nextOpen) => requestOpenChange(dialogFor(trigger), nextOpen, trigger),
+      });
+    },
+    destroy(trigger) {
+      trigger._templDialogClick?.();
+      trigger._templDialogClick = null;
+    },
+  });
+
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
-    // Base UI's DialogTrigger identifier, shared with PopoverTrigger; only
-    // triggers whose aria-controls names a dialog popup are ours.
-    const trigger = event.target.closest("[data-base-ui-click-trigger][aria-controls]");
-    if (trigger && dialogFor(trigger)) {
-      toggleDialog(dialogFor(trigger), trigger);
-      return;
-    }
     const closeButton = event.target.closest("[data-templ-dialog-close]");
     if (closeButton) {
       requestOpenChange(dialogFor(closeButton), false);
