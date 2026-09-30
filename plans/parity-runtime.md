@@ -150,7 +150,7 @@ Done when: toggle group items have one tab stop, accordion, radiogroup and tabs 
 
 ### 10. Drawer on a div viewport
 
-- [ ] Done
+- [x] Done
 
 `Drawer.Viewport` becomes a `div` with `data-slot="drawer-viewport"`, modality from the blocks (focus manager, mark others, scroll lock, dismiss), `showModal`, `show()` and the `<dialog>` resets gone. The dashboard01 range toggle is controlled like upstream's `timeRange` (carried over).
 
@@ -389,5 +389,17 @@ The plan named the accordion as a consumer, but Base UI 1.6's accordion has no a
 Structure that moves to upstream's: the active tab and the checked radio render `data-composite-item-active`. The toggle group gets Base UI's `disabled` prop: `data-disabled` on the group, and every toggle in it is disabled. The `toggle-group-disabled` example is upstream's again, a disabled group instead of disabled items in a multiple group.
 
 Checks: a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 47), in chromium and webkit. The DOM against rt8b differs by `data-composite-item-active`, the toggle group's disabled state and example, and the new code blocks. `compare.mjs` for accordion, tabs, radio group and toggle group all pass in both engines (toggle group 21 of 21, before 18), a Tab walk through `toggle-group-demo`, `tabs-demo` and `radio-group-demo` stops once per group like upstream. `compare.mjs` 384 pass and 83 fail in both engines instead of 381 and 86, `escape.mjs` 0 failures, `compare.mjs dismiss` 37, `compare.mjs hover` unchanged, `transition.mjs` and `position.mjs` unchanged, `htmx.mjs` 110 of 110 in both engines. The first webkit run of `transition.mjs` and `position.mjs` timed out loading pages of the reference app, whose Next dev server had been running for four days; restarted, both runs were clean.
+
+### Task 10
+
+The drawer renders shadcn's structure: the `drawer-portal` portal node, hidden while the drawer is unmounted like the dialog's, holds DialogPortal's `InternalBackdrop` for a modal drawer, the `drawer-overlay` and the `drawer-viewport` `div`, which holds the popup. Before, a `<dialog>` was portal node and viewport at once and held the overlay. The modality was already built from the blocks since task 7 (`show()`, never `showModal()`), so what goes is the element: `show()` and `close()`, the native `cancel` and `close` events (Escape comes from `useDismiss`), the `<dialog>` resets in the class string and `dialog.open` as the state. `drawer.js` keeps the root's open state, which flips when the change is requested, apart from being mounted, which lasts until the exit transition finished. A reopen during the exit works now, `dialog.open` still said open then.
+
+Structure and ARIA that move to upstream's: the viewport renders `role="presentation"`, the popup `role="dialog"`, the id the trigger's `aria-controls` names, and `aria-labelledby` and `aria-describedby` for its own title and description (`useDialogTitle`, `useDialogDescription`, found by their slots, a nested drawer's excluded). `data-templ-modal` is gone, Base UI renders the modal state as `data-modal` on the viewport, which the script reads.
+
+The dashboard01 range toggle and the mobile select are controlled by one `timeRange` like upstream's `chart-area-interactive.tsx`: a press on the pressed item keeps it (`value[0] ?? "90d"`, so a second press on "Last 30 days" goes to "Last 3 months" as upstream), a select pick sets it, and the script commits both controls and the chart panels. The re-press workaround is gone.
+
+Harness: the behavior suite and `escape.mjs` read the drawer's open state through `window.templ.drawer.isOpen` and find the viewport through the popup's id.
+
+Checks: a11y 30 of 30, behavior 30 of 30, `go test ./...` green (the dashboard01 test looks for the controlled range), in chromium and webkit. `grep "showModal\|<dialog"` finds nothing outside the plans. The DOM against rt9 differs on the drawer pages by the new structure and on the dashboard by the controlled range. `compare.mjs family:drawer` 14 pass instead of 12, the rest is the trigger's and the close's slot name, `compare.mjs` 386 pass and 81 fail in both engines instead of 384 and 83, `compare.mjs dismiss` 39 instead of 37, `escape.mjs` 0 failures, `compare.mjs hover` unchanged, `transition.mjs` and `position.mjs` unchanged apart from sampling jitter, `htmx.mjs` 110 of 110 in both engines. On `/view/dashboard-01` a press on the pressed range keeps it pressed.
 
 ## Planner review

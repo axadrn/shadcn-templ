@@ -42,7 +42,9 @@ func TestInteractiveBaseBlockPendantsAreRendered(t *testing.T) {
 	for _, want := range []string{
 		"data-dashboard01-chart-range-card",
 		"window.matchMedia(\"(max-width: 767px)\")",
-		"setRange(card, \"7d\")",
+		"setTimeRange(card, \"7d\")",
+		// The range toggle is controlled by timeRange like the TSX.
+		"data-templ-value=\"[&#34;90d&#34;]\"",
 	} {
 		if !strings.Contains(html, want) {
 			t.Errorf("rendered chart is missing %q", want)

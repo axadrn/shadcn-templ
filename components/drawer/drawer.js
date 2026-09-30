@@ -48,41 +48,60 @@
 
   // ----- the drawer parts ----------------------------------------------------
   //
-  // The <dialog> is the Drawer.Viewport (fullscreen, hosts the listeners),
-  // the popup div is Drawer.Popup, the overlay div is DrawerOverlay (only
-  // rendered for modal, non-nested drawers). Lifecycle attributes and swipe
-  // vars land on popup and overlay, exactly where Base UI puts them.
+  // The viewport div is the Drawer.Viewport (fullscreen, hosts the
+  // listeners), the popup div is Drawer.Popup, the overlay div is
+  // DrawerOverlay beside the viewport in the portal node (only rendered for
+  // modal, non-nested drawers). Lifecycle attributes and swipe vars land on
+  // popup and overlay, exactly where Base UI puts them.
 
-  // The viewport is the <dialog> with shadcn's drawer-viewport slot.
-  const VIEWPORT = 'dialog[data-slot="drawer-viewport"]';
+  // The viewport is Drawer.Viewport with shadcn's drawer-viewport slot. Its
+  // parent is DrawerPortal's portal node, which also holds the overlay and
+  // is hidden while the drawer is unmounted, like the dialog's.
+  const VIEWPORT = '[data-slot="drawer-viewport"]';
 
-  function popupOf(dialog) {
-    return dialog.querySelector(':scope > [data-slot="drawer-popup"]');
+  const POPUP = '[data-slot="drawer-popup"]';
+
+  function popupOf(viewport) {
+    return viewport.querySelector(":scope > " + POPUP);
   }
 
-  function overlayOf(dialog) {
-    return dialog.querySelector(':scope > [data-slot="drawer-overlay"]');
+  function portalNodeOf(viewport) {
+    return viewport.parentElement;
+  }
+
+  function overlayOf(viewport) {
+    return portalNodeOf(viewport).querySelector(':scope > [data-slot="drawer-overlay"]');
+  }
+
+  // Mounted from the open until the exit transition finished.
+  function isMounted(viewport) {
+    return !portalNodeOf(viewport).hidden;
+  }
+
+  // The root's open state, which flips when the change is requested.
+  function isOpen(viewport) {
+    return !!viewport._templOpen;
   }
 
   // The popup and the overlay render the transition status, the viewport
   // the open state.
-  function partsOf(dialog) {
-    return { parts: [popupOf(dialog), overlayOf(dialog)], stateParts: [dialog] };
+  function partsOf(viewport) {
+    return { parts: [popupOf(viewport), overlayOf(viewport)], stateParts: [viewport] };
   }
 
-  function setPartsAttr(dialog, name, on) {
-    const popup = popupOf(dialog);
-    const overlay = overlayOf(dialog);
+  function setPartsAttr(viewport, name, on) {
+    const popup = popupOf(viewport);
+    const overlay = overlayOf(viewport);
     if (popup) popup.toggleAttribute(name, on);
     if (overlay) overlay.toggleAttribute(name, on);
   }
 
-  function directionOf(dialog) {
-    return popupOf(dialog)?.getAttribute("data-swipe-direction") || "down";
+  function directionOf(viewport) {
+    return popupOf(viewport)?.getAttribute("data-swipe-direction") || "down";
   }
 
-  function axisIsY(dialog) {
-    const d = directionOf(dialog);
+  function axisIsY(viewport) {
+    const d = directionOf(viewport);
     return d === "down" || d === "up";
   }
 
@@ -112,13 +131,14 @@
     return { x, y, scale };
   }
 
-  // Resolves a drawer viewport <dialog> from an id, the element
-  // itself, or anything inside it.
+  // Resolves a drawer viewport from the popup's id, the element itself, or
+  // anything inside it. The id is the popup's, like Base UI's, which the
+  // trigger's aria-controls names.
   function getDrawer(target) {
     if (!target) return null;
     if (typeof target === "string") {
       const el = document.getElementById(target);
-      return el && el.matches(VIEWPORT) ? ensureDrawer(el) : null;
+      return el && el.matches(POPUP) ? ensureDrawer(el.parentElement) : null;
     }
     if (target.matches?.(VIEWPORT)) return ensureDrawer(target);
     return ensureDrawer(target.closest?.(VIEWPORT) || null);
@@ -133,15 +153,46 @@
     return getDrawer(element);
   }
 
-  function triggersFor(dialog) {
-    if (!dialog.id) return [];
+  function idOf(viewport) {
+    return popupOf(viewport)?.id || "";
+  }
+
+  function isModal(viewport) {
+    return viewport.getAttribute("data-modal") === "true";
+  }
+
+  function triggersFor(viewport) {
+    if (!idOf(viewport)) return [];
     return document.querySelectorAll(
-      '[data-base-ui-click-trigger][aria-controls="' + dialog.id + '"]',
+      '[data-base-ui-click-trigger][aria-controls="' + idOf(viewport) + '"]',
     );
   }
 
-  function updateState(dialog, isOpen) {
-    triggersFor(dialog).forEach((trigger) => {
+  // useDialogTitle and useDialogDescription: the popup is labelled and
+  // described by its own title and description, not a nested drawer's.
+  function wireAria(viewport) {
+    const popup = popupOf(viewport);
+    if (!popup) return;
+    const own = (slot) => [...popup.querySelectorAll('[data-slot="' + slot + '"]')]
+      .find((el) => el.closest(POPUP) === popup);
+    const title = own("drawer-title");
+    if (title) {
+      if (!title.id) title.id = popup.id + "-title";
+      popup.setAttribute("aria-labelledby", title.id);
+    } else {
+      popup.removeAttribute("aria-labelledby");
+    }
+    const description = own("drawer-description");
+    if (description) {
+      if (!description.id) description.id = popup.id + "-description";
+      popup.setAttribute("aria-describedby", description.id);
+    } else {
+      popup.removeAttribute("aria-describedby");
+    }
+  }
+
+  function updateState(viewport, isOpen) {
+    triggersFor(viewport).forEach((trigger) => {
       trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
       trigger.toggleAttribute("data-popup-open", isOpen);
     });
@@ -154,16 +205,16 @@
   // Everything below is recomputed from the DOM on every state change, so
   // swapped-in or swapped-out drawers never leave stale stacking state.
 
-  function parentOf(dialog) {
-    const id = dialog.getAttribute("data-templ-drawer-parent");
+  function parentOf(viewport) {
+    const id = viewport.getAttribute("data-templ-drawer-parent");
     if (!id) return null;
     const el = document.getElementById(id);
-    return el && el.matches(VIEWPORT) ? el : null;
+    return el && el.matches(POPUP) ? el.parentElement : null;
   }
 
-  function ancestorsOf(dialog) {
+  function ancestorsOf(viewport) {
     const chain = [];
-    let current = parentOf(dialog);
+    let current = parentOf(viewport);
     while (current && !chain.includes(current)) {
       chain.push(current);
       current = parentOf(current);
@@ -171,23 +222,23 @@
     return chain;
   }
 
-  function hasOpenNested(dialog) {
-    return popupOf(dialog)?.hasAttribute("data-nested-drawer-open") || false;
+  function hasOpenNested(viewport) {
+    return popupOf(viewport)?.hasAttribute("data-nested-drawer-open") || false;
   }
 
   // Mirrors the child's swipe progress into every ancestor popup
   // (DrawerRoot's onNestedSwipeProgressChange chain: the var feeds
   // --stack-progress, easing the parent back to the front while the child is
   // dragged away).
-  function notifyAncestors(dialog, progress) {
-    ancestorsOf(dialog).forEach((ancestor) => {
+  function notifyAncestors(viewport, progress) {
+    ancestorsOf(viewport).forEach((ancestor) => {
       const popup = popupOf(ancestor);
       if (popup) popup.style.setProperty("--drawer-swipe-progress", String(progress));
     });
   }
 
-  function setAncestorsSwiping(dialog, on) {
-    ancestorsOf(dialog).forEach((ancestor) => {
+  function setAncestorsSwiping(viewport, on) {
+    ancestorsOf(viewport).forEach((ancestor) => {
       const popup = popupOf(ancestor);
       if (popup) popup.toggleAttribute("data-nested-drawer-swiping", on);
     });
@@ -210,7 +261,7 @@
       const popup = popupOf(d);
       if (!popup) continue;
       const closing = window.templ.transition.isEnding(popup);
-      if (!d.open && !closing) continue;
+      if (!isMounted(d)) continue;
       const chain = ancestorsOf(d);
       // A closing drawer no longer counts as open (Base UI flips `open`
       // before the exit transition) but still pins the parents' heights
@@ -219,7 +270,7 @@
         const ai = info.get(ancestor);
         if (!ai) continue;
         ai.present = true;
-        if (d.open && !closing) {
+        if (isOpen(d) && !closing) {
           ai.openDesc += 1;
           // The frontmost drawer of the stack is the deepest open one.
           const depth = chain.length; // distance of d below the root, relative depth works per ancestor
@@ -233,7 +284,7 @@
 
     for (const d of dialogs) {
       const popup = popupOf(d);
-      if (!popup || !d.open) continue;
+      if (!popup || !isMounted(d)) continue;
       const i = info.get(d);
       const closing = window.templ.transition.isEnding(popup);
       if (i.openDesc === 0 && !closing) {
@@ -268,9 +319,9 @@
   // pendant of the snapPoints prop) and kept on the element itself so
   // swapped-out drawers take their state with them.
 
-  function snapStateOf(dialog) {
-    if (dialog._templSnap !== undefined) return dialog._templSnap;
-    const raw = dialog.getAttribute("data-templ-snap-points");
+  function snapStateOf(viewport) {
+    if (viewport._templSnap !== undefined) return viewport._templSnap;
+    const raw = viewport.getAttribute("data-templ-snap-points");
     let points = null;
     if (raw) {
       try {
@@ -280,17 +331,17 @@
       }
     }
     if (!Array.isArray(points) || points.length === 0) {
-      dialog._templSnap = null;
+      viewport._templSnap = null;
       return null;
     }
-    dialog._templSnap = {
+    viewport._templSnap = {
       points,
       resolved: [],
       active: points[0],
       popupHeight: 0,
-      sequential: dialog.hasAttribute("data-templ-snap-to-sequential-points"),
+      sequential: viewport.hasAttribute("data-templ-snap-to-sequential-points"),
     };
-    return dialog._templSnap;
+    return viewport._templSnap;
   }
 
   // Resolves the vertical swipe movement for a snap point, damping the drag
@@ -340,11 +391,11 @@
   // Resolves the configured snap points against the current viewport and
   // popup size (useDrawerSnapPoints resolvedSnapPoints, including the
   // last-wins dedupe of near-equal heights).
-  function resolveSnapPoints(dialog) {
-    const snap = snapStateOf(dialog);
+  function resolveSnapPoints(viewport) {
+    const snap = snapStateOf(viewport);
     if (!snap) return;
-    const popup = popupOf(dialog);
-    const viewportHeight = dialog.clientHeight || document.documentElement.clientHeight;
+    const popup = popupOf(viewport);
+    const viewportHeight = viewport.clientHeight || document.documentElement.clientHeight;
     const rootFontSize =
       parseFloat(window.getComputedStyle(document.documentElement).fontSize) || 16;
     const popupHeight = popup ? popup.offsetHeight : 0;
@@ -376,12 +427,12 @@
   // The offset of the active snap point; falls back to the closest resolved
   // point when the active value has no exact match (useDrawerSnapPoints
   // resolvedActiveSnapPoint).
-  function activeSnapOffset(dialog, snap) {
+  function activeSnapOffset(viewport, snap) {
     if (snap.active === null || snap.active === undefined) return null;
     const exact = snap.resolved.find((point) => Object.is(point.value, snap.active));
     if (exact) return exact.offset;
     if (!snap.resolved.length) return null;
-    const viewportHeight = dialog.clientHeight || document.documentElement.clientHeight;
+    const viewportHeight = viewport.clientHeight || document.documentElement.clientHeight;
     const rootFontSize =
       parseFloat(window.getComputedStyle(document.documentElement).fontSize) || 16;
     const resolvedHeight = resolveSnapValue(snap.active, viewportHeight, rootFontSize);
@@ -396,8 +447,8 @@
 
   // The offset range between the two lowest snap points, used for the
   // overlay progress with snap points (DrawerViewport snapPointRange).
-  function snapRangeOf(dialog, snap) {
-    if (!snap || snap.points.length < 2 || snap.resolved.length < 2 || !axisIsY(dialog)) {
+  function snapRangeOf(viewport, snap) {
+    if (!snap || snap.points.length < 2 || snap.resolved.length < 2 || !axisIsY(viewport)) {
       return null;
     }
     const offsets = snap.resolved.map((point) => point.offset).sort((a, b) => a - b);
@@ -408,19 +459,19 @@
   // (negative for `up`, DrawerPopup snapPointOffsetValue), data-expanded at
   // the full snap point (activeSnapPoint === 1) and the steady-state overlay
   // progress between snap points.
-  function applySnapState(dialog) {
-    const snap = snapStateOf(dialog);
-    const popup = popupOf(dialog);
-    if (!snap || !popup || !axisIsY(dialog)) return;
-    const offset = activeSnapOffset(dialog, snap);
-    const direction = directionOf(dialog);
+  function applySnapState(viewport) {
+    const snap = snapStateOf(viewport);
+    const popup = popupOf(viewport);
+    if (!snap || !popup || !axisIsY(viewport)) return;
+    const offset = activeSnapOffset(viewport, snap);
+    const direction = directionOf(viewport);
     popup.style.setProperty(
       "--drawer-snap-point-offset",
       offset === null ? "0px" : (direction === "up" ? -offset : offset) + "px",
     );
     popup.toggleAttribute("data-expanded", snap.active === 1);
-    const overlay = overlayOf(dialog);
-    const range = snapRangeOf(dialog, snap);
+    const overlay = overlayOf(viewport);
+    const range = snapRangeOf(viewport, snap);
     if (overlay && range && range.range > 0 && offset !== null) {
       overlay.style.setProperty(
         "--drawer-swipe-progress",
@@ -431,27 +482,27 @@
 
   // Re-resolve snap offsets when the viewport resizes (the reference
   // observes the viewport and popup with a ResizeObserver).
-  function watchSnapResize(dialog) {
-    if (dialog._templSnapRO || typeof ResizeObserver !== "function") return;
-    if (!snapStateOf(dialog)) return;
-    dialog._templSnapRO = new ResizeObserver(() => {
-      if (!dialog.open || popupOf(dialog)?.hasAttribute("data-swiping")) return;
-      resolveSnapPoints(dialog);
-      applySnapState(dialog);
+  function watchSnapResize(viewport) {
+    if (viewport._templSnapRO || typeof ResizeObserver !== "function") return;
+    if (!snapStateOf(viewport)) return;
+    viewport._templSnapRO = new ResizeObserver(() => {
+      if (!isMounted(viewport) || popupOf(viewport)?.hasAttribute("data-swiping")) return;
+      resolveSnapPoints(viewport);
+      applySnapState(viewport);
     });
-    dialog._templSnapRO.observe(dialog);
+    viewport._templSnapRO.observe(viewport);
   }
 
-  function unwatchSnapResize(dialog) {
-    if (dialog._templSnapRO) {
-      dialog._templSnapRO.disconnect();
-      delete dialog._templSnapRO;
+  function unwatchSnapResize(viewport) {
+    if (viewport._templSnapRO) {
+      viewport._templSnapRO.disconnect();
+      delete viewport._templSnapRO;
     }
   }
 
-  function resetSwipeVars(dialog) {
-    const popup = popupOf(dialog);
-    const overlay = overlayOf(dialog);
+  function resetSwipeVars(viewport) {
+    const popup = popupOf(viewport);
+    const overlay = overlayOf(viewport);
     if (popup) {
       popup.style.setProperty("--drawer-swipe-movement-x", "0px");
       popup.style.setProperty("--drawer-swipe-movement-y", "0px");
@@ -464,11 +515,11 @@
     }
   }
 
-  function cleanupClosed(dialog) {
-    stopDismiss(dialog);
-    window.templ.transition.reset(partsOf(dialog), false);
-    setPartsAttr(dialog, "data-swiping", false);
-    const popup = popupOf(dialog);
+  function cleanupClosed(viewport) {
+    stopDismiss(viewport);
+    window.templ.transition.reset(partsOf(viewport), false);
+    setPartsAttr(viewport, "data-swiping", false);
+    const popup = popupOf(viewport);
     if (popup) {
       popup.style.removeProperty("transform");
       popup.style.removeProperty("transition");
@@ -480,19 +531,20 @@
       popup.removeAttribute("data-nested-drawer-swiping");
       popup.removeAttribute("data-expanded");
     }
-    resetSwipeVars(dialog);
+    resetSwipeVars(viewport);
     // Closing resets the snap point to the default (DrawerRoot
     // handleOpenChange), ready for the next open.
-    const snap = snapStateOf(dialog);
+    const snap = snapStateOf(viewport);
     if (snap) snap.active = snap.points[0];
-    unwatchSnapResize(dialog);
-    updateState(dialog, false);
-    dialog._templReleaseScroll?.();
-    dialog._templReleaseScroll = null;
+    unwatchSnapResize(viewport);
+    updateState(viewport, false);
+    viewport._templReleaseScroll?.();
+    viewport._templReleaseScroll = null;
     // Unmounting the focus manager returns focus.
-    dialog._templFocus?.unmount();
-    dialog._templFocus = null;
-    dialog._templInternalBackdrop?.remove();
+    viewport._templFocus?.unmount();
+    viewport._templFocus = null;
+    viewport._templInternalBackdrop?.remove();
+    portalNodeOf(viewport).hidden = true;
     syncStack();
   }
 
@@ -517,116 +569,114 @@
   }
 
   // DrawerPopup's FloatingFocusManager: the popup takes the initial focus.
-  function startFocusManager(dialog) {
-    const popup = popupOf(dialog);
-    if (dialog._templFocus) {
-      dialog._templFocus.open();
+  function startFocusManager(viewport) {
+    const popup = popupOf(viewport);
+    if (viewport._templFocus) {
+      viewport._templFocus.open();
       return;
     }
-    const triggers = triggersFor(dialog);
-    dialog._templFocus = window.templ.focusManager.useFloatingFocusManager({
+    const triggers = triggersFor(viewport);
+    viewport._templFocus = window.templ.focusManager.useFloatingFocusManager({
       floating: popup,
       reference: triggers[0] || null,
       triggers,
-      modal: dialog.getAttribute("data-templ-modal") === "true",
+      modal: isModal(viewport),
       openInteractionType: lastInteractionType || null,
       initialFocus: popup,
       restoreFocus: "popup",
-      closeOnFocusOut: !dialog.hasAttribute("data-templ-disable-pointer-dismissal"),
-      onOpenChange: (open) => requestOpenChange(dialog, open),
+      closeOnFocusOut: !viewport.hasAttribute("data-templ-disable-pointer-dismissal"),
+      onOpenChange: (open) => requestOpenChange(viewport, open),
     });
   }
 
   // useDismiss with useDialogRoot's options, DrawerRoot builds on them.
-  function startDismiss(dialog) {
-    const popup = popupOf(dialog);
-    if (!popup || dialog._templDismiss) return;
-    const isModal = () => dialog.getAttribute("data-templ-modal") === "true";
-    dialog._templDismiss = window.templ.dismiss.useDismiss({
+  function startDismiss(viewport) {
+    const popup = popupOf(viewport);
+    if (!popup || viewport._templDismiss) return;
+    viewport._templDismiss = window.templ.dismiss.useDismiss({
       floating: popup,
-      reference: [...document.querySelectorAll('[aria-controls="' + dialog.id + '"]')],
+      reference: [...document.querySelectorAll('[aria-controls="' + idOf(viewport) + '"]')],
       // A nested open drawer blocks its parent.
-      escapeKey: () => !hasOpenNested(dialog),
+      escapeKey: () => !hasOpenNested(viewport),
       // With a backdrop the dismissal waits for the click.
-      outsidePressEvent: () => (dialog._templInternalBackdrop?.isConnected || overlayOf(dialog)) ? "intentional" : { mouse: "intentional", touch: "sloppy" },
+      outsidePressEvent: () => (viewport._templInternalBackdrop?.isConnected || overlayOf(viewport)) ? "intentional" : { mouse: "intentional", touch: "sloppy" },
       outsidePress(event) {
         if ("button" in event && event.button !== 0) return false;
         if ("touches" in event && event.touches.length !== 1) return false;
-        if (hasOpenNested(dialog) || dialog.hasAttribute("data-templ-disable-pointer-dismissal")) return false;
-        const overlay = overlayOf(dialog);
-        const internalBackdrop = dialog._templInternalBackdrop?.isConnected ? dialog._templInternalBackdrop : null;
-        if (!isModal() || (!overlay && !internalBackdrop)) return true;
+        if (hasOpenNested(viewport) || viewport.hasAttribute("data-templ-disable-pointer-dismissal")) return false;
+        const overlay = overlayOf(viewport);
+        const internalBackdrop = viewport._templInternalBackdrop?.isConnected ? viewport._templInternalBackdrop : null;
+        if (!isModal(viewport) || (!overlay && !internalBackdrop)) return true;
         const target = event.target;
         return target === overlay || target === internalBackdrop ||
           (target.contains(popup) && !target.hasAttribute("data-base-ui-portal"));
       },
-      onOpenChange: (open) => requestOpenChange(dialog, open),
+      onOpenChange: (open) => requestOpenChange(viewport, open),
     });
   }
 
-  function stopDismiss(dialog) {
-    dialog._templDismiss?.();
-    dialog._templDismiss = null;
+  function stopDismiss(viewport) {
+    viewport._templDismiss?.();
+    viewport._templDismiss = null;
   }
 
 
   function openDrawer(target) {
-    const dialog = getDrawer(target);
-    if (!dialog) return;
-    const popup = popupOf(dialog);
+    const viewport = getDrawer(target);
+    if (!viewport) return;
+    const popup = popupOf(viewport);
     if (!popup) return;
 
-    if (!dialog.open) {
-      resetSwipeVars(dialog);
-      try {
-        // Modal drawers open non-modally too: shadcn/Base UI never use the
-        // native top layer (it would stack above the z-index portaled
-        // popups). Modality - scroll lock, inert siblings, focus - is
-        // built by hand, like Base UI does.
-        window.templ.portal.render(dialog);
-        dialog.show();
-        if (dialog.getAttribute("data-templ-modal") === "true") {
-          dialog._templReleaseScroll = window.templ.scrollLock.acquire(dialog);
-          dialog._templInternalBackdrop ??= createInternalBackdrop();
-          dialog._templInternalBackdrop.inert = false;
-          dialog.prepend(dialog._templInternalBackdrop);
-        }
-      } catch {
-        return;
+    viewport._templOpen = true;
+    if (!isMounted(viewport)) {
+      resetSwipeVars(viewport);
+      // DrawerPortal mounts: the portal node shows, and a modal drawer gets
+      // the scroll lock and DialogPortal's InternalBackdrop. Focus and the
+      // hidden outside come from the focus manager, like Base UI's.
+      const portalNode = portalNodeOf(viewport);
+      wireAria(viewport);
+      window.templ.portal.render(portalNode);
+      portalNode.hidden = false;
+      if (isModal(viewport)) {
+        viewport._templReleaseScroll = window.templ.scrollLock.acquire(viewport);
+        viewport._templInternalBackdrop ??= createInternalBackdrop();
+        viewport._templInternalBackdrop.inert = false;
+        portalNode.prepend(viewport._templInternalBackdrop);
       }
       // With layout available, resolve the snap points and seed the default
       // snap offset so the enter transition lands on the first snap point.
-      if (snapStateOf(dialog) && axisIsY(dialog)) {
-        resolveSnapPoints(dialog);
-        applySnapState(dialog);
-        watchSnapResize(dialog);
+      if (snapStateOf(viewport) && axisIsY(viewport)) {
+        resolveSnapPoints(viewport);
+        applySnapState(viewport);
+        watchSnapResize(viewport);
       }
     }
 
     // Base UI mounts the popup with its starting style (the off-screen
     // --closed-transform), so the panel transitions in from there
     // (450ms cubic-bezier(0.22,1,0.36,1)). Also cancels an exit in flight.
-    window.templ.transition.open(partsOf(dialog));
-    updateState(dialog, true);
+    window.templ.transition.open(partsOf(viewport));
+    updateState(viewport, true);
     // Also on a reopen during the exit, which stopped the dismissal.
-    startDismiss(dialog);
-    startFocusManager(dialog);
+    startDismiss(viewport);
+    startFocusManager(viewport);
     syncStack();
   }
 
   // strength is Base UI's --drawer-swipe-strength scalar: the ending
   // transition runs for strength*400ms. 1 for non-swipe closes.
   function closeDrawer(target, strength) {
-    const dialog = getDrawer(target);
-    if (!dialog) return;
-    const popup = popupOf(dialog);
+    const viewport = getDrawer(target);
+    if (!viewport) return;
+    const popup = popupOf(viewport);
 
-    if (!dialog.open || !popup) {
-      updateState(dialog, false);
+    viewport._templOpen = false;
+    if (!isMounted(viewport) || !popup) {
+      updateState(viewport, false);
       return;
     }
     if (window.templ.transition.isEnding(popup)) return;
-    stopDismiss(dialog);
+    stopDismiss(viewport);
 
     // Pin the measured height for the exit (DrawerPopup sets --drawer-height
     // while transitionStatus is 'ending'), so the panel cannot collapse
@@ -637,41 +687,39 @@
     const value =
       typeof strength === "number" && isFinite(strength) && strength > 0 ? strength : 1;
     popup.style.setProperty("--drawer-swipe-strength", String(value));
-    const overlay = overlayOf(dialog);
+    const overlay = overlayOf(viewport);
     if (overlay) overlay.style.setProperty("--drawer-swipe-strength", String(value));
     // Unmounts once the exit transition finished.
-    window.templ.transition.close(partsOf(dialog), popup, () => {
-      if (dialog.open) dialog.close(); // the close handler runs cleanupClosed
-      else cleanupClosed(dialog);
-    });
-    updateState(dialog, false);
-    dialog._templFocus?.close();
-    if (dialog._templInternalBackdrop) dialog._templInternalBackdrop.inert = true;
+    window.templ.transition.close(partsOf(viewport), popup, () => cleanupClosed(viewport));
+    updateState(viewport, false);
+    viewport._templFocus?.close();
+    if (viewport._templInternalBackdrop) viewport._templInternalBackdrop.inert = true;
     // Like the dialog, the scroll lock goes when the close starts.
-    dialog._templReleaseScroll?.();
-    dialog._templReleaseScroll = null;
+    viewport._templReleaseScroll?.();
+    viewport._templReleaseScroll = null;
     // The stack treats a closing drawer as closed (Base UI flips `open`
     // before the exit transition), so the parent starts scaling forward now.
     syncStack();
   }
 
   function isDrawerOpen(target) {
-    return getDrawer(target)?.open || false;
+    const viewport = getDrawer(target);
+    return viewport ? isOpen(viewport) : false;
   }
 
   function requestOpenChange(target, nextOpen, strength) {
-    const dialog = getDrawer(target);
-    if (!dialog || dialog.open === nextOpen) return false;
-    const accepted = dialog.dispatchEvent(
+    const viewport = getDrawer(target);
+    if (!viewport || isOpen(viewport) === nextOpen) return false;
+    const accepted = viewport.dispatchEvent(
       new CustomEvent("drawer-open-change", {
         bubbles: true,
         cancelable: true,
         detail: { open: nextOpen },
       }),
     );
-    if (!accepted || dialog.hasAttribute("data-templ-open")) return false;
-    if (nextOpen) openDrawer(dialog);
-    else closeDrawer(dialog, strength);
+    if (!accepted || viewport.hasAttribute("data-templ-open")) return false;
+    if (nextOpen) openDrawer(viewport);
+    else closeDrawer(viewport, strength);
     return true;
   }
 
@@ -682,27 +730,27 @@
   // Sets the active snap point (the pendant of the controlled snapPoint
   // prop) and animates the popup to it.
   function setSnapPoint(target, value) {
-    const dialog = getDrawer(target);
-    if (!dialog) return;
-    const snap = snapStateOf(dialog);
+    const viewport = getDrawer(target);
+    if (!viewport) return;
+    const snap = snapStateOf(viewport);
     if (!snap) return;
     snap.active = value;
-    if (dialog.open) {
-      resolveSnapPoints(dialog);
-      applySnapState(dialog);
+    if (isMounted(viewport)) {
+      resolveSnapPoints(viewport);
+      applySnapState(viewport);
     }
   }
 
   function getSnapPoint(target) {
-    const dialog = getDrawer(target);
-    const snap = dialog ? snapStateOf(dialog) : null;
+    const viewport = getDrawer(target);
+    const snap = viewport ? snapStateOf(viewport) : null;
     return snap ? snap.active : null;
   }
 
   // ----- swipe to dismiss ----------------------------------------------------
   //
   // Port of the Base UI drawer gesture (useSwipeDismiss + DrawerViewport):
-  // - the <dialog> viewport hosts the listeners, exactly like DrawerViewport
+  // - the viewport hosts the listeners, exactly like DrawerViewport
   // - mouse swipes start on the panel chrome (popup minus [data-slot=
   //   drawer-content] minus interactive elements), touch swipes anywhere in
   //   the popup: the reference's isDrawerContentTarget /
@@ -750,11 +798,11 @@
   // shorter the remaining distance, the shorter the exit transition. With
   // snap points, the active snap offset already shifted the popup along the
   // dismiss direction and counts toward the travelled distance.
-  function resolveSwipeStrength(dialog, size, disp, releaseVelocity, overallVelocity) {
+  function resolveSwipeStrength(viewport, size, disp, releaseVelocity, overallVelocity) {
     let base = 0;
-    const snap = snapStateOf(dialog);
-    if (snap && axisIsY(dialog) && snap.resolved.length > 0) {
-      const offset = activeSnapOffset(dialog, snap);
+    const snap = snapStateOf(viewport);
+    if (snap && axisIsY(viewport) && snap.resolved.length > 0) {
+      const offset = activeSnapOffset(viewport, snap);
       if (offset !== null) base = offset;
     }
     const remaining = Math.max(0, size - (base + disp));
@@ -773,7 +821,7 @@
     return MIN_SWIPE_RELEASE_SCALAR + normalized * (MAX_SWIPE_RELEASE_SCALAR - MIN_SWIPE_RELEASE_SCALAR);
   }
 
-  function attachSwipe(dialog) {
+  function attachSwipe(viewport) {
     const state = {
       swiping: false,
       pointerId: null,
@@ -792,7 +840,7 @@
     };
 
     function startSwipe(x, y, time) {
-      const popup = popupOf(dialog);
+      const popup = popupOf(viewport);
       if (!popup) return;
       state.swiping = true;
       state.startX = x;
@@ -801,12 +849,12 @@
       state.initial = getTransform(popup);
       state.offsetX = state.initial.x;
       state.offsetY = state.initial.y;
-      state.size = axisIsY(dialog) ? popup.offsetHeight : popup.offsetWidth;
+      state.size = axisIsY(viewport) ? popup.offsetHeight : popup.offsetWidth;
       state.lastSample = { x: state.initial.x, y: state.initial.y, time };
       state.lastVelX = 0;
       state.lastVelY = 0;
       state.nestedActive = false;
-      setPartsAttr(dialog, "data-swiping", true);
+      setPartsAttr(viewport, "data-swiping", true);
       // Freeze the element under the pointer (useSwipeDismiss syncDragStyles).
       popup.style.transition = "none";
       // A mouse drag with an expanded selection inside the popup would drag
@@ -817,13 +865,13 @@
 
     function moveSwipe(x, y, time) {
       if (!state.swiping) return;
-      const popup = popupOf(dialog);
+      const popup = popupOf(viewport);
       if (!popup) return;
-      const direction = directionOf(dialog);
-      const vertical = axisIsY(dialog);
+      const direction = directionOf(viewport);
+      const vertical = axisIsY(viewport);
       const rawDX = x - state.startX;
       const rawDY = y - state.startY;
-      const snap = snapStateOf(dialog);
+      const snap = snapStateOf(viewport);
       const snapActive = Boolean(snap && vertical && snap.resolved.length > 0);
 
       // Directional damping (useSwipeDismiss applyDirectionalDamping):
@@ -844,7 +892,7 @@
       state.offsetY = state.initial.y + dy;
       const deltaX = state.offsetX - state.initial.x;
       const deltaY = state.offsetY - state.initial.y;
-      const baseOffset = snapActive ? (activeSnapOffset(dialog, snap) ?? 0) : 0;
+      const baseOffset = snapActive ? (activeSnapOffset(viewport, snap) ?? 0) : 0;
 
       if (snapActive && direction === "down") {
         // Snap-point drag (DrawerViewport onProgress with snap points): the
@@ -875,7 +923,7 @@
       // (DrawerViewport offsetToProgress); otherwise it is displacement over
       // the panel size.
       let progress = 0;
-      const range = snapActive ? snapRangeOf(dialog, snap) : null;
+      const range = snapActive ? snapRangeOf(viewport, snap) : null;
       if (range && range.range > 0 && snap.popupHeight > 0) {
         progress = clamp(
           (clamp(baseOffset + deltaY, 0, snap.popupHeight) - range.minOffset) / range.range,
@@ -887,20 +935,20 @@
         const scale = state.initial.scale || 1;
         progress = state.size > 0 && disp > 0 ? clamp(disp / (state.size * scale), 0, 1) : 0;
       }
-      const overlay = overlayOf(dialog);
+      const overlay = overlayOf(viewport);
       if (overlay) overlay.style.setProperty("--drawer-swipe-progress", String(progress));
 
       // Nested drawer: mirror the progress into the ancestor popups and flag
       // them as nested-swiping once the gesture passes the 10px threshold
       // (DrawerViewport updateNestedSwipeActive).
-      if (dialog.getAttribute("data-templ-drawer-parent")) {
-        notifyAncestors(dialog, progress);
+      if (viewport.getAttribute("data-templ-drawer-parent")) {
+        notifyAncestors(viewport, progress);
         if (
           !state.nestedActive &&
           Math.abs(displacement(direction, deltaX, deltaY)) >= MIN_SWIPE_THRESHOLD
         ) {
           state.nestedActive = true;
-          setAncestorsSwiping(dialog, true);
+          setAncestorsSwiping(viewport, true);
         }
       }
 
@@ -916,23 +964,23 @@
     }
 
     function finishNestedSwipe(progress) {
-      if (dialog.getAttribute("data-templ-drawer-parent")) {
-        notifyAncestors(dialog, progress);
+      if (viewport.getAttribute("data-templ-drawer-parent")) {
+        notifyAncestors(viewport, progress);
       }
       state.nestedActive = false;
-      setAncestorsSwiping(dialog, false);
+      setAncestorsSwiping(viewport, false);
     }
 
     function endSwipe(time) {
       if (!state.swiping) return;
       state.swiping = false;
       state.pointerId = null;
-      setPartsAttr(dialog, "data-swiping", false);
-      const popup = popupOf(dialog);
+      setPartsAttr(viewport, "data-swiping", false);
+      const popup = popupOf(viewport);
       if (!popup) return;
 
-      const direction = directionOf(dialog);
-      const vertical = axisIsY(dialog);
+      const direction = directionOf(viewport);
+      const vertical = axisIsY(viewport);
       const deltaX = state.offsetX - state.initial.x;
       const deltaY = state.offsetY - state.initial.y;
       const disp = displacement(direction, deltaX, deltaY);
@@ -956,7 +1004,7 @@
       popup.style.removeProperty("transition");
       popup.style.removeProperty("transform");
 
-      const snap = snapStateOf(dialog);
+      const snap = snapStateOf(viewport);
       const snapActive = Boolean(snap && vertical && snap.resolved.length > 0);
 
       if (snapActive && snap.popupHeight > 0) {
@@ -978,7 +1026,7 @@
           }
         }
 
-        const currentOffset = activeSnapOffset(dialog, snap) ?? 0;
+        const currentOffset = activeSnapOffset(viewport, snap) ?? 0;
         const dragTargetOffset = clamp(currentOffset + dragDelta, 0, popupHeight);
         const velocityOffset =
           Math.abs(resolvedVelocity) >= SNAP_VELOCITY_THRESHOLD
@@ -994,7 +1042,7 @@
           // toward the travelled distance (resolveSwipeRelease reads it
           // before setActiveSnapPoint(null) flushes).
           const strength = resolveSwipeStrength(
-            dialog,
+            viewport,
             popupHeight,
             disp,
             releaseVelocity,
@@ -1003,16 +1051,16 @@
           const previousActive = snap.active;
           snap.active = null;
           finishNestedSwipe(0);
-          if (!requestOpenChange(dialog, false, strength)) {
+          if (!requestOpenChange(viewport, false, strength)) {
             snap.active = previousActive;
-            applySnapState(dialog);
+            applySnapState(viewport);
             popup.style.setProperty("--drawer-swipe-movement-x", "0px");
             popup.style.setProperty("--drawer-swipe-movement-y", "0px");
           }
         };
         const settle = (point) => {
           snap.active = point.value;
-          applySnapState(dialog);
+          applySnapState(viewport);
           void popup.offsetWidth;
           popup.style.setProperty("--drawer-swipe-movement-x", "0px");
           popup.style.setProperty("--drawer-swipe-movement-y", "0px");
@@ -1088,9 +1136,9 @@
       if (shouldClose) {
         finishNestedSwipe(0);
         const closed = requestOpenChange(
-          dialog,
+          viewport,
           false,
-          resolveSwipeStrength(dialog, state.size, disp, releaseVelocity, overallVelocity),
+          resolveSwipeStrength(viewport, state.size, disp, releaseVelocity, overallVelocity),
         );
         if (closed) return;
       }
@@ -1101,7 +1149,7 @@
       void popup.offsetWidth;
       popup.style.setProperty("--drawer-swipe-movement-x", "0px");
       popup.style.setProperty("--drawer-swipe-movement-y", "0px");
-      const overlay = overlayOf(dialog);
+      const overlay = overlayOf(viewport);
       if (overlay) overlay.style.setProperty("--drawer-swipe-progress", "0");
       finishNestedSwipe(0);
     }
@@ -1110,11 +1158,11 @@
     // padding) but not inside the content wrapper or on interactive elements
     // (DrawerViewport onPointerDown: isSwipeIgnoredTarget/isDrawerContentTarget).
     // A press outside the popup is a backdrop dismiss, handled below.
-    dialog.addEventListener("pointerdown", (event) => {
+    viewport.addEventListener("pointerdown", (event) => {
       if (event.pointerType === "touch") return;
       if (event.button !== 0) return;
-      const popup = popupOf(dialog);
-      if (!popup || window.templ.transition.isEnding(popup) || hasOpenNested(dialog)) return;
+      const popup = popupOf(viewport);
+      if (!popup || window.templ.transition.isEnding(popup) || hasOpenNested(viewport)) return;
       const target = event.target instanceof Element ? event.target : null;
       if (!target || !popup.contains(target)) return;
       if (target.closest(IGNORE_SELECTOR) || target.closest('[data-slot="drawer-content"]')) {
@@ -1123,13 +1171,13 @@
       startSwipe(event.clientX, event.clientY, event.timeStamp);
       state.pointerId = event.pointerId;
       try {
-        dialog.setPointerCapture(event.pointerId);
+        viewport.setPointerCapture(event.pointerId);
       } catch {
         /* no capture, moves still bubble */
       }
     });
 
-    dialog.addEventListener("pointermove", (event) => {
+    viewport.addEventListener("pointermove", (event) => {
       if (event.pointerType === "touch") return;
       if (!state.swiping || state.pointerId !== event.pointerId) return;
       event.preventDefault(); // prevent text selection while dragging
@@ -1140,22 +1188,22 @@
       if (event.pointerType === "touch") return;
       if (state.pointerId !== event.pointerId) return;
       try {
-        dialog.releasePointerCapture(event.pointerId);
+        viewport.releasePointerCapture(event.pointerId);
       } catch {
         /* already released */
       }
       endSwipe(event.timeStamp);
     };
-    dialog.addEventListener("pointerup", onPointerEnd);
-    dialog.addEventListener("pointercancel", onPointerEnd);
+    viewport.addEventListener("pointerup", onPointerEnd);
+    viewport.addEventListener("pointercancel", onPointerEnd);
 
     // Touch: swipes can start anywhere in the panel, arbitrated against
     // scrollable content (DrawerViewport onTouchStart/processTouchMove).
-    dialog.addEventListener(
+    viewport.addEventListener(
       "touchstart",
       (event) => {
-        const popup = popupOf(dialog);
-        if (!popup || window.templ.transition.isEnding(popup) || hasOpenNested(dialog)) return;
+        const popup = popupOf(viewport);
+        if (!popup || window.templ.transition.isEnding(popup) || hasOpenNested(viewport)) return;
         if (event.touches.length !== 1) {
           state.touch = null;
           return;
@@ -1166,7 +1214,7 @@
           state.touch = null;
           return;
         }
-        const vertical = axisIsY(dialog);
+        const vertical = axisIsY(viewport);
         const scrollTarget = findScrollable(target, popup, vertical);
         const crossScrollable = !!findScrollable(target, popup, !vertical);
         state.touch = {
@@ -1178,7 +1226,7 @@
           crossScrollable,
           // null: undecided, claim on a move toward dismiss from the edge.
           allowSwipe: scrollTarget
-            ? atDismissEdge(scrollTarget, directionOf(dialog))
+            ? atDismissEdge(scrollTarget, directionOf(viewport))
               ? null
               : false
             : null,
@@ -1189,15 +1237,15 @@
       { passive: true },
     );
 
-    dialog.addEventListener(
+    viewport.addEventListener(
       "touchmove",
       (event) => {
         const touchState = state.touch;
         if (!touchState || event.touches.length !== 1) return;
         const touch = event.touches[0];
-        const vertical = axisIsY(dialog);
-        const direction = directionOf(dialog);
-        const snap = snapStateOf(dialog);
+        const vertical = axisIsY(viewport);
+        const direction = directionOf(viewport);
+        const snap = snapStateOf(viewport);
         const snapActive = Boolean(snap && vertical && snap.resolved.length > 0);
         const axisDelta = vertical
           ? touch.clientY - touchState.lastY
@@ -1265,34 +1313,25 @@
       state.touch = null;
       endSwipe(event.timeStamp);
     };
-    dialog.addEventListener("touchend", onTouchEnd);
-    dialog.addEventListener("touchcancel", onTouchEnd);
+    viewport.addEventListener("touchend", onTouchEnd);
+    viewport.addEventListener("touchcancel", onTouchEnd);
   }
 
   // ----- lifecycle -----------------------------------------------------------
 
-  function ensureDrawer(dialog) {
-    if (!dialog || dialog._templDrawerInit) return dialog;
-    dialog._templDrawerInit = true;
+  function ensureDrawer(viewport) {
+    if (!viewport || viewport._templDrawerInit) return viewport;
+    viewport._templDrawerInit = true;
 
-    dialog.addEventListener("cancel", (event) => {
-      event.preventDefault();
-      requestOpenChange(dialog, false);
-    });
+    attachSwipe(viewport);
 
-    dialog.addEventListener("close", () => {
-      cleanupClosed(dialog);
-    });
-
-    attachSwipe(dialog);
-
-    return dialog;
+    return viewport;
   }
 
   // Moves the drawer to <body>, the pendant of the reference's DrawerPortal.
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
-    // Base UI's DrawerTrigger identifier (DialogTrigger), shared with dialog
+    // Base UI's DrawerTrigger identifier (DialogTrigger), shared with viewport
     // and popover triggers; only those naming a drawer viewport are ours.
     const trigger = event.target.closest("[data-base-ui-click-trigger][aria-controls]");
     if (trigger && drawerFor(trigger)) {
@@ -1309,24 +1348,24 @@
   // stays in the document, which keeps programmatic drawers
   // (window.templ.drawer.open) alive.
   window.templ.lifecycle.register(VIEWPORT, {
-    init(dialog) {
-      ensureDrawer(dialog);
+    init(viewport) {
+      ensureDrawer(viewport);
       // Server-side open state (Base UI open or defaultOpen).
-      if (dialog.getAttribute("data-templ-open") === "true" || dialog.hasAttribute("data-templ-default-open")) {
-        openDrawer(dialog);
+      if (viewport.getAttribute("data-templ-open") === "true" || viewport.hasAttribute("data-templ-default-open")) {
+        openDrawer(viewport);
       } else {
-        updateState(dialog, dialog.open);
+        updateState(viewport, isOpen(viewport));
       }
       syncStack();
     },
-    destroy(dialog) {
-      stopDismiss(dialog);
-      unwatchSnapResize(dialog);
-      dialog._templReleaseScroll?.();
-      dialog._templReleaseScroll = null;
-      dialog._templFocus?.unmount();
-      dialog._templFocus = null;
-      window.templ.portal.remove(dialog);
+    destroy(viewport) {
+      stopDismiss(viewport);
+      unwatchSnapResize(viewport);
+      viewport._templReleaseScroll?.();
+      viewport._templReleaseScroll = null;
+      viewport._templFocus?.unmount();
+      viewport._templFocus = null;
+      window.templ.portal.remove(portalNodeOf(viewport));
       syncStack();
     },
   });

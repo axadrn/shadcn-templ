@@ -115,7 +115,7 @@ type DescriptionProps struct {
 // Drawer renders no element: it only carries the id and options that link
 // Trigger, Content and Close (via ctx). 1:1 base/ui/drawer.tsx Drawer, which
 // wraps the Base UI Drawer.Root without its own DOM. A Drawer rendered inside
-// another Drawer's subtree is nested (Base UI's context nesting): its dialog
+// another Drawer's subtree is nested (Base UI's context nesting): its viewport
 // links to the parent so drawer.js can drive the stacking behavior, and it
 // renders no overlay (DrawerBackdrop enabled: !nested).
 templ Drawer(props ...Props) {
@@ -174,10 +174,10 @@ func CloseFor(id string) templ.Attributes {
 // composes DrawerPortal > DrawerOverlay + Drawer.Viewport > Drawer.Popup >
 // Drawer.Content:
 //
-//   - The native <dialog> plays the Drawer.Viewport role: a fullscreen,
-//     visually empty positioning container that hosts the swipe listeners
-//     (DrawerViewport does exactly that). showModal() gives it the top
-//     layer, focus trap and inertness Base UI builds by hand.
+//   - The portal node is DrawerPortal (drawer-portal), [hidden] while the
+//     drawer is unmounted, like the dialog's.
+//   - The viewport <div> is Drawer.Viewport: a fullscreen, visually empty
+//     positioning container that hosts the swipe listeners.
 //   - The overlay <div> is DrawerOverlay (cn-drawer-overlay), rendered for
 //     modal drawers only and, like Base UI's DrawerBackdrop (enabled:
 //     !nested), never for nested drawers.
@@ -188,8 +188,9 @@ func CloseFor(id string) templ.Attributes {
 //     overlay, so the blocks apply 1:1.
 //
 // The hidden portal node keeps the SSRd content hidden until drawer.js portals it
-// (DrawerPortal pendant). data-templ-modal is Base UI's modal prop, which
-// drawer.js reads for the modality (scroll lock, inert, focus trap).
+// (DrawerPortal pendant). data-modal is Base UI's modal state on the
+// viewport, which drawer.js reads for the modality (scroll lock, focus
+// manager).
 //
 // The inline styles seed the vars the reference registers with initial
 // values via CSS.registerProperty (DrawerPopup removeCSSVariableInheritance)
@@ -207,12 +208,22 @@ templ Content(props ...ContentProps) {
 	}
 	{{ hasSnapPoints := s.snapJSON != "" }}
 	<div data-templ-portal hidden>
-		<dialog
-			id={ s.id }
+		<div data-base-ui-portal data-slot="drawer-portal" hidden>
+			if !s.disableModal && s.parentID == "" {
+				<div
+					data-slot="drawer-overlay"
+					role="presentation"
+					if hasSnapPoints {
+						data-snap-points=""
+					}
+					style="--drawer-swipe-progress:0;--drawer-swipe-strength:1"
+					class="cn-drawer-overlay fixed inset-0 z-50 min-h-dvh opacity-[max(var(--drawer-overlay-min-opacity,0),calc(1-var(--drawer-swipe-progress)))] transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] select-none data-ending-style:pointer-events-none data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] data-snap-points:[--drawer-overlay-min-opacity:0.5] data-starting-style:opacity-0 data-swiping:duration-0 supports-[-webkit-touch-callout:none]:absolute"
+				></div>
+			}
+		<div
 			data-slot="drawer-viewport"
-			data-base-ui-portal
+			role="presentation"
 			data-modal={ utils.IfElse(!s.disableModal, "true", "false") }
-			data-templ-modal={ utils.IfElse(!s.disableModal, "true", "false") }
 			if s.controlled {
 				data-templ-open={ strconv.FormatBool(s.open) }
 			} else {
@@ -237,33 +248,14 @@ templ Content(props ...ContentProps) {
 					// modal drawers stay pointer-events-none so the page keeps
 					// working underneath.
 					"pointer-events-none fixed inset-0 z-50 select-none data-[modal=true]:pointer-events-auto",
-					// Native <dialog> resets: the UA gives dialogs padding, border,
-					// background, fit-content sizing and auto margins that the
-					// reference's viewport <div> does not have. size-auto with
-					// inset-0 stretches it over the viewport. The UA ::backdrop is
-					// hidden because the overlay element below is the real
-					// DrawerOverlay. dialog:not([open]) keeps the UA display:none,
-					// the SSR pendant of Base UI unmounting while closed; while
-					// closing, [open] stays set until drawer.js calls close() after
-					// the exit transition, so the animation still plays.
-					"m-0 size-auto max-w-none max-h-none border-0 bg-transparent p-0 outline-none [&::backdrop]:hidden",
 				),
 			}
 			{ p.Attributes... }
 		>
-			if !s.disableModal && s.parentID == "" {
-				<div
-					data-slot="drawer-overlay"
-					role="presentation"
-					if hasSnapPoints {
-						data-snap-points=""
-					}
-					style="--drawer-swipe-progress:0;--drawer-swipe-strength:1"
-					class="cn-drawer-overlay fixed inset-0 z-50 min-h-dvh opacity-[max(var(--drawer-overlay-min-opacity,0),calc(1-var(--drawer-swipe-progress)))] transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] select-none data-ending-style:pointer-events-none data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] data-snap-points:[--drawer-overlay-min-opacity:0.5] data-starting-style:opacity-0 data-swiping:duration-0 supports-[-webkit-touch-callout:none]:absolute"
-				></div>
-			}
 			<div
+				id={ s.id }
 				data-slot="drawer-popup"
+				role="dialog"
 				data-swipe-direction={ string(s.direction) }
 				data-swipe-axis={ axis }
 				if hasSnapPoints {
@@ -314,7 +306,8 @@ templ Content(props ...ContentProps) {
 					{ children... }
 				</div>
 			</div>
-		</dialog>
+		</div>
+		</div>
 	</div>
 }
 
