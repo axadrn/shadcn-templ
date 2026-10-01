@@ -87,8 +87,6 @@ The reference app from `parity-runtime` task 1 serves every upstream example at 
 
 `compare.mjs chromium dialog-demo` and the same in webkit run end to end. The DOM check already finds what the step checks of `parity-runtime` could not see: `DialogTitle` is an `h2` upstream, a closed trigger has no `aria-controls`, the select value keeps `data-placeholder`, and in WebKit Base UI's focus guards are `role="button"` instead of `aria-hidden` (Base UI switches them for Safari, not for a screen reader as `parity-runtime` task 7 assumed). Task 2 collects all of it.
 
-## Planner review
-
 ### Task 2
 
 `tmp/parity-components/inventory.md` (from `inventory.py`) has a row for every upstream component and example and the `compare.mjs` result of every existing example per component in both engines.
@@ -100,3 +98,5 @@ Examples: 513 upstream, 336 here, 177 missing (57 `-rtl` variants, the chat set,
 Comparison over the 336 examples, 2930 checks: chromium 2232 pass and 698 fail, webkit 2217 and 713. Every component with examples fails somewhere, mostly on the DOM check. The causes most first differences go back to are listed in task 3; then come the accordion's `dir`, the combobox input's attributes, `data-activation-direction` on tabs and collapsible, `role="group"` on field and slider, `aria-disabled="false"` on collapsible and toggle buttons, the radio input's `name`, `span` where we render `div` (avatar, empty, item), the dialog title's `h2`, the menus' internal backdrop (`MenuPositioner` renders one, `modal` is true by default), the select value's `data-placeholder`, the calendar's `data-mode`, the breadcrumb's `aria-label` case and the drawer's `data-drawer-content`. Example only attributes (`data-*-demo` markers of our examples) also differ.
 
 The harness serves our site on port 8190 through `tmp/parity-components/serve.sh`, a binary built from the working tree, because another project took port 8090 from `task dev` twice during the runs. `compare.mjs` reads `TEMPL_URL`, default `http://localhost:8190`, and runs four examples at a time (`--jobs=4`), about 15 minutes per engine for all of them.
+
+## Planner review
