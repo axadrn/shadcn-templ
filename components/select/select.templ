@@ -173,7 +173,7 @@ templ Trigger(props ...TriggerProps) {
 		data-slot="select-trigger"
 		data-size={ string(p.Size) }
 		role="combobox"
-		aria-controls={ s.id }
+		data-templ-controls={ s.id }
 		aria-haspopup="listbox"
 		aria-expanded="false"
 		aria-readonly?={ s.readOnly }
@@ -231,7 +231,6 @@ templ Content(props ...ContentProps) {
 	<div data-templ-portal hidden>
 		<div data-base-ui-portal>
 		<div
-			id={ s.id }
 			if !alignItem {
 				data-templ-align-item-with-trigger="false"
 			}
@@ -246,6 +245,7 @@ templ Content(props ...ContentProps) {
 			class="isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
+				id={ s.id }
 				data-slot="select-content"
 				tabindex="-1"
 				data-base-ui-focusable

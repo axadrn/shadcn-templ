@@ -487,13 +487,14 @@ templ dataTableScript() {
 			// useIsMobile pendant for TableCellViewer: mutate the inert portal
 			// template before drawer.js opens it, so the first open is correct.
 			// The drawer lives in the document from the first render (hidden
-			// portal node), so the trigger's aria-controls always resolves.
-			const drawerDialog = (trigger) => {
-				const id = trigger.getAttribute("aria-controls");
+			// portal node), so the trigger's data-templ-controls always resolves.
+			// The id is the drawer popup's.
+			const drawerPopup = (trigger) => {
+				const id = trigger.getAttribute("data-templ-controls");
 				return id ? document.getElementById(id) : null;
 			};
 			const syncDrawerDirection = (trigger) => {
-				const popup = drawerDialog(trigger)?.querySelector('[data-slot="drawer-popup"]');
+				const popup = drawerPopup(trigger);
 				if (!popup) return;
 				const mobile = window.matchMedia("(max-width: 767px)").matches;
 				popup.setAttribute("data-swipe-direction", mobile ? "down" : "right");

@@ -56,7 +56,7 @@ templ DatePickerRange() {
 			// is looked up per event instead of captured at parse time.
 			document.addEventListener("calendar-change", (e) => {
 				if (!(e.target instanceof Element) || !e.target.closest("#date-picker-range")) return;
-				const trigger = document.querySelector('[aria-controls="date-picker-range"]');
+				const trigger = document.querySelector('[data-templ-controls="date-picker-range"]');
 				const display = trigger.querySelector("span:not([data-icon])");
 				if (e.detail.value && e.detail.endValue) {
 					display.textContent = fmt(e.detail.value) + " - " + fmt(e.detail.endValue);

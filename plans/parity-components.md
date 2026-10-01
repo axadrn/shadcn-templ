@@ -59,7 +59,7 @@ Checks: the table is complete against `gh api repos/shadcn-ui/ui/contents/apps/v
 
 ### 3. What every component shares
 
-- [ ] Done
+- [x] Done
 
 The causes that show up across components in task 2's inventory, fixed first because `compare.mjs` reports only the first DOM difference of a step and these hide the rest:
 
@@ -98,5 +98,18 @@ Examples: 513 upstream, 336 here, 177 missing (57 `-rtl` variants, the chat set,
 Comparison over the 336 examples, 2930 checks: chromium 2232 pass and 698 fail, webkit 2217 and 713. Every component with examples fails somewhere, mostly on the DOM check. The causes most first differences go back to are listed in task 3; then come the accordion's `dir`, the combobox input's attributes, `data-activation-direction` on tabs and collapsible, `role="group"` on field and slider, `aria-disabled="false"` on collapsible and toggle buttons, the radio input's `name`, `span` where we render `div` (avatar, empty, item), the dialog title's `h2`, the menus' internal backdrop (`MenuPositioner` renders one, `modal` is true by default), the select value's `data-placeholder`, the calendar's `data-mode`, the breadcrumb's `aria-label` case and the drawer's `data-drawer-content`. Example only attributes (`data-*-demo` markers of our examples) also differ.
 
 The harness serves our site on port 8190 through `tmp/parity-components/serve.sh`, a binary built from the working tree, because another project took port 8090 from `task dev` twice during the runs. `compare.mjs` reads `TEMPL_URL`, default `http://localhost:8190`, and runs four examples at a time (`--jobs=4`), about 15 minutes per engine for all of them.
+
+### Task 3
+
+- **The trigger link is a port marker.** Triggers name their popup or panel in `data-templ-controls`, the link Base UI keeps in its store, and render `aria-controls` only as Base UI does: dialog, alert dialog, sheet, drawer, popover and dropdown menu triggers while the popup is mounted, select, combobox and collapsible triggers while open. Tooltip triggers name theirs in `data-templ-tooltip-trigger` like the hover card's `data-templ-hover-card-trigger`, since `sidebar.MenuButton` puts a tooltip trigger and a collapsible or menu trigger on one element. `AGENTS.md` rule 2 says so now instead of the ARIA lookup.
+- **The id is the popup's.** Like Base UI's, the id `aria-controls` names sits on the popup (`popover-content`, `dropdown-menu-content`, `select-content`, `combobox-content`), not on the positioner. The scripts get the positioner as the popup's parent. `window.templ.popover` takes the id, the popup or the positioner. The sidebar blocks that set a menu's side per viewport (`onMobileChange`, 15 files) set it on the positioner they get from the popup's id, the dashboard data table finds the drawer popup by its id, which task 10 of `parity-runtime` had already moved there.
+- **Icons** render the attributes lucide-react renders, without `data-lucide` (`components/icon/icon.go` and the generator).
+- **Focus guards** follow Base UI's `FocusGuard`: on an Apple OS with WebKit they are `role="button"` without `aria-hidden`, so VoiceOver's virtual cursor lands on them.
+- **The checkbox** rendered an attribute named `else`: templ has no `else if` inside an attribute list, the branch is nested now. With `Indeterminate` it had also rendered both `aria-checked` values.
+- `select.js` drops `data-popup-side` from the trigger when the popup unmounts, like `SelectTrigger`.
+
+The dev setup: another project's `task dev` holds port 8090, so the site runs from this repo's own watchers on port 8190 (`go tool templ generate --watch` with the docs server, the bundle and the tailwind watcher, logs in `tmp/parity-components/dev-*.log`), and every harness script points at 8190.
+
+Checks: `go test ./...` green, a11y 30 of 30 and behavior 30 of 30 in chromium and webkit (the suites find triggers by the marker and popups by their id now), `escape.mjs` 0 failures in both, `htmx.mjs` 110 of 110 in both. `compare.mjs all`: chromium 2344 pass and 586 fail instead of 2232 and 698, webkit 2334 and 596 instead of 2217 and 713. None of the five causes is left: no `data-lucide`, no focus guard and no `else` in a first difference, and `aria-controls` only where a component renders other attributes too (the combobox input's, the collapsible's `aria-disabled`, the drawer's exit), which the component tasks take.
 
 ## Planner review

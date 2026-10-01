@@ -21,12 +21,12 @@
   }
 
   function contentFor(trigger) {
-    return document.getElementById(trigger.getAttribute("aria-describedby"));
+    return document.getElementById(trigger.getAttribute("data-templ-tooltip-trigger"));
   }
 
   function triggerFor(content) {
     return document.querySelector(
-      '[aria-describedby="' + content.id + '"]',
+      '[data-templ-tooltip-trigger="' + content.id + '"]',
     );
   }
 

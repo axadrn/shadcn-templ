@@ -41,7 +41,7 @@
     // Dialog.Close links through context in Base UI; its port marker carries
     // the dialog id when the close sits outside the popup.
     const id =
-      element.getAttribute("aria-controls") || element.getAttribute("data-templ-dialog-close");
+      element.getAttribute("data-templ-controls") || element.getAttribute("data-templ-dialog-close");
     if (id) return getDialog(id);
     return getDialog(element);
   }
@@ -49,7 +49,7 @@
   function triggersFor(popup) {
     if (!popup.id) return [];
     return document.querySelectorAll(
-      '[data-base-ui-click-trigger][aria-controls="' + popup.id + '"]',
+      '[data-base-ui-click-trigger][data-templ-controls="' + popup.id + '"]',
     );
   }
 
@@ -145,6 +145,14 @@
     });
   }
 
+  // DialogTrigger renders aria-controls while the popup is mounted.
+  function setTriggersControl(state, mounted) {
+    triggersFor(state.popup).forEach((trigger) => {
+      if (mounted) trigger.setAttribute("aria-controls", state.popup.id);
+      else trigger.removeAttribute("aria-controls");
+    });
+  }
+
   // DialogPortal renders an InternalBackdrop for a modal dialog while it is
   // mounted: fixed over the viewport, inert while closing, and useDismiss
   // treats it as a backdrop.
@@ -187,6 +195,7 @@
     }
 
     updateTriggers(state, true);
+    setTriggersControl(state, true);
 
     // DialogPopup's FloatingFocusManager, mounted until the exit animation
     // finished. Opened by touch the popup takes focus, so the virtual
@@ -226,6 +235,7 @@
     if (state.internalBackdrop) state.internalBackdrop.inert = true;
     window.templ.transition.close(partsOf(state), popup, () => {
       state.root.hidden = true;
+      setTriggersControl(state, false);
       popup.style.removeProperty("--nested-dialogs");
       popup.removeAttribute("data-nested-dialog-open");
       // Unmounting the focus manager returns focus.
@@ -362,8 +372,8 @@
 
   // DialogTrigger's useClick with its default click event. Base UI's
   // DialogTrigger identifier is shared with PopoverTrigger and DrawerTrigger;
-  // only triggers whose aria-controls names a dialog popup are ours.
-  window.templ.lifecycle.register("[data-base-ui-click-trigger][aria-controls]", {
+  // only triggers whose data-templ-controls names a dialog popup are ours.
+  window.templ.lifecycle.register("[data-base-ui-click-trigger][data-templ-controls]", {
     init(trigger) {
       if (!dialogFor(trigger)) return;
       trigger._templDialogClick = window.templ.click.useClick(trigger, {

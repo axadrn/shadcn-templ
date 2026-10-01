@@ -330,7 +330,7 @@ templ calendarExampleDatePickerSimple() {
 			// is looked up per event instead of captured at parse time.
 			document.addEventListener("calendar-change", (e) => {
 				if (!(e.target instanceof Element) || !e.target.closest("#calendar-example-date-picker-simple")) return;
-				const trigger = document.querySelector('[aria-controls="calendar-example-date-picker-simple"]');
+				const trigger = document.querySelector('[data-templ-controls="calendar-example-date-picker-simple"]');
 				trigger.querySelector("span:not([data-icon])").textContent = e.detail.value ? fmt(e.detail.value) : "Pick a date";
 			});
 		})();
@@ -390,7 +390,7 @@ templ calendarExampleDatePickerWithDropdowns() {
 			// is looked up per event instead of captured at parse time.
 			document.addEventListener("calendar-change", (e) => {
 				if (!(e.target instanceof Element) || !e.target.closest("#calendar-example-date-picker-dropdowns")) return;
-				const trigger = document.querySelector('[aria-controls="calendar-example-date-picker-dropdowns"]');
+				const trigger = document.querySelector('[data-templ-controls="calendar-example-date-picker-dropdowns"]');
 				trigger.querySelector("span:not([data-icon])").textContent = e.detail.value ? fmt(e.detail.value) : "Pick a date";
 			});
 			document.addEventListener("click", (e) => {
@@ -449,7 +449,7 @@ templ calendarExampleDatePickerWithRange() {
 			// is looked up per event instead of captured at parse time.
 			document.addEventListener("calendar-change", (e) => {
 				if (!(e.target instanceof Element) || !e.target.closest("#calendar-example-date-picker-range")) return;
-				const trigger = document.querySelector('[aria-controls="calendar-example-date-picker-range"]');
+				const trigger = document.querySelector('[data-templ-controls="calendar-example-date-picker-range"]');
 				const display = trigger.querySelector("span:not([data-icon])");
 				if (e.detail.value && e.detail.endValue) {
 					display.textContent = fmt(e.detail.value) + " - " + fmt(e.detail.endValue);

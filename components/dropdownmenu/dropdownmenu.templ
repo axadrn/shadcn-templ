@@ -74,13 +74,14 @@ func triggerID(menuID string) string {
 // into the menu trigger — the asChild equivalent: no wrapper element, so the
 // trigger composes cleanly inside ButtonGroup and friends. The element keeps
 // its own data-slot; dropdownmenu.js finds it by aria-haspopup="menu" and the
-// aria-controls link to the menu, as Base UI's MenuTrigger renders them.
+// data-templ-controls link to the menu popup. aria-controls follows the
+// mounted popup, as Base UI's MenuTrigger renders it.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
-		"id":            triggerID(state(ctx).id),
-		"aria-controls": state(ctx).id,
-		"aria-haspopup": "menu",
-		"aria-expanded": "false",
+		"id":                  triggerID(state(ctx).id),
+		"data-templ-controls": state(ctx).id,
+		"aria-haspopup":       "menu",
+		"aria-expanded":       "false",
 	}
 }
 
@@ -287,7 +288,6 @@ templ Content(props ...ContentProps) {
 	// content never participates in layout or sibling CSS.
 	@Portal() {
 		<div
-			id={ s.id }
 			data-templ-side={ string(p.Side) }
 			data-templ-align={ string(p.Align) }
 			data-templ-side-offset={ strconv.Itoa(p.SideOffset) }
@@ -302,6 +302,7 @@ templ Content(props ...ContentProps) {
 			class="isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
+				id={ s.id }
 				data-slot="dropdown-menu-content"
 				data-closed
 				role="menu"

@@ -4,13 +4,13 @@
   const PANEL = '[data-slot="collapsible-content"]';
 
   function panelFor(trigger) {
-    return document.getElementById(trigger.getAttribute("aria-controls") || "");
+    return document.getElementById(trigger.getAttribute("data-templ-controls") || "");
   }
 
   // A trigger merged onto another component keeps that component's slot
-  // (Base UI render prop), so the trigger is whatever controls a panel.
+  // (Base UI render prop), so the trigger is whatever links a panel.
   function triggerOf(target) {
-    const trigger = target.closest("[aria-controls]");
+    const trigger = target.closest("[data-templ-controls]");
     const panel = trigger && panelFor(trigger);
     return panel && panel.matches(PANEL) ? trigger : null;
   }
@@ -41,6 +41,9 @@
     setOpen(root, isOpen);
     trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
     trigger.toggleAttribute("data-panel-open", isOpen);
+    // CollapsibleTrigger renders aria-controls while open.
+    if (isOpen) trigger.setAttribute("aria-controls", panel.id);
+    else trigger.removeAttribute("aria-controls");
     if (isOpen) window.templ.collapsiblePanel.open(panel, VARS);
     else window.templ.collapsiblePanel.close(panel, VARS);
   }

@@ -63,10 +63,19 @@
   // ----- FocusGuard -----------------------------------------------------------
 
   // A visually hidden tabbable span that hands focus on when it receives it.
+  // @base-ui/utils/platform: VoiceOver may run on any Apple OS. Through
+  // WebKit its virtual cursor only focuses focusable or button elements, so
+  // the guards there are buttons the cursor can land on instead of hidden.
+  const platform = (navigator.platform || "").toLowerCase();
+  const ios = /^i(os$|p)/.test(platform) || (platform === "macintel" && navigator.maxTouchPoints > 1);
+  const apple = ios || platform.startsWith("mac");
+  const voiceOverGuards = apple && webkit;
+
   function createFocusGuard(type, onFocus) {
     const guard = document.createElement("span");
     if (type) guard.setAttribute("data-type", type);
-    guard.setAttribute("aria-hidden", "true");
+    if (voiceOverGuards) guard.setAttribute("role", "button");
+    else guard.setAttribute("aria-hidden", "true");
     guard.setAttribute("tabindex", "0");
     guard.setAttribute("data-base-ui-focus-guard", "");
     guard.style.cssText = "clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:-1px;position:fixed;top:0;left:0";

@@ -6,9 +6,9 @@
   const SUB_TRIGGER = '[data-slot="dropdown-menu-sub-trigger"]';
   const SUB_CONTENT = '[data-slot="dropdown-menu-sub-content"]';
   // Base UI's MenuTrigger renders no identifier: a menu trigger is whatever
-  // has aria-haspopup="menu" and controls a menu positioner. The element may
-  // carry another component's slot (sidebar.MenuButton).
-  const TRIGGER = '[aria-haspopup="menu"][aria-controls]';
+  // has aria-haspopup="menu" and links a menu popup (data-templ-controls).
+  // The element may carry another component's slot (sidebar.MenuButton).
+  const TRIGGER = '[aria-haspopup="menu"][data-templ-controls]';
 
   function isPositioner(el) {
     // The popup is the positioner's slotted child, next to the focus guards.
@@ -19,13 +19,14 @@
     return [...document.querySelectorAll(POPUP)].map((p) => p.parentElement).filter(isPositioner);
   }
 
+  // The id is the popup's, like Base UI's.
   function triggerFor(content) {
-    return document.querySelector('[aria-controls="' + content.id + '"]');
+    return document.querySelector('[data-templ-controls="' + popupFor(content).id + '"]');
   }
 
   function contentFor(trigger) {
-    const el = document.getElementById(trigger.getAttribute("aria-controls"));
-    return isPositioner(el) ? el : null;
+    const el = document.getElementById(trigger.getAttribute("data-templ-controls"));
+    return el?.matches(POPUP) && isPositioner(el.parentElement) ? el.parentElement : null;
   }
 
   // The dropdown trigger an event target sits in, if any.
@@ -223,6 +224,8 @@
     content._templOpenMethod = trigger._templOpenMethod || "programmatic";
     portal(content);
     content.hidden = false;
+    // MenuTrigger renders aria-controls while the popup is mounted.
+    trigger.setAttribute("aria-controls", popupFor(content).id);
     content._templDismiss ??= window.templ.dismiss.useDismiss({
       floating: content,
       reference: trigger,
@@ -266,6 +269,7 @@
       stopAutoPositioning(content);
       stopFocusManager(content);
       content.hidden = true;
+      triggerFor(content)?.removeAttribute("aria-controls");
     });
     content._templSubs?.forEach(closeSubNow);
     const trigger = triggerFor(content);

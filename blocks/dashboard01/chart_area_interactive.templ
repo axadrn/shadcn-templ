@@ -266,7 +266,7 @@ templ ChartAreaInteractive() {
 					t.setAttribute("aria-pressed", String(on));
 				});
 				const trigger = card.querySelector("[data-templ-chart-range-select]");
-				const content = trigger && document.getElementById(trigger.getAttribute("aria-controls"));
+				const content = trigger && document.getElementById(trigger.getAttribute("data-templ-controls"));
 				const item = content && content.querySelector('[data-slot="select-item"][data-templ-value="' + value + '"]');
 				if (item) {
 					content.querySelectorAll('[data-slot="select-item"]').forEach((candidate) => {

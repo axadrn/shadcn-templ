@@ -161,13 +161,14 @@ func Collapsible(props ...Props) templ.Component {
 // into the collapsible trigger — the asChild equivalent: no wrapper element.
 // On an element with its own data-slot (sidebar.MenuButton) that slot wins,
 // as with Base UI's render prop, so collapsible.js finds a trigger by its
-// aria-controls link to the panel.
+// data-templ-controls link to the panel. aria-controls follows the open
+// state, as CollapsibleTrigger renders it.
 func Trigger(ctx context.Context) templ.Attributes {
 	s := state(ctx)
 	attrs := templ.Attributes{
-		"data-slot":     "collapsible-trigger",
-		"aria-controls": s.id,
-		"aria-expanded": utils.IfElse(s.open, "true", "false"),
+		"data-slot":           "collapsible-trigger",
+		"data-templ-controls": s.id,
+		"aria-expanded":       utils.IfElse(s.open, "true", "false"),
 	}
 	if s.disabled {
 		attrs["data-disabled"] = true
@@ -175,6 +176,7 @@ func Trigger(ctx context.Context) templ.Attributes {
 	}
 	if s.open {
 		attrs["data-panel-open"] = true
+		attrs["aria-controls"] = s.id
 	}
 	return attrs
 }
@@ -220,7 +222,7 @@ func Content(props ...ContentProps) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(s.id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/collapsible/collapsible.templ`, Line: 107, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/collapsible/collapsible.templ`, Line: 109, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {

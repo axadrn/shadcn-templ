@@ -44,7 +44,7 @@ func state(ctx context.Context) ctxState {
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
 		"data-base-ui-tooltip-trigger": true,
-		"aria-describedby":             state(ctx).id,
+		"data-templ-tooltip-trigger":   state(ctx).id,
 	}
 }
 

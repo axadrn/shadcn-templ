@@ -568,7 +568,7 @@ func NavUser(user User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\">\n\t\t// The pendant of useSidebar().isMobile in the block: the menu reads\n\t\t// its side when it opens, onMobileChange keeps it current until the\n\t\t// block is swapped out.\n\t\t// side={isMobile ? \"bottom\" : \"right\"}\n\t\tconst menu = document.getElementById(\"sidebar08-nav-user-menu\");\n\t\twindow.templ.sidebar.onMobileChange((isMobile) => {\n\t\t\tif (!menu?.isConnected) return false;\n\t\t\tmenu.setAttribute(\"data-templ-side\", isMobile ? \"bottom\" : \"right\");\n\t\t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\">\n\t\t// The pendant of useSidebar().isMobile in the block: the menu reads\n\t\t// its side when it opens, onMobileChange keeps it current until the\n\t\t// block is swapped out.\n\t\t// side={isMobile ? \"bottom\" : \"right\"}\n\t\t// The id names the menu popup, its positioner holds the side.\n\t\tconst menu = document.getElementById(\"sidebar08-nav-user-menu\")?.parentElement;\n\t\twindow.templ.sidebar.onMobileChange((isMobile) => {\n\t\t\tif (!menu?.isConnected) return false;\n\t\t\tmenu.setAttribute(\"data-templ-side\", isMobile ? \"bottom\" : \"right\");\n\t\t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

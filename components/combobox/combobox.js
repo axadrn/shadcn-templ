@@ -27,12 +27,28 @@
     return popup && isPositioner(popup.parentElement) ? popup.parentElement : null;
   }
 
-  // Base UI's ComboboxTrigger: aria-haspopup plus aria-controls naming the
-  // combobox (not the role=combobox input).
+  // The positioner from its popup's id. The id is the popup's, like Base
+  // UI's, which data-templ-controls and data-templ-combobox-anchor name.
+  function byId(id) {
+    const el = id ? document.getElementById(id) : null;
+    return el?.matches(POPUP) && isPositioner(el.parentElement) ? el.parentElement : null;
+  }
+
+  function idOf(content) {
+    return popupFor(content)?.id || "";
+  }
+
+  // Every ComboboxTrigger of this combobox.
+  function triggersFor(content) {
+    return [...document.querySelectorAll('[aria-haspopup][data-templ-controls="' + idOf(content) + '"]')];
+  }
+
+  // Base UI's ComboboxTrigger: aria-haspopup plus the link to the combobox
+  // (not the role=combobox input).
   function triggerOf(target) {
-    const trigger = target.closest && target.closest("[aria-haspopup][aria-controls]");
+    const trigger = target.closest && target.closest("[aria-haspopup][data-templ-controls]");
     if (!trigger || trigger.matches(INPUT)) return null;
-    return isPositioner(document.getElementById(trigger.getAttribute("aria-controls"))) ? trigger : null;
+    return byId(trigger.getAttribute("data-templ-controls")) ? trigger : null;
   }
 
   // A popup-pattern anchor is the trigger button itself.
@@ -44,14 +60,14 @@
   // the content (an input group inside the popup also carries the attribute
   // but never anchors the position).
   function anchorFor(content) {
-    return [...document.querySelectorAll('[data-templ-combobox-anchor="' + content.id + '"]')].find(
+    return [...document.querySelectorAll('[data-templ-combobox-anchor="' + idOf(content) + '"]')].find(
       (a) => !content.contains(a),
     );
   }
 
   function contentFor(el) {
     const anchor = el.closest(ANCHOR);
-    return anchor ? document.getElementById(anchor.getAttribute("data-templ-combobox-anchor")) : null;
+    return anchor ? byId(anchor.getAttribute("data-templ-combobox-anchor")) : null;
   }
 
   // What the popup is positioned against, like shadcn's runtime: the chips
@@ -88,9 +104,11 @@
   // the popup-pattern anchor and the input group button.
   function setExpanded(content, expanded) {
     const input = inputFor(content);
-    const triggers = document.querySelectorAll('[aria-haspopup][aria-controls="' + content.id + '"]');
-    [input, ...triggers].forEach((t) => {
+    [input, ...triggersFor(content)].forEach((t) => {
       if (!t) return;
+      // ComboboxInput and ComboboxTrigger render aria-controls while open.
+      if (expanded) t.setAttribute("aria-controls", idOf(content));
+      else t.removeAttribute("aria-controls");
       t.setAttribute("aria-expanded", expanded ? "true" : "false");
       t.toggleAttribute("data-popup-open", expanded);
       t.toggleAttribute("data-pressed", expanded);
@@ -175,7 +193,7 @@
     const popup = popupFor(content);
     const inputInsidePopup = !!input && content.contains(input);
     const modal = !inputInsidePopup;
-    const trigger = document.querySelector('[aria-haspopup][aria-controls="' + content.id + '"]');
+    const trigger = triggersFor(content)[0] || null;
     if (modal) {
       content._templDismissButtons = [createDismissButton(content), createDismissButton(content)];
       input?.before(content._templDismissButtons[0]);
@@ -184,7 +202,7 @@
     content._templFocus = window.templ.focusManager.useFloatingFocusManager({
       floating: content,
       reference: inputInsidePopup ? trigger : input || trigger,
-      triggers: [input, ...document.querySelectorAll('[aria-haspopup][aria-controls="' + content.id + '"]')],
+      triggers: [input, ...triggersFor(content)],
       modal,
       openInteractionType: content._templOpenMethod ?? null,
       initialFocus: inputInsidePopup ? (interactionType) => (interactionType === "touch" ? popup : input) : false,
@@ -325,7 +343,7 @@
     portal(content);
     content._templDismiss ??= window.templ.dismiss.useDismiss({
       floating: content,
-      reference: [inputFor(content), ...document.querySelectorAll('[aria-haspopup][aria-controls="' + content.id + '"]')],
+      reference: [inputFor(content), ...triggersFor(content)],
       // The visual viewport can be small with the software keyboard open, so
       // a touch outside dismisses on the click, after a possible scroll.
       outsidePressEvent: { mouse: "sloppy", touch: "intentional" },
@@ -605,7 +623,7 @@
 
     const anchor = e.target.closest(ANCHOR);
     if (anchor && !positionerOf(anchor)) {
-      const content = document.getElementById(anchor.getAttribute("data-templ-combobox-anchor"));
+      const content = byId(anchor.getAttribute("data-templ-combobox-anchor"));
       if (!content || content.hasAttribute("data-open")) return;
       const field = inputFor(content);
     if (field && !field.disabled) requestOpenChange(content, true);

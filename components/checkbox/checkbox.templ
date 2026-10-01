@@ -55,14 +55,14 @@ templ Checkbox(props ...Props) {
 			} else {
 				data-unchecked
 			}
-		}
-		else
-		if checked {
-			aria-checked="true"
-			data-checked
 		} else {
-			aria-checked="false"
-			data-unchecked
+			if checked {
+				aria-checked="true"
+				data-checked
+			} else {
+				aria-checked="false"
+				data-unchecked
+			}
 		}
 		if p.Disabled {
 			data-disabled

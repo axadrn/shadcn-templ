@@ -76,9 +76,8 @@ func generateSVG(name string, props Props) (string, error) {
 		return "", err // Error from getIconContent already includes icon name
 	}
 
-	// Construct the final SVG string.
-	// The data-lucide attribute helps identify these as Lucide icons if needed.
-	return fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"%s\" data-lucide=\"icon\"%s>%s</svg>",
+	// Construct the final SVG string, the attributes lucide-react renders.
+	return fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"%s\"%s>%s</svg>",
 		props.Class, attrString(props.Attributes), content), nil
 }
 

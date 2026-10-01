@@ -70,7 +70,7 @@ templ NavProjects(projects []Project) {
 		// its side when it opens, onMobileChange keeps it current until the
 		// block is swapped out.
 		// side={isMobile ? "bottom" : "right"} align={isMobile ? "end" : "start"}
-		const menus = [...document.querySelectorAll('[id^="sidebar16-nav-projects-menu-"][data-templ-side]')];
+		const menus = [...document.querySelectorAll('[data-slot="dropdown-menu-content"][id^="sidebar16-nav-projects-menu-"]')].map((popup) => popup.parentElement);
 		window.templ.sidebar.onMobileChange((isMobile) => {
 			if (!menus[0]?.isConnected) return false;
 			menus.forEach((menu) => {

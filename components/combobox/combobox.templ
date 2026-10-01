@@ -220,7 +220,7 @@ func Trigger(ctx context.Context) templ.Attributes {
 	s := state(ctx)
 	return templ.Attributes{
 		"data-templ-combobox-anchor": s.id,
-		"aria-controls":              s.id,
+		"data-templ-controls":        s.id,
 		"aria-haspopup":              "dialog",
 		"aria-expanded":              "false",
 	}
@@ -278,7 +278,7 @@ templ Input(props ...InputProps) {
 		{{
 			attrs := templ.Attributes{
 				"role":              "combobox",
-				"aria-controls":     s.id,
+				"data-templ-controls": s.id,
 				"aria-expanded":     "false",
 				"aria-autocomplete": "list",
 				"autocomplete":      "off",
@@ -305,12 +305,12 @@ templ Input(props ...InputProps) {
 					Size:     inputgroup.ButtonSizeIconXs,
 					Disabled: s.disabled,
 					// Base UI's ComboboxTrigger next to an input: aria-haspopup
-					// listbox, aria-controls and aria-expanded.
+					// listbox, the link to the popup and aria-expanded.
 					Attributes: templ.Attributes{
 						"data-slot":     "input-group-button",
 						"tabindex":      "-1",
 						"aria-haspopup": "listbox",
-						"aria-controls": s.id,
+						"data-templ-controls": s.id,
 						"aria-expanded": "false",
 						"data-disabled": s.disabled,
 					},
@@ -360,7 +360,6 @@ templ Content(props ...ContentProps) {
 	<div data-templ-portal hidden>
 		<div data-base-ui-portal>
 		<div
-			id={ s.id }
 			if s.valueControlled {
 				if s.multiple {
 					data-templ-value={ templ.JSONString(s.values) }
@@ -386,6 +385,7 @@ templ Content(props ...ContentProps) {
 			class="isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
 		>
 			<div
+				id={ s.id }
 				data-slot="combobox-content"
 				data-chips={ utils.IfElse(s.multiple, "true", "false") }
 				data-closed
@@ -612,7 +612,7 @@ templ ChipsInput(props ...ChipsInputProps) {
 		}
 		data-slot="combobox-chip-input"
 		role="combobox"
-		aria-controls={ s.id }
+		data-templ-controls={ s.id }
 		aria-expanded="false"
 		aria-autocomplete="list"
 		autocomplete="off"

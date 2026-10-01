@@ -5,8 +5,8 @@
   // no slot) around the [data-slot=popover-content] popup.
   const POPUP = '[data-slot="popover-content"]';
   // Base UI's PopoverTrigger identifier, shared with DialogTrigger; the
-  // aria-controls target tells the two apart.
-  const CLICK_TRIGGER = "[data-base-ui-click-trigger][aria-controls]";
+  // data-templ-controls target tells the two apart.
+  const CLICK_TRIGGER = "[data-base-ui-click-trigger][data-templ-controls]";
 
   function isPositioner(el) {
     // The popup is the positioner's slotted child, next to the focus guards.
@@ -17,13 +17,30 @@
     return [...document.querySelectorAll(POPUP)].map((p) => p.parentElement).filter(isPositioner);
   }
 
+  // The id is the popup's, like Base UI's, which data-templ-controls on
+  // the triggers names.
+  function idOf(content) {
+    return popupFor(content)?.id || "";
+  }
+
+  function triggersFor(content) {
+    return [...document.querySelectorAll('[data-templ-controls="' + idOf(content) + '"]')];
+  }
+
   function triggerFor(content) {
-    return document.querySelector('[aria-controls="' + content.id + '"]');
+    return triggersFor(content)[0] || null;
+  }
+
+  // The positioner from its popup's id, the popup or the positioner.
+  function resolve(target) {
+    const el = typeof target === "string" ? document.getElementById(target) : target;
+    if (!el) return null;
+    if (isPositioner(el)) return el;
+    return el.matches?.(POPUP) && isPositioner(el.parentElement) ? el.parentElement : null;
   }
 
   function contentFor(trigger) {
-    const el = document.getElementById(trigger.getAttribute("aria-controls"));
-    return isPositioner(el) ? el : null;
+    return resolve(trigger.getAttribute("data-templ-controls"));
   }
 
   // The popover trigger an event target sits in, if any.
@@ -65,12 +82,12 @@
     if (!popup) return;
     const title = popup.querySelector("[data-slot=popover-title]");
     if (title) {
-      if (!title.id) title.id = content.id + "-title";
+      if (!title.id) title.id = idOf(content) + "-title";
       popup.setAttribute("aria-labelledby", title.id);
     }
     const description = popup.querySelector("[data-slot=popover-description]");
     if (description) {
-      if (!description.id) description.id = content.id + "-description";
+      if (!description.id) description.id = idOf(content) + "-description";
       popup.setAttribute("aria-describedby", description.id);
     }
   }
@@ -137,7 +154,7 @@
     content._templFocus = window.templ.focusManager.useFloatingFocusManager({
       floating: content,
       reference: trigger,
-      triggers: [...document.querySelectorAll('[aria-controls="' + content.id + '"]')],
+      triggers: triggersFor(content),
       modal: false,
       openInteractionType: content._templOpenMethod ?? null,
       // Opened by touch the popup takes focus, so the virtual keyboard stays
@@ -157,19 +174,21 @@
     content._templTriggerGuards = null;
   }
 
-  function open(content) {
-    if (typeof content === "string") content = document.getElementById(content);
+  function open(target) {
+    const content = resolve(target);
     if (!content || isOpen(content)) return;
     allContents().forEach((c) => {
       if (c !== content) close(c);
     });
     portal(content);
     content.hidden = false;
+    // PopoverTrigger renders aria-controls while the popup is mounted.
+    triggersFor(content).forEach((trigger) => trigger.setAttribute("aria-controls", idOf(content)));
     // useDismiss runs while open. Base UI's non modal popover dismisses a
     // mouse press on the click, a touch on the press.
     content._templDismiss = window.templ.dismiss.useDismiss({
       floating: content,
-      reference: [...document.querySelectorAll('[aria-controls="' + content.id + '"]')],
+      reference: triggersFor(content),
       outsidePressEvent: { mouse: "intentional", touch: "sloppy" },
       onOpenChange: (open, reason, event) => requestOpenChange(content, open, { reason, event }),
     });
@@ -191,8 +210,8 @@
   }
 
   // details { reason, event } of the close, for the focus manager.
-  function close(content, details) {
-    if (typeof content === "string") content = document.getElementById(content);
+  function close(target, details) {
+    const content = resolve(target);
     if (!content || content.hidden) return;
     content._templDismiss?.();
     content._templDismiss = null;
@@ -203,6 +222,7 @@
       stopAutoPositioning(content);
       stopFocusManager(content);
       content.hidden = true;
+      triggersFor(content).forEach((trigger) => trigger.removeAttribute("aria-controls"));
     });
     const trigger = triggerFor(content);
     if (trigger) {
@@ -229,8 +249,8 @@
 
   // interactionType is how the trigger opened it (useOpenInteractionType),
   // null for a programmatic open.
-  function toggle(content, interactionType = null) {
-    if (typeof content === "string") content = document.getElementById(content);
+  function toggle(target, interactionType = null) {
+    const content = resolve(target);
     if (!content) return;
     content._templOpenMethod = interactionType;
     requestOpenChange(content, !isOpen(content));
@@ -242,7 +262,7 @@
   // PopoverTrigger's useClick with its default click event, on every trigger
   // of the popover.
   function listenForClick(content) {
-    const cleanups = [...document.querySelectorAll('[aria-controls="' + content.id + '"]')].map((trigger) =>
+    const cleanups = triggersFor(content).map((trigger) =>
       window.templ.click.useClick(trigger, {
         isOpen: () => isOpen(content),
         onOpenChange(nextOpen, event, pointerType) {
@@ -287,7 +307,7 @@
     closeNearest,
     toggle,
     isOpen: (c) => {
-      if (typeof c === "string") c = document.getElementById(c);
+      c = resolve(c);
       return !!c && isOpen(c);
     },
   };

@@ -30,12 +30,15 @@
     return popup && isPositioner(popup.parentElement) ? popup.parentElement : null;
   }
 
+  // The id is the popup's, like Base UI's list, which data-templ-controls on
+  // the trigger names.
   function triggerFor(content) {
-    return document.querySelector(TRIGGER + '[aria-controls="' + content.id + '"]');
+    return document.querySelector(TRIGGER + '[data-templ-controls="' + popupFor(content).id + '"]');
   }
 
   function contentFor(trigger) {
-    return document.getElementById(trigger.getAttribute("aria-controls"));
+    const el = document.getElementById(trigger.getAttribute("data-templ-controls"));
+    return el?.matches(POPUP) ? el.parentElement : null;
   }
 
   // The hidden form input sits right before the trigger button.
@@ -561,6 +564,8 @@
         true, content._templOpenMethod === "touch", content, trigger,
       );
       window.templ.transition.open(partsOf(content));
+      // SelectTrigger renders aria-controls while open.
+      trigger.setAttribute("aria-controls", popupFor(content).id);
       trigger.setAttribute("aria-expanded", "true");
       trigger.setAttribute("data-popup-open", "");
       trigger.setAttribute("data-pressed", "");
@@ -594,11 +599,14 @@
       highlight(content, null);
       content._templAlignFallback = false;
       content.hidden = true;
+      // data-popup-side follows the mounted popup.
+      triggerFor(content)?.removeAttribute("data-popup-side");
     });
     content._templReleaseScroll?.();
     content._templReleaseScroll = null;
     const trigger = triggerFor(content);
     if (trigger) {
+      trigger.removeAttribute("aria-controls");
       trigger.setAttribute("aria-expanded", "false");
       trigger.removeAttribute("data-popup-open");
       trigger.removeAttribute("data-pressed");

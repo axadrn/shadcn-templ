@@ -41,7 +41,7 @@ templ DatePickerDemo() {
 			// is looked up per event instead of captured at parse time.
 			document.addEventListener("calendar-change", (e) => {
 				if (!(e.target instanceof Element) || !e.target.closest("#date-picker-demo")) return;
-				const trigger = document.querySelector('[aria-controls="date-picker-demo"]');
+				const trigger = document.querySelector('[data-templ-controls="date-picker-demo"]');
 				trigger.querySelector("span").textContent = e.detail.value ? fmt(e.detail.value) : "Pick a date";
 				trigger.setAttribute("data-empty", e.detail.value ? "false" : "true");
 			});

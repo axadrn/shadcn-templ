@@ -159,7 +159,7 @@ func Trigger(ctx context.Context) templ.Attributes {
 func TriggerFor(id string) templ.Attributes {
 	return templ.Attributes{
 		"data-base-ui-click-trigger": true,
-		"aria-controls":              id,
+		"data-templ-controls":        id,
 		"aria-haspopup":              "dialog",
 		"aria-expanded":              "false",
 	}
