@@ -115,7 +115,7 @@ const typesetDefaultFontsCss = `/* globals.css */
 }`
 
 templ Typeset() {
-	@layouts.BaseLayout("Typeset", "Typography for markdown you don't control.") {
+	@layouts.AppLayout("Typeset", "Typography for markdown you don't control.") {
 		@modules.AnnouncementBar()
 		@modules.Navbar()
 		<link rel="stylesheet" href={ utils.ScriptURL("/assets/css/create-fonts.css") }/>

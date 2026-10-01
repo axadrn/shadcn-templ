@@ -88,13 +88,10 @@ templ BaseLayout(title, description string) {
 		<body
 			class="group/body style-nova overscroll-none antialiased transition-colors duration-200 [--footer-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]"
 		>
-			// group/layout + the designer gates are the pendant of shadcn's
-		// app/(app)/layout.tsx: designer pages (data-slot="designer") pin the
-		// layout to the viewport, and the navbar's designer actions show via
-		// group-has-data-[slot=designer]/layout.
-		<div data-slot="layout" class="group/layout relative z-10 flex min-h-svh flex-col bg-background has-data-[slot=designer]:h-svh has-data-[slot=designer]:overflow-hidden">
-				{ children... }
-			</div>
+			// shadcn's app/layout.tsx renders its children right in <body>: the
+			// (view) routes (examples, block and chart views) are bare, the
+			// (app) routes wrap themselves in AppLayout.
+			{ children... }
 			@toast.Toaster(toast.ToasterProps{ID: "toaster"})
 		</body>
 		// HTMX
@@ -127,4 +124,16 @@ templ BaseLayout(title, description string) {
 			});
 		</script>
 	</html>
+}
+
+// AppLayout is shadcn's app/(app)/layout.tsx inside the root layout: the
+// group/layout wrapper with the designer gates. Designer pages
+// (data-slot="designer") pin the layout to the viewport, and the navbar's
+// designer actions show via group-has-data-[slot=designer]/layout.
+templ AppLayout(title, description string) {
+	@BaseLayout(title, description) {
+		<div data-slot="layout" class="group/layout relative z-10 flex min-h-svh flex-col bg-background has-data-[slot=designer]:h-svh has-data-[slot=designer]:overflow-hidden">
+			{ children... }
+		</div>
+	}
 }

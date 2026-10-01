@@ -150,7 +150,7 @@ var createOtherRadii = []createOption{
 }
 
 templ Create() {
-	@layouts.BaseLayout("New Project", "Customize everything. Pick your base color, theme, fonts and create your own version of shadcn-templ.") {
+	@layouts.AppLayout("New Project", "Customize everything. Pick your base color, theme, fonts and create your own version of shadcn-templ.") {
 		@modules.AnnouncementBar()
 		@modules.Navbar()
 		<link rel="stylesheet" href={ utils.ScriptURL("/assets/css/create-fonts.css") }/>

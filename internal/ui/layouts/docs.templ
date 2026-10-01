@@ -10,7 +10,7 @@ import (
 // sidebar provider whose grid holds the docs sidebar and the page. The page
 // body is their docs page frame: content column, sticky toc column.
 templ DocsLayout(title, description string, tocItems []modules.TableOfContentsItem) {
-	@BaseLayout(title, description) {
+	@AppLayout(title, description) {
 		@modules.TableOfContentsScript()
 		@modules.IframeThemeSync()
 		@modules.AnnouncementBar()

@@ -79,7 +79,7 @@ const blocksTitle = "Building Blocks for the Web"
 const blocksDescription = "Clean, modern building blocks. Copy and paste into your apps. Built with Go and templ. Open Source. Free forever."
 
 templ Blocks(category string) {
-	@layouts.BaseLayout(blocksTitle, blocksDescription) {
+	@layouts.AppLayout(blocksTitle, blocksDescription) {
 		@modules.AnnouncementBar()
 		@modules.Navbar()
 		<section class="border-grid">

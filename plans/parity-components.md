@@ -1,8 +1,8 @@
 # parity-components: every shadcn Base UI component, each one tested against shadcn in the browser
 
 - **Planner**: Claude
-- **Executor**: Codex
-- **Status**: planning, starts after `plans/parity-runtime.md` is merged (task 1 and 2 can run earlier, they change nothing in the repo)
+- **Executor**: Claude, one commit per task
+- **Status**: in progress, `plans/parity-runtime.md` is merged (PR #624)
 - **Branch**: `feat/parity-components` from `main` after the parity-runtime merge
 
 ## Context
@@ -38,7 +38,7 @@ Tasks 1 and 2 are written in full now; the component tasks are written after tas
 
 ### 1. Pin and reference app
 
-- [ ] Done
+- [x] Done
 
 The reference app from `parity-runtime` task 1. `compare.mjs` extended by the DOM tree comparison and the screenshot diff from Decisions, scenarios for `button`, `dialog`, `select` as the first three to prove the extension.
 
@@ -61,5 +61,15 @@ Checks: the table is complete against `gh api repos/shadcn-ui/ui/contents/apps/v
 Planned shape: one task per existing component that fails a comparison, then one task per missing component, then one task per missing example, then a final full run of `compare.mjs` over every example in both engines with the result appended to `plans/UPSTREAM.md`.
 
 ## Executor log
+
+### Task 1
+
+The reference app from `parity-runtime` task 1 serves every upstream example at `/examples/base/<name>` on port 3100, which is the route the decisions call `/preview`.
+
+`/preview/<name>` renders like it. shadcn's root `app/layout.tsx` puts its children right in `<body>`, the `(app)` routes add `app/(app)/layout.tsx` around them and the `(view)` routes (examples, block and chart views) add nothing. `BaseLayout` was both at once, it always wrapped the page in the `group/layout` flex column. Now `BaseLayout` is the root layout and the new `AppLayout` is the `(app)` one, used by the home, docs, charts, blocks, create, typeset and not found pages. The example preview, the block view and the chart view keep `BaseLayout`. Without the flex column a lone trigger keeps its width, and `tmp/parity-runtime/position.mjs` puts all nine popups where shadcn puts them without the `display: block` override it needed since `parity-runtime` task 6, which is removed there and in its `compare.mjs`.
+
+`tmp/parity-components/compare.mjs <engine> <example...|all|family:<prefix>>` compares after every step the rendered DOM (one line per element with tag, sorted attribute names, the values of `role`, `aria-*` and a few layout attributes, id references as present, `data-templ-*` and both apps' infrastructure left out, unrendered subtrees skipped), the focus, the scroll lock and a screenshot pixel diff (`pixelmatch`, threshold 0.1, a step passes up to 0.2 % differing pixels, the three images of a failing step land in `out/<engine>/`). The steps come from `scenarios.json`, for now the families of `parity-runtime`. `pngjs` and `pixelmatch` are installed in `tmp/parity-components`, Playwright is linked from `tmp/a11y-600`.
+
+`compare.mjs chromium dialog-demo` and the same in webkit run end to end. The DOM check already finds what the step checks of `parity-runtime` could not see: `DialogTitle` is an `h2` upstream, a closed trigger has no `aria-controls`, the select value keeps `data-placeholder`, and in WebKit Base UI's focus guards are `role="button"` instead of `aria-hidden` (Base UI switches them for Safari, not for a screen reader as `parity-runtime` task 7 assumed). Task 2 collects all of it.
 
 ## Planner review

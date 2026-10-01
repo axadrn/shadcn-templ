@@ -30,7 +30,7 @@ templ IndexPage() {
 	// nova page — a nested island leaves the wall's own nova rules in the
 	// cascade and they leak back in (visibly: a band under the card footers).
 	{{ cardsHTML, cardsErr := modules.InlinedStyleHTML(ctx, CardsDemo(), "base-rhea") }}
-	@layouts.BaseLayout(indexTitle, indexDescription) {
+	@layouts.AppLayout(indexTitle, indexDescription) {
 		@modules.AnnouncementBar()
 		@modules.Navbar()
 		// app/(app)/layout.tsx's <main> plus page.tsx's root div.
