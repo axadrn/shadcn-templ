@@ -14,7 +14,7 @@ templ CollapsibleBasic() {
 				@button.Button(button.Props{
 					Variant:    button.VariantGhost,
 					Class:      "w-full",
-					Attributes: collapsible.Trigger(ctx),
+					Attributes: serverButton(collapsible.Trigger(ctx)),
 				}) {
 					Product details
 					@icon.ChevronDown(icon.Props{Class: "ml-auto group-data-panel-open/button:rotate-180"})

@@ -3,12 +3,19 @@ package pages
 import (
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/examples"
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/layouts"
+	"github.com/axadrn/shadcn-templ/v2/internal/ui/modules"
 )
 
 // ExamplePreview serves a registry example as a standalone page, the target
-// of BlockPreview iframes (shadcn's /view/{name} pendant).
+// of BlockPreview iframes (shadcn's /view/{name} pendant). The example
+// renders as the compiled utility build of the style its reference imports.
 templ ExamplePreview(name string, entry examples.RegistryEntry) {
+	{{ html, err := modules.InlinedStyleHTML(ctx, entry.Component, entry.Style) }}
 	@layouts.BaseLayout("Preview: "+name, "") {
-		@entry.Component
+		if err != nil {
+			{ err.Error() }
+		} else {
+			@templ.Raw(html)
+		}
 	}
 }

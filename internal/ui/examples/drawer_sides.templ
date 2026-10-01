@@ -7,7 +7,7 @@ import (
 
 templ DrawerSides() {
 	@drawer.Drawer(drawer.Props{SwipeDirection: drawer.SwipeDirectionLeft}) {
-		@button.Button(button.Props{Variant: button.VariantSecondary, Attributes: drawer.Trigger(ctx)}) {
+		@button.Button(button.Props{Variant: button.VariantSecondary, Attributes: serverButton(drawer.Trigger(ctx))}) {
 			Open Left Drawer
 		}
 		@drawer.Content() {
@@ -23,7 +23,7 @@ templ DrawerSides() {
 				<div class="size-full rounded-2xl bg-muted"></div>
 			</div>
 			@drawer.Footer() {
-				@button.Button(button.Props{Attributes: drawer.Close(ctx)}) {
+				@button.Button(button.Props{Attributes: serverButton(drawer.Close(ctx))}) {
 					Close
 				}
 			}

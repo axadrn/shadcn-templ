@@ -7,6 +7,9 @@ import "github.com/a-h/templ"
 type RegistryEntry struct {
 	Component templ.Component
 	File      string
+	// Style is the style the reference example imports its ui from
+	// ("base-rhea" for @/styles/base-rhea/ui/*), "" for base-nova.
+	Style string
 }
 
 // Registry resolves <ComponentPreview name="..."/> shortcodes in the
@@ -209,13 +212,13 @@ var Registry = map[string]RegistryEntry{
 	"alert-dialog-media":                {Component: AlertDialogWithMedia(), File: "alert_dialog_media.templ"},
 	"alert-dialog-small-media":          {Component: AlertDialogSmallWithMedia(), File: "alert_dialog_small_media.templ"},
 	"alert-dialog-destructive":          {Component: AlertDialogDestructive(), File: "alert_dialog_destructive.templ"},
-	"drawer-demo":                       {Component: DrawerDemo(), File: "drawer_demo.templ"},
-	"drawer-sides":                      {Component: DrawerSides(), File: "drawer_sides.templ"},
-	"drawer-swipe-handle":               {Component: DrawerSwipeHandle(), File: "drawer_swipe_handle.templ"},
-	"drawer-nested":                     {Component: DrawerNested(), File: "drawer_nested.templ"},
-	"drawer-non-modal":                  {Component: DrawerNonModal(), File: "drawer_non_modal.templ"},
-	"drawer-snap-points":                {Component: DrawerSnapPoints(), File: "drawer_snap_points.templ"},
-	"drawer-dialog":                     {Component: DrawerDialog(), File: "drawer_dialog.templ"},
+	"drawer-demo":                       {Component: DrawerDemo(), File: "drawer_demo.templ", Style: "base-rhea"},
+	"drawer-sides":                      {Component: DrawerSides(), File: "drawer_sides.templ", Style: "base-rhea"},
+	"drawer-swipe-handle":               {Component: DrawerSwipeHandle(), File: "drawer_swipe_handle.templ", Style: "base-rhea"},
+	"drawer-nested":                     {Component: DrawerNested(), File: "drawer_nested.templ", Style: "base-rhea"},
+	"drawer-non-modal":                  {Component: DrawerNonModal(), File: "drawer_non_modal.templ", Style: "base-rhea"},
+	"drawer-snap-points":                {Component: DrawerSnapPoints(), File: "drawer_snap_points.templ", Style: "base-rhea"},
+	"drawer-dialog":                     {Component: DrawerDialog(), File: "drawer_dialog.templ", Style: "base-rhea"},
 	"command-demo":                      {Component: CommandDemo(), File: "command_demo.templ"},
 	"command-basic":                     {Component: CommandBasic(), File: "command_basic.templ"},
 	"command-shortcuts":                 {Component: CommandShortcuts(), File: "command_shortcuts.templ"},

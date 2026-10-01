@@ -9,7 +9,7 @@ templ AlertDialogDemo() {
 	@alertdialog.AlertDialog() {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
-			Attributes: alertdialog.Trigger(ctx),
+			Attributes: serverButton(alertdialog.Trigger(ctx)),
 		}) {
 			Show Dialog
 		}

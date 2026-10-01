@@ -9,7 +9,7 @@ templ DialogStickyFooter() {
 	@dialog.Dialog() {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
-			Attributes: dialog.Trigger(ctx),
+			Attributes: serverButton(dialog.Trigger(ctx)),
 		}) {
 			Sticky Footer
 		}
@@ -32,7 +32,7 @@ templ DialogStickyFooter() {
 			@dialog.Footer() {
 				@button.Button(button.Props{
 					Variant:    button.VariantOutline,
-					Attributes: dialog.Close(ctx),
+					Attributes: serverButton(dialog.Close(ctx)),
 				}) {
 					Close
 				}

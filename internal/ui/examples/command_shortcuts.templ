@@ -3,7 +3,6 @@ package examples
 import (
 	"github.com/axadrn/shadcn-templ/v2/components/button"
 	"github.com/axadrn/shadcn-templ/v2/components/command"
-	"github.com/axadrn/shadcn-templ/v2/components/dialog"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 )
 
@@ -12,7 +11,7 @@ templ CommandShortcuts() {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
 			Class:      "w-fit",
-			Attributes: dialog.TriggerFor("command-shortcuts"),
+			ID:         "command-shortcuts-open",
 		}) {
 			Open Menu
 		}
@@ -50,4 +49,11 @@ templ CommandShortcuts() {
 			}
 		}
 	</div>
+	// shadcn's example opens the dialog from the button's onClick
+	// (setOpen(true)), the button is no dialog trigger.
+	<script nonce={ templ.GetNonce(ctx) }>
+		document.addEventListener("click", (e) => {
+			if (e.target instanceof Element && e.target.closest("#command-shortcuts-open")) window.templ.dialog.open("command-shortcuts");
+		});
+	</script>
 }

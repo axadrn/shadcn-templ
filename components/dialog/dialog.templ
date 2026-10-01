@@ -101,6 +101,7 @@ func Trigger(ctx context.Context) templ.Attributes {
 // TriggerFor targets a dialog outside the current Dialog root by id.
 func TriggerFor(id string) templ.Attributes {
 	return templ.Attributes{
+		"data-slot":                  "dialog-trigger",
 		"data-base-ui-click-trigger": true,
 		"data-templ-controls":        id,
 		"aria-haspopup":              "dialog",
@@ -116,6 +117,7 @@ func Close(ctx context.Context) templ.Attributes {
 // CloseFor targets a dialog outside the current Dialog root by id.
 func CloseFor(id string) templ.Attributes {
 	return templ.Attributes{
+		"data-slot":               "dialog-close",
 		"data-templ-dialog-close": id,
 	}
 }
@@ -215,7 +217,6 @@ templ Content(props ...ContentProps) {
 					Attributes: templ.Attributes{
 						"data-slot":             "dialog-close",
 						"data-templ-dialog-close": "",
-						"aria-label":            "Close",
 					},
 				}) {
 					@icon.X()
@@ -267,7 +268,7 @@ templ Title(props ...TitleProps) {
 	}
 	// data-templ-dialog-title is the Title registration: the script wires the
 	// popup's aria-labelledby to this element, like Base UI's useDialogTitle.
-	<div
+	<h2
 		if p.ID != "" {
 			id={ p.ID }
 		}
@@ -277,7 +278,7 @@ templ Title(props ...TitleProps) {
 		{ p.Attributes... }
 	>
 		{ children... }
-	</div>
+	</h2>
 }
 
 templ Description(props ...DescriptionProps) {
@@ -287,7 +288,7 @@ templ Description(props ...DescriptionProps) {
 	}
 	// data-templ-dialog-description is the Description registration: the script
 	// wires the popup's aria-describedby to this element, like Base UI.
-	<div
+	<p
 		if p.ID != "" {
 			id={ p.ID }
 		}
@@ -297,5 +298,5 @@ templ Description(props ...DescriptionProps) {
 		{ p.Attributes... }
 	>
 		{ children... }
-	</div>
+	</p>
 }

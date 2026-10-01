@@ -10,10 +10,12 @@ import (
 )
 
 // DrawerDialog is the responsive dialog: a Dialog on desktop and a Drawer on
-// mobile (the reference's useMediaQuery("(min-width: 768px)")). Both are
-// SSR'd; the demo-local script below shows one and hides the other.
+// mobile (the reference's useMediaQuery("(min-width: 768px)")). Like the
+// React branch, only one of them is in the document: the script stamps the
+// matching template and swaps it when the query changes, carrying the open
+// state over like the reference's shared open.
 templ DrawerDialog() {
-	<div data-templ-drawer-dialog-desktop hidden>
+	<template id="drawer-dialog-desktop-template">
 		@dialog.Dialog(dialog.Props{ID: "drawer-dialog-desktop"}) {
 			@button.Button(button.Props{Variant: button.VariantOutline, Attributes: dialog.Trigger(ctx)}) {
 				Edit Profile
@@ -30,8 +32,8 @@ templ DrawerDialog() {
 				@drawerDialogProfileForm("")
 			}
 		}
-	</div>
-	<div data-templ-drawer-dialog-mobile hidden>
+</template>
+	<template id="drawer-dialog-mobile-template">
 		@drawer.Drawer(drawer.Props{ID: "drawer-dialog-mobile"}) {
 			@button.Button(button.Props{Variant: button.VariantOutline, Attributes: drawer.Trigger(ctx)}) {
 				Edit Profile
@@ -48,21 +50,28 @@ templ DrawerDialog() {
 				@drawerDialogProfileForm("p-4")
 			}
 		}
-	</div>
+</template>
 	<script nonce={ templ.GetNonce(ctx) }>
 		(() => {
-			// useMediaQuery pendant: show the Dialog markup on desktop and
-			// the Drawer on mobile. Both are server-rendered; only one set of
-			// triggers is visible at a time. Demo-local behavior, not a
-			// component API.
 			const mq = window.matchMedia("(min-width: 768px)");
+			const desktop = document.getElementById("drawer-dialog-desktop-template");
+			const mobile = document.getElementById("drawer-dialog-mobile-template");
+			// The component scripts load after this one: name the API, look it
+			// up on a swap.
+			const apiOf = (id) => (id === "drawer-dialog-desktop" ? window.templ.dialog : window.templ.drawer);
+			let shown = [];
+			let shownId = null;
 			const apply = () => {
-				document.querySelectorAll("[data-templ-drawer-dialog-desktop]").forEach((el) => {
-					el.hidden = !mq.matches;
-				});
-				document.querySelectorAll("[data-templ-drawer-dialog-mobile]").forEach((el) => {
-					el.hidden = mq.matches;
-				});
+				const [template, id] = mq.matches ? [desktop, "drawer-dialog-desktop"] : [mobile, "drawer-dialog-mobile"];
+				if (id === shownId) return;
+				const open = shownId !== null && apiOf(shownId).isOpen(shownId);
+				shown.forEach((node) => node.remove());
+				if (shownId) document.getElementById(shownId)?.closest("[data-templ-portal]")?.remove();
+				const fragment = template.content.cloneNode(true);
+				shown = [...fragment.childNodes];
+				mobile.after(fragment);
+				shownId = id;
+				if (open) requestAnimationFrame(() => apiOf(id).open(id));
 			};
 			apply();
 			mq.addEventListener("change", apply);

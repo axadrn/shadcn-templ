@@ -72,12 +72,13 @@ func triggerID(menuID string) string {
 
 // Trigger returns the attributes that turn any element (usually a button)
 // into the menu trigger — the asChild equivalent: no wrapper element, so the
-// trigger composes cleanly inside ButtonGroup and friends. The element keeps
-// its own data-slot; dropdownmenu.js finds it by aria-haspopup="menu" and the
-// data-templ-controls link to the menu popup. aria-controls follows the
-// mounted popup, as Base UI's MenuTrigger renders it.
+// trigger composes cleanly inside ButtonGroup and friends. dropdownmenu.js
+// finds it by aria-haspopup="menu" and the data-templ-controls link to the
+// menu popup. aria-controls follows the open popup, as Base UI's MenuTrigger
+// renders it.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
+		"data-slot":           "dropdown-menu-trigger",
 		"id":                  triggerID(state(ctx).id),
 		"data-templ-controls": state(ctx).id,
 		"aria-haspopup":       "menu",

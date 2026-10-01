@@ -125,6 +125,7 @@ func Trigger(ctx context.Context) templ.Attributes {
 // TriggerFor targets an alert dialog outside the current AlertDialog root by id.
 func TriggerFor(id string) templ.Attributes {
 	return templ.Attributes{
+		"data-slot":                  "alert-dialog-trigger",
 		"data-base-ui-click-trigger": true,
 		"data-templ-controls":        id,
 		"aria-haspopup":              "dialog",
@@ -290,7 +291,7 @@ templ Title(props ...TitleProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	<div
+	<h2
 		if p.ID != "" {
 			id={ p.ID }
 		}
@@ -300,7 +301,7 @@ templ Title(props ...TitleProps) {
 		{ p.Attributes... }
 	>
 		{ children... }
-	</div>
+	</h2>
 }
 
 templ Description(props ...DescriptionProps) {
@@ -308,7 +309,7 @@ templ Description(props ...DescriptionProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	<div
+	<p
 		if p.ID != "" {
 			id={ p.ID }
 		}
@@ -318,7 +319,7 @@ templ Description(props ...DescriptionProps) {
 		{ p.Attributes... }
 	>
 		{ children... }
-	</div>
+	</p>
 }
 
 // Action is a plain button, exactly like shadcn's AlertDialogAction: it does

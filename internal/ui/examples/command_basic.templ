@@ -3,7 +3,6 @@ package examples
 import (
 	"github.com/axadrn/shadcn-templ/v2/components/button"
 	"github.com/axadrn/shadcn-templ/v2/components/command"
-	"github.com/axadrn/shadcn-templ/v2/components/dialog"
 )
 
 templ CommandBasic() {
@@ -11,7 +10,7 @@ templ CommandBasic() {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
 			Class:      "w-fit",
-			Attributes: dialog.TriggerFor("command-basic"),
+			ID:         "command-basic-open",
 		}) {
 			Open Menu
 		}
@@ -37,4 +36,11 @@ templ CommandBasic() {
 			}
 		}
 	</div>
+	// shadcn's example opens the dialog from the button's onClick
+	// (setOpen(true)), the button is no dialog trigger.
+	<script nonce={ templ.GetNonce(ctx) }>
+		document.addEventListener("click", (e) => {
+			if (e.target instanceof Element && e.target.closest("#command-basic-open")) window.templ.dialog.open("command-basic");
+		});
+	</script>
 }

@@ -224,7 +224,8 @@
     content._templOpenMethod = trigger._templOpenMethod || "programmatic";
     portal(content);
     content.hidden = false;
-    // MenuTrigger renders aria-controls while the popup is mounted.
+    // MenuTrigger renders aria-controls while the popup is open
+    // (triggerPopupId).
     trigger.setAttribute("aria-controls", popupFor(content).id);
     content._templDismiss ??= window.templ.dismiss.useDismiss({
       floating: content,
@@ -265,11 +266,11 @@
     popup._templTypeahead?.reset();
     // Positioned until it unmounts, like Base UI. Unmounting the focus
     // manager returns focus.
+    triggerFor(content)?.removeAttribute("aria-controls");
     window.templ.transition.close(partsOf(content), popup, () => {
       stopAutoPositioning(content);
       stopFocusManager(content);
       content.hidden = true;
-      triggerFor(content)?.removeAttribute("aria-controls");
     });
     content._templSubs?.forEach(closeSubNow);
     const trigger = triggerFor(content);

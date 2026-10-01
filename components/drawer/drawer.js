@@ -83,10 +83,10 @@
     return !!viewport._templOpen;
   }
 
-  // The popup and the overlay render the transition status, the viewport
-  // the open state.
+  // The viewport (DialogViewport's transitionStatusMapping), the popup and
+  // the overlay render the open state and the transition status.
   function partsOf(viewport) {
-    return { parts: [popupOf(viewport), overlayOf(viewport)], stateParts: [viewport] };
+    return { parts: [popupOf(viewport), overlayOf(viewport), viewport] };
   }
 
   function setPartsAttr(viewport, name, on) {
@@ -192,18 +192,13 @@
   }
 
   // DrawerTrigger (DialogTrigger) renders aria-controls while the popup is
-  // mounted.
-  function setTriggersControl(viewport, mounted) {
-    triggersFor(viewport).forEach((trigger) => {
-      if (mounted) trigger.setAttribute("aria-controls", idOf(viewport));
-      else trigger.removeAttribute("aria-controls");
-    });
-  }
-
+  // open (triggerPopupId).
   function updateState(viewport, isOpen) {
     triggersFor(viewport).forEach((trigger) => {
       trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
       trigger.toggleAttribute("data-popup-open", isOpen);
+      if (isOpen) trigger.setAttribute("aria-controls", idOf(viewport));
+      else trigger.removeAttribute("aria-controls");
     });
   }
 
@@ -554,7 +549,6 @@
     viewport._templFocus = null;
     viewport._templInternalBackdrop?.remove();
     portalNodeOf(viewport).hidden = true;
-    setTriggersControl(viewport, false);
     syncStack();
   }
 
@@ -647,7 +641,6 @@
       wireAria(viewport);
       window.templ.portal.render(portalNode);
       portalNode.hidden = false;
-      setTriggersControl(viewport, true);
       if (isModal(viewport)) {
         viewport._templReleaseScroll = window.templ.scrollLock.acquire(viewport);
         viewport._templInternalBackdrop ??= createInternalBackdrop();

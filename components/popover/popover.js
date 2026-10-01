@@ -182,7 +182,8 @@
     });
     portal(content);
     content.hidden = false;
-    // PopoverTrigger renders aria-controls while the popup is mounted.
+    // PopoverTrigger renders aria-controls while the popup is open
+    // (triggerPopupId).
     triggersFor(content).forEach((trigger) => trigger.setAttribute("aria-controls", idOf(content)));
     // useDismiss runs while open. Base UI's non modal popover dismisses a
     // mouse press on the click, a touch on the press.
@@ -218,11 +219,11 @@
     content._templFocus?.close(details);
     // Positioned until it unmounts, like Base UI. Unmounting the focus
     // manager returns focus.
+    triggersFor(content).forEach((trigger) => trigger.removeAttribute("aria-controls"));
     window.templ.transition.close(partsOf(content), popupFor(content), () => {
       stopAutoPositioning(content);
       stopFocusManager(content);
       content.hidden = true;
-      triggersFor(content).forEach((trigger) => trigger.removeAttribute("aria-controls"));
     });
     const trigger = triggerFor(content);
     if (trigger) {

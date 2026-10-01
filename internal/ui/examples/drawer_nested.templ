@@ -101,24 +101,21 @@ templ DrawerNested() {
 	<script nonce={ templ.GetNonce(ctx) }>
 		(() => {
 			// useIsMobile pendant (hooks/use-mobile.ts), like the drawer-demo:
-			// swipeSwipeDirection is down and the swipe handle shows below the md
-			// breakpoint, right and no handle from md up.
-			const findDialog = (id) => document.getElementById(id);
-
-			const ids = ["drawer-nested-1", "drawer-nested-2", "drawer-nested-3", "drawer-nested-4"];
+			// swipeDirection is down and the swipe handle renders below the md
+			// breakpoint, right and no handle from md up. A drawer's id is its
+			// popup's.
+			const popups = ["drawer-nested-1", "drawer-nested-2", "drawer-nested-3", "drawer-nested-4"]
+				.map((id) => document.getElementById(id))
+				.filter(Boolean);
+			const handles = popups.map((popup) => popup.querySelector('[data-slot="drawer-swipe-handle"]'));
 			const mq = window.matchMedia("(max-width: 767px)");
 			const apply = () => {
-				for (const id of ids) {
-					const dialog = findDialog(id);
-					const popup = dialog?.querySelector('[data-slot="drawer-popup"]');
-					if (!popup) continue;
+				popups.forEach((popup, i) => {
 					popup.setAttribute("data-swipe-direction", mq.matches ? "down" : "right");
 					popup.setAttribute("data-swipe-axis", mq.matches ? "y" : "x");
-					const handle = popup.querySelector('[data-slot="drawer-swipe-handle"]');
-					// Inline display, because the handle's flex class would
-					// win over the [hidden] UA rule.
-					if (handle) handle.style.display = mq.matches ? "" : "none";
-				}
+					if (mq.matches) popup.prepend(handles[i]);
+					else handles[i].remove();
+				});
 			};
 			apply();
 			mq.addEventListener("change", apply);

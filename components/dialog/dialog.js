@@ -138,17 +138,13 @@
 
   // ----- open / close --------------------------------------------------------
 
+  // DialogTrigger renders aria-controls while the popup is open
+  // (triggerPopupId).
   function updateTriggers(state, isOpen) {
     triggersFor(state.popup).forEach((trigger) => {
       trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
       trigger.toggleAttribute("data-popup-open", isOpen);
-    });
-  }
-
-  // DialogTrigger renders aria-controls while the popup is mounted.
-  function setTriggersControl(state, mounted) {
-    triggersFor(state.popup).forEach((trigger) => {
-      if (mounted) trigger.setAttribute("aria-controls", state.popup.id);
+      if (isOpen) trigger.setAttribute("aria-controls", state.popup.id);
       else trigger.removeAttribute("aria-controls");
     });
   }
@@ -195,7 +191,6 @@
     }
 
     updateTriggers(state, true);
-    setTriggersControl(state, true);
 
     // DialogPopup's FloatingFocusManager, mounted until the exit animation
     // finished. Opened by touch the popup takes focus, so the virtual
@@ -235,7 +230,6 @@
     if (state.internalBackdrop) state.internalBackdrop.inert = true;
     window.templ.transition.close(partsOf(state), popup, () => {
       state.root.hidden = true;
-      setTriggersControl(state, false);
       popup.style.removeProperty("--nested-dialogs");
       popup.removeAttribute("data-nested-dialog-open");
       // Unmounting the focus manager returns focus.

@@ -77,21 +77,20 @@ templ DrawerDemo() {
 			// The drawer's id is its popup's, like Base UI's.
 			const drawerDemo = () => document.getElementById("drawer-demo");
 
-			// useIsMobile pendant (hooks/use-mobile.ts): swipeSwipeDirection is
-			// down and the swipe handle shows below the md breakpoint, right
+			// useIsMobile pendant (hooks/use-mobile.ts): swipeDirection is
+			// down and the swipe handle renders below the md breakpoint, right
 			// and no handle from md up. Demo-only behavior, so it lives here
 			// instead of the component API. The direction attributes live on
 			// the popup (Base UI Drawer.Popup).
+			const handle = drawerDemo()?.querySelector('[data-slot="drawer-swipe-handle"]');
 			const mq = window.matchMedia("(max-width: 767px)");
 			const apply = () => {
 				const popup = drawerDemo();
 				if (!popup) return;
 				popup.setAttribute("data-swipe-direction", mq.matches ? "down" : "right");
 				popup.setAttribute("data-swipe-axis", mq.matches ? "y" : "x");
-				const handle = popup.querySelector('[data-slot="drawer-swipe-handle"]');
-				// Inline display, because the handle's flex class would win
-				// over the [hidden] UA rule.
-				if (handle) handle.style.display = mq.matches ? "" : "none";
+				if (mq.matches) popup.prepend(handle);
+				else handle.remove();
 			};
 			apply();
 			mq.addEventListener("change", apply);

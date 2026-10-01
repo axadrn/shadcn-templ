@@ -11,7 +11,7 @@ templ SheetDemo() {
 	@sheet.Sheet() {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
-			Attributes: sheet.Trigger(ctx),
+			Attributes: serverButton(sheet.Trigger(ctx)),
 		}) {
 			Open
 		}
@@ -44,7 +44,7 @@ templ SheetDemo() {
 				}
 				@button.Button(button.Props{
 					Variant:    button.VariantOutline,
-					Attributes: sheet.Close(ctx),
+					Attributes: serverButton(sheet.Close(ctx)),
 				}) {
 					Close
 				}

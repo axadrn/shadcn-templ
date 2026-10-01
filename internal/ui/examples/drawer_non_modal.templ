@@ -8,7 +8,7 @@ import (
 
 templ DrawerNonModal() {
 	@drawer.Drawer(drawer.Props{Modal: utils.Ptr(false), DisablePointerDismissal: true, SwipeDirection: drawer.SwipeDirectionRight}) {
-		@button.Button(button.Props{Variant: button.VariantOutline, Attributes: drawer.Trigger(ctx)}) {
+		@button.Button(button.Props{Variant: button.VariantOutline, Attributes: serverButton(drawer.Trigger(ctx))}) {
 			Non Modal
 		}
 		@drawer.Content() {
@@ -21,7 +21,7 @@ templ DrawerNonModal() {
 				<div class="rounded-2xl bg-muted group-data-[swipe-axis=x]/drawer-popup:size-full group-data-[swipe-axis=y]/drawer-popup:h-80 group-data-[swipe-axis=y]/drawer-popup:w-full"></div>
 			</div>
 			@drawer.Footer() {
-				@button.Button(button.Props{Attributes: drawer.Close(ctx)}) {
+				@button.Button(button.Props{Attributes: serverButton(drawer.Close(ctx))}) {
 					Close
 				}
 			}

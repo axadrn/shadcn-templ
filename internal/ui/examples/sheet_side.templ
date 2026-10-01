@@ -14,7 +14,7 @@ templ SheetSide() {
 				@button.Button(button.Props{
 					Variant:    button.VariantOutline,
 					Class:      "capitalize",
-					Attributes: sheet.Trigger(ctx),
+					Attributes: serverButton(sheet.Trigger(ctx)),
 				}) {
 					{ string(side) }
 				}
@@ -40,7 +40,7 @@ templ SheetSide() {
 						}
 						@button.Button(button.Props{
 							Variant:    button.VariantOutline,
-							Attributes: sheet.Close(ctx),
+							Attributes: serverButton(sheet.Close(ctx)),
 						}) {
 							Close
 						}
