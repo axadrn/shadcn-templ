@@ -27,14 +27,11 @@ const dataTablePageSize = 10
 // lists in the tsx: every accessor column that can hide.
 var dataTableHideableColumns = []string{"type", "status", "target", "limit", "reviewer"}
 
-var dataTableViews = []struct {
-	Value string
-	Label string
-}{
-	{"outline", "Outline"},
-	{"past-performance", "Past Performance"},
-	{"key-personnel", "Key Personnel"},
-	{"focus-documents", "Focus Documents"},
+var dataTableViews = []selectcomp.ItemData{
+	{Value: "outline", Label: "Outline"},
+	{Value: "past-performance", Label: "Past Performance"},
+	{Value: "key-personnel", Label: "Key Personnel"},
+	{Value: "focus-documents", Label: "Focus Documents"},
 }
 
 templ DataTable(data []Item) {
@@ -57,7 +54,7 @@ templ DataTable(data []Item) {
 				}
 				// The view select is static: it mirrors the tabs but does not
 				// switch them (the tsx does not wire it to the tabs either).
-				@selectcomp.Select(selectcomp.Props{DefaultValue: "outline"}) {
+				@selectcomp.Select(selectcomp.Props{Items: dataTableViews, DefaultValue: "outline"}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{
 						Class: "flex w-fit @4xl/main:hidden",
 						Size:  selectcomp.SizeSm,
@@ -69,7 +66,7 @@ templ DataTable(data []Item) {
 						@selectcomp.Group() {
 							for _, view := range dataTableViews {
 								@selectcomp.Item(selectcomp.ItemProps{Value: view.Value}) {
-									{ view.Label }
+									{ view.Label.(string) }
 								}
 							}
 						}
@@ -597,7 +594,12 @@ templ dataTableRow(item Item, page, size int) {
 				@label.Label(label.Props{For: fmt.Sprintf("%d-reviewer", item.ID), Class: "sr-only"}) {
 					Reviewer
 				}
-				@selectcomp.Select() {
+				@selectcomp.Select(selectcomp.Props{
+					Items: []selectcomp.ItemData{
+						{Value: "Eddie Lake", Label: "Eddie Lake"},
+						{Value: "Jamik Tashpulatov", Label: "Jamik Tashpulatov"},
+					},
+				}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{
 						Class: "w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate",
 						Size:  selectcomp.SizeSm,
@@ -809,7 +811,14 @@ templ dataTableDrawerBody(item Item) {
 				@label.Label(label.Props{For: "status"}) {
 					Status
 				}
-				@selectcomp.Select(selectcomp.Props{DefaultValue: item.Status}) {
+				@selectcomp.Select(selectcomp.Props{
+					Items: []selectcomp.ItemData{
+						{Value: "Done", Label: "Done"},
+						{Value: "In Progress", Label: "In Progress"},
+						{Value: "Not Started", Label: "Not Started"},
+					},
+					DefaultValue: item.Status,
+				}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{ID: "status", Class: "w-full"}) {
 						@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a status"})
 					}
@@ -847,7 +856,14 @@ templ dataTableDrawerBody(item Item) {
 			@label.Label(label.Props{For: "reviewer"}) {
 				Reviewer
 			}
-			@selectcomp.Select(selectcomp.Props{DefaultValue: item.Reviewer}) {
+			@selectcomp.Select(selectcomp.Props{
+				Items: []selectcomp.ItemData{
+					{Value: "Eddie Lake", Label: "Eddie Lake"},
+					{Value: "Jamik Tashpulatov", Label: "Jamik Tashpulatov"},
+					{Value: "Emily Whalen", Label: "Emily Whalen"},
+				},
+				DefaultValue: item.Reviewer,
+			}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{ID: "reviewer", Class: "w-full"}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a reviewer"})
 				}

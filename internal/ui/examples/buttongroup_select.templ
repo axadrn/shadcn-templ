@@ -9,28 +9,30 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
+var buttonGroupCurrencies = []selectcomp.ItemData{
+	{Label: "US Dollar", Value: "$"},
+	{Label: "Euro", Value: "€"},
+	{Label: "British Pound", Value: "£"},
+}
+
 templ ButtonGroupSelect() {
 	@buttongroup.ButtonGroup() {
 		@buttongroup.ButtonGroup() {
-			@selectcomp.Select(selectcomp.Props{DefaultValue: "$"}) {
+			@selectcomp.Select(selectcomp.Props{ID: "button-group-currency", Items: buttonGroupCurrencies, DefaultValue: "$"}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{Class: "font-mono"}) {
-					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "$"})
+					$
 				}
 				@selectcomp.Content(selectcomp.ContentProps{AlignItemWithTrigger: utils.Ptr(false), Align: selectcomp.AlignStart}) {
 					@selectcomp.Group() {
-						@selectcomp.Item(selectcomp.ItemProps{Value: "$", Label: "$"}) {
-							$ <span class="text-muted-foreground">US Dollar</span>
-						}
-						@selectcomp.Item(selectcomp.ItemProps{Value: "€", Label: "€"}) {
-							€ <span class="text-muted-foreground">Euro</span>
-						}
-						@selectcomp.Item(selectcomp.ItemProps{Value: "£", Label: "£"}) {
-							£ <span class="text-muted-foreground">British Pound</span>
+						for _, item := range buttonGroupCurrencies {
+							@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+								{ item.Value } <span class="text-muted-foreground">{ item.Label.(string) }</span>
+							}
 						}
 					}
 				}
 			}
-			@input.Input(input.Props{Placeholder: "10.00"})
+			@input.Input(input.Props{Placeholder: "10.00", Attributes: templ.Attributes{"pattern": "[0-9]*"}})
 		}
 		@buttongroup.ButtonGroup() {
 			@button.Button(button.Props{
@@ -42,4 +44,12 @@ templ ButtonGroupSelect() {
 			}
 		}
 	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The trigger shows the currency state, which onValueChange sets.
+		document.addEventListener("select-change", (e) => {
+			const trigger = e.target;
+			if (trigger.getAttribute("data-templ-controls") !== "button-group-currency") return;
+			trigger.firstChild.textContent = e.detail.value;
+		});
+	</script>
 }

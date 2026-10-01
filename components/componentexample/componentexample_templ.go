@@ -934,7 +934,14 @@ func formExample() templ.Component {
 								}
 								return nil
 							})
-							templ_7745c5c3_Err = selectcomp.Select().Render(templ.WithChildren(ctx, templ_7745c5c3_Var34), templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = selectcomp.Select(selectcomp.Props{
+								Items: []selectcomp.ItemData{
+									{Value: "developer", Label: "Developer"},
+									{Value: "designer", Label: "Designer"},
+									{Value: "manager", Label: "Manager"},
+									{Value: "other", Label: "Other"},
+								},
+							}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var34), templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}

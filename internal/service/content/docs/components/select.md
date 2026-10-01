@@ -55,6 +55,8 @@ shadcn-templ add select
 
 <ComponentSource name="select" title="components/baseui/use_typeahead.js" />
 
+<ComponentSource name="select" title="components/baseui/internal_backdrop.js" />
+
 <ComponentSource name="select" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="select" title="components/floatingui/floating_ui_dom.js" />
@@ -168,7 +170,8 @@ the server renders open counts as opened programmatically.
 | Prop       | Type     | Default |
 | ---------- | -------- | ------- |
 | `Name`     | `string` | -       |
-| `Value`    | `string` | -       |
+| `Items`    | `[]ItemData` | -   |
+| `Value`    | `*string` | -      |
 | `DefaultValue` | `string` | - |
 | `Open` | `*bool` | - |
 | `DefaultOpen` | `bool` | `false` |
@@ -185,7 +188,7 @@ The `selectcomp.Trigger` component is the button that opens the listbox.
 
 ### SelectValue
 
-The `selectcomp.Value` component shows the selected label inside the trigger.
+The `selectcomp.Value` component shows the label `Items` has for the value, the value itself without one, and the placeholder while no value is selected. An `ItemData` with the value `""` is Base UI's null item: its label shows while the select has no value. A label is a `string` or a `templ.Component`.
 
 | Prop          | Type     | Default |
 | ------------- | -------- | ------- |

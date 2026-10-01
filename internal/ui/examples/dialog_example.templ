@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"github.com/axadrn/shadcn-templ/v2/utils"
 	"github.com/axadrn/shadcn-templ/v2/components/button"
 	"github.com/axadrn/shadcn-templ/v2/components/checkbox"
 	"github.com/axadrn/shadcn-templ/v2/components/dialog"
@@ -225,7 +226,12 @@ func dialogExampleAccents() []dialogExampleOption {
 }
 
 templ dialogExampleSettingsSelect(id, value string, options []dialogExampleOption) {
-	@selectcomp.Select(selectcomp.Props{DefaultValue: value}) {
+	@selectcomp.Select(selectcomp.Props{
+		Items: utils.Map(options, func(o dialogExampleOption) selectcomp.ItemData {
+			return selectcomp.ItemData{Value: o.Value, Label: o.Label}
+		}),
+		DefaultValue: value,
+	}) {
 		@selectcomp.Trigger(selectcomp.TriggerProps{ID: id}) {
 			@selectcomp.Value()
 		}

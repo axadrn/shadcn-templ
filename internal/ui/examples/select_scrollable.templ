@@ -1,117 +1,116 @@
 package examples
 
-import selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+import (
+	"slices"
+
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+)
+
+var selectTimezonesNorthAmerica = []selectcomp.ItemData{
+	{Label: "Eastern Standard Time", Value: "est"},
+	{Label: "Central Standard Time", Value: "cst"},
+	{Label: "Mountain Standard Time", Value: "mst"},
+	{Label: "Pacific Standard Time", Value: "pst"},
+	{Label: "Alaska Standard Time", Value: "akst"},
+	{Label: "Hawaii Standard Time", Value: "hst"},
+}
+
+var selectTimezonesEuropeAfrica = []selectcomp.ItemData{
+	{Label: "Greenwich Mean Time", Value: "gmt"},
+	{Label: "Central European Time", Value: "cet"},
+	{Label: "Eastern European Time", Value: "eet"},
+	{Label: "Western European Summer Time", Value: "west"},
+	{Label: "Central Africa Time", Value: "cat"},
+	{Label: "East Africa Time", Value: "eat"},
+}
+
+var selectTimezonesAsia = []selectcomp.ItemData{
+	{Label: "Moscow Time", Value: "msk"},
+	{Label: "India Standard Time", Value: "ist"},
+	{Label: "China Standard Time", Value: "cst_china"},
+	{Label: "Japan Standard Time", Value: "jst"},
+	{Label: "Korea Standard Time", Value: "kst"},
+	{Label: "Indonesia Central Standard Time", Value: "ist_indonesia"},
+}
+
+var selectTimezonesAustraliaPacific = []selectcomp.ItemData{
+	{Label: "Australian Western Standard Time", Value: "awst"},
+	{Label: "Australian Central Standard Time", Value: "acst"},
+	{Label: "Australian Eastern Standard Time", Value: "aest"},
+	{Label: "New Zealand Standard Time", Value: "nzst"},
+	{Label: "Fiji Time", Value: "fjt"},
+}
+
+var selectTimezonesSouthAmerica = []selectcomp.ItemData{
+	{Label: "Argentina Time", Value: "art"},
+	{Label: "Bolivia Time", Value: "bot"},
+	{Label: "Brasilia Time", Value: "brt"},
+	{Label: "Chile Standard Time", Value: "clt"},
+}
+
+var selectTimezones = slices.Concat(
+	[]selectcomp.ItemData{{Label: "Select a timezone", Value: ""}},
+	selectTimezonesNorthAmerica,
+	selectTimezonesEuropeAfrica,
+	selectTimezonesAsia,
+	selectTimezonesAustraliaPacific,
+	selectTimezonesSouthAmerica,
+)
 
 templ SelectScrollable() {
-	@selectcomp.Select() {
+	@selectcomp.Select(selectcomp.Props{Items: selectTimezones}) {
 		@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-full max-w-64"}) {
-			@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a timezone"})
+			@selectcomp.Value()
 		}
 		@selectcomp.Content() {
 			@selectcomp.Group() {
 				@selectcomp.Label() {
 					North America
 				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "est"}) {
-					Eastern Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "cst"}) {
-					Central Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "mst"}) {
-					Mountain Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "pst"}) {
-					Pacific Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "akst"}) {
-					Alaska Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "hst"}) {
-					Hawaii Standard Time
+				for _, item := range selectTimezonesNorthAmerica {
+					@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+						{ item.Label.(string) }
+					}
 				}
 			}
 			@selectcomp.Group() {
 				@selectcomp.Label() {
 					Europe & Africa
 				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "gmt"}) {
-					Greenwich Mean Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "cet"}) {
-					Central European Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "eet"}) {
-					Eastern European Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "west"}) {
-					Western European Summer Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "cat"}) {
-					Central Africa Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "eat"}) {
-					East Africa Time
+				for _, item := range selectTimezonesEuropeAfrica {
+					@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+						{ item.Label.(string) }
+					}
 				}
 			}
 			@selectcomp.Group() {
 				@selectcomp.Label() {
 					Asia
 				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "msk"}) {
-					Moscow Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "ist"}) {
-					India Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "cst_china"}) {
-					China Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "jst"}) {
-					Japan Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "kst"}) {
-					Korea Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "ist_indonesia"}) {
-					Indonesia Central Standard Time
+				for _, item := range selectTimezonesAsia {
+					@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+						{ item.Label.(string) }
+					}
 				}
 			}
 			@selectcomp.Group() {
 				@selectcomp.Label() {
 					Australia & Pacific
 				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "awst"}) {
-					Australian Western Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "acst"}) {
-					Australian Central Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "aest"}) {
-					Australian Eastern Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "nzst"}) {
-					New Zealand Standard Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "fjt"}) {
-					Fiji Time
+				for _, item := range selectTimezonesAustraliaPacific {
+					@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+						{ item.Label.(string) }
+					}
 				}
 			}
 			@selectcomp.Group() {
 				@selectcomp.Label() {
 					South America
 				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "art"}) {
-					Argentina Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "bot"}) {
-					Bolivia Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "brt"}) {
-					Brasilia Time
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "clt"}) {
-					Chile Standard Time
+				for _, item := range selectTimezonesSouthAmerica {
+					@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+						{ item.Label.(string) }
+					}
 				}
 			}
 		}

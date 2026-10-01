@@ -6,24 +6,20 @@ import (
 )
 
 templ SelectInvalid() {
-	@field.Field(field.Props{ Class: "w-full max-w-48", Attributes: templ.Attributes{"data-invalid": "true"}}) {
+	@field.Field(field.Props{Class: "w-full max-w-48", Attributes: templ.Attributes{"data-invalid": "true"}}) {
 		@field.Label() {
 			Fruit
 		}
-		@selectcomp.Select() {
+		@selectcomp.Select(selectcomp.Props{Items: selectFruits[:4]}) {
 			@selectcomp.Trigger(selectcomp.TriggerProps{Attributes: templ.Attributes{"aria-invalid": "true"}}) {
-				@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
+				@selectcomp.Value()
 			}
 			@selectcomp.Content() {
 				@selectcomp.Group() {
-					@selectcomp.Item(selectcomp.ItemProps{Value: "apple"}) {
-						Apple
-					}
-					@selectcomp.Item(selectcomp.ItemProps{Value: "banana"}) {
-						Banana
-					}
-					@selectcomp.Item(selectcomp.ItemProps{Value: "blueberry"}) {
-						Blueberry
+					for _, item := range selectFruits[:4] {
+						@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+							{ item.Label.(string) }
+						}
 					}
 				}
 			}

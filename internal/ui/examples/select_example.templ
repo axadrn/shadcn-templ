@@ -58,9 +58,23 @@ var selectExampleFruits = []selectExampleItem{
 	{"Pineapple", "pineapple"},
 }
 
+var selectExampleFruitItems = utils.Map(selectExampleFruits, func(f selectExampleItem) selectcomp.ItemData {
+	return selectcomp.ItemData{Value: f.Value, Label: f.Label}
+})
+
+var selectExampleManyItems = func() []selectcomp.ItemData {
+	items := make([]selectcomp.ItemData, 100)
+	for i := range items {
+		items[i] = selectcomp.ItemData{Value: fmt.Sprintf("item-%d", i), Label: fmt.Sprintf("Item %d", i)}
+	}
+	return items
+}()
+
 templ selectExampleBasic() {
 	@selectExampleSection("Basic", "") {
-		@selectcomp.Select() {
+		@selectcomp.Select(selectcomp.Props{
+			Items: selectExampleFruitItems,
+		}) {
 			@selectcomp.Trigger() {
 				@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
 			}
@@ -86,7 +100,9 @@ templ selectExampleSides() {
 	@selectExampleSection("Sides", "col-span-2") {
 		<div class="flex flex-wrap justify-center gap-2">
 			for _, side := range selectExampleSideLabels {
-				@selectcomp.Select() {
+				@selectcomp.Select(selectcomp.Props{
+					Items: selectExampleFruitItems,
+				}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-28 capitalize"}) {
 						@selectcomp.Value(selectcomp.ValueProps{Placeholder: side})
 					}
@@ -105,25 +121,30 @@ templ selectExampleSides() {
 	}
 }
 
+// The chart types with their icon, the labels the trigger shows too.
+var selectExampleChartTypes = []selectcomp.ItemData{
+	{Value: "line", Label: selectExampleChartLabel(icon.ChartLine(), "Line")},
+	{Value: "bar", Label: selectExampleChartLabel(icon.ChartBar(), "Bar")},
+	{Value: "pie", Label: selectExampleChartLabel(icon.ChartPie(), "Pie")},
+}
+
+templ selectExampleChartLabel(chartIcon templ.Component, text string) {
+	@chartIcon
+	{ text }
+}
+
 templ selectExampleChartItems() {
-	@selectcomp.Item(selectcomp.ItemProps{Value: "line"}) {
-		@icon.ChartLine()
-		Line
-	}
-	@selectcomp.Item(selectcomp.ItemProps{Value: "bar"}) {
-		@icon.ChartBar()
-		Bar
-	}
-	@selectcomp.Item(selectcomp.ItemProps{Value: "pie"}) {
-		@icon.ChartPie()
-		Pie
+	for _, item := range selectExampleChartTypes {
+		@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+			@item.Label.(templ.Component)
+		}
 	}
 }
 
 templ selectExampleWithIcons() {
 	@selectExampleSection("With Icons", "") {
 		<div class="flex flex-col gap-4">
-			@selectcomp.Select() {
+			@selectcomp.Select(selectcomp.Props{Items: selectExampleChartTypes}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{Size: selectcomp.SizeSm}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Chart Type"})
 				}
@@ -133,7 +154,7 @@ templ selectExampleWithIcons() {
 					}
 				}
 			}
-			@selectcomp.Select() {
+			@selectcomp.Select(selectcomp.Props{Items: selectExampleChartTypes}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{Size: selectcomp.SizeDefault}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Chart Type"})
 				}
@@ -149,7 +170,16 @@ templ selectExampleWithIcons() {
 
 templ selectExampleWithGroups() {
 	@selectExampleSection("With Groups & Labels", "") {
-		@selectcomp.Select() {
+		@selectcomp.Select(selectcomp.Props{
+			Items: []selectcomp.ItemData{
+				{Value: "apple", Label: "Apple"},
+				{Value: "banana", Label: "Banana"},
+				{Value: "blueberry", Label: "Blueberry"},
+				{Value: "carrot", Label: "Carrot"},
+				{Value: "broccoli", Label: "Broccoli"},
+				{Value: "spinach", Label: "Spinach"},
+			},
+		}) {
 			@selectcomp.Trigger() {
 				@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
 			}
@@ -190,7 +220,9 @@ templ selectExampleWithGroups() {
 
 templ selectExampleLargeList() {
 	@selectExampleSection("Large List", "") {
-		@selectcomp.Select() {
+		@selectcomp.Select(selectcomp.Props{
+			Items: selectExampleManyItems,
+		}) {
 			@selectcomp.Trigger() {
 				@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select an item"})
 			}
@@ -210,7 +242,9 @@ templ selectExampleLargeList() {
 templ selectExampleSizes() {
 	@selectExampleSection("Sizes", "") {
 		<div class="flex flex-col gap-4">
-			@selectcomp.Select() {
+			@selectcomp.Select(selectcomp.Props{
+				Items: selectExampleFruitItems,
+			}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{Size: selectcomp.SizeSm}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
 				}
@@ -224,7 +258,9 @@ templ selectExampleSizes() {
 					}
 				}
 			}
-			@selectcomp.Select() {
+			@selectcomp.Select(selectcomp.Props{
+				Items: selectExampleFruitItems,
+			}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{Size: selectcomp.SizeDefault}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
 				}
@@ -287,7 +323,9 @@ templ selectExampleWithButton() {
 	@selectExampleSection("With Button", "") {
 		<div class="flex flex-col gap-4">
 			<div class="flex items-center gap-2">
-				@selectcomp.Select() {
+				@selectcomp.Select(selectcomp.Props{
+					Items: selectExampleFruitItems,
+				}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{Size: selectcomp.SizeSm}) {
 						@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
 					}
@@ -306,7 +344,9 @@ templ selectExampleWithButton() {
 				}
 			</div>
 			<div class="flex items-center gap-2">
-				@selectcomp.Select() {
+				@selectcomp.Select(selectcomp.Props{
+					Items: selectExampleFruitItems,
+				}) {
 					@selectcomp.Trigger() {
 						@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
 					}
@@ -330,7 +370,15 @@ templ selectExampleWithButton() {
 
 templ selectExampleItemAligned() {
 	@selectExampleSection("Item Aligned", "") {
-		@selectcomp.Select() {
+		@selectcomp.Select(selectcomp.Props{
+			Items: []selectcomp.ItemData{
+				{Value: "apple", Label: "Apple"},
+				{Value: "banana", Label: "Banana"},
+				{Value: "blueberry", Label: "Blueberry"},
+				{Value: "grapes", Label: "Grapes"},
+				{Value: "pineapple", Label: "Pineapple"},
+			},
+		}) {
 			@selectcomp.Trigger() {
 				@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
 			}
@@ -363,7 +411,9 @@ templ selectExampleWithField() {
 			@field.Label(field.LabelProps{For: "select-fruit"}) {
 				Favorite Fruit
 			}
-			@selectcomp.Select() {
+			@selectcomp.Select(selectcomp.Props{
+				Items: selectExampleFruitItems,
+			}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{ID: "select-fruit"}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
 				}
@@ -387,7 +437,9 @@ templ selectExampleWithField() {
 templ selectExampleInvalid() {
 	@selectExampleSection("Invalid", "") {
 		<div class="flex flex-col gap-4">
-			@selectcomp.Select() {
+			@selectcomp.Select(selectcomp.Props{
+				Items: selectExampleFruitItems,
+			}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{Attributes: templ.Attributes{"aria-invalid": "true"}}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
 				}
@@ -405,7 +457,9 @@ templ selectExampleInvalid() {
 				@field.Label(field.LabelProps{For: "select-fruit-invalid"}) {
 					Favorite Fruit
 				}
-				@selectcomp.Select() {
+				@selectcomp.Select(selectcomp.Props{
+					Items: selectExampleFruitItems,
+				}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{ID: "select-fruit-invalid", Attributes: templ.Attributes{"aria-invalid": "true"}}) {
 						@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
 					}
@@ -431,7 +485,13 @@ templ selectExampleInline() {
 	@selectExampleSection("Inline with Input & NativeSelect", "") {
 		<div class="flex items-center gap-2">
 			@input.Input(input.Props{Placeholder: "Search...", Class: "flex-1"})
-			@selectcomp.Select() {
+			@selectcomp.Select(selectcomp.Props{
+				Items: []selectcomp.ItemData{
+					{Value: "all", Label: "All"},
+					{Value: "active", Label: "Active"},
+					{Value: "inactive", Label: "Inactive"},
+				},
+			}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-[140px]"}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Filter"})
 				}
@@ -470,7 +530,16 @@ templ selectExampleInline() {
 
 templ selectExampleDisabled() {
 	@selectExampleSection("Disabled", "") {
-		@selectcomp.Select(selectcomp.Props{Disabled: true}) {
+		@selectcomp.Select(selectcomp.Props{
+			Items: []selectcomp.ItemData{
+				{Value: "apple", Label: "Apple"},
+				{Value: "banana", Label: "Banana"},
+				{Value: "blueberry", Label: "Blueberry"},
+				{Value: "grapes", Label: "Grapes"},
+				{Value: "pineapple", Label: "Pineapple"},
+			},
+			Disabled: true,
+		}) {
 			@selectcomp.Trigger() {
 				@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
 			}
@@ -515,7 +584,9 @@ templ selectExampleInDialog() {
 						Use the select below to choose a fruit.
 					}
 				}
-				@selectcomp.Select() {
+				@selectcomp.Select(selectcomp.Props{
+					Items: selectExampleFruitItems,
+				}) {
 					@selectcomp.Trigger() {
 						@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
 					}

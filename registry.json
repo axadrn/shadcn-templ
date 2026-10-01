@@ -538,6 +538,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/internal_backdrop.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/baseui/menu.js",
           "type": "registry:ui"
         },
@@ -1105,6 +1109,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/internal_backdrop.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/baseui/menu.js",
           "type": "registry:ui"
         },
@@ -1261,6 +1269,10 @@
         },
         {
           "path": "components/baseui/use_list_navigation.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/internal_backdrop.js",
           "type": "registry:ui"
         },
         {

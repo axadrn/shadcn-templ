@@ -41,10 +41,48 @@
     return el?.matches(POPUP) ? el.parentElement : null;
   }
 
-  // The hidden form input sits right before the trigger button.
+  // SelectRoot renders its hidden input after its children, so after the
+  // trigger among its siblings.
+  const INPUT = 'input[aria-hidden="true"][tabindex="-1"]';
+
   function inputFor(trigger) {
-    const prev = trigger.previousElementSibling;
-    return prev && prev.matches('input[type="hidden"]') ? prev : null;
+    let el = trigger.nextElementSibling;
+    while (el && !el.matches(INPUT)) el = el.nextElementSibling;
+    return el;
+  }
+
+  function triggerOfInput(input) {
+    let el = input.previousElementSibling;
+    while (el && !el.matches(TRIGGER)) el = el.previousElementSibling;
+    return el;
+  }
+
+  // SelectIcon renders the open state too.
+  function iconFor(trigger) {
+    return trigger.querySelector(':scope > svg[aria-hidden="true"]');
+  }
+
+  // SelectItemIndicator, mounted while its item is selected.
+  function indicatorOf(item) {
+    return item.querySelector(':scope > span[aria-hidden="true"]');
+  }
+
+  function setSelected(item, selected) {
+    item.toggleAttribute("data-selected", selected);
+    item.setAttribute("aria-selected", selected ? "true" : "false");
+    const indicator = indicatorOf(item);
+    if (indicator) indicator.hidden = !selected;
+  }
+
+  // Base UI's Select.Group names its label (Select.GroupLabel has an id).
+  function wireGroups(content) {
+    let n = 0;
+    content.querySelectorAll('[data-slot="select-group"]').forEach((group) => {
+      const label = group.querySelector(':scope > [data-slot="select-label"]');
+      if (!label) return;
+      if (!label.id) label.id = popupFor(content).id + "-label-" + ++n;
+      group.setAttribute("aria-labelledby", label.id);
+    });
   }
 
   // Base UI's Select.ItemText has no slot; it is the item's first child.
@@ -64,14 +102,27 @@
     return trigger.querySelector('[data-slot="select-value"]');
   }
 
+  // SelectValue: the items label of the value, else the raw value, else
+  // (no value) the placeholder. The labels come with the value's template.
+  function renderValue(span, value) {
+    const items = span.querySelector(":scope > template[data-templ-items]");
+    const entry = items && [...items.content.children].find((e) => e.getAttribute("data-templ-value") === value);
+    [...span.childNodes].forEach((node) => node !== items && node.remove());
+    let nodes;
+    if (entry) nodes = [...entry.cloneNode(true).childNodes];
+    else if (value !== "") nodes = [document.createTextNode(value)];
+    else nodes = [document.createTextNode(span.getAttribute("data-templ-placeholder") || "")];
+    span.prepend(...nodes);
+  }
+
   function popupFor(content) {
     return content.querySelector(":scope > " + POPUP);
   }
 
-  // Base UI's Select.List has no slot; it is the popup child between the
-  // scroll arrows.
+  // SelectList has no slot; it is the popup's listbox between the scroll
+  // arrows.
   function viewportFor(content) {
-    return popupFor(content).querySelector(":scope > :not([data-slot])");
+    return popupFor(content).querySelector(':scope > [role="listbox"]');
   }
 
   function clamp(value, min, max) {
@@ -103,8 +154,12 @@
     return content.parentElement;
   }
 
+  // SelectPortal mounts on the first open and stays: Base UI keeps the
+  // select's positioner mounted (hidden) once it opened.
   function portal(content) {
-    window.templ.portal.render(portalNodeOf(content));
+    const node = portalNodeOf(content);
+    window.templ.portal.render(node);
+    node.hidden = false;
   }
 
   // SelectPopup's FloatingFocusManager: non modal, focus returns to the
@@ -204,13 +259,26 @@
     content._templTypeahead = null;
   }
 
-  // Clears everything a previous open left behind on the positioner and popup.
+  // Clears everything a previous open left behind on the positioner, popup
+  // and list.
   function resetInlineStyles(content) {
-    ["left", "right", "top", "bottom", "height", "maxHeight", "marginTop", "marginBottom"].forEach(
+    ["position", "left", "right", "top", "bottom", "height", "maxHeight", "marginTop", "marginBottom"].forEach(
       (prop) => (content.style[prop] = ""),
     );
     const popup = popupFor(content);
     if (popup) popup.style.height = "";
+    setListFunctionalStyles(content, false);
+  }
+
+  // LIST_FUNCTIONAL_STYLES: while the popup is aligned with the trigger the
+  // list is the scroller, otherwise the popup scrolls.
+  function setListFunctionalStyles(content, on) {
+    const list = viewportFor(content);
+    if (!list) return;
+    list.style.position = on ? "relative" : "";
+    list.style.maxHeight = on ? "100%" : "";
+    list.style.overflowX = on ? "hidden" : "";
+    list.style.overflowY = on ? "auto" : "";
   }
 
 
@@ -267,6 +335,7 @@
     content.style.marginTop = MARGIN + "px";
     content.style.marginBottom = MARGIN + "px";
     popup.style.height = "100%";
+    setListFunctionalStyles(content, true);
 
     const max = maxScrollTop(viewport);
     const isTopPositioned = scrollTop >= max - TOL;
@@ -326,6 +395,9 @@
     const alignActive = isAlignMode(content) && content._templOpenMethod !== "touch" && !content._templAlignFallback;
     content._templAligned = false;
     resetInlineStyles(content);
+    // The aligned positioner is fixed to the viewport, like SelectPositioner's,
+    // also while its natural size is measured.
+    if (alignActive) content.style.position = "fixed";
     let placed = false;
     const positioning = window.templ.anchorPositioning.useAnchorPositioning({
       anchor: trigger,
@@ -368,14 +440,26 @@
 
   // ----- scroll arrows + capped grow-on-scroll (Base UI behavior) -----------
 
+  // SelectRoot's handleScrollArrowVisibility with the arrows'
+  // SelectScrollArrow: an arrow mounts while the list can scroll its way
+  // (never for a touch open), with the positioner's side, and the list hides
+  // its scrollbar while one is mounted (hasScrollArrows).
   function updateScrollArrows(content) {
-    const viewport = viewportFor(content);
+    const list = viewportFor(content);
     const up = content.querySelector('[data-slot="select-scroll-up-button"]');
     const down = content.querySelector('[data-slot="select-scroll-down-button"]');
-    if (!viewport || !up || !down) return;
-    const max = maxScrollTop(viewport);
-    up.classList.toggle("hidden", max <= 0 || viewport.scrollTop <= TOL);
-    down.classList.toggle("hidden", max <= 0 || viewport.scrollTop >= max - TOL);
+    if (!list || !up || !down) return;
+    const max = maxScrollTop(list);
+    const scrollTop = clamp(list.scrollTop, 0, max);
+    const touch = content._templOpenMethod === "touch";
+    const side = content.getAttribute("data-side") || "bottom";
+    [[up, scrollTop > 0], [down, scrollTop < max]].forEach(([arrow, visible]) => {
+      visible = visible && !touch;
+      arrow.hidden = !visible;
+      arrow.toggleAttribute("data-visible", visible);
+      arrow.setAttribute("data-side", side);
+    });
+    list.style.scrollbarWidth = !up.hidden || !down.hidden ? "none" : "";
   }
 
   // In aligned mode scrolling first consumes the remaining space toward the
@@ -546,6 +630,9 @@
       content._templSelection.allowUnselectedMouseUp = true;
     }, SELECTED_DELAY);
     portal(content);
+    // SelectPositioner's InternalBackdrop: the select is modal, the trigger
+    // stays pressable through the hole.
+    window.templ.internalBackdrop.mount(content, trigger);
     content._templDismiss ??= window.templ.dismiss.useDismiss({
       floating: content,
       reference: trigger,
@@ -569,6 +656,7 @@
       trigger.setAttribute("aria-expanded", "true");
       trigger.setAttribute("data-popup-open", "");
       trigger.setAttribute("data-pressed", "");
+      iconFor(trigger)?.setAttribute("data-popup-open", "");
       content._templNav?.open();
       content._templTypeahead?.reset();
     };
@@ -589,6 +677,7 @@
     content._templFocus?.close();
     content._templNav?.close();
     content._templTypeahead?.reset();
+    window.templ.internalBackdrop.inert(content);
     // Aligned mode has no exit animation (animate-none, like shadcn), so
     // the close completes on the next frame. Positioned until it unmounts,
     // and the alignment fallback holds until then too. Unmounting the focus
@@ -599,6 +688,7 @@
       highlight(content, null);
       content._templAlignFallback = false;
       content.hidden = true;
+      window.templ.internalBackdrop.remove(content);
       // data-popup-side follows the mounted popup.
       triggerFor(content)?.removeAttribute("data-popup-side");
     });
@@ -610,6 +700,7 @@
       trigger.setAttribute("aria-expanded", "false");
       trigger.removeAttribute("data-popup-open");
       trigger.removeAttribute("data-pressed");
+      iconFor(trigger)?.removeAttribute("data-popup-open");
     }
   }
 
@@ -654,16 +745,16 @@
 
     // Controlled: the Base UI value prop, the owner commits.
     if (!trigger.hasAttribute("data-templ-value")) {
-      content.querySelectorAll(ITEM).forEach((i) => {
-      i.removeAttribute("data-selected");
-      i.setAttribute("aria-selected", "false");
-      });
-      item.setAttribute("data-selected", "");
-      item.setAttribute("aria-selected", "true");
+      content.querySelectorAll(ITEM).forEach((i) => setSelected(i, i === item));
 
+      // The null item ("") selects no value: the value shows its label and
+      // stays a placeholder.
       const span = valueSpanFor(trigger);
-      if (span) span.textContent = label;
-      trigger.removeAttribute("data-placeholder");
+      if (span) {
+        renderValue(span, value);
+        span.toggleAttribute("data-placeholder", value === "");
+      }
+      trigger.toggleAttribute("data-placeholder", value === "");
 
       const input = inputFor(trigger);
       if (input && input.value !== value) {
@@ -681,13 +772,9 @@
       const content = contentFor(trigger);
       if (!isPositioner(content)) return;
       startListNavigation(content, trigger);
-      const checked = content.querySelector(ITEM + "[data-selected]");
-      if (checked) {
-        const label = labelOf(checked);
-        const span = valueSpanFor(trigger);
-        if (span && span.textContent.trim() !== label) span.textContent = label;
-        if (trigger.hasAttribute("data-placeholder")) trigger.removeAttribute("data-placeholder");
-      }
+      // SelectPopup leaves aria-orientation out once it has a list.
+      popupFor(content).removeAttribute("aria-orientation");
+      wireGroups(content);
       // Server-side open state (Base UI open or defaultOpen). A server open
       // has no pointer, so it is programmatic.
       if (content.getAttribute("data-templ-open") === "true" || content.hasAttribute("data-templ-default-open")) {
@@ -771,9 +858,6 @@
       trigger._templOpenMethod = e.pointerType;
       if (e.pointerType === "touch") return;
       pressedTriggers.add(trigger);
-      // Keep the browser from focusing the trigger button, focus lives on
-      // the selected item while the listbox is open (Base UI focus scope).
-      e.preventDefault();
       if (!trigger.disabled) {
         const content = contentFor(trigger);
         if (content) {
@@ -909,6 +993,25 @@
         }
       }
     }
+  });
+
+  // The hidden input's onFocus moves focus to the trigger, its onChange
+  // takes a browser autofill: the item whose value or label matches.
+  document.addEventListener("focusin", (e) => {
+    if (!(e.target instanceof Element) || !e.target.matches(INPUT)) return;
+    triggerOfInput(e.target)?.focus({ focusVisible: true });
+  });
+
+  document.addEventListener("change", (e) => {
+    const input = e.target;
+    if (!(input instanceof Element) || !input.matches(INPUT) || !e.isTrusted) return;
+    const trigger = triggerOfInput(input);
+    const content = trigger && contentFor(trigger);
+    if (!content || trigger.disabled || trigger.getAttribute("aria-readonly") === "true") return;
+    const next = input.value.toLowerCase();
+    const match = itemsIn(content).find((item) =>
+      (item.getAttribute("data-templ-value") || "").toLowerCase() === next || labelOf(item).toLowerCase() === next);
+    if (match) selectItem(content, match);
   });
 
   window.addEventListener(

@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"github.com/axadrn/shadcn-templ/v2/utils"
 	"github.com/axadrn/shadcn-templ/v2/components/button"
 	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
@@ -369,7 +370,12 @@ templ tableExampleWithSelect() {
 							{ task.Task }
 						}
 						@table.Cell() {
-							@selectcomp.Select(selectcomp.Props{DefaultValue: task.Assignee}) {
+							@selectcomp.Select(selectcomp.Props{
+								Items: utils.Map(tableExamplePeople, func(p tableExamplePerson) selectcomp.ItemData {
+									return selectcomp.ItemData{Value: p.Value, Label: p.Label}
+								}),
+								DefaultValue: task.Assignee,
+							}) {
 								@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-40", Size: selectcomp.SizeSm}) {
 									@selectcomp.Value()
 								}

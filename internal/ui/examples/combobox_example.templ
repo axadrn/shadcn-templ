@@ -668,7 +668,11 @@ templ comboboxExampleWithOtherInputs() {
 				}
 			}
 		}
-		@selectcomp.Select() {
+		@selectcomp.Select(selectcomp.Props{
+			Items: utils.Map(comboboxExampleFrameworks, func(f comboboxExampleFramework) selectcomp.ItemData {
+				return selectcomp.ItemData{Value: f.Value, Label: f.Label}
+			}),
+		}) {
 			@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-52"}) {
 				@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a framework"})
 			}

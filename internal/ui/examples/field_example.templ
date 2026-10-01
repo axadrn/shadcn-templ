@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"github.com/axadrn/shadcn-templ/v2/utils"
 	"github.com/axadrn/shadcn-templ/v2/components/badge"
 	"github.com/axadrn/shadcn-templ/v2/components/checkbox"
 	"github.com/axadrn/shadcn-templ/v2/components/field"
@@ -208,7 +209,12 @@ templ fieldExampleTextareaFields() {
 // fieldExampleSelect is one Select field: the tsx passes item lists whose
 // first entry has a null value, our pendant is the placeholder plus items.
 templ fieldExampleSelect(id, placeholder string, invalid, disabled bool, options []dialogExampleOption) {
-	@selectcomp.Select(selectcomp.Props{Disabled: disabled}) {
+	@selectcomp.Select(selectcomp.Props{
+		Items: append([]selectcomp.ItemData{{Value: "", Label: placeholder}}, utils.Map(options, func(o dialogExampleOption) selectcomp.ItemData {
+			return selectcomp.ItemData{Value: o.Value, Label: o.Label}
+		})...),
+		Disabled: disabled,
+	}) {
 		@selectcomp.Trigger(selectcomp.TriggerProps{
 			ID: id,
 			Attributes: templ.Attributes{

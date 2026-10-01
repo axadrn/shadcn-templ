@@ -639,7 +639,12 @@ templ PayoutThreshold() {
 					@field.Label(field.LabelProps{For: "preferred-currency"}) {
 						Preferred Currency
 					}
-					@selectcomp.Select(selectcomp.Props{DefaultValue: "usd"}) {
+					@selectcomp.Select(selectcomp.Props{
+						Items: utils.Map(cardsCurrencies, func(c createOption) selectcomp.ItemData {
+							return selectcomp.ItemData{Value: c.Value, Label: c.Label}
+						}),
+						DefaultValue: "usd",
+					}) {
 						@selectcomp.Trigger(selectcomp.TriggerProps{ID: "preferred-currency", Class: "w-full"}) {
 							@selectcomp.Value()
 						}

@@ -189,7 +189,15 @@ templ cardPreferences() {
 }
 
 templ currencySelect(id string) {
-	@selectcomp.Select(selectcomp.Props{DefaultValue: "usd"}) {
+	@selectcomp.Select(selectcomp.Props{
+		Items: []selectcomp.ItemData{
+			{Value: "usd", Label: "USD — United States Dollar"},
+			{Value: "eur", Label: "EUR — Euro"},
+			{Value: "gbp", Label: "GBP — British Pound"},
+			{Value: "jpy", Label: "JPY — Japanese Yen"},
+		},
+		DefaultValue: "usd",
+	}) {
 		@selectcomp.Trigger(selectcomp.TriggerProps{ID: id, Class: "w-full"}) {
 			@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select"})
 		}
@@ -928,7 +936,14 @@ templ cardSavingsTargets() {
 						@field.Label(field.LabelProps{For: "invest-type"}) {
 							Order Type
 						}
-						@selectcomp.Select(selectcomp.Props{DefaultValue: "market"}) {
+						@selectcomp.Select(selectcomp.Props{
+							Items: []selectcomp.ItemData{
+								{Value: "market", Label: "Market Order"},
+								{Value: "limit", Label: "Limit Order"},
+								{Value: "stop", Label: "Stop Order"},
+							},
+							DefaultValue: "market",
+						}) {
 							@selectcomp.Trigger(selectcomp.TriggerProps{ID: "invest-type", Class: "w-full"}) {
 								@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select"})
 							}
@@ -1549,7 +1564,12 @@ templ cardTransferFunds() {
 }
 
 templ transferAccountSelect(id string, accounts []transferAccount, selected string) {
-	@selectcomp.Select(selectcomp.Props{DefaultValue: selected}) {
+	@selectcomp.Select(selectcomp.Props{
+		Items: utils.Map(accounts, func(a transferAccount) selectcomp.ItemData {
+			return selectcomp.ItemData{Value: a.value, Label: a.label}
+		}),
+		DefaultValue: selected,
+	}) {
 		@selectcomp.Trigger(selectcomp.TriggerProps{ID: id, Class: "w-full"}) {
 			@selectcomp.Value()
 		}
@@ -2407,7 +2427,15 @@ templ cardTypographySpecimen() {
 							@field.Label(field.LabelProps{For: "feedback-category"}) {
 								Category
 							}
-							@selectcomp.Select(selectcomp.Props{DefaultValue: "general"}) {
+							@selectcomp.Select(selectcomp.Props{
+								Items: []selectcomp.ItemData{
+									{Value: "general", Label: "General"},
+									{Value: "bug", Label: "Bug Report"},
+									{Value: "feature", Label: "Feature Request"},
+									{Value: "improvement", Label: "Improvement"},
+								},
+								DefaultValue: "general",
+							}) {
 								@selectcomp.Trigger(selectcomp.TriggerProps{ID: "feedback-category", Class: "w-full"}) {
 									@selectcomp.Value()
 								}
@@ -3082,7 +3110,14 @@ templ cardShippingAddress() {
 						@field.Label(field.LabelProps{For: "shipping-state"}) {
 							State
 						}
-						@selectcomp.Select(selectcomp.Props{DefaultValue: "CA"}) {
+						@selectcomp.Select(selectcomp.Props{
+							Items: []selectcomp.ItemData{
+								{Value: "CA", Label: "California"},
+								{Value: "NY", Label: "New York"},
+								{Value: "TX", Label: "Texas"},
+							},
+							DefaultValue: "CA",
+						}) {
 							@selectcomp.Trigger(selectcomp.TriggerProps{ID: "shipping-state", Class: "w-full"}) {
 								@selectcomp.Value()
 							}
@@ -3113,7 +3148,14 @@ templ cardShippingAddress() {
 						@field.Label(field.LabelProps{For: "shipping-country"}) {
 							Country
 						}
-						@selectcomp.Select(selectcomp.Props{DefaultValue: "US"}) {
+						@selectcomp.Select(selectcomp.Props{
+							Items: []selectcomp.ItemData{
+								{Value: "US", Label: "United States"},
+								{Value: "CA", Label: "Canada"},
+								{Value: "UK", Label: "United Kingdom"},
+							},
+							DefaultValue: "US",
+						}) {
 							@selectcomp.Trigger(selectcomp.TriggerProps{ID: "shipping-country", Class: "w-full"}) {
 								@selectcomp.Value()
 							}
@@ -3325,7 +3367,14 @@ templ cardInviteTeam() {
 				for _, invite := range inviteTeamRows {
 					<div class="flex items-center gap-2">
 						@input.Input(input.Props{Value: invite.email, Class: "flex-1"})
-						@selectcomp.Select(selectcomp.Props{DefaultValue: invite.role}) {
+						@selectcomp.Select(selectcomp.Props{
+							Items: []selectcomp.ItemData{
+								{Value: "admin", Label: "Admin"},
+								{Value: "editor", Label: "Editor"},
+								{Value: "viewer", Label: "Viewer"},
+							},
+							DefaultValue: invite.role,
+						}) {
 							@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-24"}) {
 								@selectcomp.Value()
 							}
@@ -3606,7 +3655,15 @@ templ cardReportBug() {
 						@field.Label(field.LabelProps{For: "bug-severity"}) {
 							Severity
 						}
-						@selectcomp.Select(selectcomp.Props{DefaultValue: "medium"}) {
+						@selectcomp.Select(selectcomp.Props{
+							Items: []selectcomp.ItemData{
+								{Value: "critical", Label: "Critical"},
+								{Value: "high", Label: "High"},
+								{Value: "medium", Label: "Medium"},
+								{Value: "low", Label: "Low"},
+							},
+							DefaultValue: "medium",
+						}) {
 							@selectcomp.Trigger(selectcomp.TriggerProps{ID: "bug-severity", Class: "w-full"}) {
 								@selectcomp.Value()
 							}
@@ -3632,7 +3689,15 @@ templ cardReportBug() {
 						@field.Label(field.LabelProps{For: "bug-component"}) {
 							Component
 						}
-						@selectcomp.Select(selectcomp.Props{DefaultValue: "dashboard"}) {
+						@selectcomp.Select(selectcomp.Props{
+							Items: []selectcomp.ItemData{
+								{Value: "dashboard", Label: "Dashboard"},
+								{Value: "auth", Label: "Auth"},
+								{Value: "api", Label: "API"},
+								{Value: "billing", Label: "Billing"},
+							},
+							DefaultValue: "dashboard",
+						}) {
 							@selectcomp.Trigger(selectcomp.TriggerProps{ID: "bug-component", Class: "w-full"}) {
 								@selectcomp.Value()
 							}
@@ -3753,7 +3818,11 @@ templ cardFeedbackForm() {
 						@field.Label(field.LabelProps{For: "topic"}) {
 							Topic
 						}
-						@selectcomp.Select() {
+						@selectcomp.Select(selectcomp.Props{
+							Items: utils.Map(feedbackTopics, func(t feedbackTopic) selectcomp.ItemData {
+								return selectcomp.ItemData{Value: t.value, Label: t.label}
+							}),
+						}) {
 							@selectcomp.Trigger(selectcomp.TriggerProps{ID: "topic", Class: "w-full"}) {
 								@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a topic"})
 							}
@@ -3928,7 +3997,13 @@ templ cardGithubProfile() {
 						@field.Label(field.LabelProps{For: "email"}) {
 							Public Email
 						}
-						@selectcomp.Select(selectcomp.Props{DefaultValue: "m@example.com"}) {
+						@selectcomp.Select(selectcomp.Props{
+							Items: []selectcomp.ItemData{
+								{Value: "m@example.com", Label: "m@example.com"},
+								{Value: "m@gmail.com", Label: "m@gmail.com"},
+							},
+							DefaultValue: "m@example.com",
+						}) {
 							@selectcomp.Trigger(selectcomp.TriggerProps{ID: "email", Class: "w-full"}) {
 								@selectcomp.Value()
 							}

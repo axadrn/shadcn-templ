@@ -47,7 +47,22 @@ templ FieldDemo() {
 								@field.Label(field.LabelProps{For: "checkout-exp-month-ts6"}) {
 									Month
 								}
-								@selectcomp.Select() {
+								@selectcomp.Select(selectcomp.Props{
+									Items: []selectcomp.ItemData{
+										{Value: "01", Label: "01"},
+										{Value: "02", Label: "02"},
+										{Value: "03", Label: "03"},
+										{Value: "04", Label: "04"},
+										{Value: "05", Label: "05"},
+										{Value: "06", Label: "06"},
+										{Value: "07", Label: "07"},
+										{Value: "08", Label: "08"},
+										{Value: "09", Label: "09"},
+										{Value: "10", Label: "10"},
+										{Value: "11", Label: "11"},
+										{Value: "12", Label: "12"},
+									},
+								}) {
 									@selectcomp.Trigger(selectcomp.TriggerProps{ID: "checkout-exp-month-ts6"}) {
 										@selectcomp.Value(selectcomp.ValueProps{Placeholder: "MM"})
 									}
@@ -95,7 +110,16 @@ templ FieldDemo() {
 								@field.Label(field.LabelProps{For: "checkout-7j9-exp-year-f59"}) {
 									Year
 								}
-								@selectcomp.Select() {
+								@selectcomp.Select(selectcomp.Props{
+									Items: []selectcomp.ItemData{
+										{Value: "2024", Label: "2024"},
+										{Value: "2025", Label: "2025"},
+										{Value: "2026", Label: "2026"},
+										{Value: "2027", Label: "2027"},
+										{Value: "2028", Label: "2028"},
+										{Value: "2029", Label: "2029"},
+									},
+								}) {
 									@selectcomp.Trigger(selectcomp.TriggerProps{ID: "checkout-7j9-exp-year-f59"}) {
 										@selectcomp.Value(selectcomp.ValueProps{Placeholder: "YYYY"})
 									}

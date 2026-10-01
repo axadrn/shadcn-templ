@@ -133,11 +133,13 @@ func chartAreaInteractiveShortDate(v any) string {
 	return t.Format("Jan 2")
 }
 
-var chartAreaInteractiveRanges = []struct {
+type chartAreaInteractiveRange struct {
 	Key   string
 	Label string
 	Days  int
-}{
+}
+
+var chartAreaInteractiveRanges = []chartAreaInteractiveRange{
 	{"90d", "Last 3 months", 90},
 	{"30d", "Last 30 days", 30},
 	{"7d", "Last 7 days", 7},
@@ -176,7 +178,12 @@ templ ChartAreaInteractive() {
 						}
 					}
 				}
-				@selectcomp.Select(selectcomp.Props{Value: utils.Ptr("90d")}) {
+				@selectcomp.Select(selectcomp.Props{
+					Items: utils.Map(chartAreaInteractiveRanges, func(r chartAreaInteractiveRange) selectcomp.ItemData {
+						return selectcomp.ItemData{Value: r.Key, Label: r.Label}
+					}),
+					Value: utils.Ptr("90d"),
+				}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{
 						Class:      "flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden",
 						Size:       selectcomp.SizeSm,

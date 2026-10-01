@@ -3,29 +3,19 @@ package examples
 import selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
 
 templ SelectDemo() {
-	@selectcomp.Select() {
+	@selectcomp.Select(selectcomp.Props{Items: selectFruits}) {
 		@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-full max-w-48"}) {
-			@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
+			@selectcomp.Value()
 		}
 		@selectcomp.Content() {
 			@selectcomp.Group() {
 				@selectcomp.Label() {
 					Fruits
 				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "apple"}) {
-					Apple
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "banana"}) {
-					Banana
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "blueberry"}) {
-					Blueberry
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "grapes"}) {
-					Grapes
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "pineapple"}) {
-					Pineapple
+				for _, item := range selectFruits {
+					@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+						{ item.Label.(string) }
+					}
 				}
 			}
 		}

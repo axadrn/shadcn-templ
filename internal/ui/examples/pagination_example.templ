@@ -101,7 +101,15 @@ templ paginationExampleWithSelect() {
 				@field.Label(field.LabelProps{For: "select-rows-per-page"}) {
 					Rows per page
 				}
-				@selectcomp.Select(selectcomp.Props{DefaultValue: "25"}) {
+				@selectcomp.Select(selectcomp.Props{
+					Items: []selectcomp.ItemData{
+						{Value: "10", Label: "10"},
+						{Value: "25", Label: "25"},
+						{Value: "50", Label: "50"},
+						{Value: "100", Label: "100"},
+					},
+					DefaultValue: "25",
+				}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{ID: "select-rows-per-page", Class: "w-20"}) {
 						@selectcomp.Value()
 					}

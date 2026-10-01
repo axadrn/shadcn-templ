@@ -194,7 +194,14 @@ templ buttonGroupExampleWithSelect() {
 				Amount
 			}
 			@buttongroup.ButtonGroup() {
-				@selectcomp.Select(selectcomp.Props{DefaultValue: "$"}) {
+				@selectcomp.Select(selectcomp.Props{
+					Items: []selectcomp.ItemData{
+						{Value: "$", Label: "$"},
+						{Value: "€", Label: "€"},
+						{Value: "£", Label: "£"},
+					},
+					DefaultValue: "$",
+				}) {
 					@selectcomp.Trigger() {
 						@selectcomp.Value()
 					}
@@ -304,7 +311,14 @@ templ buttonGroupExampleWithLike() {
 templ buttonGroupExampleWithSelectAndInput() {
 	@buttonGroupExampleSection("With Select and Input") {
 		@buttongroup.ButtonGroup() {
-			@selectcomp.Select(selectcomp.Props{DefaultValue: "hours"}) {
+			@selectcomp.Select(selectcomp.Props{
+				Items: []selectcomp.ItemData{
+					{Value: "hours", Label: "Hours"},
+					{Value: "days", Label: "Days"},
+					{Value: "weeks", Label: "Weeks"},
+				},
+				DefaultValue: "hours",
+			}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{ID: "button-group-example-duration"}) {
 					@selectcomp.Value()
 				}

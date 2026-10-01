@@ -49,7 +49,14 @@ templ InputForm() {
 					@field.Label(field.LabelProps{For: "form-country"}) {
 						Country
 					}
-					@selectcomp.Select(selectcomp.Props{DefaultValue: "us"}) {
+					@selectcomp.Select(selectcomp.Props{
+						Items: []selectcomp.ItemData{
+							{Value: "us", Label: "United States"},
+							{Value: "uk", Label: "United Kingdom"},
+							{Value: "ca", Label: "Canada"},
+						},
+						DefaultValue: "us",
+					}) {
 						@selectcomp.Trigger(selectcomp.TriggerProps{ID: "form-country"}) {
 							@selectcomp.Value()
 						}

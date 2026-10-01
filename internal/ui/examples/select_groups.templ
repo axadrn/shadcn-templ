@@ -1,25 +1,43 @@
 package examples
 
-import selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+import (
+	"slices"
+
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+)
+
+var selectGroupFruits = []selectcomp.ItemData{
+	{Label: "Apple", Value: "apple"},
+	{Label: "Banana", Value: "banana"},
+	{Label: "Blueberry", Value: "blueberry"},
+}
+
+var selectGroupVegetables = []selectcomp.ItemData{
+	{Label: "Carrot", Value: "carrot"},
+	{Label: "Broccoli", Value: "broccoli"},
+	{Label: "Spinach", Value: "spinach"},
+}
+
+var selectGroupItems = slices.Concat(
+	[]selectcomp.ItemData{{Label: "Select a fruit", Value: ""}},
+	selectGroupFruits,
+	selectGroupVegetables,
+)
 
 templ SelectGroupsExample() {
-	@selectcomp.Select() {
+	@selectcomp.Select(selectcomp.Props{Items: selectGroupItems}) {
 		@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-full max-w-48"}) {
-			@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a fruit"})
+			@selectcomp.Value()
 		}
 		@selectcomp.Content() {
 			@selectcomp.Group() {
 				@selectcomp.Label() {
 					Fruits
 				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "apple"}) {
-					Apple
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "banana"}) {
-					Banana
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "blueberry"}) {
-					Blueberry
+				for _, item := range selectGroupFruits {
+					@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+						{ item.Label.(string) }
+					}
 				}
 			}
 			@selectcomp.Separator()
@@ -27,14 +45,10 @@ templ SelectGroupsExample() {
 				@selectcomp.Label() {
 					Vegetables
 				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "carrot"}) {
-					Carrot
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "broccoli"}) {
-					Broccoli
-				}
-				@selectcomp.Item(selectcomp.ItemProps{Value: "spinach"}) {
-					Spinach
+				for _, item := range selectGroupVegetables {
+					@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+						{ item.Label.(string) }
+					}
 				}
 			}
 		}

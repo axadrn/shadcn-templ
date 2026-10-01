@@ -141,11 +141,13 @@ func chartAreaInteractiveShortDate(v any) string {
 	return t.Format("Jan 2")
 }
 
-var chartAreaInteractiveRanges = []struct {
+type chartAreaInteractiveRange struct {
 	Key   string
 	Label string
 	Days  int
-}{
+}
+
+var chartAreaInteractiveRanges = []chartAreaInteractiveRange{
 	{"90d", "Last 3 months", 90},
 	{"30d", "Last 30 days", 30},
 	{"7d", "Last 7 days", 7},
@@ -292,7 +294,7 @@ func ChartAreaInteractive() templ.Component {
 								var templ_7745c5c3_Var9 string
 								templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(rng.Label)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/chart_area_interactive.templ`, Line: 175, Col: 18}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/chart_area_interactive.templ`, Line: 177, Col: 18}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 								if templ_7745c5c3_Err != nil {
@@ -405,7 +407,7 @@ func ChartAreaInteractive() templ.Component {
 										var templ_7745c5c3_Var15 string
 										templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(rng.Label)
 										if templ_7745c5c3_Err != nil {
-											return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/chart_area_interactive.templ`, Line: 191, Col: 20}
+											return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/chart_area_interactive.templ`, Line: 198, Col: 20}
 										}
 										_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 										if templ_7745c5c3_Err != nil {
@@ -432,7 +434,12 @@ func ChartAreaInteractive() templ.Component {
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = selectcomp.Select(selectcomp.Props{Value: utils.Ptr("90d")}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = selectcomp.Select(selectcomp.Props{
+						Items: utils.Map(chartAreaInteractiveRanges, func(r chartAreaInteractiveRange) selectcomp.ItemData {
+							return selectcomp.ItemData{Value: r.Key, Label: r.Label}
+						}),
+						Value: utils.Ptr("90d"),
+					}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -488,7 +495,7 @@ func ChartAreaInteractive() templ.Component {
 						var templ_7745c5c3_Var18 string
 						templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(rng.Key)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/chart_area_interactive.templ`, Line: 204, Col: 42}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/chart_area_interactive.templ`, Line: 211, Col: 42}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 						if templ_7745c5c3_Err != nil {
@@ -690,7 +697,7 @@ func ChartAreaInteractive() templ.Component {
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/chart_area_interactive.templ`, Line: 252, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/dashboard01/chart_area_interactive.templ`, Line: 259, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {

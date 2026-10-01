@@ -10,7 +10,7 @@ templ SelectAlignItem() {
 	@field.Group(field.GroupProps{Class: "w-full max-w-xs"}) {
 		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
 			@field.Content() {
-				@field.Label(field.LabelProps{For: "align-item-switch"}) {
+				@field.Label(field.LabelProps{For: "align-item"}) {
 					Align Item
 				}
 				@field.Description() {
@@ -18,13 +18,14 @@ templ SelectAlignItem() {
 				}
 			}
 			@switchcomp.Switch(switchcomp.Props{
-				ID:             "align-item-switch",
+				ID:             "align-item",
 				DefaultChecked: true,
 			})
 		}
 		@field.Field() {
 			@selectcomp.Select(selectcomp.Props{
 				ID:           "align-item-select",
+				Items:        selectFruits,
 				DefaultValue: "banana",
 			}) {
 				@selectcomp.Trigger() {
@@ -32,20 +33,10 @@ templ SelectAlignItem() {
 				}
 				@selectcomp.Content() {
 					@selectcomp.Group() {
-						@selectcomp.Item(selectcomp.ItemProps{Value: "apple"}) {
-							Apple
-						}
-						@selectcomp.Item(selectcomp.ItemProps{Value: "banana"}) {
-							Banana
-						}
-						@selectcomp.Item(selectcomp.ItemProps{Value: "blueberry"}) {
-							Blueberry
-						}
-						@selectcomp.Item(selectcomp.ItemProps{Value: "grapes"}) {
-							Grapes
-						}
-						@selectcomp.Item(selectcomp.ItemProps{Value: "pineapple"}) {
-							Pineapple
+						for _, item := range selectFruits {
+							@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+								{ item.Label.(string) }
+							}
 						}
 					}
 				}
@@ -54,15 +45,16 @@ templ SelectAlignItem() {
 	}
 	<script nonce={ templ.GetNonce(ctx) }>
 		(() => {
-			const sw = document.getElementById("align-item-switch");
+			const sw = document.getElementById("align-item");
 			if (!sw) return;
 			sw.addEventListener("change", () => {
-				// Looked up on toggle: the content is portaled to <body> at init.
-				// Toggles the component's real flag, the rendered form of Base
-				// UI's alignItemWithTrigger prop (ContentProps.AlignItemWithTrigger).
-				const content = document.getElementById("align-item-select");
-				if (!content) return;
-				content.setAttribute("data-templ-align-item-with-trigger", String(sw.checked));
+				// The alignItemWithTrigger state: the popup renders it as
+				// data-align-trigger, the positioner reads the prop. The id is
+				// the popup's, the positioner its parent.
+				const popup = document.getElementById("align-item-select");
+				if (!popup) return;
+				popup.setAttribute("data-align-trigger", String(sw.checked));
+				popup.parentElement.setAttribute("data-templ-align-item-with-trigger", String(sw.checked));
 			});
 		})();
 	</script>

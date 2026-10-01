@@ -1,6 +1,7 @@
 package charts
 
 import (
+	"github.com/axadrn/shadcn-templ/v2/utils"
 	"fmt"
 	"strings"
 
@@ -57,7 +58,12 @@ templ ChartPieInteractive() {
 					January - June 2024
 				}
 			</div>
-			@selectcomp.Select(selectcomp.Props{DefaultValue: "january"}) {
+			@selectcomp.Select(selectcomp.Props{
+				Items: utils.Map(chartPieInteractiveData, func(d chart.Datum) selectcomp.ItemData {
+					return selectcomp.ItemData{Value: d["month"].(string), Label: chartPieInteractiveConfig.Label(d["month"].(string))}
+				}),
+				DefaultValue: "january",
+			}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{
 					Class:      "ml-auto h-7 w-[130px] rounded-lg pl-2.5",
 					Attributes: templ.Attributes{"aria-label": "Select a value", "data-templ-chart-month-select": "pie-interactive"},

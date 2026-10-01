@@ -10,7 +10,18 @@ templ FieldSelect() {
 		@field.Label() {
 			Department
 		}
-		@selectcomp.Select() {
+		@selectcomp.Select(selectcomp.Props{
+			Items: []selectcomp.ItemData{
+				{Value: "engineering", Label: "Engineering"},
+				{Value: "design", Label: "Design"},
+				{Value: "marketing", Label: "Marketing"},
+				{Value: "sales", Label: "Sales"},
+				{Value: "support", Label: "Customer Support"},
+				{Value: "hr", Label: "Human Resources"},
+				{Value: "finance", Label: "Finance"},
+				{Value: "operations", Label: "Operations"},
+			},
+		}) {
 			@selectcomp.Trigger() {
 				@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Choose department"})
 			}

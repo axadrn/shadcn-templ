@@ -179,6 +179,16 @@ func IfElse[T any](condition bool, trueValue T, falseValue T) T {
 	return falseValue
 }
 
+// Map returns f applied to every element of s.
+// Example: Map(fruits, func(f fruit) selectcomp.ItemData { ... }) → items
+func Map[T, U any](s []T, f func(T) U) []U {
+	out := make([]U, len(s))
+	for i, v := range s {
+		out[i] = f(v)
+	}
+	return out
+}
+
 // MergeAttributes combines multiple Attributes into one.
 // Example: MergeAttributes(attr1, attr2) → combined attributes
 func MergeAttributes(attrs ...templ.Attributes) templ.Attributes {
