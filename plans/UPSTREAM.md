@@ -11,4 +11,4 @@ Moving the pin is its own plan.
 
 ## Accepted differences
 
-None yet.
+- **No sonner.** shadcn ships `ui/sonner.tsx` next to `ui/toast.tsx`. shadcn-templ ports only the Base UI toast, by the owner's decision on 2026-10-01 (`plans/parity-components.md`).

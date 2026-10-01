@@ -30,6 +30,7 @@ After `parity-attributes` and `parity-runtime`, every existing component follows
 - **Slider thumbs hold an input.** Found by `parity-runtime` task 11: Base UI renders an `<input type="range">` in each thumb, which takes the focus and, disabled, cannot be focused. Ours is a `div` with `role="slider"`, focusable by script even when disabled.
 - **TooltipProvider.** Found by `parity-runtime` task 8b: shadcn exports `TooltipProvider` (Base UI's delay group, `delay` 0 by default, which shadcn's docs wrap the app in). Ours has none and every tooltip behaves as inside a provider with `delay` 0 but without the group: a neighbouring tooltip does not open at once within the group's `timeout`, and no popup renders `data-instant`.
 - **One menu script.** Found by `parity-runtime` task 8b: the submenu code of `dropdownmenu.js` and `contextmenu.js` is the same apart from the event names and the positioning. Base UI has one `Menu` for both, so one shared script is the simpler pendant, done with the menu task.
+- **No sonner.** Decided by Axel on 2026-10-01: upstream ships `sonner.tsx` next to `toast.tsx`, we port only the newer Base UI toast. Sonner and its examples are not missing, they are out of scope.
 - **Both engines.** Every comparison runs in chromium and webkit (`tmp/a11y-600/node_modules` Playwright).
 
 ## Tasks
@@ -48,7 +49,7 @@ Checks: `node tmp/parity-components/compare.mjs chromium dialog-demo`, same for 
 
 ### 2. Inventory
 
-- [ ] Done
+- [x] Done
 
 `tmp/parity-components/inventory.md`: one row per upstream `ui/*.tsx` with our directory or "missing", one row per upstream example with our example or "missing", and for every existing component the result of `compare.mjs` over all its examples in both engines. Scenarios for every existing example added to `scenarios.json`.
 
@@ -56,9 +57,23 @@ Done when: every upstream component and example has a row, every existing compon
 
 Checks: the table is complete against `gh api repos/shadcn-ui/ui/contents/apps/v4/registry/bases/base/ui` at the pin.
 
-### 3 onward. Written after task 2
+### 3. What every component shares
 
-Planned shape: one task per existing component that fails a comparison, then one task per missing component, then one task per missing example, then a final full run of `compare.mjs` over every example in both engines with the result appended to `plans/UPSTREAM.md`.
+- [ ] Done
+
+The causes that show up across components in task 2's inventory, fixed first because `compare.mjs` reports only the first DOM difference of a step and these hide the rest:
+
+- A closed trigger renders no `aria-controls` upstream (185 first differences): Base UI links trigger and popup in its store and renders `aria-controls` only while the popup is open. Dialog, alert dialog, sheet, drawer, popover, both menus, select, combobox, command dialog and collapsible. The scripts find the popup through that link today, so the link becomes a port marker under rule 3 (React keeps it in memory) and `aria-controls` follows the open state.
+- The tooltip trigger renders no `aria-describedby` upstream (24), the same way: a port marker for the link, the ARIA as Base UI renders it.
+- Icons render `data-lucide` (120), lucide-react renders none.
+- In Safari Base UI's focus guards are `role="button"` without `aria-hidden` (78, webkit only), the switch `parity-runtime` task 7 left out.
+- An attribute literally named `else` on checkbox, field and label parts (42): a templ `else` branch inside an attribute list renders as an attribute.
+
+Done when: none of these shows up in `compare.mjs all` in either engine, `check.sh` green with its URLs on the port of `tmp/parity-components/serve.sh`.
+
+### 4 onward. Written after task 3
+
+Planned shape: after task 3 a new full run, then one task per existing component that still fails, then one task per missing component (11: attachment, bubble, direction, marker, menubar, message, message-scroller, native-select, navigation-menu, questionnaire, scroll-area), then one task per missing example (177, 57 of them the `-rtl` variants that need `direction`), then a final full run of `compare.mjs` over every example in both engines with the result appended to `plans/UPSTREAM.md`.
 
 ## Executor log
 
@@ -73,3 +88,15 @@ The reference app from `parity-runtime` task 1 serves every upstream example at 
 `compare.mjs chromium dialog-demo` and the same in webkit run end to end. The DOM check already finds what the step checks of `parity-runtime` could not see: `DialogTitle` is an `h2` upstream, a closed trigger has no `aria-controls`, the select value keeps `data-placeholder`, and in WebKit Base UI's focus guards are `role="button"` instead of `aria-hidden` (Base UI switches them for Safari, not for a screen reader as `parity-runtime` task 7 assumed). Task 2 collects all of it.
 
 ## Planner review
+
+### Task 2
+
+`tmp/parity-components/inventory.md` (from `inventory.py`) has a row for every upstream component and example and the `compare.mjs` result of every existing example per component in both engines.
+
+Components: 62 upstream, 50 here, sonner out of scope, 11 missing: attachment, bubble, direction, marker, menubar, message, message-scroller, native-select, navigation-menu, questionnaire, scroll-area.
+
+Examples: 513 upstream, 336 here, 177 missing (57 `-rtl` variants, the chat set, sidebar parts, input group and shimmer and scroll fade examples), 56 more here.
+
+Comparison over the 336 examples, 2930 checks: chromium 2232 pass and 698 fail, webkit 2217 and 713. Every component with examples fails somewhere, mostly on the DOM check. The causes most first differences go back to are listed in task 3; then come the accordion's `dir`, the combobox input's attributes, `data-activation-direction` on tabs and collapsible, `role="group"` on field and slider, `aria-disabled="false"` on collapsible and toggle buttons, the radio input's `name`, `span` where we render `div` (avatar, empty, item), the dialog title's `h2`, the menus' internal backdrop (`MenuPositioner` renders one, `modal` is true by default), the select value's `data-placeholder`, the calendar's `data-mode`, the breadcrumb's `aria-label` case and the drawer's `data-drawer-content`. Example only attributes (`data-*-demo` markers of our examples) also differ.
+
+The harness serves our site on port 8190 through `tmp/parity-components/serve.sh`, a binary built from the working tree, because another project took port 8090 from `task dev` twice during the runs. `compare.mjs` reads `TEMPL_URL`, default `http://localhost:8190`, and runs four examples at a time (`--jobs=4`), about 15 minutes per engine for all of them.
