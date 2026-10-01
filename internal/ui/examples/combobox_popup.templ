@@ -1,20 +1,32 @@
 package examples
 
 import (
+	"slices"
+
 	"github.com/axadrn/shadcn-templ/v2/components/button"
 	"github.com/axadrn/shadcn-templ/v2/components/combobox"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+// The countries with upstream's first entry, the value "" labelled "Select
+// country", which the combobox starts with.
+var comboboxPopupCountries = slices.Concat(
+	[]combobox.ItemData{{Value: "", Label: "Select country"}},
+	utils.Map(comboboxCountries, func(c comboboxCountry) combobox.ItemData {
+		return combobox.ItemData{Value: c.Value, Label: c.Label}
+	}),
 )
 
 templ ComboboxPopup() {
-	@combobox.Combobox() {
+	@combobox.Combobox(combobox.Props{Items: comboboxPopupCountries, DefaultValue: ""}) {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
-			Class:      "w-64 justify-between font-normal",
+			Class:      "cn-combobox-trigger w-64 justify-between font-normal",
 			Attributes: combobox.Trigger(ctx),
 		}) {
-			@combobox.Value(combobox.ValueProps{Placeholder: "Select country"})
-			@icon.ChevronDown(icon.Props{Class: "pointer-events-none size-4 text-muted-foreground"})
+			@combobox.Value()
+			@icon.ChevronDown(icon.Props{Class: "cn-combobox-trigger-icon pointer-events-none"})
 		}
 		@combobox.Content() {
 			@combobox.Input(combobox.InputProps{
@@ -25,9 +37,9 @@ templ ComboboxPopup() {
 				No items found.
 			}
 			@combobox.List() {
-				for _, country := range comboboxCountries {
-					@combobox.Item(combobox.ItemProps{Value: country.Value, Label: country.Label}) {
-						{ country.Label }
+				for _, country := range comboboxPopupCountries {
+					@combobox.Item(combobox.ItemProps{Value: country.Value}) {
+						{ country.Label.(string) }
 					}
 				}
 			}

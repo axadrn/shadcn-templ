@@ -3,8 +3,8 @@ package examples
 import "github.com/axadrn/shadcn-templ/v2/components/combobox"
 
 templ ComboboxDisabled() {
-	@combobox.Combobox(combobox.Props{Disabled: true}) {
-		@combobox.Input(combobox.InputProps{Placeholder: "Select a framework"})
+	@combobox.Combobox() {
+		@combobox.Input(combobox.InputProps{Placeholder: "Select a framework", Disabled: true})
 		@combobox.Content() {
 			@combobox.Empty() {
 				No items found.

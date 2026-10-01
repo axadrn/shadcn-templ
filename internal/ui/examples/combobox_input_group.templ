@@ -6,6 +6,15 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
 )
 
+var comboboxTimezoneGroups = []struct {
+	Value string
+	Items []string
+}{
+	{"Americas", []string{"(GMT-5) New York", "(GMT-8) Los Angeles", "(GMT-6) Chicago", "(GMT-5) Toronto", "(GMT-8) Vancouver", "(GMT-3) São Paulo"}},
+	{"Europe", []string{"(GMT+0) London", "(GMT+1) Paris", "(GMT+1) Berlin", "(GMT+1) Rome", "(GMT+1) Madrid", "(GMT+1) Amsterdam"}},
+	{"Asia/Pacific", []string{"(GMT+9) Tokyo", "(GMT+8) Shanghai", "(GMT+8) Singapore", "(GMT+4) Dubai", "(GMT+11) Sydney", "(GMT+9) Seoul"}},
+}
+
 templ ComboboxInputGroup() {
 	@combobox.Combobox() {
 		@combobox.Input(combobox.InputProps{Placeholder: "Select a timezone"}) {
@@ -21,46 +30,16 @@ templ ComboboxInputGroup() {
 				No timezones found.
 			}
 			@combobox.List() {
-				@combobox.Group() {
-					@combobox.Label() {
-						Americas
-					}
-					@combobox.Item(combobox.ItemProps{Value: "new-york"}) {
-						(GMT-5) New York
-					}
-					@combobox.Item(combobox.ItemProps{Value: "los-angeles"}) {
-						(GMT-8) Los Angeles
-					}
-					@combobox.Item(combobox.ItemProps{Value: "chicago"}) {
-						(GMT-6) Chicago
-					}
-				}
-				@combobox.Group() {
-					@combobox.Label() {
-						Europe
-					}
-					@combobox.Item(combobox.ItemProps{Value: "london"}) {
-						(GMT+0) London
-					}
-					@combobox.Item(combobox.ItemProps{Value: "paris"}) {
-						(GMT+1) Paris
-					}
-					@combobox.Item(combobox.ItemProps{Value: "berlin"}) {
-						(GMT+1) Berlin
-					}
-				}
-				@combobox.Group() {
-					@combobox.Label() {
-						Asia/Pacific
-					}
-					@combobox.Item(combobox.ItemProps{Value: "tokyo"}) {
-						(GMT+9) Tokyo
-					}
-					@combobox.Item(combobox.ItemProps{Value: "shanghai"}) {
-						(GMT+8) Shanghai
-					}
-					@combobox.Item(combobox.ItemProps{Value: "singapore"}) {
-						(GMT+8) Singapore
+				for _, group := range comboboxTimezoneGroups {
+					@combobox.Group() {
+						@combobox.Label() {
+							{ group.Value }
+						}
+						for _, item := range group.Items {
+							@combobox.Item(combobox.ItemProps{Value: item}) {
+								{ item }
+							}
+						}
 					}
 				}
 			}

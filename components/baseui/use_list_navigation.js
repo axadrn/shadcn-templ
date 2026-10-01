@@ -320,7 +320,7 @@
     on(floating, "pointermove", () => {
       isPointerModality = true;
     });
-    if (!virtual && !typeableComboboxReference) floating?.setAttribute("aria-orientation", orientation);
+    if (orientation !== "both") floating?.setAttribute("aria-orientation", orientation);
 
     // The items' props, delegated since the list changes.
     const itemOf = (target) => {

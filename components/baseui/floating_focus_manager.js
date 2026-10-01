@@ -192,6 +192,9 @@
       nextFocusableElement = null,
       getInsideElements,
       onOpenChange,
+      // The element the guards wrap: the focus manager's children, the
+      // floating focus element unless the popup holds a focusable list.
+      guardsAround = null,
     } = options;
     const triggers = [...(options.triggers || [domReference])].filter(Boolean);
     const doc = floating.ownerDocument;
@@ -255,8 +258,8 @@
           }
         }
       });
-      floatingFocusElement.before(beforeGuard);
-      floatingFocusElement.after(afterGuard);
+      (guardsAround || floatingFocusElement).before(beforeGuard);
+      (guardsAround || floatingFocusElement).after(afterGuard);
     }
 
     // Prevent Tab from escaping the modal when there is nothing tabbable.
