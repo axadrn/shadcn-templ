@@ -71,9 +71,25 @@ The causes that show up across components in task 2's inventory, fixed first bec
 
 Done when: none of these shows up in `compare.mjs all` in either engine, `check.sh` green with its URLs on the port of `tmp/parity-components/serve.sh`.
 
-### 4 onward. Written after task 3
+### 4 onward. One task per component group
 
-Planned shape: after task 3 a new full run, then one task per existing component that still fails, then one task per missing component (11: attachment, bubble, direction, marker, menubar, message, message-scroller, native-select, navigation-menu, questionnaire, scroll-area), then one task per missing example (177, 57 of them the `-rtl` variants that need `direction`), then a final full run of `compare.mjs` over every example in both engines with the result appended to `plans/UPSTREAM.md`.
+Written after task 3 from `tmp/parity-components/causes.txt`, the first DOM, focus and pixel differences of `compare.mjs all` per component. Each task makes the examples of its components pass in both engines or records why one cannot, and adds the scenario steps its components need to `scenarios.json`.
+
+4. **Dialog family.** `DialogTitle` and `AlertDialogTitle` and the sheet's are `h2`. Drawer: `data-drawer-content`, the trigger and close slots, the exit under reduced motion, the pixel differences. Command dialog: the example's trigger is a plain button that opens the dialog.
+5. **Menus.** `MenuPositioner`'s internal backdrop (modal by default for the dropdown menu, always for the context menu), the extra portal node of the context menu, the trigger slot `dropdown-menu-trigger`, items as `div` with an id, `data-rootownerid`, and one script for both menus.
+6. **Select.** The value's `data-placeholder`, the icons' `aria-hidden`, the trigger's `tabindex`, the listbox role on the list, the null item of `select-demo` and `select-invalid`.
+7. **Combobox.** The input's attributes (`aria-haspopup`, `autocapitalize`, `autocorrect`, `spellcheck`, `type`, `value`, `data-popup-side`), `role="toolbar"` on the chips, the `combobox-popup` trigger's role, the input group focus.
+8. **Popover, tooltip, hover card.** The tooltip's and hover card's positioner, the popup's `data-base-ui-focusable` and `tabindex`, the tooltip trigger's slot, `TooltipProvider` with the delay group.
+9. **Tabs, collapsible, accordion.** `data-activation-direction` on the tabs list and the collapsible, the collapsible trigger's `aria-disabled` and slot, the accordion's `dir`.
+10. **Toggle, toggle group, radio group.** `aria-disabled` on toggles, the radio input without `name` and `data-invalid` on the group.
+11. **Slider.** `role="group"` and the thumb's input.
+12. **Field, input, label, button group, kbd.** `required` and `name` on field inputs, `data-disabled` on inputs, the icons' `aria-hidden`, `data-orientation` only where Base UI renders it.
+13. **Avatar, empty, item, breadcrumb, pagination, button, spinner.** `span` where we render `div`, the breadcrumb's `aria-label`, links with `role="button"`, `rel`, `role="listitem"`, `data-icon`, the button examples' structure.
+14. **Calendar, carousel, chart, aspect ratio, input OTP, resizable, toast, sidebar.** `data-mode` on the calendar, `data-disabled` on carousel buttons, the chart's `svg` and size attributes, the image attributes Next's `Image` renders (decide with the owner), the OTP container's slot, `data-panel-size`, the toast's attributes, `data-sidebar`.
+15. **Example markers.** Our examples carry `data-*-demo` attributes their scripts hook on, upstream's carry none; they move to ids.
+16. **Missing components**, one task each: attachment, bubble, direction, marker, menubar, message, message-scroller, native-select, navigation-menu, questionnaire, scroll-area.
+17. **Missing examples**, by component: the 57 `-rtl` variants after `direction`, the chat set with its components, sidebar parts, input group, shimmer, scroll fade and the rest of task 2's list.
+18. **Final run** of `compare.mjs all` in both engines, the result appended to `plans/UPSTREAM.md`.
 
 ## Executor log
 
