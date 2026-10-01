@@ -22,33 +22,37 @@ templ DropdownMenuSubmenu() {
 					@dropdownmenu.SubTrigger() {
 						Invite users
 					}
-					@dropdownmenu.SubContent() {
-						@dropdownmenu.Item() {
-							Email
-						}
-						@dropdownmenu.Item() {
-							Message
-						}
-						@dropdownmenu.Sub() {
-							@dropdownmenu.SubTrigger() {
-								More options
+					@dropdownmenu.Portal() {
+						@dropdownmenu.SubContent() {
+							@dropdownmenu.Item() {
+								Email
 							}
-							@dropdownmenu.SubContent() {
-								@dropdownmenu.Item() {
-									Calendly
+							@dropdownmenu.Item() {
+								Message
+							}
+							@dropdownmenu.Sub() {
+								@dropdownmenu.SubTrigger() {
+									More options
 								}
-								@dropdownmenu.Item() {
-									Slack
-								}
-								@dropdownmenu.Separator()
-								@dropdownmenu.Item() {
-									Webhook
+								@dropdownmenu.Portal() {
+									@dropdownmenu.SubContent() {
+										@dropdownmenu.Item() {
+											Calendly
+										}
+										@dropdownmenu.Item() {
+											Slack
+										}
+										@dropdownmenu.Separator()
+										@dropdownmenu.Item() {
+											Webhook
+										}
+									}
 								}
 							}
-						}
-						@dropdownmenu.Separator()
-						@dropdownmenu.Item() {
-							Advanced...
+							@dropdownmenu.Separator()
+							@dropdownmenu.Item() {
+								Advanced...
+							}
 						}
 					}
 				}

@@ -57,6 +57,8 @@ shadcn-templ add context-menu
 
 <ComponentSource name="context-menu" title="components/baseui/use_hover.js" />
 
+<ComponentSource name="context-menu" title="components/baseui/menu.js" />
+
 <ComponentSource name="context-menu" title="components/baseui/use_click.js" />
 
 <ComponentSource name="context-menu" title="components/floatingui/floating_ui_core.js" />

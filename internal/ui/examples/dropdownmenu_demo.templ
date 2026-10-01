@@ -46,16 +46,18 @@ templ DropdownMenuDemo() {
 					@dropdownmenu.SubTrigger() {
 						Invite users
 					}
-					@dropdownmenu.SubContent() {
-						@dropdownmenu.Item() {
-							Email
-						}
-						@dropdownmenu.Item() {
-							Message
-						}
-						@dropdownmenu.Separator()
-						@dropdownmenu.Item() {
-							More...
+					@dropdownmenu.Portal() {
+						@dropdownmenu.SubContent() {
+							@dropdownmenu.Item() {
+								Email
+							}
+							@dropdownmenu.Item() {
+								Message
+							}
+							@dropdownmenu.Separator()
+							@dropdownmenu.Item() {
+								More...
+							}
 						}
 					}
 				}

@@ -18,6 +18,7 @@ const (
 type ctxKey string
 
 const stateKey ctxKey = "contextmenuState"
+const subStateKey ctxKey = "contextmenuSubState"
 const radioStateKey ctxKey = "contextmenuRadioState"
 
 type ctxState struct {
@@ -32,6 +33,21 @@ func menuID(ctx context.Context) string {
 		return state.id
 	}
 	return ""
+}
+
+// subState carries the id a Sub shares with its trigger and its content, and
+// the open state that lands on the content's positioner.
+type ctxSubState struct {
+	id          string
+	open        *bool
+	defaultOpen bool
+}
+
+func subState(ctx context.Context) ctxSubState {
+	if s, ok := ctx.Value(subStateKey).(ctxSubState); ok {
+		return s
+	}
+	return ctxSubState{}
 }
 
 type Props struct {
@@ -150,10 +166,10 @@ type GroupProps struct {
 	Attributes templ.Attributes
 }
 
+// SubProps is SubmenuRoot's: it renders no element, ID names the submenu's
+// popup, the open state lands on its positioner like the root's.
 type SubProps struct {
-	ID         string
-	Class      string
-	Attributes templ.Attributes
+	ID          string
 	Open        *bool
 	DefaultOpen bool
 }
@@ -166,7 +182,6 @@ type SubTriggerProps struct {
 }
 
 type SubContentProps struct {
-	ID         string
 	Class      string
 	Attributes templ.Attributes
 }
@@ -175,24 +190,12 @@ type SubContentProps struct {
 // the pointer and with the arrow keys), so there are no hover: styles here.
 // 1:1 base/ui/context-menu.tsx ContextMenuItem, the look comes from
 // cn-context-menu-item; the inset padding keys on the data-inset attribute.
-func itemClasses() string {
-	return utils.CN(
-		"cn-context-menu-item group/context-menu-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-		// Base UI's item primitive fills the menu row. Native buttons and links
-		// need that layout semantics explicitly.
-		"w-full text-left",
-	)
-}
+const itemClasses = "cn-context-menu-item group/context-menu-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0"
 
 // 1:1 base/ui/context-menu.tsx ContextMenuCheckboxItem/RadioItem, cnClass is
 // cn-context-menu-checkbox-item or cn-context-menu-radio-item.
 func checkItemClasses(cnClass string) string {
-	return utils.CN(
-		cnClass+" relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-		// Base UI unmounts the indicator when unchecked; our indicator toggles
-		// on the checked state via the group instead.
-		"group/cmitem w-full text-left",
-	)
+	return cnClass + " relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0"
 }
 
 // contentClasses is the shared 1:1 base/ui/context-menu.tsx ContextMenuContent
@@ -239,15 +242,23 @@ type PortalProps struct {
 	Attributes templ.Attributes
 }
 
-// Portal is 1:1 the reference Portal slot: a hidden portal node until the script portals
-// the content to <body> on open.
+// Portal is shadcn's ContextMenuPortal, which an example puts around a
+// submenu's content: a portal node of its own, mounted with the submenu.
 templ Portal(props ...PortalProps) {
 	{{ var p PortalProps }}
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
+	@portal(templ.Attributes{"data-slot": "context-menu-portal"}, p.Attributes) {
+		{ children... }
+	}
+}
+
+// portal is MenuPrimitive.Portal inside the content: a hidden node that holds
+// the content until the script portals it to <body> on open.
+templ portal(attrs ...templ.Attributes) {
 	<div data-templ-portal hidden>
-		<div data-base-ui-portal { p.Attributes... }>
+		<div data-base-ui-portal hidden { utils.MergeAttributes(attrs...)... }>
 			{ children... }
 		</div>
 	</div>
@@ -267,9 +278,8 @@ templ Content(props ...ContentProps) {
 	{{ s, _ := ctx.Value(stateKey).(ctxState) }}
 	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
-	@Portal() {
+	@portal() {
 		<div
-			id={ menuID(ctx) }
 			data-templ-side={ string(p.Side) }
 			data-templ-side-offset={ strconv.Itoa(p.SideOffset) }
 			data-templ-align-offset={ strconv.Itoa(p.AlignOffset) }
@@ -280,9 +290,10 @@ templ Content(props ...ContentProps) {
 			data-closed
 			hidden
 			role="presentation"
-			class="isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
+			class="isolate z-50 outline-none"
 		>
 			<div
+				id={ menuID(ctx) }
 				data-slot="context-menu-content"
 				data-closed
 				role="menu"
@@ -334,15 +345,14 @@ templ Item(props ...ItemProps) {
 			}
 			role="menuitem"
 			tabindex="-1"
-			class={ utils.CN(itemClasses(), p.Class) }
+			class={ utils.CN(itemClasses, p.Class) }
 			{ p.Attributes... }
 		>
 			{ children... }
 		</a>
 	} else {
-		<button
+		<div
 			id={ p.ID }
-			type="button"
 			data-slot="context-menu-item"
 			data-variant={ string(p.Variant) }
 			data-inset?={ p.Inset }
@@ -355,11 +365,11 @@ templ Item(props ...ItemProps) {
 			}
 			role="menuitem"
 			tabindex="-1"
-			class={ utils.CN(itemClasses(), p.Class) }
+			class={ utils.CN(itemClasses, p.Class) }
 			{ p.Attributes... }
 		>
 			{ children... }
-		</button>
+		</div>
 	}
 }
 
@@ -372,9 +382,8 @@ templ CheckboxItem(props ...CheckboxItemProps) {
 		{{ p.ID = utils.RandomID() }}
 	}
 	{{ checked := initialChecked(p) }}
-	<button
+	<div
 		id={ p.ID }
-		type="button"
 		data-slot="context-menu-checkbox-item"
 		data-templ-checked?={ p.Checked != nil }
 		role="menuitemcheckbox"
@@ -393,11 +402,19 @@ templ CheckboxItem(props ...CheckboxItemProps) {
 		class={ utils.CN(checkItemClasses("cn-context-menu-checkbox-item"), p.Class) }
 		{ p.Attributes... }
 	>
-		<span class="cn-context-menu-item-indicator pointer-events-none opacity-0 group-data-checked/cmitem:opacity-100">
-			@icon.Check()
+		<span class="cn-context-menu-item-indicator pointer-events-none">
+			@itemIndicator(checked, p.Disabled)
 		</span>
 		{ children... }
-	</button>
+	</div>
+}
+
+// itemIndicator is CheckboxItemIndicator and RadioItemIndicator: mounted
+// while the item is checked, the script toggles [hidden] for the unmount.
+templ itemIndicator(checked, disabled bool) {
+	<span aria-hidden="true" data-checked data-disabled?={ disabled } hidden?={ !checked }>
+		@icon.Check()
+	</span>
 }
 
 templ RadioGroup(props ...RadioGroupProps) {
@@ -435,9 +452,8 @@ templ RadioItem(props ...RadioItemProps) {
 	{{ group, _ := ctx.Value(radioStateKey).(radioState) }}
 	{{ checked := group.value != "" && group.value == p.Value }}
 	{{ disabled := p.Disabled || group.disabled }}
-	<button
+	<div
 		id={ p.ID }
-		type="button"
 		data-slot="context-menu-radio-item"
 		if p.Value != "" {
 			data-templ-value={ p.Value }
@@ -458,11 +474,11 @@ templ RadioItem(props ...RadioItemProps) {
 		class={ utils.CN(checkItemClasses("cn-context-menu-radio-item"), p.Class) }
 		{ p.Attributes... }
 	>
-		<span class="cn-context-menu-item-indicator pointer-events-none opacity-0 group-data-checked/cmitem:opacity-100">
-			@icon.Check()
+		<span class="cn-context-menu-item-indicator pointer-events-none">
+			@itemIndicator(checked, disabled)
 		</span>
 		{ children... }
-	</button>
+	</div>
 }
 
 templ Group(props ...GroupProps) {
@@ -494,6 +510,7 @@ templ Label(props ...LabelProps) {
 		}
 		data-slot="context-menu-label"
 		data-inset?={ p.Inset }
+		role="presentation"
 		class={ utils.CN("cn-context-menu-label", p.Class) }
 		{ p.Attributes... }
 	>
@@ -511,6 +528,8 @@ templ Separator(props ...SeparatorProps) {
 			id={ p.ID }
 		}
 		role="separator"
+		aria-orientation="horizontal"
+		data-orientation="horizontal"
 		data-slot="context-menu-separator"
 		class={ utils.CN("cn-context-menu-separator", p.Class) }
 		{ p.Attributes... }
@@ -539,20 +558,11 @@ templ Sub(props ...SubProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	<div
-		if p.ID != "" {
-			id={ p.ID }
-		}
-		data-slot="context-menu-sub"
-		if p.Open != nil {
-			data-templ-open={ strconv.FormatBool(*p.Open) }
-		}
-		data-templ-default-open?={ p.Open == nil && p.DefaultOpen }
-		class={ utils.CN("", p.Class) }
-		{ p.Attributes... }
-	>
-		{ children... }
-	</div>
+	if p.ID == "" {
+		{{ p.ID = utils.RandomID() }}
+	}
+	{{ ctx = context.WithValue(ctx, subStateKey, ctxSubState{id: p.ID, open: p.Open, defaultOpen: p.DefaultOpen}) }}
+	{ children... }
 }
 
 templ SubTrigger(props ...SubTriggerProps) {
@@ -560,13 +570,14 @@ templ SubTrigger(props ...SubTriggerProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	<button
-		if p.ID != "" {
-			id={ p.ID }
-		}
-		type="button"
+	if p.ID == "" {
+		{{ p.ID = subState(ctx).id + "-trigger" }}
+	}
+	<div
+		id={ p.ID }
 		data-slot="context-menu-sub-trigger"
 		data-inset?={ p.Inset }
+		data-templ-controls={ subState(ctx).id }
 		role="menuitem"
 		tabindex="-1"
 		aria-haspopup="menu"
@@ -578,7 +589,6 @@ templ SubTrigger(props ...SubTriggerProps) {
 				// data-open, which Base UI does not render on a submenu trigger
 				// (it renders data-popup-open), so it stays off like upstream's.
 				"cn-context-menu-sub-trigger flex cursor-default items-center outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
-				"w-full text-left",
 				p.Class,
 			),
 		}
@@ -586,7 +596,7 @@ templ SubTrigger(props ...SubTriggerProps) {
 	>
 		{ children... }
 		@icon.ChevronRight(icon.Props{Class: "cn-rtl-flip ml-auto"})
-	</button>
+	</div>
 }
 
 templ SubContent(props ...SubContentProps) {
@@ -596,22 +606,26 @@ templ SubContent(props ...SubContentProps) {
 	}
 	// shadcn's ContextMenuSubContent is a ContextMenuContent: it portals on
 	// open like the root menu, into the root's portal node.
-	@Portal() {
+	{{ sub := subState(ctx) }}
+	@portal() {
 		<div
+			if sub.open != nil {
+				data-templ-open={ strconv.FormatBool(*sub.open) }
+			}
+			data-templ-default-open?={ sub.open == nil && sub.defaultOpen }
 			data-closed
 			data-nested
 			hidden
 			role="presentation"
-			class="isolate z-50 outline-none fixed inset-auto left-0 top-0"
+			class="isolate z-50 outline-none"
 		>
 		<div
-			if p.ID != "" {
-				id={ p.ID }
-			}
+			id={ sub.id }
 			data-slot="context-menu-sub-content"
 			data-closed
 			data-nested
 			role="menu"
+			aria-labelledby={ sub.id + "-trigger" }
 			tabindex="-1"
 			data-base-ui-focusable
 			class={

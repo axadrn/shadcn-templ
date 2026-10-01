@@ -38,41 +38,45 @@ templ DropdownMenuComplex() {
 						@icon.FolderOpen()
 						Open Recent
 					}
-					@dropdownmenu.SubContent() {
-						@dropdownmenu.Group() {
-							@dropdownmenu.Label() {
-								Recent Projects
-							}
-							@dropdownmenu.Item() {
-								@icon.FileCode()
-								Project Alpha
-							}
-							@dropdownmenu.Item() {
-								@icon.FileCode()
-								Project Beta
-							}
-							@dropdownmenu.Sub() {
-								@dropdownmenu.SubTrigger() {
-									@icon.Ellipsis()
-									More Projects
+					@dropdownmenu.Portal() {
+						@dropdownmenu.SubContent() {
+							@dropdownmenu.Group() {
+								@dropdownmenu.Label() {
+									Recent Projects
 								}
-								@dropdownmenu.SubContent() {
-									@dropdownmenu.Item() {
-										@icon.FileCode()
-										Project Gamma
+								@dropdownmenu.Item() {
+									@icon.FileCode()
+									Project Alpha
+								}
+								@dropdownmenu.Item() {
+									@icon.FileCode()
+									Project Beta
+								}
+								@dropdownmenu.Sub() {
+									@dropdownmenu.SubTrigger() {
+										@icon.Ellipsis()
+										More Projects
 									}
-									@dropdownmenu.Item() {
-										@icon.FileCode()
-										Project Delta
+									@dropdownmenu.Portal() {
+										@dropdownmenu.SubContent() {
+											@dropdownmenu.Item() {
+												@icon.FileCode()
+												Project Gamma
+											}
+											@dropdownmenu.Item() {
+												@icon.FileCode()
+												Project Delta
+											}
+										}
 									}
 								}
 							}
-						}
-						@dropdownmenu.Separator()
-						@dropdownmenu.Group() {
-							@dropdownmenu.Item() {
-								@icon.FolderSearch()
-								Browse...
+							@dropdownmenu.Separator()
+							@dropdownmenu.Group() {
+								@dropdownmenu.Item() {
+									@icon.FolderSearch()
+									Browse...
+								}
 							}
 						}
 					}
@@ -111,25 +115,27 @@ templ DropdownMenuComplex() {
 						@icon.Palette()
 						Theme
 					}
-					@dropdownmenu.SubContent() {
-						@dropdownmenu.Group() {
-							@dropdownmenu.Label() {
-								Appearance
-							}
-							@dropdownmenu.RadioGroup(dropdownmenu.RadioGroupProps{DefaultValue: "light"}) {
-								@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{
-									Value: "light",
-								}) {
-									@icon.Sun()
-									Light
+					@dropdownmenu.Portal() {
+						@dropdownmenu.SubContent() {
+							@dropdownmenu.Group() {
+								@dropdownmenu.Label() {
+									Appearance
 								}
-								@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{Value: "dark"}) {
-									@icon.Moon()
-									Dark
-								}
-								@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{Value: "system"}) {
-									@icon.Monitor()
-									System
+								@dropdownmenu.RadioGroup(dropdownmenu.RadioGroupProps{DefaultValue: "light"}) {
+									@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{
+										Value: "light",
+									}) {
+										@icon.Sun()
+										Light
+									}
+									@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{Value: "dark"}) {
+										@icon.Moon()
+										Dark
+									}
+									@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{Value: "system"}) {
+										@icon.Monitor()
+										System
+									}
 								}
 							}
 						}
@@ -157,46 +163,50 @@ templ DropdownMenuComplex() {
 						@icon.Settings()
 						Settings
 					}
-					@dropdownmenu.SubContent() {
-						@dropdownmenu.Group() {
-							@dropdownmenu.Label() {
-								Preferences
-							}
-							@dropdownmenu.Item() {
-								@icon.Keyboard()
-								Keyboard Shortcuts
-							}
-							@dropdownmenu.Item() {
-								@icon.Languages()
-								Language
-							}
-							@dropdownmenu.Sub() {
-								@dropdownmenu.SubTrigger() {
-									@icon.Bell()
-									Notifications
+					@dropdownmenu.Portal() {
+						@dropdownmenu.SubContent() {
+							@dropdownmenu.Group() {
+								@dropdownmenu.Label() {
+									Preferences
 								}
-								@dropdownmenu.SubContent() {
-									@dropdownmenu.Group() {
-										@dropdownmenu.Label() {
-											Notification Types
-										}
-										@dropdownmenu.CheckboxItem(dropdownmenu.CheckboxItemProps{DefaultChecked: true}) {
-											@icon.Bell()
-											Push Notifications
-										}
-										@dropdownmenu.CheckboxItem(dropdownmenu.CheckboxItemProps{DefaultChecked: true}) {
-											@icon.Mail()
-											Email Notifications
+								@dropdownmenu.Item() {
+									@icon.Keyboard()
+									Keyboard Shortcuts
+								}
+								@dropdownmenu.Item() {
+									@icon.Languages()
+									Language
+								}
+								@dropdownmenu.Sub() {
+									@dropdownmenu.SubTrigger() {
+										@icon.Bell()
+										Notifications
+									}
+									@dropdownmenu.Portal() {
+										@dropdownmenu.SubContent() {
+											@dropdownmenu.Group() {
+												@dropdownmenu.Label() {
+													Notification Types
+												}
+												@dropdownmenu.CheckboxItem(dropdownmenu.CheckboxItemProps{DefaultChecked: true}) {
+													@icon.Bell()
+													Push Notifications
+												}
+												@dropdownmenu.CheckboxItem(dropdownmenu.CheckboxItemProps{DefaultChecked: true}) {
+													@icon.Mail()
+													Email Notifications
+												}
+											}
 										}
 									}
 								}
 							}
-						}
-						@dropdownmenu.Separator()
-						@dropdownmenu.Group() {
-							@dropdownmenu.Item() {
-								@icon.Shield()
-								Privacy & Security
+							@dropdownmenu.Separator()
+							@dropdownmenu.Group() {
+								@dropdownmenu.Item() {
+									@icon.Shield()
+									Privacy & Security
+								}
 							}
 						}
 					}
