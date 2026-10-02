@@ -227,4 +227,15 @@ Checks: `go test ./...` green, a11y 30 of 30 and behavior in both engines (the s
 
 Checks: `go test ./...` green, a11y 30 of 30 in both engines, behavior, `escape.mjs` 0 failures. `compare.mjs all`: chromium 2896 pass and 109 fail, webkit 2889 and 116. Button group, field, input, label and kbd pass every check; input group fails only `input-group-button`'s example marker (task 15).
 
+### Task 13
+
+- **Avatar.** `AvatarRoot` is a `span`. `AvatarImage` mounts once its image loaded and `AvatarFallback` unmounts then, `[hidden]` here (the browser still loads a hidden image); the image's own fade and `data-loaded` are gone. `avatar.js` registers on the lifecycle block now, the registry and the docs list it.
+- **Button as a link.** A `Button` with `Href` is Base UI's Button with `nativeButton` false, which shadcn renders the link through: `role="button"` and `tabindex="0"` (pagination links, `empty-demo`). `button.Variants` is shadcn's `buttonVariants` for an element that is no Button (`button-render`).
+- **Breadcrumb.** `aria-label="breadcrumb"`.
+- **Examples ported 1:1.** `button-render`, `button-rounded`, `button-with-icon` (the icons' `data-icon`), `empty-background`, `empty-avatar-group` (upstream's plain stack instead of an avatar group), `item-image` (`role="listitem"`), `item-link` (`rel`), `spinner-custom` (its own spinner has no slot), `breadcrumb-demo` (the dropdown trigger on a Button of a server component keeps `button`), `breadcrumb-dropdown` (`useButton`'s `type` and `tabindex` on the bare button).
+
+Open: `pagination-simple` upstream renders `data-slot="button"` on its fourth link only, the other four are `pagination-link`, from the same source line each; reproducible, not explained yet. `item-header`, `item-image` and `aspect-ratio-demo` use Next's `Image` (`srcset`, `data-nimg`, lazy loading); plan task 14 asks the owner. The avatar pixels are our own pictures (task 8's text question).
+
+Checks: `go test ./...` green, a11y 30 of 30 and behavior in both engines. `compare.mjs all`: chromium 2936 pass and 69 fail, webkit 2928 and 77. Breadcrumb, spinner and the dropdown menu (its avatar) pass every check; avatar, empty and button fail only on the open points above.
+
 ## Planner review

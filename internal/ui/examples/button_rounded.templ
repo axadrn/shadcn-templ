@@ -6,7 +6,10 @@ import (
 )
 
 templ ButtonRounded() {
-	<div class="flex flex-col gap-8">
+	<div class="flex gap-2">
+		@button.Button(button.Props{Class: "rounded-full"}) {
+			Get Started
+		}
 		@button.Button(button.Props{
 			Variant: button.VariantOutline,
 			Size:    button.SizeIcon,

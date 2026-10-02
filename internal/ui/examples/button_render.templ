@@ -2,12 +2,9 @@ package examples
 
 import "github.com/axadrn/shadcn-templ/v2/components/button"
 
+// The link takes the button's look through buttonVariants, it is no Button.
 templ ButtonRender() {
-	@button.Button(button.Props{
-		Href:    "#",
-		Variant: button.VariantSecondary,
-		Size:    button.SizeSm,
-	}) {
+	<a href="#" class={ button.Variants(button.Props{Variant: button.VariantSecondary, Size: button.SizeSm}) }>
 		Login
-	}
+	</a>
 }

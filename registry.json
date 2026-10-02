@@ -99,6 +99,10 @@
         {
           "path": "components/avatar/avatar.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [

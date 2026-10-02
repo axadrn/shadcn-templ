@@ -31,6 +31,8 @@ shadcn-templ add avatar
 
 <ComponentSource name="avatar" title="components/avatar/avatar.js" />
 
+<ComponentSource name="avatar" title="components/baseui/lifecycle.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>

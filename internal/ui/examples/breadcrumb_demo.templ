@@ -20,7 +20,7 @@ templ BreadcrumbDemo() {
 					@button.Button(button.Props{
 						Size:       button.SizeIconSm,
 						Variant:    button.VariantGhost,
-						Attributes: dropdownmenu.Trigger(ctx),
+						Attributes: serverRendered(dropdownmenu.Trigger(ctx)),
 					}) {
 						@breadcrumb.Ellipsis()
 						<span class="sr-only">Toggle menu</span>

@@ -21,7 +21,7 @@ templ EmptyBackground() {
 		}
 		@empty.Content() {
 			@button.Button(button.Props{Variant: button.VariantOutline}) {
-				@icon.RefreshCcw()
+				@icon.RefreshCcw(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
 				Refresh
 			}
 		}

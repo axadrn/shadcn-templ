@@ -36,8 +36,9 @@ templ ItemImage() {
 		@item.Group(item.GroupProps{Class: "gap-4"}) {
 			for _, song := range music {
 				@item.Item(item.Props{
-					Variant: item.VariantOutline,
-					Href:    "#",
+					Variant:    item.VariantOutline,
+					Href:       "#",
+					Attributes: templ.Attributes{"role": "listitem"},
 				}) {
 					@item.Media(item.MediaProps{Variant: item.MediaVariantImage}) {
 						<img

@@ -6,11 +6,14 @@ import (
 )
 
 templ ButtonWithIcon() {
-	@button.Button(button.Props{
-		Variant: button.VariantOutline,
-		Size:    button.SizeSm,
-	}) {
-		@icon.GitBranch()
-		New Branch
-	}
+	<div class="flex gap-2">
+		@button.Button(button.Props{Variant: button.VariantOutline}) {
+			@icon.GitBranch(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+			New Branch
+		}
+		@button.Button(button.Props{Variant: button.VariantOutline}) {
+			Fork
+			@icon.GitFork(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+		}
+	</div>
 }

@@ -1,25 +1,31 @@
 (function () {
   "use strict";
 
-  // Fade an avatar image in once it has loaded. Until then — or if it never
-  // loads — it stays transparent (opacity-0) and the fallback stacked
-  // underneath shows through. CSP-safe replacement for inline handlers.
-  function reveal(img) {
-    img.dataset.loaded = "true";
+  // Port of Base UI's AvatarImage and AvatarFallback: the image mounts once
+  // it loaded, the fallback unmounts then. Until it loads, or when it never
+  // does, the fallback shows. Mounting is [hidden] here, the browser still
+  // loads a hidden image.
+  function loaded(img) {
+    img.hidden = false;
+    img.parentElement
+      ?.querySelectorAll(':scope > [data-slot="avatar-fallback"]')
+      .forEach((fallback) => (fallback.hidden = true));
   }
 
   // Images that load after this script runs.
   document.addEventListener(
     "load",
-    function (e) {
+    (e) => {
       const img = e.target;
-      if (img.matches && img.matches('[data-slot="avatar-image"]')) reveal(img);
+      if (img.matches && img.matches('[data-slot="avatar-image"]')) loaded(img);
     },
     true,
   );
 
   // Images that already loaded before this script ran.
-  document.querySelectorAll('[data-slot="avatar-image"]').forEach(function (img) {
-    if (img.complete && img.naturalWidth > 0) reveal(img);
+  window.templ.lifecycle.register('[data-slot="avatar-image"]', {
+    init(img) {
+      if (img.complete && img.naturalWidth > 0) loaded(img);
+    },
   });
 })();

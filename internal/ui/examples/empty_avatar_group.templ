@@ -11,7 +11,7 @@ templ EmptyAvatarGroup() {
 	@empty.Empty() {
 		@empty.Header() {
 			@empty.Media() {
-				@avatar.Group(avatar.GroupProps{Class: "*:data-[slot=avatar]:size-12 grayscale"}) {
+				<div class="flex -space-x-2 *:data-[slot=avatar]:size-12 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background *:data-[slot=avatar]:grayscale">
 					@avatar.Avatar() {
 						@avatar.Image(avatar.ImageProps{
 							Src: "https://github.com/axadrn.png",
@@ -39,7 +39,7 @@ templ EmptyAvatarGroup() {
 							JD
 						}
 					}
-				}
+				</div>
 			}
 			@empty.Title() {
 				No Team Members
