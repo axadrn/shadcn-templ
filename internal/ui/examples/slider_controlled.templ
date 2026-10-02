@@ -6,28 +6,28 @@ import (
 )
 
 templ SliderControlled() {
-	<div class="mx-auto grid w-full max-w-xs gap-3" data-slider-controlled-demo>
+	<div class="mx-auto grid w-full max-w-xs gap-3">
 		<div class="flex items-center justify-between gap-2">
 			@label.Label(label.Props{For: "slider-demo-temperature"}) {
 				Temperature
 			}
-			<span class="text-sm text-muted-foreground" data-value>0.3, 0.7</span>
+			<span id="slider-demo-temperature-value" class="text-sm text-muted-foreground">0.3, 0.7</span>
 		</div>
 		@slider.Slider(slider.Props{
-			ID:           "slider-demo-temperature",
-			DefaultValue: []float64{0.3, 0.7},
-			Min:          0,
-			Max:          1,
-			Step:         0.1,
+			ID:    "slider-demo-temperature",
+			Value: []float64{0.3, 0.7},
+			Min:   0,
+			Max:   1,
+			Step:  0.1,
 		})
 	</div>
-	<script>
-		// Keep the displayed value in sync with the slider.
-		(() => {
-			const demo = document.querySelector("[data-slider-controlled-demo]");
-			demo.addEventListener("slider-change", (e) => {
-				demo.querySelector("[data-value]").textContent = e.detail.values.join(", ");
-			});
-		})();
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The value state: onValueChange sets it, the slider and the text
+		// render it.
+		document.addEventListener("slider-change", (e) => {
+			if (e.target.id !== "slider-demo-temperature") return;
+			window.templ.slider.setValues(e.target, e.detail.values);
+			document.getElementById("slider-demo-temperature-value").textContent = e.detail.values.join(", ");
+		});
 	</script>
 }

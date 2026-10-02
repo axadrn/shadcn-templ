@@ -207,4 +207,13 @@ Checks: `go test ./...` green, a11y 30 of 30 (the tabs check expects `aria-contr
 
 Checks: `go test ./...` green, a11y 30 of 30 in both engines, behavior (the radio group suite checks one checked input and no differing names instead of a shared generated one), `escape.mjs` 0 failures. `compare.mjs all`: chromium 2813 pass and 192 fail, webkit 2805 and 200. Toggle group, radio group and the drawer pass every check; `avatar-demo`'s pixels differ by our own avatar images (task 8's text question).
 
+### Task 11
+
+- **Thumb input.** Every `SliderThumb` holds the range input Base UI renders: visually hidden over the thumb (vertical writing for a vertical slider), `id`, `name` (Base UI's, no hidden inputs per value any more), `min`, `max`, `step`, `value`, `aria-orientation`, `aria-valuenow`, the default `aria-valuetext` of a two thumb range (`start range`, `end range`), `disabled`. It takes the focus and the keys: the arrows by step (Shift and the Page keys by the large step of 10), Home and End to the ends or, in a range, to the neighbor; a native change (an assistive technology) sets the value too. The thumb itself renders `data-index`, the orientation and `data-disabled`, no role or tab stop.
+- **Parts.** The root is a `group`; the control and the indicator carry Base UI's `data-base-ui-slider-control` and `data-base-ui-slider-indicator`.
+- **API.** `window.templ.slider` (`values`, `setValues`, `setDisabled`) for a page that sets a slider's state from outside like a controlled one's owner; the create preview's roller shades and savings cards use it instead of repeating the position math.
+- **Example.** `slider-controlled` is controlled like upstream's (`Value`, the change sets the slider and the text), without its `data-slider-controlled-demo` marker.
+
+Checks: `go test ./...` green, a11y 30 of 30 and behavior in both engines (the slider suite drives the thumb input), the create preview runs without page errors. `compare.mjs all`: chromium 2855 pass and 150 fail, webkit 2848 and 157. The slider passes every check in both engines (42 failures before), the field one more; the drawer pixel failure in chromium is the known flake.
+
 ## Planner review

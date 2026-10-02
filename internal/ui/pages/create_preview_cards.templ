@@ -799,19 +799,8 @@ templ cardKitchenIsland() {
 				nightlight: [15, 20, 0, 80],
 				focus: [100, 85, 0, 0],
 			};
-			// slider.js render() for the single horizontal thumb, same repeat
-			// as the roller shades demo.
-			const setSlider = (root, v) => {
-				const min = parseFloat(root.getAttribute("data-templ-min") || "0");
-				const max = parseFloat(root.getAttribute("data-templ-max") || "100");
-				const f = max === min ? 0 : Math.min(1, Math.max(0, (v - min) / (max - min)));
-				const thumb = root.querySelector("[data-slot=slider-thumb]");
-				thumb.setAttribute("aria-valuenow", String(v));
-				thumb.style.left = "calc(" + (f * 100).toFixed(4) + "% - " + (f * 12).toFixed(2) + "px)";
-				const range = root.querySelector("[data-slot=slider-range]");
-				range.style.left = "0";
-				range.style.width = "calc(" + (f * 100).toFixed(4) + "% + " + (6 - f * 12).toFixed(2) + "px)";
-			};
+			// The slider's state set from outside, like a controlled one.
+			const setSlider = (root, v) => window.templ.slider.setValues(root, [v]);
 			document.addEventListener("toggle-group-value-change", (e) => {
 				const card = e.target.closest("[data-kitchen-island]");
 				if (!card) return;
@@ -839,21 +828,8 @@ templ cardKitchenIsland() {
 					t.disabled = disabled;
 					t.toggleAttribute("data-disabled", disabled);
 				});
-				// The slider's Disabled prop pendant: root + control carry
-				// data-disabled (behavior + 50% opacity), the thumb loses its
-				// tab stop.
-				card.querySelectorAll("[data-slot=slider]").forEach((root) => {
-					root.toggleAttribute("data-disabled", disabled);
-					root.querySelector("[data-slot=slider-track]").parentElement.toggleAttribute("data-disabled", disabled);
-					const thumb = root.querySelector("[data-slot=slider-thumb]");
-					thumb.toggleAttribute("data-disabled", disabled);
-					if (disabled) {
-						thumb.setAttribute("aria-disabled", "true");
-					} else {
-						thumb.removeAttribute("aria-disabled");
-					}
-					thumb.setAttribute("tabindex", disabled ? "-1" : "0");
-				});
+				// The slider's Disabled prop, set from outside.
+				card.querySelectorAll("[data-slot=slider]").forEach((root) => window.templ.slider.setDisabled(root, disabled));
 			});
 		})();
 	</script>
@@ -1839,19 +1815,8 @@ templ cardRollerShades() {
 			window.__templDemoRollerShades = true;
 			const POSITIONS = { open: 0, half: 50, closed: 100 };
 			const presetOf = (v) => (v <= 10 ? "open" : v >= 90 ? "closed" : "half");
-			// slider.js render() for the single horizontal thumb: the demo sets
-			// the value from outside, so it repeats the edge-aligned math.
-			const setSlider = (root, v) => {
-				const min = parseFloat(root.getAttribute("data-templ-min") || "0");
-				const max = parseFloat(root.getAttribute("data-templ-max") || "100");
-				const f = max === min ? 0 : Math.min(1, Math.max(0, (v - min) / (max - min)));
-				const thumb = root.querySelector("[data-slot=slider-thumb]");
-				thumb.setAttribute("aria-valuenow", String(v));
-				thumb.style.left = "calc(" + (f * 100).toFixed(4) + "% - " + (f * 12).toFixed(2) + "px)";
-				const range = root.querySelector("[data-slot=slider-range]");
-				range.style.left = "0";
-				range.style.width = "calc(" + (f * 100).toFixed(4) + "% + " + (6 - f * 12).toFixed(2) + "px)";
-			};
+			// The slider's state set from outside, like a controlled one.
+			const setSlider = (root, v) => window.templ.slider.setValues(root, [v]);
 			const render = (card, v) => {
 				card.querySelector("[data-roller-shade]").style.height = v + "%";
 				const preset = presetOf(v);
@@ -1879,7 +1844,7 @@ templ cardRollerShades() {
 				} else {
 					// Unpressing keeps the position; render re-asserts the
 					// controlled preset.
-					v = parseFloat(sliderRoot.querySelector("[data-slot=slider-thumb]").getAttribute("aria-valuenow"));
+					v = window.templ.slider.values(sliderRoot)[0];
 				}
 				render(card, v);
 			});

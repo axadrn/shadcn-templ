@@ -4873,7 +4873,7 @@ func cardKitchenIsland() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 172, "\">\n\t\t// The vanilla pendant of kitchen-island.tsx's state: the scene toggle\n\t\t// group applies its SCENES preset to the four sliders (brightness,\n\t\t// color temp, volume, fade in DOM order), the header switch\n\t\t// enables/disables scenes and sliders. Dragging a slider changes only\n\t\t// that slider, exactly like the source.\n\t\t(() => {\n\t\t\tif (window.__templDemoKitchenIsland) return;\n\t\t\twindow.__templDemoKitchenIsland = true;\n\t\t\t// kitchen-island.tsx SCENES, as [brightness, colorTemp, volume, fade].\n\t\t\tconst SCENES = {\n\t\t\t\tcooking: [90, 70, 30, 0],\n\t\t\t\tdining: [50, 40, 20, 60],\n\t\t\t\tnightlight: [15, 20, 0, 80],\n\t\t\t\tfocus: [100, 85, 0, 0],\n\t\t\t};\n\t\t\t// slider.js render() for the single horizontal thumb, same repeat\n\t\t\t// as the roller shades demo.\n\t\t\tconst setSlider = (root, v) => {\n\t\t\t\tconst min = parseFloat(root.getAttribute(\"data-templ-min\") || \"0\");\n\t\t\t\tconst max = parseFloat(root.getAttribute(\"data-templ-max\") || \"100\");\n\t\t\t\tconst f = max === min ? 0 : Math.min(1, Math.max(0, (v - min) / (max - min)));\n\t\t\t\tconst thumb = root.querySelector(\"[data-slot=slider-thumb]\");\n\t\t\t\tthumb.setAttribute(\"aria-valuenow\", String(v));\n\t\t\t\tthumb.style.left = \"calc(\" + (f * 100).toFixed(4) + \"% - \" + (f * 12).toFixed(2) + \"px)\";\n\t\t\t\tconst range = root.querySelector(\"[data-slot=slider-range]\");\n\t\t\t\trange.style.left = \"0\";\n\t\t\t\trange.style.width = \"calc(\" + (f * 100).toFixed(4) + \"% + \" + (6 - f * 12).toFixed(2) + \"px)\";\n\t\t\t};\n\t\t\tdocument.addEventListener(\"toggle-group-value-change\", (e) => {\n\t\t\t\tconst card = e.target.closest(\"[data-kitchen-island]\");\n\t\t\t\tif (!card) return;\n\t\t\t\t// handleSceneChange(value[0] ?? \"cooking\"): unpressing falls\n\t\t\t\t// back to the cooking scene.\n\t\t\t\tconst scene = e.detail.value[0] || \"cooking\";\n\t\t\t\tconst preset = SCENES[scene];\n\t\t\t\tif (!preset) return;\n\t\t\t\tcard.querySelectorAll(\"[data-slot=slider]\").forEach((root, i) => {\n\t\t\t\t\tif (preset[i] != null) setSlider(root, preset[i]);\n\t\t\t\t});\n\t\t\t\tconst group = card.querySelector(\"[data-slot=toggle-group]\");\n\t\t\t\tgroup.querySelectorAll(\"[data-slot=toggle-group-item]\").forEach((t) => {\n\t\t\t\t\tconst on = t.getAttribute(\"data-templ-value\") === scene;\n\t\t\t\t\tt.toggleAttribute(\"data-pressed\", on);\n\t\t\t\t\tt.setAttribute(\"aria-pressed\", on ? \"true\" : \"false\");\n\t\t\t\t});\n\t\t\t});\n\t\t\tdocument.addEventListener(\"change\", (e) => {\n\t\t\t\tif (!e.target.matches || !e.target.matches(\"[data-slot=switch] + input\")) return;\n\t\t\t\tconst card = e.target.closest(\"[data-kitchen-island]\");\n\t\t\t\tif (!card) return;\n\t\t\t\tconst disabled = !e.target.checked;\n\t\t\t\tcard.querySelectorAll(\"[data-slot=toggle-group-item]\").forEach((t) => {\n\t\t\t\t\tt.disabled = disabled;\n\t\t\t\t\tt.toggleAttribute(\"data-disabled\", disabled);\n\t\t\t\t});\n\t\t\t\t// The slider's Disabled prop pendant: root + control carry\n\t\t\t\t// data-disabled (behavior + 50% opacity), the thumb loses its\n\t\t\t\t// tab stop.\n\t\t\t\tcard.querySelectorAll(\"[data-slot=slider]\").forEach((root) => {\n\t\t\t\t\troot.toggleAttribute(\"data-disabled\", disabled);\n\t\t\t\t\troot.querySelector(\"[data-slot=slider-track]\").parentElement.toggleAttribute(\"data-disabled\", disabled);\n\t\t\t\t\tconst thumb = root.querySelector(\"[data-slot=slider-thumb]\");\n\t\t\t\t\tthumb.toggleAttribute(\"data-disabled\", disabled);\n\t\t\t\t\tif (disabled) {\n\t\t\t\t\t\tthumb.setAttribute(\"aria-disabled\", \"true\");\n\t\t\t\t\t} else {\n\t\t\t\t\t\tthumb.removeAttribute(\"aria-disabled\");\n\t\t\t\t\t}\n\t\t\t\t\tthumb.setAttribute(\"tabindex\", disabled ? \"-1\" : \"0\");\n\t\t\t\t});\n\t\t\t});\n\t\t})();\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 172, "\">\n\t\t// The vanilla pendant of kitchen-island.tsx's state: the scene toggle\n\t\t// group applies its SCENES preset to the four sliders (brightness,\n\t\t// color temp, volume, fade in DOM order), the header switch\n\t\t// enables/disables scenes and sliders. Dragging a slider changes only\n\t\t// that slider, exactly like the source.\n\t\t(() => {\n\t\t\tif (window.__templDemoKitchenIsland) return;\n\t\t\twindow.__templDemoKitchenIsland = true;\n\t\t\t// kitchen-island.tsx SCENES, as [brightness, colorTemp, volume, fade].\n\t\t\tconst SCENES = {\n\t\t\t\tcooking: [90, 70, 30, 0],\n\t\t\t\tdining: [50, 40, 20, 60],\n\t\t\t\tnightlight: [15, 20, 0, 80],\n\t\t\t\tfocus: [100, 85, 0, 0],\n\t\t\t};\n\t\t\t// The slider's state set from outside, like a controlled one.\n\t\t\tconst setSlider = (root, v) => window.templ.slider.setValues(root, [v]);\n\t\t\tdocument.addEventListener(\"toggle-group-value-change\", (e) => {\n\t\t\t\tconst card = e.target.closest(\"[data-kitchen-island]\");\n\t\t\t\tif (!card) return;\n\t\t\t\t// handleSceneChange(value[0] ?? \"cooking\"): unpressing falls\n\t\t\t\t// back to the cooking scene.\n\t\t\t\tconst scene = e.detail.value[0] || \"cooking\";\n\t\t\t\tconst preset = SCENES[scene];\n\t\t\t\tif (!preset) return;\n\t\t\t\tcard.querySelectorAll(\"[data-slot=slider]\").forEach((root, i) => {\n\t\t\t\t\tif (preset[i] != null) setSlider(root, preset[i]);\n\t\t\t\t});\n\t\t\t\tconst group = card.querySelector(\"[data-slot=toggle-group]\");\n\t\t\t\tgroup.querySelectorAll(\"[data-slot=toggle-group-item]\").forEach((t) => {\n\t\t\t\t\tconst on = t.getAttribute(\"data-templ-value\") === scene;\n\t\t\t\t\tt.toggleAttribute(\"data-pressed\", on);\n\t\t\t\t\tt.setAttribute(\"aria-pressed\", on ? \"true\" : \"false\");\n\t\t\t\t});\n\t\t\t});\n\t\t\tdocument.addEventListener(\"change\", (e) => {\n\t\t\t\tif (!e.target.matches || !e.target.matches(\"[data-slot=switch] + input\")) return;\n\t\t\t\tconst card = e.target.closest(\"[data-kitchen-island]\");\n\t\t\t\tif (!card) return;\n\t\t\t\tconst disabled = !e.target.checked;\n\t\t\t\tcard.querySelectorAll(\"[data-slot=toggle-group-item]\").forEach((t) => {\n\t\t\t\t\tt.disabled = disabled;\n\t\t\t\t\tt.toggleAttribute(\"data-disabled\", disabled);\n\t\t\t\t});\n\t\t\t\t// The slider's Disabled prop, set from outside.\n\t\t\t\tcard.querySelectorAll(\"[data-slot=slider]\").forEach((root) => window.templ.slider.setDisabled(root, disabled));\n\t\t\t});\n\t\t})();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -6097,7 +6097,7 @@ func cardRecentTransactions() templ.Component {
 									var templ_7745c5c3_Var268 string
 									templ_7745c5c3_Var268, templ_7745c5c3_Err = templ.JoinStringErrs(tx.name)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1036, Col: 44}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1012, Col: 44}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var268))
 									if templ_7745c5c3_Err != nil {
@@ -6110,7 +6110,7 @@ func cardRecentTransactions() templ.Component {
 									var templ_7745c5c3_Var269 string
 									templ_7745c5c3_Var269, templ_7745c5c3_Err = templ.JoinStringErrs(tx.category)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1037, Col: 66}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1013, Col: 66}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var269))
 									if templ_7745c5c3_Err != nil {
@@ -6145,7 +6145,7 @@ func cardRecentTransactions() templ.Component {
 									var templ_7745c5c3_Var271 string
 									templ_7745c5c3_Var271, templ_7745c5c3_Err = templ.JoinStringErrs(tx.date)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1041, Col: 17}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1017, Col: 17}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var271))
 									if templ_7745c5c3_Err != nil {
@@ -6181,7 +6181,7 @@ func cardRecentTransactions() templ.Component {
 										var templ_7745c5c3_Var273 string
 										templ_7745c5c3_Var273, templ_7745c5c3_Err = templ.JoinStringErrs(tx.amount)
 										if templ_7745c5c3_Err != nil {
-											return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1045, Col: 86}
+											return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1021, Col: 86}
 										}
 										_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var273))
 										if templ_7745c5c3_Err != nil {
@@ -6199,7 +6199,7 @@ func cardRecentTransactions() templ.Component {
 										var templ_7745c5c3_Var274 string
 										templ_7745c5c3_Var274, templ_7745c5c3_Err = templ.JoinStringErrs(tx.amount)
 										if templ_7745c5c3_Err != nil {
-											return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1047, Col: 69}
+											return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1023, Col: 69}
 										}
 										_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var274))
 										if templ_7745c5c3_Err != nil {
@@ -6646,7 +6646,7 @@ func sidebarNavCard(groups []sidebarNavGroup) templ.Component {
 									var templ_7745c5c3_Var291 string
 									templ_7745c5c3_Var291, templ_7745c5c3_Err = templ.JoinStringErrs(group.label)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1153, Col: 21}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1129, Col: 21}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var291))
 									if templ_7745c5c3_Err != nil {
@@ -6722,7 +6722,7 @@ func sidebarNavCard(groups []sidebarNavGroup) templ.Component {
 													var templ_7745c5c3_Var296 string
 													templ_7745c5c3_Var296, templ_7745c5c3_Err = templ.JoinStringErrs(entry.label)
 													if templ_7745c5c3_Err != nil {
-														return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1161, Col: 25}
+														return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1137, Col: 25}
 													}
 													_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var296))
 													if templ_7745c5c3_Err != nil {
@@ -7319,7 +7319,7 @@ func paymentItem(iconFn func(...icon.Props) templ.Component, title, description 
 					var templ_7745c5c3_Var321 string
 					templ_7745c5c3_Var321, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1234, Col: 11}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1210, Col: 11}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var321))
 					if templ_7745c5c3_Err != nil {
@@ -7350,7 +7350,7 @@ func paymentItem(iconFn func(...icon.Props) templ.Component, title, description 
 					var templ_7745c5c3_Var323 string
 					templ_7745c5c3_Var323, templ_7745c5c3_Err = templ.JoinStringErrs(description)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1237, Col: 17}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1213, Col: 17}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var323))
 					if templ_7745c5c3_Err != nil {
@@ -7860,7 +7860,7 @@ func cardReleaseCatalog() templ.Component {
 								var templ_7745c5c3_Var345 string
 								templ_7745c5c3_Var345, templ_7745c5c3_Err = templ.JoinStringErrs(holding.ticker)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1319, Col: 24}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1295, Col: 24}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var345))
 								if templ_7745c5c3_Err != nil {
@@ -7907,7 +7907,7 @@ func cardReleaseCatalog() templ.Component {
 									var templ_7745c5c3_Var348 string
 									templ_7745c5c3_Var348, templ_7745c5c3_Err = templ.JoinStringErrs(holding.name)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1324, Col: 22}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1300, Col: 22}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var348))
 									if templ_7745c5c3_Err != nil {
@@ -7938,7 +7938,7 @@ func cardReleaseCatalog() templ.Component {
 									var templ_7745c5c3_Var350 string
 									templ_7745c5c3_Var350, templ_7745c5c3_Err = templ.JoinStringErrs(holding.shares)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1327, Col: 24}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1303, Col: 24}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var350))
 									if templ_7745c5c3_Err != nil {
@@ -7951,7 +7951,7 @@ func cardReleaseCatalog() templ.Component {
 									var templ_7745c5c3_Var351 string
 									templ_7745c5c3_Var351, templ_7745c5c3_Err = templ.JoinStringErrs(holding.added)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1327, Col: 52}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1303, Col: 52}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var351))
 									if templ_7745c5c3_Err != nil {
@@ -7988,7 +7988,7 @@ func cardReleaseCatalog() templ.Component {
 								var templ_7745c5c3_Var353 string
 								templ_7745c5c3_Var353, templ_7745c5c3_Err = templ.JoinStringErrs(holding.typ)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1332, Col: 21}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1308, Col: 21}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var353))
 								if templ_7745c5c3_Err != nil {
@@ -8007,7 +8007,7 @@ func cardReleaseCatalog() templ.Component {
 							var templ_7745c5c3_Var354 string
 							templ_7745c5c3_Var354, templ_7745c5c3_Err = templ.JoinStringErrs(holding.value)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1336, Col: 62}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1312, Col: 62}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var354))
 							if templ_7745c5c3_Err != nil {
@@ -9520,7 +9520,7 @@ func transferAccountSelect(id string, accounts []transferAccount, selected strin
 							var templ_7745c5c3_Var418 string
 							templ_7745c5c3_Var418, templ_7745c5c3_Err = templ.JoinStringErrs(account.label)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1580, Col: 21}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1556, Col: 21}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var418))
 							if templ_7745c5c3_Err != nil {
@@ -11243,13 +11243,13 @@ func cardRollerShades() templ.Component {
 		var templ_7745c5c3_Var489 string
 		templ_7745c5c3_Var489, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1832, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1808, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var489))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 420, "\">\n\t\t// The vanilla pendant of roller-shades.tsx's position state: the\n\t\t// slider drives the shade height, the derived preset (<=10 open,\n\t\t// >=90 closed, else half) drives the toggle group, and the toggle\n\t\t// group is controlled, so unpressing keeps the current preset.\n\t\t(() => {\n\t\t\tif (window.__templDemoRollerShades) return;\n\t\t\twindow.__templDemoRollerShades = true;\n\t\t\tconst POSITIONS = { open: 0, half: 50, closed: 100 };\n\t\t\tconst presetOf = (v) => (v <= 10 ? \"open\" : v >= 90 ? \"closed\" : \"half\");\n\t\t\t// slider.js render() for the single horizontal thumb: the demo sets\n\t\t\t// the value from outside, so it repeats the edge-aligned math.\n\t\t\tconst setSlider = (root, v) => {\n\t\t\t\tconst min = parseFloat(root.getAttribute(\"data-templ-min\") || \"0\");\n\t\t\t\tconst max = parseFloat(root.getAttribute(\"data-templ-max\") || \"100\");\n\t\t\t\tconst f = max === min ? 0 : Math.min(1, Math.max(0, (v - min) / (max - min)));\n\t\t\t\tconst thumb = root.querySelector(\"[data-slot=slider-thumb]\");\n\t\t\t\tthumb.setAttribute(\"aria-valuenow\", String(v));\n\t\t\t\tthumb.style.left = \"calc(\" + (f * 100).toFixed(4) + \"% - \" + (f * 12).toFixed(2) + \"px)\";\n\t\t\t\tconst range = root.querySelector(\"[data-slot=slider-range]\");\n\t\t\t\trange.style.left = \"0\";\n\t\t\t\trange.style.width = \"calc(\" + (f * 100).toFixed(4) + \"% + \" + (6 - f * 12).toFixed(2) + \"px)\";\n\t\t\t};\n\t\t\tconst render = (card, v) => {\n\t\t\t\tcard.querySelector(\"[data-roller-shade]\").style.height = v + \"%\";\n\t\t\t\tconst preset = presetOf(v);\n\t\t\t\tconst group = card.querySelector(\"[data-slot=toggle-group]\");\n\t\t\t\tgroup.querySelectorAll(\"[data-slot=toggle-group-item]\").forEach((t) => {\n\t\t\t\t\tconst on = t.getAttribute(\"data-templ-value\") === preset;\n\t\t\t\t\tt.toggleAttribute(\"data-pressed\", on);\n\t\t\t\t\tt.setAttribute(\"aria-pressed\", on ? \"true\" : \"false\");\n\t\t\t\t});\n\t\t\t};\n\t\t\tdocument.addEventListener(\"slider-change\", (e) => {\n\t\t\t\tconst card = e.target.closest(\"[data-roller-shades]\");\n\t\t\t\tif (!card) return;\n\t\t\t\trender(card, e.detail.values[0]);\n\t\t\t});\n\t\t\tdocument.addEventListener(\"toggle-group-value-change\", (e) => {\n\t\t\t\tconst card = e.target.closest(\"[data-roller-shades]\");\n\t\t\t\tif (!card) return;\n\t\t\t\tconst sliderRoot = card.querySelector(\"[data-slot=slider]\");\n\t\t\t\tlet v;\n\t\t\t\tconst nextPreset = e.detail.value[0];\n\t\t\t\tif (nextPreset in POSITIONS) {\n\t\t\t\t\tv = POSITIONS[nextPreset];\n\t\t\t\t\tsetSlider(sliderRoot, v);\n\t\t\t\t} else {\n\t\t\t\t\t// Unpressing keeps the position; render re-asserts the\n\t\t\t\t\t// controlled preset.\n\t\t\t\t\tv = parseFloat(sliderRoot.querySelector(\"[data-slot=slider-thumb]\").getAttribute(\"aria-valuenow\"));\n\t\t\t\t}\n\t\t\t\trender(card, v);\n\t\t\t});\n\t\t})();\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 420, "\">\n\t\t// The vanilla pendant of roller-shades.tsx's position state: the\n\t\t// slider drives the shade height, the derived preset (<=10 open,\n\t\t// >=90 closed, else half) drives the toggle group, and the toggle\n\t\t// group is controlled, so unpressing keeps the current preset.\n\t\t(() => {\n\t\t\tif (window.__templDemoRollerShades) return;\n\t\t\twindow.__templDemoRollerShades = true;\n\t\t\tconst POSITIONS = { open: 0, half: 50, closed: 100 };\n\t\t\tconst presetOf = (v) => (v <= 10 ? \"open\" : v >= 90 ? \"closed\" : \"half\");\n\t\t\t// The slider's state set from outside, like a controlled one.\n\t\t\tconst setSlider = (root, v) => window.templ.slider.setValues(root, [v]);\n\t\t\tconst render = (card, v) => {\n\t\t\t\tcard.querySelector(\"[data-roller-shade]\").style.height = v + \"%\";\n\t\t\t\tconst preset = presetOf(v);\n\t\t\t\tconst group = card.querySelector(\"[data-slot=toggle-group]\");\n\t\t\t\tgroup.querySelectorAll(\"[data-slot=toggle-group-item]\").forEach((t) => {\n\t\t\t\t\tconst on = t.getAttribute(\"data-templ-value\") === preset;\n\t\t\t\t\tt.toggleAttribute(\"data-pressed\", on);\n\t\t\t\t\tt.setAttribute(\"aria-pressed\", on ? \"true\" : \"false\");\n\t\t\t\t});\n\t\t\t};\n\t\t\tdocument.addEventListener(\"slider-change\", (e) => {\n\t\t\t\tconst card = e.target.closest(\"[data-roller-shades]\");\n\t\t\t\tif (!card) return;\n\t\t\t\trender(card, e.detail.values[0]);\n\t\t\t});\n\t\t\tdocument.addEventListener(\"toggle-group-value-change\", (e) => {\n\t\t\t\tconst card = e.target.closest(\"[data-roller-shades]\");\n\t\t\t\tif (!card) return;\n\t\t\t\tconst sliderRoot = card.querySelector(\"[data-slot=slider]\");\n\t\t\t\tlet v;\n\t\t\t\tconst nextPreset = e.detail.value[0];\n\t\t\t\tif (nextPreset in POSITIONS) {\n\t\t\t\t\tv = POSITIONS[nextPreset];\n\t\t\t\t\tsetSlider(sliderRoot, v);\n\t\t\t\t} else {\n\t\t\t\t\t// Unpressing keeps the position; render re-asserts the\n\t\t\t\t\t// controlled preset.\n\t\t\t\t\tv = window.templ.slider.values(sliderRoot)[0];\n\t\t\t\t}\n\t\t\t\trender(card, v);\n\t\t\t});\n\t\t})();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -11547,7 +11547,7 @@ func cardStockPerformance() templ.Component {
 											var templ_7745c5c3_Var504 string
 											templ_7745c5c3_Var504, templ_7745c5c3_Err = templ.JoinStringErrs(ticker)
 											if templ_7745c5c3_Err != nil {
-												return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1954, Col: 18}
+												return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1919, Col: 18}
 											}
 											_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var504))
 											if templ_7745c5c3_Err != nil {
@@ -11622,7 +11622,7 @@ func cardStockPerformance() templ.Component {
 						var templ_7745c5c3_Var506 string
 						templ_7745c5c3_Var506, templ_7745c5c3_Err = templ.JoinStringErrs(panel.Key)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1965, Col: 38}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1930, Col: 38}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var506))
 						if templ_7745c5c3_Err != nil {
@@ -11766,7 +11766,7 @@ func cardStockPerformance() templ.Component {
 		var templ_7745c5c3_Var510 string
 		templ_7745c5c3_Var510, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1996, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 1961, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var510))
 		if templ_7745c5c3_Err != nil {
@@ -13194,7 +13194,7 @@ func cardNotificationSettings() templ.Component {
 									var templ_7745c5c3_Var575 string
 									templ_7745c5c3_Var575, templ_7745c5c3_Err = templ.JoinStringErrs(setting.label)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2194, Col: 23}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2159, Col: 23}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var575))
 									if templ_7745c5c3_Err != nil {
@@ -13225,7 +13225,7 @@ func cardNotificationSettings() templ.Component {
 									var templ_7745c5c3_Var577 string
 									templ_7745c5c3_Var577, templ_7745c5c3_Err = templ.JoinStringErrs(setting.description)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2197, Col: 29}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2162, Col: 29}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var577))
 									if templ_7745c5c3_Err != nil {
@@ -13319,7 +13319,7 @@ func cardNotificationSettings() templ.Component {
 		var templ_7745c5c3_Var580 string
 		templ_7745c5c3_Var580, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2210, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2175, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var580))
 		if templ_7745c5c3_Err != nil {
@@ -13410,7 +13410,7 @@ func cardStyleOverview() templ.Component {
 					var templ_7745c5c3_Var584 string
 					templ_7745c5c3_Var584, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS("--color: var(" + variable + ")"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2318, Col: 62}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2283, Col: 62}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var584))
 					if templ_7745c5c3_Err != nil {
@@ -13423,7 +13423,7 @@ func cardStyleOverview() templ.Component {
 					var templ_7745c5c3_Var585 string
 					templ_7745c5c3_Var585, templ_7745c5c3_Err = templ.JoinStringErrs(variable)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2321, Col: 17}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2286, Col: 17}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var585))
 					if templ_7745c5c3_Err != nil {
@@ -13457,7 +13457,7 @@ func cardStyleOverview() templ.Component {
 		var templ_7745c5c3_Var586 string
 		templ_7745c5c3_Var586, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2328, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2293, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var586))
 		if templ_7745c5c3_Err != nil {
@@ -14169,7 +14169,7 @@ func cardTypographySpecimen() templ.Component {
 		var templ_7745c5c3_Var617 string
 		templ_7745c5c3_Var617, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2479, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2444, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var617))
 		if templ_7745c5c3_Err != nil {
@@ -16796,7 +16796,7 @@ func cardCodespaces() templ.Component {
 		var templ_7745c5c3_Var728 string
 		templ_7745c5c3_Var728, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2859, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2824, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var728))
 		if templ_7745c5c3_Err != nil {
@@ -17286,7 +17286,7 @@ func cardInvoice() templ.Component {
 									var templ_7745c5c3_Var751 string
 									templ_7745c5c3_Var751, templ_7745c5c3_Err = templ.JoinStringErrs(row.item)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2963, Col: 18}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2928, Col: 18}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var751))
 									if templ_7745c5c3_Err != nil {
@@ -17317,7 +17317,7 @@ func cardInvoice() templ.Component {
 									var templ_7745c5c3_Var753 string
 									templ_7745c5c3_Var753, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", row.qty))
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2966, Col: 36}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2931, Col: 36}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var753))
 									if templ_7745c5c3_Err != nil {
@@ -17348,7 +17348,7 @@ func cardInvoice() templ.Component {
 									var templ_7745c5c3_Var755 string
 									templ_7745c5c3_Var755, templ_7745c5c3_Err = templ.JoinStringErrs(invoiceUSD(row.unitPrice))
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2969, Col: 35}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2934, Col: 35}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var755))
 									if templ_7745c5c3_Err != nil {
@@ -17379,7 +17379,7 @@ func cardInvoice() templ.Component {
 									var templ_7745c5c3_Var757 string
 									templ_7745c5c3_Var757, templ_7745c5c3_Err = templ.JoinStringErrs(invoiceUSD(row.qty * row.unitPrice))
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2972, Col: 45}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2937, Col: 45}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var757))
 									if templ_7745c5c3_Err != nil {
@@ -17455,7 +17455,7 @@ func cardInvoice() templ.Component {
 								var templ_7745c5c3_Var761 string
 								templ_7745c5c3_Var761, templ_7745c5c3_Err = templ.JoinStringErrs(invoiceUSD(invoiceSubtotal()))
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2981, Col: 38}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2946, Col: 38}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var761))
 								if templ_7745c5c3_Err != nil {
@@ -17600,7 +17600,7 @@ func cardInvoice() templ.Component {
 								var templ_7745c5c3_Var768 string
 								templ_7745c5c3_Var768, templ_7745c5c3_Err = templ.JoinStringErrs(invoiceUSD(invoiceSubtotal()))
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2997, Col: 38}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 2962, Col: 38}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var768))
 								if templ_7745c5c3_Err != nil {
@@ -19068,7 +19068,7 @@ func cardEnvironmentVariables() templ.Component {
 					var templ_7745c5c3_Var829 string
 					templ_7745c5c3_Var829, templ_7745c5c3_Err = templ.JoinStringErrs(env.key)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3221, Col: 40}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3186, Col: 40}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var829))
 					if templ_7745c5c3_Err != nil {
@@ -19439,7 +19439,7 @@ func cardBarChart() templ.Component {
 				var templ_7745c5c3_Var841 string
 				templ_7745c5c3_Var841, templ_7745c5c3_Err = templ.JoinStringErrs(barChartCardTotalString("desktop"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3325, Col: 87}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3290, Col: 87}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var841))
 				if templ_7745c5c3_Err != nil {
@@ -19452,7 +19452,7 @@ func cardBarChart() templ.Component {
 				var templ_7745c5c3_Var842 string
 				templ_7745c5c3_Var842, templ_7745c5c3_Err = templ.JoinStringErrs(barChartCardTotalString("mobile"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3329, Col: 86}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3294, Col: 86}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var842))
 				if templ_7745c5c3_Err != nil {
@@ -19465,7 +19465,7 @@ func cardBarChart() templ.Component {
 				var templ_7745c5c3_Var843 string
 				templ_7745c5c3_Var843, templ_7745c5c3_Err = templ.JoinStringErrs(barChartCardDelta())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3333, Col: 72}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3298, Col: 72}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var843))
 				if templ_7745c5c3_Err != nil {
@@ -20249,7 +20249,7 @@ func cardActivateAgentDialog() templ.Component {
 						var templ_7745c5c3_Var877 string
 						templ_7745c5c3_Var877, templ_7745c5c3_Err = templ.JoinStringErrs("for production issues with deployment context.")
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3444, Col: 92}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3409, Col: 92}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var877))
 						if templ_7745c5c3_Err != nil {
@@ -20802,7 +20802,7 @@ func cardPieChart() templ.Component {
 						var templ_7745c5c3_Var899 string
 						templ_7745c5c3_Var899, templ_7745c5c3_Err = templ.JoinStringErrs(topBrowser)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3551, Col: 17}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3516, Col: 17}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var899))
 						if templ_7745c5c3_Err != nil {
@@ -20960,7 +20960,7 @@ func cardPieChart() templ.Component {
 				var templ_7745c5c3_Var905 string
 				templ_7745c5c3_Var905, templ_7745c5c3_Err = templ.JoinStringErrs(topBrowser)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3583, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3548, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var905))
 				if templ_7745c5c3_Err != nil {
@@ -20973,7 +20973,7 @@ func cardPieChart() templ.Component {
 				var templ_7745c5c3_Var906 string
 				templ_7745c5c3_Var906, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d%%", topShare))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3584, Col: 92}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3549, Col: 92}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var906))
 				if templ_7745c5c3_Err != nil {
@@ -22361,7 +22361,7 @@ func cardContributors() templ.Component {
 							var templ_7745c5c3_Var967 string
 							templ_7745c5c3_Var967, templ_7745c5c3_Err = templ.JoinStringErrs(username[:1])
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3781, Col: 21}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3746, Col: 21}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var967))
 							if templ_7745c5c3_Err != nil {
@@ -22622,7 +22622,7 @@ func cardFeedbackForm() templ.Component {
 											var templ_7745c5c3_Var980 string
 											templ_7745c5c3_Var980, templ_7745c5c3_Err = templ.JoinStringErrs(topic.label)
 											if templ_7745c5c3_Err != nil {
-												return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3833, Col: 24}
+												return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3798, Col: 24}
 											}
 											_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var980))
 											if templ_7745c5c3_Err != nil {
@@ -22980,7 +22980,7 @@ func cardBookAppointment() templ.Component {
 									var templ_7745c5c3_Var996 string
 									templ_7745c5c3_Var996, templ_7745c5c3_Err = templ.JoinStringErrs(slot)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3878, Col: 14}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3843, Col: 14}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var996))
 									if templ_7745c5c3_Err != nil {
@@ -23358,7 +23358,7 @@ func cardSleepReport() templ.Component {
 					var templ_7745c5c3_Var1010 string
 					templ_7745c5c3_Var1010, templ_7745c5c3_Err = templ.JoinStringErrs(stat.value)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3956, Col: 64}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3921, Col: 64}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1010))
 					if templ_7745c5c3_Err != nil {
@@ -23371,7 +23371,7 @@ func cardSleepReport() templ.Component {
 					var templ_7745c5c3_Var1011 string
 					templ_7745c5c3_Var1011, templ_7745c5c3_Err = templ.JoinStringErrs(stat.label)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3957, Col: 61}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3922, Col: 61}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1011))
 					if templ_7745c5c3_Err != nil {
@@ -23954,7 +23954,7 @@ func cardGithubProfile() templ.Component {
 							var templ_7745c5c3_Var1037 string
 							templ_7745c5c3_Var1037, templ_7745c5c3_Err = templ.JoinStringErrs("@mention")
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4031, Col: 33}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 3996, Col: 33}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1037))
 							if templ_7745c5c3_Err != nil {
@@ -24188,7 +24188,7 @@ func cardWeeklyFitnessSummary() templ.Component {
 					var templ_7745c5c3_Var1046 string
 					templ_7745c5c3_Var1046, templ_7745c5c3_Err = templ.JoinStringErrs(day.day)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4074, Col: 58}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4039, Col: 58}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1046))
 					if templ_7745c5c3_Err != nil {
@@ -24201,7 +24201,7 @@ func cardWeeklyFitnessSummary() templ.Component {
 					var templ_7745c5c3_Var1047 string
 					templ_7745c5c3_Var1047, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS(fmt.Sprintf("height: %d%%", day.load)))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4078, Col: 68}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4043, Col: 68}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1047))
 					if templ_7745c5c3_Err != nil {
@@ -24867,7 +24867,7 @@ func usageGauge(percentage float64) templ.Component {
 		var templ_7745c5c3_Var1074 string
 		templ_7745c5c3_Var1074, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS(fmt.Sprintf("stroke-dasharray: %f %f", circumference, circumference)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4226, Col: 94}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4191, Col: 94}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1074))
 		if templ_7745c5c3_Err != nil {
@@ -24880,7 +24880,7 @@ func usageGauge(percentage float64) templ.Component {
 		var templ_7745c5c3_Var1075 string
 		templ_7745c5c3_Var1075, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS(fmt.Sprintf("stroke-dasharray: %f %f", strokePercent, circumference)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4238, Col: 94}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4203, Col: 94}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1075))
 		if templ_7745c5c3_Err != nil {
@@ -25061,7 +25061,7 @@ func cardUsage() templ.Component {
 									var templ_7745c5c3_Var1086 string
 									templ_7745c5c3_Var1086, templ_7745c5c3_Err = templ.JoinStringErrs(entry.name)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4259, Col: 20}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4224, Col: 20}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1086))
 									if templ_7745c5c3_Err != nil {
@@ -25102,7 +25102,7 @@ func cardUsage() templ.Component {
 								var templ_7745c5c3_Var1088 string
 								templ_7745c5c3_Var1088, templ_7745c5c3_Err = templ.JoinStringErrs(entry.value)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4263, Col: 99}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4228, Col: 99}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1088))
 								if templ_7745c5c3_Err != nil {
@@ -25271,7 +25271,7 @@ func cardShortcuts() templ.Component {
 									var templ_7745c5c3_Var1096 string
 									templ_7745c5c3_Var1096, templ_7745c5c3_Err = templ.JoinStringErrs(shortcut.label)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4298, Col: 25}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4263, Col: 25}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1096))
 									if templ_7745c5c3_Err != nil {
@@ -25319,7 +25319,7 @@ func cardShortcuts() templ.Component {
 											var templ_7745c5c3_Var1099 string
 											templ_7745c5c3_Var1099, templ_7745c5c3_Err = templ.JoinStringErrs(key)
 											if templ_7745c5c3_Err != nil {
-												return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4304, Col: 17}
+												return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4269, Col: 17}
 											}
 											_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1099))
 											if templ_7745c5c3_Err != nil {
@@ -25807,7 +25807,7 @@ func cardLiveWaveform() templ.Component {
 		var templ_7745c5c3_Var1119 string
 		templ_7745c5c3_Var1119, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4373, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4338, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1119))
 		if templ_7745c5c3_Err != nil {
@@ -25970,7 +25970,7 @@ func cardVisitors() templ.Component {
 						var templ_7745c5c3_Var1127 string
 						templ_7745c5c3_Var1127, templ_7745c5c3_Err = templ.JoinStringErrs(visitorsTrend())
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4713, Col: 22}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create_preview_cards.templ`, Line: 4678, Col: 22}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var1127))
 						if templ_7745c5c3_Err != nil {

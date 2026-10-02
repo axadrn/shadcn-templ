@@ -18,8 +18,26 @@
     return [...root.querySelectorAll('[data-slot="slider-thumb"]')];
   }
 
+  // SliderThumb's range input, which takes the focus and carries the value.
+  function inputOf(thumb) {
+    return thumb.querySelector(':scope > input[type="range"]');
+  }
+
   function valuesOf(root) {
-    return thumbsOf(root).map((t) => parseFloat(t.getAttribute("aria-valuenow") || "0"));
+    return thumbsOf(root).map((t) => parseFloat(inputOf(t)?.getAttribute("aria-valuenow") || "0"));
+  }
+
+  // Base UI's default aria-valuetext: a two thumb range names its start and
+  // end.
+  function syncInputs(root, values) {
+    thumbsOf(root).forEach((thumb, i) => {
+      const input = inputOf(thumb);
+      if (!input) return;
+      input.value = String(values[i]);
+      input.setAttribute("value", String(values[i]));
+      input.setAttribute("aria-valuenow", String(values[i]));
+      if (values.length === 2) input.setAttribute("aria-valuetext", values[i] + (i === 0 ? " start range" : " end range"));
+    });
   }
 
   function fraction(v, c) {
@@ -68,9 +86,6 @@
         }
       }
     }
-    root.querySelectorAll(':scope > input[type="hidden"]').forEach((input, i) => {
-      if (values[i] != null) input.value = String(values[i]);
-    });
   }
 
   function snap(v, c) {
@@ -96,7 +111,7 @@
   });
   const accepted = root.dispatchEvent(change);
   if (!accepted || root.hasAttribute("data-templ-value")) return;
-    thumbsOf(root)[index].setAttribute("aria-valuenow", String(v));
+    syncInputs(root, nextValues);
     render(root);
   }
 
@@ -146,7 +161,7 @@
     const index = pressedThumb ? thumbsOf(root).indexOf(pressedThumb) : nearestThumb(root, v);
     drag = { root, index };
     if (!pressedThumb) setValue(root, index, v);
-    thumbsOf(root)[index].focus({ preventScroll: true });
+    inputOf(thumbsOf(root)[index])?.focus({ preventScroll: true });
   });
 
   document.addEventListener("pointermove", (e) => {
@@ -158,24 +173,63 @@
     drag = null;
   });
 
+  // SliderThumb's input onKeyDown: the arrows move by step (Shift: the
+  // large step), Page keys by the large step, Home and End to the ends or,
+  // in a range, to the neighbor.
+  const LARGE_STEP = 10;
+
   document.addEventListener("keydown", (e) => {
-    if (!(e.target instanceof Element)) return;
+    if (!(e.target instanceof Element) || e.defaultPrevented) return;
     const thumb = e.target.closest('[data-slot="slider-thumb"]');
-    if (!thumb) return;
+    if (!thumb || e.target !== inputOf(thumb)) return;
     const root = thumb.closest('[data-slot="slider"]');
     if (!root || root.hasAttribute("data-disabled")) return;
     const c = config(root);
+    const values = valuesOf(root);
     const index = thumbsOf(root).indexOf(thumb);
-    const v = valuesOf(root)[index];
+    const v = snap(values[index], c);
+    const rtl = getComputedStyle(root).direction === "rtl";
+    const by = e.shiftKey ? LARGE_STEP : c.step;
     let next = null;
-    if (e.key === "ArrowRight" || e.key === "ArrowUp") next = v + c.step;
-    if (e.key === "ArrowLeft" || e.key === "ArrowDown") next = v - c.step;
-    if (e.key === "PageUp") next = v + c.step * 10;
-    if (e.key === "PageDown") next = v - c.step * 10;
-    if (e.key === "Home") next = c.min;
-    if (e.key === "End") next = c.max;
+    if (e.key === "ArrowUp") next = v + by;
+    if (e.key === "ArrowRight") next = v + (rtl ? -by : by);
+    if (e.key === "ArrowDown") next = v - by;
+    if (e.key === "ArrowLeft") next = v + (rtl ? by : -by);
+    if (e.key === "PageUp") next = v + LARGE_STEP;
+    if (e.key === "PageDown") next = v - LARGE_STEP;
+    if (e.key === "Home") next = values.length > 1 && index > 0 ? values[index - 1] : c.min;
+    if (e.key === "End") next = values.length > 1 && index < values.length - 1 ? values[index + 1] : c.max;
     if (next === null) return;
     e.preventDefault();
     setValue(root, index, next);
   });
+
+  // The input's onChange: an assistive technology sets the value natively.
+  document.addEventListener("input", (e) => {
+    if (!(e.target instanceof Element) || !e.target.matches('[data-slot="slider-thumb"] > input[type="range"]')) return;
+    const thumb = e.target.parentElement;
+    const root = thumb.closest('[data-slot="slider"]');
+    if (root) setValue(root, thumbsOf(root).indexOf(thumb), e.target.valueAsNumber);
+  });
+  // The public API for a page that sets the state from outside, the pendant
+  // of a controlled Base UI slider whose owner re-renders it.
+  function setDisabled(root, disabled) {
+    [root, root.querySelector('[data-slot="slider-track"]')?.parentElement, ...root.querySelectorAll(
+      '[data-slot="slider-track"], [data-slot="slider-range"], [data-slot="slider-thumb"]',
+    )].forEach((el) => el?.toggleAttribute("data-disabled", disabled));
+    thumbsOf(root).forEach((thumb) => {
+      const input = inputOf(thumb);
+      if (input) input.disabled = disabled;
+    });
+  }
+
+  window.templ = window.templ || {};
+  window.templ.slider = {
+    values: valuesOf,
+    setValues(root, values) {
+      syncInputs(root, values);
+      render(root);
+    },
+    setDisabled,
+  };
 })();

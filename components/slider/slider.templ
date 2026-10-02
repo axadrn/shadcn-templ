@@ -29,7 +29,7 @@ type Props struct {
 	Step float64
 	// Orientation defaults to horizontal.
 	Orientation Orientation
-	// Name submits the values in forms, one hidden input per thumb.
+	// Name is Base UI's name: every thumb's range input submits under it.
 	Name     string
 	Disabled bool
 }
@@ -64,6 +64,28 @@ func thumbStyle(f float64, vertical bool) string {
 		return fmt.Sprintf("position:absolute;top:calc(%.4f%% - %.2fpx);left:50%%;transform:translateX(-50%%)", g*100, g*thumbSize)
 	}
 	return fmt.Sprintf("position:absolute;left:calc(%.4f%% - %.2fpx);top:50%%;transform:translateY(-50%%)", f*100, f*thumbSize)
+}
+
+// valueText is Base UI's default aria-valuetext: a two thumb range names
+// its start and end, a single value has none.
+func valueText(values []float64, i int) string {
+	if len(values) != 2 {
+		return ""
+	}
+	if i == 0 {
+		return fmtF(values[i]) + " start range"
+	}
+	return fmtF(values[i]) + " end range"
+}
+
+// inputStyle is SliderThumb's input style: visually hidden over the thumb,
+// vertical writing for a vertical slider.
+func inputStyle(vertical bool) string {
+	style := "clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:100%;height:100%;margin:-1px;position:fixed;top:0;left:0"
+	if vertical {
+		style += ";writing-mode:vertical-lr"
+	}
+	return style
 }
 
 // indicatorStyle spans from the start (one thumb) or between the outer thumb
@@ -131,8 +153,11 @@ templ Slider(props ...Props) {
 	// The data-horizontal:/data-vertical: variants match data-orientation
 	// (shadcn-tailwind.css). min, max and step are Base UI props that React
 	// keeps in memory, so they are data-templ-* here.
+	// SliderRoot is a group; SliderControl and SliderIndicator carry Base UI's
+	// markers, every SliderThumb holds the range input that takes the focus.
 	<div
 		id={ p.ID }
+		role="group"
 		data-slot="slider"
 		if p.Value != nil {
 			data-templ-value={ templ.JSONString(p.Value) }
@@ -147,13 +172,9 @@ templ Slider(props ...Props) {
 		class={ utils.CN("data-horizontal:w-full data-vertical:h-full", p.Class) }
 		{ p.Attributes... }
 	>
-		if p.Name != "" {
-			for _, v := range values {
-				<input type="hidden" name={ p.Name } value={ fmtF(v) } aria-hidden="true" tabindex="-1"/>
-			}
-		}
 		<div
 			data-orientation={ string(p.Orientation) }
+			data-base-ui-slider-control
 			if p.Disabled {
 				data-disabled
 			}
@@ -167,6 +188,7 @@ templ Slider(props ...Props) {
 			>
 				<div
 					data-slot="slider-range"
+					data-base-ui-slider-indicator
 					data-orientation={ string(p.Orientation) }
 					data-disabled?={ p.Disabled }
 					class="cn-slider-range select-none data-horizontal:h-full data-vertical:w-full"
@@ -178,21 +200,31 @@ templ Slider(props ...Props) {
 				// like in shadcn's thumb: only the control dims to 50%.
 				<div
 					data-slot="slider-thumb"
-					role="slider"
-					tabindex={ utils.IfElse(p.Disabled, "-1", "0") }
-					aria-valuemin={ fmtF(p.Min) }
-					aria-valuemax={ fmtF(p.Max) }
-					aria-valuenow={ fmtF(v) }
-					if vertical {
-						aria-orientation="vertical"
-					}
-					if p.Disabled {
-						data-disabled
-						aria-disabled="true"
-					}
+					data-index={ strconv.Itoa(i) }
+					data-orientation={ string(p.Orientation) }
+					data-disabled?={ p.Disabled }
 					style={ thumbStyle(fs[i], vertical) }
 					class="cn-slider-thumb block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50"
-				></div>
+				>
+					<input
+						type="range"
+						id={ p.ID + "-thumb-" + strconv.Itoa(i) }
+						if p.Name != "" {
+							name={ p.Name }
+						}
+						min={ fmtF(p.Min) }
+						max={ fmtF(p.Max) }
+						step={ fmtF(p.Step) }
+						value={ fmtF(v) }
+						aria-orientation={ string(p.Orientation) }
+						aria-valuenow={ fmtF(v) }
+						if valueText(values, i) != "" {
+							aria-valuetext={ valueText(values, i) }
+						}
+						disabled?={ p.Disabled }
+						style={ inputStyle(vertical) }
+					/>
+				</div>
 			}
 		</div>
 	</div>
