@@ -68,31 +68,21 @@ var ExcludedSidebarPages = map[string]bool{
 
 // PagesNew is the PAGES_NEW pendant of shadcn's lib/docs.ts: docs URLs that
 // render the blue "New" dot in the sidebar, the mobile nav and the components
-// list. Ours marks what shadcn-templ 2.0 adds over v1: components without a v1
-// predecessor (renames like dropdown -> dropdown-menu, radio -> radio-group,
-// selectbox -> select do not count, date picker became a pattern page) and
-// the new docs pages. Curated by hand like the reference: a PR that adds a
-// page adds its entry here, and the list is pruned at the release after the
-// one that introduced the entries.
+// list. Ours marks the components shadcn's base registry has that
+// shadcn-templ adds now; a link shows the dot once its page exists. Curated
+// by hand like the reference.
 var PagesNew = []string{
-	"/docs/typeset",
-	"/docs/utils/scroll-fade",
-	"/docs/utils/shimmer",
-	"/docs/components/alert-dialog",
-	"/docs/components/button-group",
-	"/docs/components/combobox",
-	"/docs/components/command",
-	"/docs/components/context-menu",
-	"/docs/components/drawer",
-	"/docs/components/empty",
-	"/docs/components/field",
-	"/docs/components/input-group",
-	"/docs/components/item",
-	"/docs/components/kbd",
-	"/docs/components/resizable",
-	"/docs/components/spinner",
-	"/docs/components/toggle",
-	"/docs/components/toggle-group",
+	"/docs/components/attachment",
+	"/docs/components/bubble",
+	"/docs/components/direction",
+	"/docs/components/marker",
+	"/docs/components/menubar",
+	"/docs/components/message",
+	"/docs/components/message-scroller",
+	"/docs/components/native-select",
+	"/docs/components/navigation-menu",
+	"/docs/components/questionnaire",
+	"/docs/components/scroll-area",
 }
 
 // PageIsNew reports whether a docs URL is in PagesNew.
