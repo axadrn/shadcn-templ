@@ -742,6 +742,9 @@ templ MenuButton(props ...MenuButtonProps) {
 			{{ s := sidebarState(ctx) }}
 			{{ tp := p }}
 			{{ trigger := tooltip.Trigger(ctx) }}
+			// shadcn renders the trigger through the menu button element,
+			// whose own data-slot stays.
+			{{ delete(trigger, "data-slot") }}
 			// The tooltip only shows while the sidebar is collapsed to icons;
 			// the script keeps the attribute in sync on toggle. An explicit
 			// TooltipHidden pins the state (the fixed marker keeps the

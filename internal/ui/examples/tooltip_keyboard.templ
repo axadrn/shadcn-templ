@@ -12,7 +12,7 @@ templ TooltipKeyboard() {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
 			Size:       button.SizeIconSm,
-			Attributes: tooltip.Trigger(ctx),
+			Attributes: serverRendered(tooltip.Trigger(ctx)),
 		}) {
 			@icon.Save()
 		}

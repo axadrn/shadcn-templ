@@ -10,7 +10,7 @@ templ AlertDialogSmallWithMedia() {
 	@alertdialog.AlertDialog() {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
-			Attributes: serverButton(alertdialog.Trigger(ctx)),
+			Attributes: serverRendered(alertdialog.Trigger(ctx)),
 		}) {
 			Show Dialog
 		}

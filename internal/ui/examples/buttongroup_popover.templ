@@ -20,7 +20,7 @@ templ ButtonGroupPopover() {
 			@button.Button(button.Props{
 				Variant:    button.VariantOutline,
 				Size:       button.SizeIcon,
-				Attributes: utils.MergeAttributes(popover.Trigger(ctx), templ.Attributes{"aria-label": "Open Popover"}),
+				Attributes: serverRendered(utils.MergeAttributes(popover.Trigger(ctx), templ.Attributes{"aria-label": "Open Popover"})),
 			}) {
 				@icon.ChevronDown()
 			}

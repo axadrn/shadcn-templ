@@ -11,7 +11,7 @@ templ PopoverForm() {
 	@popover.Popover() {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
-			Attributes: popover.Trigger(ctx),
+			Attributes: serverRendered(popover.Trigger(ctx)),
 		}) {
 			Open Popover
 		}

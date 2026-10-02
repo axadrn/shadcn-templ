@@ -70,8 +70,11 @@
     return content.parentElement;
   }
 
+  // PopoverPortal mounts with the popup.
   function portal(content) {
-    window.templ.portal.render(portalNodeOf(content));
+    const node = portalNodeOf(content);
+    window.templ.portal.render(node);
+    node.hidden = false;
     wireAria(content);
   }
 
@@ -224,6 +227,7 @@
       stopAutoPositioning(content);
       stopFocusManager(content);
       content.hidden = true;
+      portalNodeOf(content).hidden = true;
     });
     const trigger = triggerFor(content);
     if (trigger) {

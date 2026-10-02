@@ -10,7 +10,7 @@ templ AlertDialogDestructive() {
 	@alertdialog.AlertDialog() {
 		@button.Button(button.Props{
 			Variant:    button.VariantDestructive,
-			Attributes: serverButton(alertdialog.Trigger(ctx)),
+			Attributes: serverRendered(alertdialog.Trigger(ctx)),
 		}) {
 			Delete Chat
 		}

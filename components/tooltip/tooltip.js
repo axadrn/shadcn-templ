@@ -36,8 +36,11 @@
     return positionerOf(content).parentElement;
   }
 
+  // TooltipPortal mounts with the popup.
   function portal(content) {
-    window.templ.portal.render(portalNodeOf(content));
+    const node = portalNodeOf(content);
+    window.templ.portal.render(node);
+    node.hidden = false;
   }
 
   // TooltipPositioner: useAnchorPositioning with the popup collision
@@ -66,6 +69,70 @@
     content._templPositionCleanup = null;
   }
 
+  // ----- TooltipProvider -----------------------------------------------------
+
+  // shadcn's layout wraps the page in TooltipProvider (delay 0), Base UI's
+  // FloatingDelayGroup with its 400 ms timeout: a tooltip that opens while
+  // another one is open, or within the timeout after it closed, opens in the
+  // instant phase, and the other closes at once.
+  const GROUP_TIMEOUT = 400;
+  const group = { current: null, timer: null };
+
+  // TooltipRoot's instantType: "delay" in the instant phase, or while closing
+  // because another tooltip opened; else the open change's, "focus" for a
+  // focus open, "dismiss" for a press or Escape, none for hover. Positioner,
+  // popup and arrow render it as data-instant.
+  function setInstantType(content, open, reason) {
+    if (open && reason === "trigger-focus") content._templInstantType = "focus";
+    else if (!open && (reason === "trigger-press" || reason === "escape-key")) content._templInstantType = "dismiss";
+    else if (reason === "trigger-hover") content._templInstantType = undefined;
+    content._templCloseReason = open ? null : reason ?? null;
+    renderInstant(content);
+  }
+
+  function renderInstant(content) {
+    const delay = content._templEnding ? content._templCloseReason === "none" : !!content._templInstantPhase;
+    const type = delay ? "delay" : content._templInstantType;
+    [positionerOf(content), content, arrowOf(content)].forEach((el) => {
+      if (!el) return;
+      if (type) el.setAttribute("data-instant", type);
+      else el.removeAttribute("data-instant");
+    });
+  }
+
+  function setInstantPhase(content, on) {
+    content._templInstantPhase = on;
+    renderInstant(content);
+  }
+
+  // The group's open side: this tooltip becomes the current one.
+  function joinGroup(content) {
+    clearTimeout(group.timer);
+    const previous = group.current;
+    group.current = content;
+    if (previous && previous !== content) {
+      setInstantPhase(content, true);
+      setInstantPhase(previous, true);
+      requestOpenChange(triggerFor(previous), false, { reason: "none" });
+    } else {
+      setInstantPhase(content, false);
+    }
+  }
+
+  // The group's close side: the current tooltip ends the instant phase after
+  // the timeout, unless another one opened meanwhile.
+  function leaveGroup(content) {
+    if (group.current !== content) return;
+    setInstantPhase(content, false);
+    clearTimeout(group.timer);
+    group.timer = setTimeout(() => {
+      if (group.current !== content || content._templOpen) return;
+      group.current = null;
+    }, GROUP_TIMEOUT);
+  }
+
+  // ----- open / close ----------------------------------------------------------
+
   // details { reason, event } of the change, for the hover interaction.
   function open(trigger, details = {}) {
     // A disabled trigger (Base UI data-trigger-disabled) never opens, e.g.
@@ -75,6 +142,9 @@
     if (!content) return;
     content._templOpen = true;
     content._templOpenEventType = details.event?.type ?? null;
+    content._templEnding = false;
+    setInstantType(content, true, details.reason);
+    joinGroup(content);
     portal(content);
     positionerOf(content).hidden = false;
     // TooltipRoot's useDismiss: a press on the trigger closes (closeOnClick).
@@ -98,6 +168,9 @@
     if (positionerOf(content).hidden) return;
     content._templOpen = false;
     content._templOpenEventType = null;
+    content._templEnding = true;
+    setInstantType(content, false, details.reason);
+    leaveGroup(content);
     emitOpenChange(content, false, details.reason);
     content._templDismiss?.();
     content._templDismiss = null;
@@ -105,6 +178,10 @@
     window.templ.transition.close(statusOf(content), content, () => {
       stopAutoPositioning(content);
       positionerOf(content).hidden = true;
+      portalNodeOf(content).hidden = true;
+      content._templEnding = false;
+      content._templInstantPhase = false;
+      renderInstant(content);
     });
     const trigger = triggerFor(content);
     if (trigger) trigger.removeAttribute("data-popup-open");

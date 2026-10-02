@@ -11,7 +11,7 @@ templ PopoverAlignments() {
 			@button.Button(button.Props{
 				Variant:    button.VariantOutline,
 				Size:       button.SizeSm,
-				Attributes: popover.Trigger(ctx),
+				Attributes: serverRendered(popover.Trigger(ctx)),
 			}) {
 				Start
 			}
@@ -26,7 +26,7 @@ templ PopoverAlignments() {
 			@button.Button(button.Props{
 				Variant:    button.VariantOutline,
 				Size:       button.SizeSm,
-				Attributes: popover.Trigger(ctx),
+				Attributes: serverRendered(popover.Trigger(ctx)),
 			}) {
 				Center
 			}
@@ -41,7 +41,7 @@ templ PopoverAlignments() {
 			@button.Button(button.Props{
 				Variant:    button.VariantOutline,
 				Size:       button.SizeSm,
-				Attributes: popover.Trigger(ctx),
+				Attributes: serverRendered(popover.Trigger(ctx)),
 			}) {
 				End
 			}

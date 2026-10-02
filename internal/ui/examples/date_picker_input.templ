@@ -21,7 +21,6 @@ templ DatePickerInput() {
 		@popover.Popover(popover.Props{ID: "date-picker-input"}) {
 		{{
 			triggerAttrs := popover.Trigger(ctx)
-			triggerAttrs["data-slot"] = "input-group-button"
 			triggerAttrs["aria-label"] = "Select date"
 		}}
 			@inputgroup.InputGroup() {

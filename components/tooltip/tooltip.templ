@@ -39,10 +39,11 @@ func state(ctx context.Context) ctxState {
 //
 //	@button.Button(button.Props{Attributes: tooltip.Trigger(ctx)}) { ... }
 //
-// The element keeps its own data-slot; data-base-ui-tooltip-trigger is the
-// identifier Base UI's TooltipTrigger renders for exactly that case.
+// data-base-ui-tooltip-trigger is the identifier Base UI's TooltipTrigger
+// renders, shadcn's slot comes with it like for every trigger part.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
+		"data-slot":                    "tooltip-trigger",
 		"data-base-ui-tooltip-trigger": true,
 		"data-templ-tooltip-trigger":   state(ctx).id,
 	}
@@ -102,14 +103,14 @@ templ Content(props ...ContentProps) {
 	// rounding ignore it. Inside it Base UI's positioner, which carries the
 	// position, around the popup.
 	<div data-templ-portal hidden>
-		<div data-base-ui-portal>
+		<div data-base-ui-portal hidden>
 		<div
 			data-templ-side={ string(p.Side) }
 			data-templ-side-offset={ strconv.Itoa(p.SideOffset) }
 			data-closed
 			hidden
 			role="presentation"
-			class="isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
+			class="isolate z-50"
 		>
 			<div
 				id={ s.id }
@@ -119,7 +120,8 @@ templ Content(props ...ContentProps) {
 				}
 				data-templ-default-open?={ s.open == nil && s.defaultOpen }
 				data-closed
-				role="tooltip"
+				tabindex="-1"
+				data-base-ui-focusable
 				class={
 					utils.CN(
 						// 1:1 base/ui/tooltip.tsx TooltipContent, the look comes from
@@ -133,11 +135,12 @@ templ Content(props ...ContentProps) {
 				{ p.Attributes... }
 			>
 				{ children... }
-				<span
+				// TooltipArrow: the position comes inline like Base UI's.
+				<div
 					aria-hidden="true"
 					data-closed
-					class="cn-tooltip-arrow cn-tooltip-arrow-logical absolute z-50 bg-foreground fill-foreground data-[side=bottom]:top-1 data-[side=left]:top-1/2! data-[side=left]:-right-1 data-[side=left]:-translate-y-1/2 data-[side=right]:top-1/2! data-[side=right]:-left-1 data-[side=right]:-translate-y-1/2 data-[side=top]:-bottom-2.5"
-				></span>
+					class="cn-tooltip-arrow cn-tooltip-arrow-logical z-50 bg-foreground fill-foreground data-[side=bottom]:top-1 data-[side=left]:top-1/2! data-[side=left]:-right-1 data-[side=left]:-translate-y-1/2 data-[side=right]:top-1/2! data-[side=right]:-left-1 data-[side=right]:-translate-y-1/2 data-[side=top]:-bottom-2.5"
+				></div>
 			</div>
 		</div>
 		</div>

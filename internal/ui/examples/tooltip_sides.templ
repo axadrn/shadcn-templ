@@ -14,7 +14,7 @@ templ TooltipSides() {
 				@button.Button(button.Props{
 					Variant:    button.VariantOutline,
 					Class:      "w-fit capitalize",
-					Attributes: tooltip.Trigger(ctx),
+					Attributes: serverRendered(tooltip.Trigger(ctx)),
 				}) {
 					{ string(side) }
 				}

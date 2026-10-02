@@ -12,7 +12,7 @@ templ HoverCardDemo() {
 	}) {
 		@button.Button(button.Props{
 			Variant:    button.VariantLink,
-			Attributes: hovercard.Trigger(ctx),
+			Attributes: serverRendered(hovercard.Trigger(ctx)),
 		}) {
 			Hover Here
 		}

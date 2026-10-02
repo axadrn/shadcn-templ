@@ -57,6 +57,7 @@ func cardID(ctx context.Context) string {
 func Trigger(ctx context.Context) templ.Attributes {
 	d, _ := ctx.Value(delaysKey{}).(delays)
 	return templ.Attributes{
+		"data-slot":                     "hover-card-trigger",
 		"data-templ-hover-card-trigger": cardID(ctx),
 		"data-templ-delay":              strconv.Itoa(d.open),
 		"data-templ-close-delay":        strconv.Itoa(d.close),
@@ -131,7 +132,7 @@ templ Content(props ...ContentProps) {
 	// content never participates in layout or sibling CSS. Inside it Base
 	// UI's positioner, which carries the position, around the popup.
 	<div data-templ-portal hidden>
-		<div data-base-ui-portal data-slot="hover-card-portal">
+		<div data-base-ui-portal data-slot="hover-card-portal" hidden>
 		<div
 			data-templ-side={ string(p.Side) }
 			data-templ-align={ string(p.Align) }
@@ -140,7 +141,7 @@ templ Content(props ...ContentProps) {
 			data-closed
 			hidden
 			role="presentation"
-			class="isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
+			class="isolate z-50"
 		>
 			<div
 				id={ cardID(ctx) }
@@ -150,6 +151,8 @@ templ Content(props ...ContentProps) {
 				}
 				data-templ-default-open?={ s.open == nil && s.defaultOpen }
 				data-closed
+				tabindex="-1"
+				data-base-ui-focusable
 				class={
 					utils.CN(
 						// 1:1 base/ui/hover-card.tsx HoverCardContent, the look comes from

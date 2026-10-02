@@ -61,7 +61,7 @@ templ fileTreeEntry(item fileTreeItem) {
 				Variant:    button.VariantGhost,
 				Size:       button.SizeSm,
 				Class:      "w-full justify-start transition-none hover:bg-accent hover:text-accent-foreground",
-				Attributes: serverButton(collapsible.Trigger(ctx)),
+				Attributes: serverRendered(collapsible.Trigger(ctx)),
 			}) {
 				@icon.ChevronRight(icon.Props{Class: "transition-transform group-data-panel-open/button:rotate-90"})
 				@icon.Folder()

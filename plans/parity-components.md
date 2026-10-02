@@ -178,4 +178,16 @@ Checks: `go test ./...` green (the positioner test checks shadcn's classes and t
 
 Checks: `go test ./...` green, a11y 30 of 30 and behavior 30 of 30 in both engines (the combobox suite reads a chip's label from the chip), `escape.mjs` 0 failures, `htmx.mjs` 0 failed expectations, docs pages of combobox, select and dropdown menu without page errors. `compare.mjs all`: chromium 2682 pass and 307 fail, webkit 2667 and 322. The combobox passes every check in both engines (63 failures before); no other component changed.
 
+### Task 8
+
+- **Trigger slots.** `popover.Trigger`, `tooltip.Trigger` and `hovercard.Trigger` render shadcn's slots (`popover-trigger`, `tooltip-trigger`, `hover-card-trigger`). Task 4's `serverButton` is `serverRendered` now: it drops the part's slot, so the element of the render prop keeps its own, `button` as well as `input-group-addon`; the server component examples of all three use it, `tooltip-disabled`'s bare `span` keeps the trigger's slot like upstream's. `sidebar.MenuButton` drops the tooltip trigger's slot, shadcn renders the trigger through the menu button element. `date-picker-input` had forced the input group button's slot onto its popover trigger; upstream is a client component, the trigger's slot stays.
+- **Popups.** The tooltip and hover card popups render `tabindex=-1` and `data-base-ui-focusable`, the tooltip popup no `role`; the tooltip arrow is a `div` placed inline by the positioning. Every positioner has shadcn's classes only. The portal nodes of popover, tooltip and hover card unmount with the popup.
+- **TooltipProvider.** shadcn's layout wraps the page in `TooltipProvider` (delay 0), Base UI's delay group with a 400 ms timeout: a tooltip that opens while another one is open, or within the timeout after it closed, opens in the instant phase and the other closes at once (reason `none`). The tooltip renders `TooltipRoot`'s `instantType` as `data-instant` on positioner, popup and arrow: `delay` in that phase or closing for a sibling, `focus` for a focus open, `dismiss` for a press or Escape.
+- **Scenarios.** `tooltip-sides` moves from one trigger to the next, `tooltip-keyboard` opens on focus, `hover-card-demo` closes with Escape and opens on focus.
+- `tooltip-disabled`'s content is a `p` like upstream's.
+
+Open: some examples carry our own text where upstream names its own (`hover-card-demo`'s `@templ` card for `@nextjs`, the combobox's frameworks, `dialog-close-button`'s URL); the pixel check shows it. Owner: keep the project's text, or port upstream's.
+
+Checks: `go test ./...` green, a11y 30 of 30 and behavior 30 of 30 in both engines, `escape.mjs` 0 failures and `htmx.mjs` 0 failed expectations in both. WebKit ran into page timeouts while the Shiki service on port 3000 was gone (it came from the old `task dev`); it runs from this repo's `shiki` again (`npm start`, log in `tmp/parity-components/dev-shiki.log`). `compare.mjs all` with the new steps: chromium 2714 pass and 291 fail, webkit 2700 and 305. Popover and tooltip pass every check, the hover card fails only the text pixels above; the drawer's extra pixel failure in chromium is a flake that passes alone.
+
 ## Planner review

@@ -30,8 +30,11 @@
     return positionerOf(content).parentElement;
   }
 
+  // HoverCardPortal mounts with the popup.
   function portal(content) {
-    window.templ.portal.render(portalNodeOf(content));
+    const node = portalNodeOf(content);
+    window.templ.portal.render(node);
+    node.hidden = false;
   }
 
   // ----- inline triggers (utils/popups/inlineRect.ts) ------------------------
@@ -205,6 +208,7 @@
     window.templ.transition.close(statusOf(content), content, () => {
       stopAutoPositioning(content);
       positionerOf(content).hidden = true;
+      portalNodeOf(content).hidden = true;
       content._templInlineCoords = undefined;
     });
   }

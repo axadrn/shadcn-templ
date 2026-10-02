@@ -9,7 +9,7 @@ templ DialogNoCloseButton() {
 	@dialog.Dialog() {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
-			Attributes: serverButton(dialog.Trigger(ctx)),
+			Attributes: serverRendered(dialog.Trigger(ctx)),
 		}) {
 			No Close Button
 		}

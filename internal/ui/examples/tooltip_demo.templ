@@ -9,7 +9,7 @@ templ TooltipDemo() {
 	@tooltip.Tooltip() {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
-			Attributes: tooltip.Trigger(ctx),
+			Attributes: serverRendered(tooltip.Trigger(ctx)),
 		}) {
 			Hover
 		}

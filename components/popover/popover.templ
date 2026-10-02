@@ -54,6 +54,7 @@ func triggerID(popoverID string) string {
 // identifier Base UI's PopoverTrigger renders, data-templ-controls names the popover.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
+		"data-slot":                  "popover-trigger",
 		"data-base-ui-click-trigger": true,
 		"id":                         triggerID(state(ctx).id),
 		"data-templ-controls":        state(ctx).id,
@@ -139,7 +140,7 @@ templ Content(props ...ContentProps) {
 	// content never participates in layout or sibling CSS. Inside the portal
 	// node Base UI's positioner around the popup.
 	<div data-templ-portal hidden>
-		<div data-base-ui-portal>
+		<div data-base-ui-portal hidden>
 		<div
 			data-templ-side={ string(p.Side) }
 			data-templ-align={ string(p.Align) }
@@ -154,7 +155,7 @@ templ Content(props ...ContentProps) {
 			data-closed
 			hidden
 			role="presentation"
-			class="isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
+			class="isolate z-50"
 		>
 			<div
 				id={ s.id }

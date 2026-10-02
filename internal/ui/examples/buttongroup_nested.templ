@@ -24,7 +24,7 @@ templ ButtonGroupNested() {
 				@tooltip.Tooltip() {
 					@inputgroup.Addon(inputgroup.AddonProps{
 						Align:      inputgroup.AlignInlineEnd,
-						Attributes: tooltip.Trigger(ctx),
+						Attributes: serverRendered(tooltip.Trigger(ctx)),
 					}) {
 						@icon.AudioLines()
 					}

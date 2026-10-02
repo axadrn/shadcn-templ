@@ -9,7 +9,7 @@ templ SheetNoCloseButton() {
 	@sheet.Sheet() {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
-			Attributes: serverButton(sheet.Trigger(ctx)),
+			Attributes: serverRendered(sheet.Trigger(ctx)),
 		}) {
 			Open Sheet
 		}

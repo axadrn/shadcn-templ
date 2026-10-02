@@ -22,7 +22,7 @@ templ hoverCardSide(label string, side hovercard.Side) {
 		@button.Button(button.Props{
 			Variant:    button.VariantOutline,
 			Class:      "capitalize",
-			Attributes: hovercard.Trigger(ctx),
+			Attributes: serverRendered(hovercard.Trigger(ctx)),
 		}) {
 			{ label }
 		}
