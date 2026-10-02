@@ -84,10 +84,11 @@ func Trigger(ctx context.Context) templ.Attributes {
 		"data-slot":           "collapsible-trigger",
 		"data-templ-controls": s.id,
 		"aria-expanded":       utils.IfElse(s.open, "true", "false"),
+		// useButton with focusableWhenDisabled: aria-disabled either way.
+		"aria-disabled": utils.IfElse(s.disabled, "true", "false"),
 	}
 	if s.disabled {
 		attrs["data-disabled"] = true
-		attrs["aria-disabled"] = "true"
 	}
 	if s.open {
 		attrs["data-panel-open"] = true

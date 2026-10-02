@@ -190,4 +190,12 @@ Open: some examples carry our own text where upstream names its own (`hover-card
 
 Checks: `go test ./...` green, a11y 30 of 30 and behavior 30 of 30 in both engines, `escape.mjs` 0 failures and `htmx.mjs` 0 failed expectations in both. WebKit ran into page timeouts while the Shiki service on port 3000 was gone (it came from the old `task dev`); it runs from this repo's `shiki` again (`npm start`, log in `tmp/parity-components/dev-shiki.log`). `compare.mjs all` with the new steps: chromium 2714 pass and 291 fail, webkit 2700 and 305. Popover and tooltip pass every check, the hover card fails only the text pixels above; the drawer's extra pixel failure in chromium is a flake that passes alone.
 
+### Task 9
+
+- **Accordion.** `AccordionRoot` renders `dir` and its orientation. Item, header and panel render the item state like `accordionStateAttributesMapping`: `data-index` (from 0), open or closed, `data-hidden` while closed and unmounted, the orientation, `data-disabled`. The trigger follows the default mapping: the root's value as `data-value` (the open values), the orientation, `data-index` other than 0, `data-hidden`, and it stays focusable while disabled (`aria-disabled` either way, no `disabled` attribute). The script keeps all of it, `data-hidden` from the panel's unmount (`collapsiblePanel.close` takes a callback for it).
+- **Tabs.** Root, list, tabs and panels render `TabsRoot`'s activation direction (`computeActivationDirection`: `left`, `right`, `up`, `down` from the new tab's position, `none` until the first change or when level). A tab renders `aria-disabled` either way and names its panel only while that is mounted, the active one; a panel renders its `data-index`. shadcn's `Tabs` renders `orientation` as the root's `data-orientation` but does not pass it on to `TabsPrimitive.Root`, so Base UI's tabs stay horizontal: list, tabs and panels render `horizontal`, the list no `aria-orientation`, the arrow keys move horizontally, also in `tabs-vertical`.
+- **Collapsible.** The trigger renders `aria-disabled` either way.
+
+Checks: `go test ./...` green, a11y 30 of 30 (the tabs check expects `aria-controls` on the active tab only now) and behavior 30 of 30 in both engines, `escape.mjs` 0 failures. `compare.mjs all`: chromium 2767 pass and 238 fail, webkit 2752 and 253. Accordion, tabs and collapsible pass every check in both engines (52 failures each before); the sheet's two chromium failures are a flake that passes alone.
+
 ## Planner review

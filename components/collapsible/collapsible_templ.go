@@ -169,10 +169,11 @@ func Trigger(ctx context.Context) templ.Attributes {
 		"data-slot":           "collapsible-trigger",
 		"data-templ-controls": s.id,
 		"aria-expanded":       utils.IfElse(s.open, "true", "false"),
+		// useButton with focusableWhenDisabled: aria-disabled either way.
+		"aria-disabled": utils.IfElse(s.disabled, "true", "false"),
 	}
 	if s.disabled {
 		attrs["data-disabled"] = true
-		attrs["aria-disabled"] = "true"
 	}
 	if s.open {
 		attrs["data-panel-open"] = true
@@ -222,7 +223,7 @@ func Content(props ...ContentProps) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(s.id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/collapsible/collapsible.templ`, Line: 109, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/collapsible/collapsible.templ`, Line: 110, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {

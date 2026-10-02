@@ -29,9 +29,31 @@
   // Base UI's AccordionPanel exposes its size as these variables.
   const VARS = "--accordion-panel";
 
+  // The item state on item, header and panel, the trigger's hidden too:
+  // data-hidden while closed and unmounted.
+  function headerOf(item) {
+    return triggerOf(item)?.parentElement;
+  }
+
   function syncItemState(item, open) {
-    item.toggleAttribute("data-open", open);
-    item.toggleAttribute("data-closed", !open);
+    [item, headerOf(item), panelOf(item)].forEach((el) => {
+      if (!el) return;
+      el.toggleAttribute("data-open", open);
+      el.toggleAttribute("data-closed", !open);
+    });
+    if (open) setHidden(item, false);
+  }
+
+  function setHidden(item, hidden) {
+    [item, headerOf(item), triggerOf(item), panelOf(item)].forEach((el) => el?.toggleAttribute("data-hidden", hidden));
+  }
+
+  // Every trigger renders the root's value.
+  function syncRootValue(accordion) {
+    const value = valuesOf(accordion).join(",");
+    accordion.querySelectorAll('[data-slot="accordion-trigger"]').forEach((trigger) => {
+      if (trigger.closest('[data-slot="accordion"]') === accordion) trigger.setAttribute("data-value", value);
+    });
   }
 
   function openItem(item) {
@@ -50,8 +72,13 @@
     triggerOf(item).toggleAttribute("data-panel-open", false);
     triggerOf(item).removeAttribute("aria-controls");
   syncItemState(item, false);
-    if (!panel) return;
-    window.templ.collapsiblePanel.close(panel, VARS);
+    if (!panel) {
+      setHidden(item, true);
+      return;
+    }
+    window.templ.collapsiblePanel.close(panel, VARS, () => {
+      if (triggerOf(item).getAttribute("aria-expanded") === "false") setHidden(item, true);
+    });
   }
 
   function requestValueChange(accordion, item) {
@@ -89,6 +116,7 @@
 
     if (trigger.getAttribute("aria-expanded") === "true") {
       closeItem(item);
+      syncRootValue(accordion);
       return;
     }
   if (!accordion.hasAttribute("data-templ-multiple")) {
@@ -99,6 +127,7 @@
       });
     }
     openItem(item);
+    syncRootValue(accordion);
   });
 
   window.templ.lifecycle.register('[data-slot="accordion-content"]', {

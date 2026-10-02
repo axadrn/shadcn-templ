@@ -73,7 +73,8 @@
     setDimensions(panel, prefix, type === "css-transition" ? measureWithoutLayoutStyles(panel) : getDimensions(panel));
   }
 
-  function close(panel, prefix) {
+  // onUnmount runs once the panel is hidden, Base UI's mounted turning false.
+  function close(panel, prefix, onUnmount) {
     const hasSuppressedMountAnimation = !!panel._templPreventMountAnimation;
     if (hasSuppressedMountAnimation) {
       panel._templPreventMountAnimation = false;
@@ -82,6 +83,7 @@
     const unmount = () => {
       panel.hidden = true;
       setDimensions(panel, prefix, null);
+      onUnmount?.();
     };
     transition().close([panel], panel, unmount, {
       deferEnding: true,
