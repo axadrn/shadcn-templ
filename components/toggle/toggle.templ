@@ -165,6 +165,7 @@ templ Toggle(props ...Props) {
 			data-variant={ string(p.Variant) }
 			data-size={ string(p.Size) }
 			data-spacing={ strconv.Itoa(spacing) }
+			aria-disabled={ strconv.FormatBool(p.Disabled || disabledFromGroup(ctx)) }
 		} else {
 			data-slot="toggle"
 		}

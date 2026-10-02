@@ -30,8 +30,9 @@ type Props struct {
 	ID         string
 	Class      string
 	Attributes templ.Attributes
-	// Name is shared by all items in the group; a random name is generated
-	// when empty so the radios stay mutually exclusive.
+	// Name is Base UI's name: the items' inputs submit the value under it.
+	// Without one they have no name, like Base UI's; radiogroup.js keeps them
+	// mutually exclusive.
 	Name string
 	// Value is the controlled selected value. Use DefaultValue when the
 	// browser should own selection after the initial render.
@@ -68,9 +69,6 @@ templ RadioGroup(props ...Props) {
 	{{ var p Props }}
 	if len(props) > 0 {
 		{{ p = props[0] }}
-	}
-	if p.Name == "" {
-		{{ p.Name = utils.RandomID() }}
 	}
 	{{ ctx = context.WithValue(ctx, stateKey, ctxState{name: p.Name, value: initialValue(p), disabled: p.Disabled, readOnly: p.ReadOnly, required: p.Required, form: p.Form}) }}
 	<div

@@ -198,4 +198,13 @@ Checks: `go test ./...` green, a11y 30 of 30 and behavior 30 of 30 in both engin
 
 Checks: `go test ./...` green, a11y 30 of 30 (the tabs check expects `aria-controls` on the active tab only now) and behavior 30 of 30 in both engines, `escape.mjs` 0 failures. `compare.mjs all`: chromium 2767 pass and 238 fail, webkit 2752 and 253. Accordion, tabs and collapsible pass every check in both engines (52 failures each before); the sheet's two chromium failures are a flake that passes alone.
 
+### Task 10
+
+- **Toggle group.** Its items render `aria-disabled` either way (the standalone toggle does not, like Base UI). shadcn's `ToggleGroup` renders `orientation` as `data-orientation` for the styles but does not pass it on to Base UI's `ToggleGroup`: the arrow keys stay horizontal, also in `toggle-group-vertical`.
+- **Radio group.** The items' inputs have a name only when the group has Base UI's `name`, we generated one before; `radiogroup.js` unchecks the other inputs itself now, which the shared name had done. `radio-group-invalid` marks its fields `data-invalid` like upstream instead of `aria-invalid`.
+- **Styles.** The eight vendored `style-*.css` were older than the pin; they are the pin's again (the field label's hover and focus ring around a choice card, the checkbox, radio and switch inside a focused field label, the questionnaire), and `style-classes.txt` is generated again from them (`go run ./cmd/generate-style-classes`). The choice cards' and the drawer demo's focus rings match now.
+- **Reference app.** It runs as a production build (`next build`, `next start -p 3100`): the dev server had grown to 31 GB over the full runs.
+
+Checks: `go test ./...` green, a11y 30 of 30 in both engines, behavior (the radio group suite checks one checked input and no differing names instead of a shared generated one), `escape.mjs` 0 failures. `compare.mjs all`: chromium 2813 pass and 192 fail, webkit 2805 and 200. Toggle group, radio group and the drawer pass every check; `avatar-demo`'s pixels differ by our own avatar images (task 8's text question).
+
 ## Planner review

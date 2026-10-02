@@ -254,8 +254,10 @@ const (
 func (s *DocsService) ComponentsIndexSource() []byte {
 	var b strings.Builder
 	fmt.Fprintf(&b, "---\ntitle: %s\ndescription: %s\n---\n", ComponentsIndexTitle, ComponentsIndexDescription)
-	b.WriteString("\n## New Components\n\n")
-	s.writeComponentList(&b, true)
+	if shared.HasNewComponents() {
+		b.WriteString("\n## New Components\n\n")
+		s.writeComponentList(&b, true)
+	}
 	b.WriteString("\n## All Components\n\n")
 	s.writeComponentList(&b, false)
 	return []byte(b.String())

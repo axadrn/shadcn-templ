@@ -77,14 +77,17 @@
     setState(toggle, nextPressed);
   });
 
-  // ToggleGroup's CompositeRoot: one tab stop, the arrows by orientation,
+  // ToggleGroup's CompositeRoot: one tab stop, the horizontal arrows,
   // Home and End, loop, disabled toggles are skipped.
   const GROUP = '[data-slot="toggle-group"]';
   window.templ.lifecycle.register(GROUP, {
     init(group) {
       group._templComposite = window.templ.composite.useCompositeRoot(group, {
         items: () => [...items(group)].filter((item) => item.closest(GROUP) === group),
-        orientation: group.getAttribute("data-orientation") === "vertical" ? "vertical" : "horizontal",
+        // shadcn's ToggleGroup renders orientation as data-orientation for
+        // the styles but does not pass it on to Base UI's ToggleGroup, whose
+        // arrows stay horizontal.
+        orientation: "horizontal",
         rtl: () => getComputedStyle(group).direction === "rtl",
         enableHomeAndEndKeys: true,
       });

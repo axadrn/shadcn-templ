@@ -85,6 +85,23 @@ var PagesNew = []string{
 	"/docs/components/scroll-area",
 }
 
+// HasNewComponents reports whether a component page in the sidebar is in
+// PagesNew: the components overview renders its New Components section only
+// then, an empty one would be a heading over nothing.
+func HasNewComponents() bool {
+	for _, section := range Sections {
+		if section.Title != "Components" {
+			continue
+		}
+		for _, link := range section.Links {
+			if PageIsNew(link.Href) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // PageIsNew reports whether a docs URL is in PagesNew.
 func PageIsNew(href string) bool {
 	return slices.Contains(PagesNew, href)

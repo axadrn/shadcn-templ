@@ -38,8 +38,9 @@ type Props struct {
 	ID         string
 	Class      string
 	Attributes templ.Attributes
-	// Name is shared by all items in the group; a random name is generated
-	// when empty so the radios stay mutually exclusive.
+	// Name is Base UI's name: the items' inputs submit the value under it.
+	// Without one they have no name, like Base UI's; radiogroup.js keeps them
+	// mutually exclusive.
 	Name string
 	// Value is the controlled selected value. Use DefaultValue when the
 	// browser should own selection after the initial render.
@@ -97,9 +98,6 @@ func RadioGroup(props ...Props) templ.Component {
 		if len(props) > 0 {
 			p = props[0]
 		}
-		if p.Name == "" {
-			p.Name = utils.RandomID()
-		}
 		ctx = context.WithValue(ctx, stateKey, ctxState{name: p.Name, value: initialValue(p), disabled: p.Disabled, readOnly: p.ReadOnly, required: p.Required, form: p.Form})
 		var templ_7745c5c3_Var2 = []any{utils.CN("cn-radio-group w-full", p.Class)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
@@ -118,7 +116,7 @@ func RadioGroup(props ...Props) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/radiogroup/radiogroup.templ`, Line: 78, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/radiogroup/radiogroup.templ`, Line: 76, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -141,7 +139,7 @@ func RadioGroup(props ...Props) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(*p.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/radiogroup/radiogroup.templ`, Line: 82, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/radiogroup/radiogroup.templ`, Line: 80, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -374,7 +372,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/radiogroup/radiogroup.templ`, Line: 178, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/radiogroup/radiogroup.templ`, Line: 176, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -393,7 +391,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(s.name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/radiogroup/radiogroup.templ`, Line: 181, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/radiogroup/radiogroup.templ`, Line: 179, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -412,7 +410,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(p.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/radiogroup/radiogroup.templ`, Line: 184, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/radiogroup/radiogroup.templ`, Line: 182, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -431,7 +429,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(s.form)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/radiogroup/radiogroup.templ`, Line: 187, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/radiogroup/radiogroup.templ`, Line: 185, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
