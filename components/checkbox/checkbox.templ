@@ -97,6 +97,7 @@ templ Checkbox(props ...Props) {
 			} else {
 				data-unchecked
 			}
+			data-disabled?={ p.Disabled }
 			if !checked && !p.Indeterminate {
 				hidden
 			}

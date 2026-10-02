@@ -1,6 +1,12 @@
 package field
 
-import "github.com/axadrn/shadcn-templ/v2/utils"
+import (
+	"context"
+	"strconv"
+	"strings"
+
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
 
 type Orientation string
 
@@ -271,25 +277,32 @@ templ Separator(props ...SeparatorProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
+	// data-content and the content span only with children, like shadcn's.
+	{{ content := childrenHTML(ctx) }}
 	<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
 		data-slot="field-separator"
+		data-content={ strconv.FormatBool(content != "") }
 		class={ utils.CN("cn-field-separator relative", p.Class) }
 		{ p.Attributes... }
 	>
 		<div
 			data-slot="separator"
 			data-orientation="horizontal"
+			role="separator"
+			aria-orientation="horizontal"
 			class="shrink-0 bg-border data-horizontal:h-px data-horizontal:w-full data-vertical:w-px data-vertical:self-stretch absolute inset-0 top-1/2"
 		></div>
-		<span
-			class="cn-field-separator-content relative mx-auto block w-fit bg-background"
-			data-slot="field-separator-content"
-		>
-			{ children... }
-		</span>
+		if content != "" {
+			<span
+				class="cn-field-separator-content relative mx-auto block w-fit bg-background"
+				data-slot="field-separator-content"
+			>
+				@templ.Raw(content)
+			</span>
+		}
 	</div>
 }
 
@@ -309,4 +322,11 @@ templ Error(props ...ErrorProps) {
 	>
 		{ children... }
 	</div>
+}
+
+// childrenHTML renders the children, "" without any: React's {children &&}.
+func childrenHTML(ctx context.Context) string {
+	var b strings.Builder
+	_ = templ.GetChildren(ctx).Render(ctx, &b)
+	return strings.TrimSpace(b.String())
 }

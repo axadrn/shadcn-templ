@@ -13,7 +13,7 @@ templ FieldRadio() {
 		@field.Description() {
 			Yearly and lifetime plans offer significant savings.
 		}
-		@radiogroup.RadioGroup(radiogroup.Props{Name: "plan", DefaultValue: "monthly"}) {
+		@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "monthly"}) {
 			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
 				@radiogroup.Item(radiogroup.ItemProps{
 					Value: "monthly",

@@ -14,7 +14,7 @@ templ FieldChoiceCard() {
 			@field.Description() {
 				Select the compute environment for your cluster.
 			}
-			@radiogroup.RadioGroup(radiogroup.Props{Name: "compute", DefaultValue: "kubernetes"}) {
+			@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "kubernetes"}) {
 				@field.Label(field.LabelProps{For: "kubernetes-r2h"}) {
 					@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
 						@field.Content() {

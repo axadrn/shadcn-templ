@@ -995,6 +995,21 @@
     }
   });
 
+  // SelectTrigger's onFocus: an open aligned popup closes, it would cover the
+  // trigger, and the portal mounts a tick later (forceMount) to have the
+  // items ready before the first open.
+  document.addEventListener("focusin", (e) => {
+    const trigger = e.target instanceof Element && e.target.closest(TRIGGER);
+    const content = trigger && contentFor(trigger);
+    if (!content) return;
+    // A press on the trigger opens before the focus it causes, which Base
+    // UI's handler sees with the state from before the press.
+    if (isOpen(content) && content._templAligned && !pressedTriggers.has(trigger)) requestOpenChange(content, false);
+    setTimeout(() => {
+      if (content.isConnected && portalNodeOf(content).hidden) portal(content);
+    }, 0);
+  });
+
   // The hidden input's onFocus moves focus to the trigger, its onChange
   // takes a browser autofill: the item whose value or label matches.
   document.addEventListener("focusin", (e) => {

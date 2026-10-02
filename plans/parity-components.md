@@ -216,4 +216,15 @@ Checks: `go test ./...` green, a11y 30 of 30 in both engines, behavior (the radi
 
 Checks: `go test ./...` green, a11y 30 of 30 and behavior in both engines (the slider suite drives the thumb input), the create preview runs without page errors. `compare.mjs all`: chromium 2855 pass and 150 fail, webkit 2848 and 157. The slider passes every check in both engines (42 failures before), the field one more; the drawer pixel failure in chromium is the known flake.
 
+### Task 12
+
+- **Button group.** `data-orientation` only when the prop is set, like shadcn's; the classes default to horizontal (the cva default).
+- **Field.** `FieldSeparator` renders `data-content` and the content span only with children (React's `{children &&}`); its separator is Base UI's (`role="separator"`, `aria-orientation`). The checkbox indicator renders `data-disabled`. `field-demo` and `field-responsive` mark their inputs `required`, `field-radio` and `field-choice-card` pass no group name, like upstream.
+- **Input.** Base UI's `Input` (`Field.Control`) renders `data-disabled` while disabled; outside a Base UI `Field.Root` it renders no other state.
+- **Input group.** `Addon` lets a part's `data-slot` win (a tooltip trigger on it). `input-group-custom` ports `react-textarea-autosize` 8.5.9, the example's `TextareaAutosize`: the hidden measuring textarea in `<body>` and the height it sets.
+- **Trigger slots.** Task 4's rule is exact now: in a server component example a `<Button />` of a render prop keeps its slot because `button.tsx` has no `"use client"`; a client component in the render prop (`InputGroupAddon`) takes the trigger's slot. `serverRendered` is for the Button only, `button-group-nested` passes the tooltip trigger as is. `button-group-input-group` is ported with its voice state (`data-active`, `aria-pressed`, the input's placeholder and disabled).
+- **Select.** `SelectTrigger`'s focus mounts the portal a tick later (`forceMount`), only while it is not mounted yet, and closes an open aligned popup, unless the press on the trigger caused the focus (Base UI's handler sees the state from before the press).
+
+Checks: `go test ./...` green, a11y 30 of 30 in both engines, behavior, `escape.mjs` 0 failures. `compare.mjs all`: chromium 2896 pass and 109 fail, webkit 2889 and 116. Button group, field, input, label and kbd pass every check; input group fails only `input-group-button`'s example marker (task 15).
+
 ## Planner review
