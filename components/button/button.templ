@@ -100,7 +100,7 @@ templ Button(props ...Props) {
 				tabindex="0"
 			}
 			class={ utils.CN(baseClasses, p.variantClasses(), p.sizeClasses(), p.Class) }
-			if p.Type != "" {
+			if _, ok := p.Attributes["type"]; !ok && p.Type != "" {
 				type={ string(p.Type) }
 			}
 			if p.Form != "" {

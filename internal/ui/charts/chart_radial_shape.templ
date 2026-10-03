@@ -55,8 +55,8 @@ templ ChartRadialShape() {
 				}) {
 					@chart.PolarGrid(chart.PolarGridProps{GridType: "circle", RadialLines: chart.Bool(false), Stroke: "none", Class: "first:fill-muted last:fill-background", PolarRadius: []float64{86, 74}})
 					@chart.RadialBar(chart.RadialBarProps{
-						DataKey:      "visitors",
-						Background:   true,
+						DataKey:    "visitors",
+						Background: true,
 					})
 					@chart.PolarRadiusAxis(chart.PolarRadiusAxisProps{Tick: chart.Bool(false), TickLine: chart.Bool(false), AxisLine: chart.Bool(false)}) {
 						@chart.Label(chart.LabelProps{

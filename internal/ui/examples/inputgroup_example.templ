@@ -307,48 +307,48 @@ templ inputGroupExampleWithTooltip() {
 				@field.Label(field.LabelProps{For: "input-dropdown-21"}) {
 					Dropdown
 				}
-				<div data-templ-inputgroup-example-country-field>
-					@inputgroup.InputGroup() {
-						@inputgroup.Input(inputgroup.InputProps{ID: "input-dropdown-21"})
-						@inputgroup.Addon() {
-							@dropdownmenu.DropdownMenu() {
-								@inputgroup.Button(inputgroup.ButtonProps{
-									Class:      "text-muted-foreground tabular-nums",
-									Attributes: dropdownmenu.Trigger(ctx),
-								}) {
-									<span data-templ-inputgroup-example-country>+1</span>
-									@icon.ChevronDown()
+				@inputgroup.InputGroup() {
+					@inputgroup.Input(inputgroup.InputProps{ID: "input-dropdown-21"})
+					@inputgroup.Addon() {
+						@dropdownmenu.DropdownMenu() {
+							@inputgroup.Button(inputgroup.ButtonProps{
+								Class:      "text-muted-foreground tabular-nums",
+								Attributes: dropdownmenu.Trigger(ctx),
+							}) {
+								{ "+1 " }
+								@icon.ChevronDown()
+							}
+							@dropdownmenu.Content(dropdownmenu.ContentProps{
+								Align:       dropdownmenu.AlignStart,
+								Class:       "min-w-16",
+								SideOffset:  10,
+								AlignOffset: -8,
+							}) {
+								@dropdownmenu.Item() {
+									+1
 								}
-								@dropdownmenu.Content(dropdownmenu.ContentProps{
-									Align:       dropdownmenu.AlignStart,
-									Class:       "min-w-16",
-									SideOffset:  10,
-									AlignOffset: -8,
-								}) {
-									@dropdownmenu.Item() {
-										+1
-									}
-									@dropdownmenu.Item() {
-										+44
-									}
-									@dropdownmenu.Item() {
-										+46
-									}
+								@dropdownmenu.Item() {
+									+44
+								}
+								@dropdownmenu.Item() {
+									+46
 								}
 							}
 						}
 					}
-				</div>
-				// The vanilla pendant of the demo's country state: clicking a
-				// menu item writes its label into the trigger.
+				}
 				<script nonce={ templ.GetNonce(ctx) }>
-					document.addEventListener('click', (e) => {
-						const item = e.target.closest?.('[data-slot="dropdown-menu-item"]');
-						const root = e.target.closest?.('[data-templ-inputgroup-example-country-field]');
-						if (!item || !root) return;
-						const label = root.querySelector('[data-templ-inputgroup-example-country]');
-						if (label) label.textContent = item.textContent.trim();
-					});
+					// The country state: an item's onClick sets it, the trigger
+					// renders it.
+					(() => {
+						const trigger = document.currentScript.previousElementSibling.querySelector("[data-templ-controls]");
+						const menu = document.getElementById(trigger.getAttribute("data-templ-controls"));
+						menu.querySelectorAll('[data-slot="dropdown-menu-item"]').forEach((item) => {
+							item.addEventListener("click", () => {
+								trigger.firstChild.textContent = item.textContent.trim() + " ";
+							});
+						});
+					})();
 				</script>
 				@field.Description() {
 					This is a description of the input group.

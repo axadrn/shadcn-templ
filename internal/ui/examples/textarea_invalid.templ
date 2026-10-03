@@ -13,7 +13,7 @@ templ TextareaInvalid() {
 		@textarea.Textarea(textarea.Props{
 			ID:          "textarea-invalid",
 			Placeholder: "Type your message here.",
-			Attributes: templ.Attributes{"aria-invalid": "true"},
+			Attributes:  templ.Attributes{"aria-invalid": "true"},
 		})
 		@field.Description() {
 			Please enter a valid message.

@@ -40,8 +40,8 @@ templ ChartAreaStacked() {
 			@chart.Container(chart.ContainerProps{ID: "area-stacked", Config: chartAreaStackedConfig}) {
 				@chart.AreaChart(chart.AreaChartProps{
 					AccessibilityLayer: true,
-					Data:   chartAreaStackedData,
-					Margin: &chart.Margin{Left: 12, Right: 12},
+					Data:               chartAreaStackedData,
+					Margin:             &chart.Margin{Left: 12, Right: 12},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.XAxis(chart.XAxisProps{

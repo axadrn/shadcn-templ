@@ -1,7 +1,7 @@
 package examples
 
 import (
-	"strconv"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
 
 	"github.com/axadrn/shadcn-templ/v2/components/avatar"
 	"github.com/axadrn/shadcn-templ/v2/components/collapsible"
@@ -98,10 +98,11 @@ templ sidebarIconExampleTeamSwitcher() {
 			@dropdownmenu.DropdownMenu(dropdownmenu.Props{ID: "sidebar-icon-example-team-menu"}) {
 				@sidebar.MenuButton(sidebar.MenuButtonProps{
 					Size:       sidebar.MenuButtonSizeLg,
-					Class:      "data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground",
+					Class:      "data-open:bg-sidebar-accent data-open:text-sidebar-accent-foreground",
 					Attributes: dropdownmenu.Trigger(ctx),
 				}) {
-					<span class="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground [&_svg]:size-4">
+					// Button size="icon-sm" render={<span />} nativeButton={false}.
+					<span data-slot="button" role="button" tabindex="0" class={ button.Variants(button.Props{Size: button.SizeIconSm, Class: "size-8"}) }>
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
 							<rect width="256" height="256" fill="none"></rect>
 							<line x1="208" y1="128" x2="128" y2="208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></line>
@@ -109,8 +110,8 @@ templ sidebarIconExampleTeamSwitcher() {
 						</svg>
 					</span>
 					<div class="grid flex-1 text-left text-sm leading-tight">
-						<span class="truncate font-medium" data-team-name>{ sidebarIconExampleTeams[0].Name }</span>
-						<span class="truncate text-xs" data-team-plan>{ sidebarIconExampleTeams[0].Plan }</span>
+						<span class="truncate font-medium">{ sidebarIconExampleTeams[0].Name }</span>
+						<span class="truncate text-xs">{ sidebarIconExampleTeams[0].Plan }</span>
 					</div>
 					@icon.ChevronsUpDown()
 				}
@@ -121,10 +122,8 @@ templ sidebarIconExampleTeamSwitcher() {
 						}
 					}
 					@dropdownmenu.Group() {
-						for i, team := range sidebarIconExampleTeams {
-							@dropdownmenu.Item(dropdownmenu.ItemProps{
-								Attributes: templ.Attributes{"data-team-index": strconv.Itoa(i)},
-							}) {
+						for _, team := range sidebarIconExampleTeams {
+							@dropdownmenu.Item() {
 								{ team.Name }
 							}
 						}
@@ -291,18 +290,17 @@ templ SidebarIconExample() {
 		}
 	}
 	<script nonce={ templ.GetNonce(ctx) }>
+		// The activeTeam state: an item's onClick sets it, the trigger renders
+		// it.
 		(() => {
-			// Keep the selected team details in sync.
-			const plans = ["Enterprise", "Startup", "Free"];
-			document.addEventListener("click", (e) => {
-				if (!(e.target instanceof Element)) return;
-				const item = e.target.closest("#sidebar-icon-example-team-menu [data-team-index]");
-				if (!item) return;
-				const i = parseInt(item.getAttribute("data-team-index"), 10);
-				const nameEl = document.querySelector("[data-team-name]");
-				const planEl = document.querySelector("[data-team-plan]");
-				if (nameEl) nameEl.textContent = item.textContent.trim();
-				if (planEl) planEl.textContent = plans[i];
+			const teams = {{ sidebarIconExampleTeams }};
+			const menu = document.getElementById("sidebar-icon-example-team-menu");
+			const [name, plan] = document.getElementById("sidebar-icon-example-team-menu-trigger").querySelectorAll(":scope > div > span");
+			menu.querySelectorAll('[data-slot="dropdown-menu-item"]').forEach((item, i) => {
+				item.addEventListener("click", () => {
+					name.textContent = teams[i].Name;
+					plan.textContent = teams[i].Plan;
+				});
 			});
 		})();
 	</script>

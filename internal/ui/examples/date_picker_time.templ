@@ -16,10 +16,10 @@ templ DatePickerTime() {
 				Date
 			}
 			@popover.Popover(popover.Props{ID: "date-picker-time"}) {
-		{{
-			triggerAttrs := popover.Trigger(ctx)
-			triggerAttrs["id"] = "date-picker-optional"
-		}}
+				{{
+					triggerAttrs := popover.Trigger(ctx)
+					triggerAttrs["id"] = "date-picker-optional"
+				}}
 				@button.Button(button.Props{
 					Variant:    button.VariantOutline,
 					Class:      "w-32 justify-between font-normal",
@@ -29,7 +29,7 @@ templ DatePickerTime() {
 					@icon.ChevronDown(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
 				}
 				@popover.Content(popover.ContentProps{
-					Class:     "w-auto overflow-hidden p-0",
+					Class: "w-auto overflow-hidden p-0",
 					Align: popover.AlignStart,
 				}) {
 					@calendar.Calendar(calendar.Props{

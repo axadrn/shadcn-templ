@@ -32,7 +32,7 @@ templ DrawerDialog() {
 				@drawerDialogProfileForm("")
 			}
 		}
-</template>
+	</template>
 	<template id="drawer-dialog-mobile-template">
 		@drawer.Drawer(drawer.Props{ID: "drawer-dialog-mobile"}) {
 			@button.Button(button.Props{Variant: button.VariantOutline, Attributes: drawer.Trigger(ctx)}) {
@@ -50,7 +50,7 @@ templ DrawerDialog() {
 				@drawerDialogProfileForm("p-4")
 			}
 		}
-</template>
+	</template>
 	<script nonce={ templ.GetNonce(ctx) }>
 		(() => {
 			const mq = window.matchMedia("(min-width: 768px)");

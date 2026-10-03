@@ -110,8 +110,9 @@ func Trigger(ctx context.Context) templ.Attributes {
 // TriggerFor targets a sheet outside the current Sheet root by id.
 func TriggerFor(id string) templ.Attributes {
 	return templ.Attributes{
-		// useButton: tabIndex 0.
+		// useButton: tabIndex 0 and the native type.
 		"tabindex":                   "0",
+		"type":                       "button",
 		"data-slot":                  "sheet-trigger",
 		"data-base-ui-click-trigger": true,
 		"data-templ-controls":        id,
@@ -128,8 +129,9 @@ func Close(ctx context.Context) templ.Attributes {
 // CloseFor targets a sheet outside the current Sheet root by id.
 func CloseFor(id string) templ.Attributes {
 	return templ.Attributes{
-		// useButton: tabIndex 0.
+		// useButton: tabIndex 0 and the native type.
 		"tabindex":                "0",
+		"type":                    "button",
 		"data-slot":               "sheet-close",
 		"data-templ-dialog-close": id,
 	}

@@ -788,7 +788,9 @@ templ menuButtonEl(p MenuButtonProps) {
 			if p.ID != "" {
 				id={ p.ID }
 			}
-			type="button"
+			if _, ok := p.Attributes["type"]; !ok {
+				type="button"
+			}
 			if _, ok := p.Attributes["data-slot"]; !ok {
 				data-slot="sidebar-menu-button"
 			}
@@ -812,7 +814,9 @@ templ MenuAction(props ...MenuActionProps) {
 		if p.ID != "" {
 			id={ p.ID }
 		}
-		type="button"
+		if _, ok := p.Attributes["type"]; !ok {
+			type="button"
+		}
 		if _, ok := p.Attributes["data-slot"]; !ok {
 			data-slot="sidebar-menu-action"
 		}

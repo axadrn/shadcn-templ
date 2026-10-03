@@ -35,21 +35,4 @@ templ Page() {
 		}
 		@SidebarRight()
 	}
-	<script nonce={ templ.GetNonce(ctx) }>
-		(() => {
-			// Keep the selected team details in sync.
-			document.addEventListener("click", (e) => {
-				if (!(e.target instanceof Element)) return;
-				const item = e.target.closest("#sidebar15-team-menu [data-team-index]");
-				if (!item) return;
-				const i = item.getAttribute("data-team-index");
-				const name = item.textContent.trim().replace(/⌘\d$/, "").trim();
-				document.querySelectorAll("[data-team-logo]").forEach((logo) => {
-					logo.classList.toggle("hidden", logo.getAttribute("data-team-logo") !== i);
-				});
-				const nameEl = document.querySelector("[data-team-name]");
-				if (nameEl) nameEl.textContent = name;
-			});
-		})();
-	</script>
 }

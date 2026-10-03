@@ -7,24 +7,29 @@ import (
 
 // The slider drives the progress bar.
 templ ProgressControlled() {
-	<div class="flex w-full max-w-sm flex-col gap-4" data-progress-controlled-demo>
-		@progress.Progress(progress.Props{
-			ID:    "progress-controlled",
-			Value: 50,
-			Class: "w-full",
-		})
+	<div class="flex w-full max-w-sm flex-col gap-4">
+		@progress.Progress(progress.Props{Value: 50, Class: "w-full"})
 		@slider.Slider(slider.Props{
-			DefaultValue: []float64{50},
-			Min:          0,
-			Max:          100,
-			Step:         1,
+			Value: []float64{50},
+			Min:   0,
+			Max:   100,
+			Step:  1,
 		})
 	</div>
+	@progressControlledState()
+}
+
+// progressControlledState is the examples' value state: the slider's
+// onValueChange sets it, the progress and the slider render it. It follows
+// the element holding both.
+templ progressControlledState() {
 	<script nonce={ templ.GetNonce(ctx) }>
 		(() => {
-			const demo = document.querySelector("[data-progress-controlled-demo]");
-			demo.addEventListener("slider-change", (e) => {
-				document.getElementById("progress-controlled").setAttribute("aria-valuenow", String(e.detail.values[0]));
+			const demo = document.currentScript.previousElementSibling;
+			const [bar, slider] = demo.children;
+			slider.addEventListener("slider-change", (e) => {
+				window.templ.slider.setValues(slider, e.detail.values);
+				bar.setAttribute("aria-valuenow", String(e.detail.values[0]));
 			});
 		})();
 	</script>

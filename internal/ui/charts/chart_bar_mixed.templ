@@ -45,9 +45,9 @@ templ ChartBarMixed() {
 			@chart.Container(chart.ContainerProps{ID: "bar-mixed", Config: chartBarMixedConfig}) {
 				@chart.BarChart(chart.BarChartProps{
 					AccessibilityLayer: true,
-					Data:   chartBarMixedData,
-					Layout: "vertical",
-					Margin: &chart.Margin{Left: 0},
+					Data:               chartBarMixedData,
+					Layout:             "vertical",
+					Margin:             &chart.Margin{Left: 0},
 				}) {
 					@chart.YAxis(chart.YAxisProps{
 						DataKey:       "browser",

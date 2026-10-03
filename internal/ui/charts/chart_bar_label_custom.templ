@@ -41,9 +41,9 @@ templ ChartBarLabelCustom() {
 			@chart.Container(chart.ContainerProps{ID: "bar-label-custom", Config: chartBarLabelCustomConfig}) {
 				@chart.BarChart(chart.BarChartProps{
 					AccessibilityLayer: true,
-					Data:   chartBarLabelCustomData,
-					Layout: "vertical",
-					Margin: &chart.Margin{Right: 16},
+					Data:               chartBarLabelCustomData,
+					Layout:             "vertical",
+					Margin:             &chart.Margin{Right: 16},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Horizontal: chart.Bool(false)})
 					@chart.YAxis(chart.YAxisProps{

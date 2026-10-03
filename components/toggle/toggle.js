@@ -97,4 +97,14 @@
       group._templComposite = null;
     },
   });
+
+  // The owner's API: setValue is the pendant of the value prop a page
+  // renders a controlled group with.
+  window.templ = window.templ || {};
+  window.templ.toggleGroup = {
+    setValue(group, value) {
+      if (group.hasAttribute("data-templ-value")) group.setAttribute("data-templ-value", JSON.stringify(value));
+      items(group).forEach((t) => setState(t, value.includes(t.getAttribute("data-templ-value"))));
+    },
+  };
 })();

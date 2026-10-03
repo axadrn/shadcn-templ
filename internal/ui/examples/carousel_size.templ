@@ -9,7 +9,7 @@ import (
 
 templ CarouselSize() {
 	@carousel.Carousel(carousel.Props{
-		Align: carousel.AlignStart,Class: "w-full max-w-[12rem] sm:max-w-xs md:max-w-sm"}) {
+		Align: carousel.AlignStart, Class: "w-full max-w-[12rem] sm:max-w-xs md:max-w-sm"}) {
 		@carousel.Content() {
 			for i := 1; i <= 5; i++ {
 				@carousel.Item(carousel.ItemProps{Class: "basis-1/2 lg:basis-1/3"}) {

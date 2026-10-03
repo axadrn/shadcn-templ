@@ -11,7 +11,7 @@ templ SliderControlled() {
 			@label.Label(label.Props{For: "slider-demo-temperature"}) {
 				Temperature
 			}
-			<span id="slider-demo-temperature-value" class="text-sm text-muted-foreground">0.3, 0.7</span>
+			<span class="text-sm text-muted-foreground">0.3, 0.7</span>
 		</div>
 		@slider.Slider(slider.Props{
 			ID:    "slider-demo-temperature",
@@ -24,10 +24,13 @@ templ SliderControlled() {
 	<script nonce={ templ.GetNonce(ctx) }>
 		// The value state: onValueChange sets it, the slider and the text
 		// render it.
-		document.addEventListener("slider-change", (e) => {
-			if (e.target.id !== "slider-demo-temperature") return;
-			window.templ.slider.setValues(e.target, e.detail.values);
-			document.getElementById("slider-demo-temperature-value").textContent = e.detail.values.join(", ");
-		});
+		(() => {
+			const demo = document.currentScript.previousElementSibling;
+			const slider = demo.querySelector('[data-slot="slider"]');
+			slider.addEventListener("slider-change", (e) => {
+				window.templ.slider.setValues(slider, e.detail.values);
+				demo.querySelector("span").textContent = e.detail.values.join(", ");
+			});
+		})();
 	</script>
 }

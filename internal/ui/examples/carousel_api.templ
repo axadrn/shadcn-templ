@@ -10,7 +10,7 @@ import (
 // The carousel exposes its selection as a bubbling carousel-select event,
 // the vanilla pendant of embla's select event.
 templ CarouselApi() {
-	<div class="mx-auto max-w-[10rem] sm:max-w-xs" data-carousel-api-demo>
+	<div class="mx-auto max-w-[10rem] sm:max-w-xs">
 		@carousel.Carousel(carousel.Props{Class: "w-full max-w-xs"}) {
 			@carousel.Content() {
 				for i := 1; i <= 5; i++ {
@@ -26,14 +26,15 @@ templ CarouselApi() {
 			@carousel.Previous()
 			@carousel.Next()
 		}
-		<div class="py-2 text-center text-sm text-muted-foreground" data-slide-status></div>
+		<div class="py-2 text-center text-sm text-muted-foreground">Slide 0 of 0</div>
 	</div>
 	<script nonce={ templ.GetNonce(ctx) }>
-		document.addEventListener('carousel-select', (e) => {
-			const demo = e.target.closest('[data-carousel-api-demo]');
-			if (!demo) return;
-			demo.querySelector('[data-slide-status]').textContent =
-				'Slide ' + e.detail.selected + ' of ' + e.detail.count;
-		});
+		// The current and count state: the api's select event sets them.
+		(() => {
+			const demo = document.currentScript.previousElementSibling;
+			demo.addEventListener("carousel-select", (e) => {
+				demo.lastElementChild.textContent = "Slide " + e.detail.selected + " of " + e.detail.count;
+			});
+		})();
 	</script>
 }

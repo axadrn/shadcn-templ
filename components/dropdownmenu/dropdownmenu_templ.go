@@ -88,8 +88,9 @@ func triggerID(menuID string) string {
 // renders it.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
-		// useButton: tabIndex 0.
+		// useButton: tabIndex 0 and the native type.
 		"tabindex":            "0",
+		"type":                "button",
 		"data-slot":           "dropdown-menu-trigger",
 		"id":                  triggerID(state(ctx).id),
 		"data-templ-controls": state(ctx).id,
@@ -432,7 +433,7 @@ func Content(props ...ContentProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Side))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 289, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 290, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -445,7 +446,7 @@ func Content(props ...ContentProps) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Align))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 290, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 291, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -458,7 +459,7 @@ func Content(props ...ContentProps) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(p.SideOffset))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 291, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 292, Col: 54}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -471,7 +472,7 @@ func Content(props ...ContentProps) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(p.AlignOffset))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 292, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 293, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -489,7 +490,7 @@ func Content(props ...ContentProps) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatBool(*s.open))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 294, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 295, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -531,7 +532,7 @@ func Content(props ...ContentProps) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(s.id)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 303, Col: 13}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 304, Col: 13}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -544,7 +545,7 @@ func Content(props ...ContentProps) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(triggerID(s.id))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 307, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 308, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -635,7 +636,7 @@ func Group(props ...GroupProps) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 336, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 337, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -725,7 +726,7 @@ func Label(props ...LabelProps) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 354, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 355, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -829,7 +830,7 @@ func Item(props ...ItemProps) templ.Component {
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 377, Col: 13}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 378, Col: 13}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
@@ -847,7 +848,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var27 templ.SafeURL
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(p.Href))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 379, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 380, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -865,7 +866,7 @@ func Item(props ...ItemProps) templ.Component {
 				var templ_7745c5c3_Var28 string
 				templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(p.Target)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 381, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 382, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 				if templ_7745c5c3_Err != nil {
@@ -883,7 +884,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Variant))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 384, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 385, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -962,7 +963,7 @@ func Item(props ...ItemProps) templ.Component {
 				var templ_7745c5c3_Var32 string
 				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 403, Col: 13}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 404, Col: 13}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
@@ -980,7 +981,7 @@ func Item(props ...ItemProps) templ.Component {
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Variant))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 406, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 407, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
@@ -1089,7 +1090,7 @@ func CheckboxItem(props ...CheckboxItemProps) templ.Component {
 			var templ_7745c5c3_Var37 string
 			templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 433, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 434, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 			if templ_7745c5c3_Err != nil {
@@ -1275,7 +1276,7 @@ func RadioGroup(props ...RadioGroupProps) templ.Component {
 			var templ_7745c5c3_Var42 string
 			templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 477, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 478, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 			if templ_7745c5c3_Err != nil {
@@ -1298,7 +1299,7 @@ func RadioGroup(props ...RadioGroupProps) templ.Component {
 			var templ_7745c5c3_Var43 string
 			templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(*p.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 482, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 483, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 			if templ_7745c5c3_Err != nil {
@@ -1397,7 +1398,7 @@ func RadioItem(props ...RadioItemProps) templ.Component {
 			var templ_7745c5c3_Var47 string
 			templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 502, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 503, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 			if templ_7745c5c3_Err != nil {
@@ -1420,7 +1421,7 @@ func RadioItem(props ...RadioItemProps) templ.Component {
 			var templ_7745c5c3_Var48 string
 			templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(p.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 506, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 507, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 			if templ_7745c5c3_Err != nil {
@@ -1539,7 +1540,7 @@ func Separator(props ...SeparatorProps) templ.Component {
 			var templ_7745c5c3_Var52 string
 			templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 538, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 539, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 			if templ_7745c5c3_Err != nil {
@@ -1621,7 +1622,7 @@ func Shortcut(props ...ShortcutProps) templ.Component {
 			var templ_7745c5c3_Var56 string
 			templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 556, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 557, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 			if templ_7745c5c3_Err != nil {
@@ -1753,7 +1754,7 @@ func SubTrigger(props ...SubTriggerProps) templ.Component {
 		var templ_7745c5c3_Var61 string
 		templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 587, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 588, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var61))
 		if templ_7745c5c3_Err != nil {
@@ -1776,7 +1777,7 @@ func SubTrigger(props ...SubTriggerProps) templ.Component {
 		var templ_7745c5c3_Var62 string
 		templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinStringErrs(subState(ctx).id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 590, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 591, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var62))
 		if templ_7745c5c3_Err != nil {
@@ -1873,7 +1874,7 @@ func SubContent(props ...SubContentProps) templ.Component {
 				var templ_7745c5c3_Var66 string
 				templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatBool(*sub.open))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 622, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 623, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
 				if templ_7745c5c3_Err != nil {
@@ -1914,7 +1915,7 @@ func SubContent(props ...SubContentProps) templ.Component {
 			var templ_7745c5c3_Var68 string
 			templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(sub.id)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 632, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 633, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var68))
 			if templ_7745c5c3_Err != nil {
@@ -1927,7 +1928,7 @@ func SubContent(props ...SubContentProps) templ.Component {
 			var templ_7745c5c3_Var69 string
 			templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(triggerID(sub.id))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 637, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dropdownmenu/dropdownmenu.templ`, Line: 638, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var69))
 			if templ_7745c5c3_Err != nil {

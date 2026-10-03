@@ -13,10 +13,10 @@ templ DatePickerDob() {
 			Date of birth
 		}
 		@popover.Popover(popover.Props{ID: "date-picker-dob"}) {
-		{{
-			triggerAttrs := popover.Trigger(ctx)
-			triggerAttrs["id"] = "date"
-		}}
+			{{
+				triggerAttrs := popover.Trigger(ctx)
+				triggerAttrs["id"] = "date"
+			}}
 			@button.Button(button.Props{
 				Variant:    button.VariantOutline,
 				Class:      "justify-start font-normal",
@@ -25,7 +25,7 @@ templ DatePickerDob() {
 				Select date
 			}
 			@popover.Content(popover.ContentProps{
-				Class:     "w-auto overflow-hidden p-0",
+				Class: "w-auto overflow-hidden p-0",
 				Align: popover.AlignStart,
 			}) {
 				@calendar.Calendar(calendar.Props{

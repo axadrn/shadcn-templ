@@ -181,4 +181,16 @@
   }
 
   window.templ.lifecycle.register(ROOT, { init: setup });
+
+  // The owner's API: setChecked is the pendant of the checked prop a page
+  // renders a controlled checkbox with.
+  window.templ = window.templ || {};
+  window.templ.checkbox = {
+    setChecked(root, checked) {
+      const input = inputOf(root);
+      if (!input) return;
+      input.checked = checked;
+      sync(root, input);
+    },
+  };
 })();

@@ -91,14 +91,14 @@ func VersionSwitcher(versions []string, defaultVersion string) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div class=\"flex flex-col gap-0.5 leading-none\"><span class=\"font-medium\">Documentation</span> <span class=\"\" data-sidebar02-version-label>v")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div class=\"flex flex-col gap-0.5 leading-none\"><span class=\"font-medium\">Documentation</span> <span class=\"\">v")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var6 string
 						templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(defaultVersion)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar02/version_switcher.templ`, Line: 23, Col: 67}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar02/version_switcher.templ`, Line: 23, Col: 38}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 						if templ_7745c5c3_Err != nil {
@@ -116,7 +116,7 @@ func VersionSwitcher(versions []string, defaultVersion string) templ.Component {
 					})
 					templ_7745c5c3_Err = sidebar.MenuButton(sidebar.MenuButtonProps{
 						Size:       sidebar.MenuButtonSizeLg,
-						Class:      "data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground",
+						Class:      "data-open:bg-sidebar-accent data-open:text-sidebar-accent-foreground",
 						Attributes: dropdownmenu.Trigger(ctx),
 					}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
@@ -156,23 +156,27 @@ func VersionSwitcher(versions []string, defaultVersion string) templ.Component {
 									return templ_7745c5c3_Err
 								}
 								var templ_7745c5c3_Var9 string
-								templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(version)
+								templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(version + " ")
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar02/version_switcher.templ`, Line: 35, Col: 17}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar02/version_switcher.templ`, Line: 32, Col: 23}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
-								templ_7745c5c3_Err = icon.Check(icon.Props{Class: "ml-auto", Attributes: templ.Attributes{"hidden": version != defaultVersion}}).Render(ctx, templ_7745c5c3_Buffer)
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " ")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
+								if version == defaultVersion {
+									templ_7745c5c3_Err = icon.Check(icon.Props{Class: "ml-auto"}).Render(ctx, templ_7745c5c3_Buffer)
+									if templ_7745c5c3_Err != nil {
+										return templ_7745c5c3_Err
+									}
+								}
 								return nil
 							})
-							templ_7745c5c3_Err = dropdownmenu.Item(dropdownmenu.ItemProps{
-								Attributes: templ.Attributes{"data-version": version},
-							}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = dropdownmenu.Item().Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -180,8 +184,7 @@ func VersionSwitcher(versions []string, defaultVersion string) templ.Component {
 						return nil
 					})
 					templ_7745c5c3_Err = dropdownmenu.Content(dropdownmenu.ContentProps{
-						Align:      dropdownmenu.AlignStart,
-						Attributes: templ.Attributes{"data-sidebar02-version-switcher": ""},
+						Align: dropdownmenu.AlignStart,
 					}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -201,23 +204,6 @@ func VersionSwitcher(versions []string, defaultVersion string) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = sidebar.Menu().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<script nonce=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar02/version_switcher.templ`, Line: 43, Col: 36}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\">\n\t\t(() => {\n\t\t\t// The setSelectedVersion pendant: a picked version updates the\n\t\t\t// trigger label and moves the check mark.\n\t\t\tdocument.addEventListener(\"click\", (e) => {\n\t\t\t\tif (!(e.target instanceof Element)) return;\n\t\t\t\tconst item = e.target.closest(\"[data-sidebar02-version-switcher] [data-version]\");\n\t\t\t\tif (!item) return;\n\t\t\t\tconst label = document.querySelector(\"[data-sidebar02-version-label]\");\n\t\t\t\tif (label) label.textContent = \"v\" + item.dataset.version;\n\t\t\t\titem.closest(\"[data-sidebar02-version-switcher]\")\n\t\t\t\t\t.querySelectorAll(\"[data-version]\")\n\t\t\t\t\t.forEach((el) => {\n\t\t\t\t\t\tconst check = el.querySelector(\"svg\");\n\t\t\t\t\t\tif (check) check.toggleAttribute(\"hidden\", el !== item);\n\t\t\t\t\t});\n\t\t\t});\n\t\t})();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

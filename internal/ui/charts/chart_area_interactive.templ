@@ -1,6 +1,7 @@
 package charts
 
 import (
+	"github.com/axadrn/shadcn-templ/v2/utils"
 	"time"
 
 	"github.com/axadrn/shadcn-templ/v2/components/card"
@@ -131,10 +132,12 @@ func areaInteractiveShortDate(v any) string {
 	return t.Format("Jan 2")
 }
 
-var chartAreaInteractiveRanges = []struct {
+type chartAreaInteractiveRange struct {
 	Key  string
 	Days int
-}{
+}
+
+var chartAreaInteractiveRanges = []chartAreaInteractiveRange{
 	{"90d", 90},
 	{"30d", 30},
 	{"7d", 7},
@@ -161,7 +164,7 @@ templ ChartAreaInteractive() {
 			}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{
 					Class:      "hidden w-[160px] rounded-lg sm:ml-auto sm:flex",
-					Attributes: templ.Attributes{"aria-label": "Select a value", "data-templ-chart-range-select": "area-interactive"},
+					Attributes: templ.Attributes{"aria-label": "Select a value"},
 				}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Last 3 months"})
 				}
@@ -180,54 +183,78 @@ templ ChartAreaInteractive() {
 		}
 		@card.Content(card.ContentProps{Class: "px-2 pt-4 sm:px-6 sm:pt-6"}) {
 			@chart.Container(chart.ContainerProps{ID: "area-interactive", Config: chartAreaInteractiveConfig, Class: "aspect-auto h-[250px] w-full"}) {
-				for _, rng := range chartAreaInteractiveRanges {
-					<div data-templ-chart-range={ rng.Key } hidden?={ rng.Key != "90d" } style="width:100%;height:100%">
-						@chart.AreaChart(chart.AreaChartProps{
-							Data: areaInteractiveFilteredData(rng.Days),
-						}) {
-							@chart.Defs() {
-								@chart.LinearGradient(chart.LinearGradientProps{ID: "fillDesktop", X1: "0", Y1: "0", X2: "0", Y2: "1"}) {
-									<stop offset="5%" stop-color="var(--color-desktop)" stop-opacity="0.8"></stop>
-									<stop offset="95%" stop-color="var(--color-desktop)" stop-opacity="0.1"></stop>
-								}
-								@chart.LinearGradient(chart.LinearGradientProps{ID: "fillMobile", X1: "0", Y1: "0", X2: "0", Y2: "1"}) {
-									<stop offset="5%" stop-color="var(--color-mobile)" stop-opacity="0.8"></stop>
-									<stop offset="95%" stop-color="var(--color-mobile)" stop-opacity="0.1"></stop>
-								}
-							}
-							@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
-							@chart.XAxis(chart.XAxisProps{
-								DataKey:       "date",
-								TickMargin:    8,
-								MinTickGap:    32,
-								TickFormatter: areaInteractiveShortDate,
-							})
-							@chart.Tooltip(chart.TooltipProps{
-								Cursor: chart.Bool(false),
-								Content: chart.TooltipContentProps{
-									Indicator:      "dot",
-									LabelFormatter: areaInteractiveShortDate,
-								},
-							})
-							@chart.Area(chart.AreaProps{
-								DataKey: "mobile",
-								Type:    chart.CurveNatural,
-								Fill:    "url(#fillMobile)",
-								Stroke:  "var(--color-mobile)",
-								StackID: "a",
-							})
-							@chart.Area(chart.AreaProps{
-								DataKey: "desktop",
-								Type:    chart.CurveNatural,
-								Fill:    "url(#fillDesktop)",
-								Stroke:  "var(--color-desktop)",
-								StackID: "a",
-							})
-							@chart.Legend()
-						}
-					</div>
+				@chartAreaInteractiveChart(chartAreaInteractiveRanges[0].Days)
+				// The charts of the other time ranges, the props the select sets.
+				for _, rng := range chartAreaInteractiveRanges[1:] {
+					<template>
+						@chartAreaInteractiveChart(rng.Days)
+					</template>
 				}
 			}
 		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The timeRange state: the select's onValueChange sets it, the chart
+		// renders the data of that range.
+		(() => {
+			const card = document.currentScript.previousElementSibling;
+			const chartEl = card.querySelector('[data-slot="chart"]');
+			const wrapper = chartEl.querySelector(".recharts-wrapper");
+			const keys = {{ utils.Map(chartAreaInteractiveRanges, func(r chartAreaInteractiveRange) string { return r.Key }) }};
+			const models = [
+				wrapper.querySelector("script[data-templ-chart-model]").textContent,
+				...[...chartEl.querySelectorAll("template")].map((t) => t.content.querySelector("script[data-templ-chart-model]").textContent),
+			];
+			card.addEventListener("select-change", (e) => {
+				const i = keys.indexOf(e.detail.value);
+				if (i >= 0) window.templ.chart.update(wrapper, JSON.parse(models[i]));
+			});
+		})();
+	</script>
+}
+
+templ chartAreaInteractiveChart(days int) {
+	@chart.AreaChart(chart.AreaChartProps{
+		Data: areaInteractiveFilteredData(days),
+	}) {
+		@chart.Defs() {
+			@chart.LinearGradient(chart.LinearGradientProps{ID: "fillDesktop", X1: "0", Y1: "0", X2: "0", Y2: "1"}) {
+				<stop offset="5%" stop-color="var(--color-desktop)" stop-opacity="0.8"></stop>
+				<stop offset="95%" stop-color="var(--color-desktop)" stop-opacity="0.1"></stop>
+			}
+			@chart.LinearGradient(chart.LinearGradientProps{ID: "fillMobile", X1: "0", Y1: "0", X2: "0", Y2: "1"}) {
+				<stop offset="5%" stop-color="var(--color-mobile)" stop-opacity="0.8"></stop>
+				<stop offset="95%" stop-color="var(--color-mobile)" stop-opacity="0.1"></stop>
+			}
+		}
+		@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
+		@chart.XAxis(chart.XAxisProps{
+			DataKey:       "date",
+			TickMargin:    8,
+			MinTickGap:    32,
+			TickFormatter: areaInteractiveShortDate,
+		})
+		@chart.Tooltip(chart.TooltipProps{
+			Cursor: chart.Bool(false),
+			Content: chart.TooltipContentProps{
+				Indicator:      "dot",
+				LabelFormatter: areaInteractiveShortDate,
+			},
+		})
+		@chart.Area(chart.AreaProps{
+			DataKey: "mobile",
+			Type:    chart.CurveNatural,
+			Fill:    "url(#fillMobile)",
+			Stroke:  "var(--color-mobile)",
+			StackID: "a",
+		})
+		@chart.Area(chart.AreaProps{
+			DataKey: "desktop",
+			Type:    chart.CurveNatural,
+			Fill:    "url(#fillDesktop)",
+			Stroke:  "var(--color-desktop)",
+			StackID: "a",
+		})
+		@chart.Legend()
 	}
 }

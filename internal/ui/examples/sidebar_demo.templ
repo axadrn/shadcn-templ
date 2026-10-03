@@ -102,7 +102,7 @@ templ sidebarDemoTeamSwitcher() {
 			@dropdownmenu.DropdownMenu(dropdownmenu.Props{ID: "sidebar-demo-team-menu"}) {
 				@sidebar.MenuButton(sidebar.MenuButtonProps{
 					Size:       sidebar.MenuButtonSizeLg,
-					Class:      "data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground",
+					Class:      "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
 					Attributes: dropdownmenu.Trigger(ctx),
 				}) {
 					<div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
@@ -298,7 +298,7 @@ templ sidebarDemoNavUser() {
 			@dropdownmenu.DropdownMenu(dropdownmenu.Props{ID: "sidebar-demo-sidebar-demo-menu"}) {
 				@sidebar.MenuButton(sidebar.MenuButtonProps{
 					Size:       sidebar.MenuButtonSizeLg,
-					Class:      "data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground",
+					Class:      "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
 					Attributes: dropdownmenu.Trigger(ctx),
 				}) {
 					@avatar.Avatar(avatar.Props{Class: "h-8 w-8 rounded-lg"}) {

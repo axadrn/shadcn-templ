@@ -528,8 +528,8 @@ templ dataTableRow(item Item, page, size int) {
 				Class:   "size-7 text-muted-foreground hover:bg-transparent",
 				Attributes: templ.Attributes{
 					"data-dashboard01-drag-handle": "",
-					"draggable":                      "true",
-					"style":                          "touch-action:none",
+					"draggable":                    "true",
+					"style":                        "touch-action:none",
 				},
 			}) {
 				@icon.GripVertical(icon.Props{Class: "size-3 text-muted-foreground"})
@@ -732,51 +732,51 @@ templ dataTableCellViewer(item Item, page, size int) {
 templ dataTableDrawerBody(item Item) {
 	<div class="hidden md:contents">
 		@chart.Container(chart.ContainerProps{Config: dataTableCellViewerChartConfig}) {
-		@chart.AreaChart(chart.AreaChartProps{
-			AccessibilityLayer: true,
-			Data:               dataTableCellViewerChartData,
-			Margin:             &chart.Margin{Left: 0, Right: 10},
-		}) {
-			@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
-			@chart.XAxis(chart.XAxisProps{
-				DataKey:       "month",
-				TickMargin:    8,
-				TickFormatter: dataTableCellViewerMonthShort,
-				Hide:          true,
-			})
-			@chart.Tooltip(chart.TooltipProps{
-				Cursor:  chart.Bool(false),
-				Content: chart.TooltipContentProps{Indicator: "dot"},
-			})
-			@chart.Area(chart.AreaProps{
-				DataKey:     "mobile",
-				Type:        chart.CurveNatural,
-				Fill:        "var(--color-mobile)",
-				FillOpacity: 0.6,
-				Stroke:      "var(--color-mobile)",
-				StackID:     "a",
-			})
-			@chart.Area(chart.AreaProps{
-				DataKey:     "desktop",
-				Type:        chart.CurveNatural,
-				Fill:        "var(--color-desktop)",
-				FillOpacity: 0.4,
-				Stroke:      "var(--color-desktop)",
-				StackID:     "a",
-			})
-		}
+			@chart.AreaChart(chart.AreaChartProps{
+				AccessibilityLayer: true,
+				Data:               dataTableCellViewerChartData,
+				Margin:             &chart.Margin{Left: 0, Right: 10},
+			}) {
+				@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
+				@chart.XAxis(chart.XAxisProps{
+					DataKey:       "month",
+					TickMargin:    8,
+					TickFormatter: dataTableCellViewerMonthShort,
+					Hide:          true,
+				})
+				@chart.Tooltip(chart.TooltipProps{
+					Cursor:  chart.Bool(false),
+					Content: chart.TooltipContentProps{Indicator: "dot"},
+				})
+				@chart.Area(chart.AreaProps{
+					DataKey:     "mobile",
+					Type:        chart.CurveNatural,
+					Fill:        "var(--color-mobile)",
+					FillOpacity: 0.6,
+					Stroke:      "var(--color-mobile)",
+					StackID:     "a",
+				})
+				@chart.Area(chart.AreaProps{
+					DataKey:     "desktop",
+					Type:        chart.CurveNatural,
+					Fill:        "var(--color-desktop)",
+					FillOpacity: 0.4,
+					Stroke:      "var(--color-desktop)",
+					StackID:     "a",
+				})
+			}
 		}
 		@separator.Separator()
 		<div class="grid gap-2">
-		<div class="flex gap-2 leading-none font-medium">
-			Trending up by 5.2% this month
-			@icon.TrendingUp(icon.Props{Class: "size-4"})
-		</div>
-		<div class="text-muted-foreground">
-			Showing total visitors for the last 6 months. This is just
-			some random text to test the layout. It spans multiple lines
-			and should wrap around.
-		</div>
+			<div class="flex gap-2 leading-none font-medium">
+				Trending up by 5.2% this month
+				@icon.TrendingUp(icon.Props{Class: "size-4"})
+			</div>
+			<div class="text-muted-foreground">
+				Showing total visitors for the last 6 months. This is just
+				some random text to test the layout. It spans multiple lines
+				and should wrap around.
+			</div>
 		</div>
 		@separator.Separator()
 	</div>

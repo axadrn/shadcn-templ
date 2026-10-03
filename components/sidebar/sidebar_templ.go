@@ -2310,9 +2310,11 @@ func menuButtonEl(p MenuButtonProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 131, " type=\"button\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
+			if _, ok := p.Attributes["type"]; !ok {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 131, " type=\"button\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
 			if _, ok := p.Attributes["data-slot"]; !ok {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 132, " data-slot=\"sidebar-menu-button\"")
@@ -2327,7 +2329,7 @@ func menuButtonEl(p MenuButtonProps) templ.Component {
 			var templ_7745c5c3_Var91 string
 			templ_7745c5c3_Var91, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Size))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 796, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 798, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var91))
 			if templ_7745c5c3_Err != nil {
@@ -2427,7 +2429,7 @@ func MenuAction(props ...MenuActionProps) templ.Component {
 			var templ_7745c5c3_Var95 string
 			templ_7745c5c3_Var95, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 813, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 815, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var95))
 			if templ_7745c5c3_Err != nil {
@@ -2438,9 +2440,11 @@ func MenuAction(props ...MenuActionProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 143, " type=\"button\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if _, ok := p.Attributes["type"]; !ok {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 143, " type=\"button\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		if _, ok := p.Attributes["data-slot"]; !ok {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 144, " data-slot=\"sidebar-menu-action\"")
@@ -2530,7 +2534,7 @@ func MenuBadge(props ...MenuBadgeProps) templ.Component {
 			var templ_7745c5c3_Var99 string
 			templ_7745c5c3_Var99, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 838, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 842, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var99))
 			if templ_7745c5c3_Err != nil {
@@ -2621,7 +2625,7 @@ func MenuSkeleton(props ...MenuSkeletonProps) templ.Component {
 			var templ_7745c5c3_Var103 string
 			templ_7745c5c3_Var103, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 861, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 865, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var103))
 			if templ_7745c5c3_Err != nil {
@@ -2729,7 +2733,7 @@ func MenuSub(props ...MenuSubProps) templ.Component {
 			var templ_7745c5c3_Var107 string
 			templ_7745c5c3_Var107, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 891, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 895, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var107))
 			if templ_7745c5c3_Err != nil {
@@ -2819,7 +2823,7 @@ func MenuSubItem(props ...MenuSubItemProps) templ.Component {
 			var templ_7745c5c3_Var111 string
 			templ_7745c5c3_Var111, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 912, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 916, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var111))
 			if templ_7745c5c3_Err != nil {
@@ -2920,7 +2924,7 @@ func MenuSubButton(props ...MenuSubButtonProps) templ.Component {
 				var templ_7745c5c3_Var115 string
 				templ_7745c5c3_Var115, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 941, Col: 13}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 945, Col: 13}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var115))
 				if templ_7745c5c3_Err != nil {
@@ -2938,7 +2942,7 @@ func MenuSubButton(props ...MenuSubButtonProps) templ.Component {
 			var templ_7745c5c3_Var116 templ.SafeURL
 			templ_7745c5c3_Var116, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(p.Href))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 943, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 947, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var116))
 			if templ_7745c5c3_Err != nil {
@@ -2951,7 +2955,7 @@ func MenuSubButton(props ...MenuSubButtonProps) templ.Component {
 			var templ_7745c5c3_Var117 string
 			templ_7745c5c3_Var117, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Size))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 946, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 950, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var117))
 			if templ_7745c5c3_Err != nil {
@@ -3018,7 +3022,7 @@ func MenuSubButton(props ...MenuSubButtonProps) templ.Component {
 				var templ_7745c5c3_Var120 string
 				templ_7745c5c3_Var120, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 956, Col: 13}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 960, Col: 13}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var120))
 				if templ_7745c5c3_Err != nil {
@@ -3036,7 +3040,7 @@ func MenuSubButton(props ...MenuSubButtonProps) templ.Component {
 			var templ_7745c5c3_Var121 string
 			templ_7745c5c3_Var121, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Size))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 961, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar/sidebar.templ`, Line: 965, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var121))
 			if templ_7745c5c3_Err != nil {

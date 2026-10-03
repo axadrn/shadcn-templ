@@ -3,6 +3,7 @@ package examples
 import (
 	"github.com/axadrn/shadcn-templ/v2/components/checkbox"
 	"github.com/axadrn/shadcn-templ/v2/components/table"
+	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
 type checkboxTableRow struct {
@@ -20,82 +21,86 @@ var checkboxTableData = []checkboxTableRow{
 }
 
 templ CheckboxTable() {
-	<div data-checkbox-table-demo>
-		@table.Table() {
-			@table.Header() {
-				@table.Row() {
-					@table.Head(table.HeadProps{Class: "w-8"}) {
-						@checkbox.Checkbox(checkbox.Props{
-							ID:         "select-all-checkbox",
-							Name:       "select-all-checkbox",
-							Attributes: templ.Attributes{"data-select-all": true},
-						})
-					}
-					@table.Head() {
-						Name
-					}
-					@table.Head() {
-						Email
-					}
-					@table.Head() {
-						Role
-					}
+	@table.Table() {
+		@table.Header() {
+			@table.Row() {
+				@table.Head(table.HeadProps{Class: "w-8"}) {
+					@checkbox.Checkbox(checkbox.Props{
+						ID:      "select-all-checkbox",
+						Name:    "select-all-checkbox",
+						Checked: utils.Ptr(false),
+					})
+				}
+				@table.Head() {
+					Name
+				}
+				@table.Head() {
+					Email
+				}
+				@table.Head() {
+					Role
 				}
 			}
-			@table.Body() {
-				for _, row := range checkboxTableData {
-					@table.Row(table.RowProps{
-						Attributes: templ.Attributes{"data-state": templ.KV("selected", row.ID == "1")},
-					}) {
-						@table.Cell() {
-							@checkbox.Checkbox(checkbox.Props{
-								ID:             "row-" + row.ID + "-checkbox",
-								Name:           "row-" + row.ID + "-checkbox",
-								DefaultChecked: row.ID == "1",
-							})
-						}
-						@table.Cell(table.CellProps{Class: "font-medium"}) {
-							{ row.Name }
-						}
-						@table.Cell() {
-							{ row.Email }
-						}
-						@table.Cell() {
-							{ row.Role }
-						}
+		}
+		@table.Body() {
+			for _, row := range checkboxTableData {
+				@table.Row(table.RowProps{
+					Attributes: templ.Attributes{"data-state": templ.KV("selected", row.ID == "1")},
+				}) {
+					@table.Cell() {
+						@checkbox.Checkbox(checkbox.Props{
+							ID:      "row-" + row.ID + "-checkbox",
+							Name:    "row-" + row.ID + "-checkbox",
+							Checked: utils.Ptr(row.ID == "1"),
+						})
+					}
+					@table.Cell(table.CellProps{Class: "font-medium"}) {
+						{ row.Name }
+					}
+					@table.Cell() {
+						{ row.Email }
+					}
+					@table.Cell() {
+						{ row.Role }
 					}
 				}
 			}
 		}
-	</div>
+	}
+	@checkboxTableState(utils.Map(checkboxTableData, func(r checkboxTableRow) string { return r.ID }))
+}
+
+// checkboxTableState is the examples' selectedRows state: onCheckedChange
+// sets it, the checkboxes and the rows' data-state render it. It follows the
+// table.
+templ checkboxTableState(ids []string) {
 	<script nonce={ templ.GetNonce(ctx) }>
-		// The checkbox renders a span root with a hidden native input beside it;
-		// dispatching change after a programmatic check lets checkbox.js sync
-		// the root's state attributes.
-		let updatingCheckboxTable = false;
-		document.addEventListener('change', (e) => {
-			const demo = e.target.closest('[data-checkbox-table-demo]');
-			if (!demo || !e.target.matches('[data-slot=checkbox] + input') || updatingCheckboxTable) return;
-			const all = demo.querySelector('[data-select-all]')?.nextElementSibling;
-			const rows = [...demo.querySelectorAll('tbody [data-slot=checkbox] + input')];
-			const setChecked = (input, checked) => {
-				if (input.checked === checked) return;
-				input.checked = checked;
-				input.dispatchEvent(new Event('change', { bubbles: true }));
+		(() => {
+			const table = document.currentScript.previousElementSibling;
+			const all = table.querySelector('thead [data-slot="checkbox"]');
+			const rows = [...table.querySelectorAll('tbody [data-slot="checkbox"]')];
+			const ids = {{ ids }};
+			const selected = new Set(["1"]);
+			const render = () => {
+				window.templ.checkbox.setChecked(all, selected.size === rows.length);
+				rows.forEach((row, i) => {
+					window.templ.checkbox.setChecked(row, selected.has(ids[i]));
+					const tr = row.closest("tr");
+					if (selected.has(ids[i])) tr.setAttribute("data-state", "selected");
+					else tr.removeAttribute("data-state");
+				});
 			};
-			// The dispatched change events re-enter this handler; the guard keeps
-			// them from reacting to the half-updated state.
-			updatingCheckboxTable = true;
-			if (e.target === all) {
-				rows.forEach((row) => setChecked(row, all.checked));
-			} else {
-				setChecked(all, rows.every((row) => row.checked));
-			}
-			updatingCheckboxTable = false;
-			rows.forEach((row) => {
-				row.closest('tr').toggleAttribute('data-state', row.checked);
-				if (row.checked) row.closest('tr').setAttribute('data-state', 'selected');
+			table.addEventListener("checkbox-change", (e) => {
+				if (e.target === all) {
+					selected.clear();
+					if (e.detail.checked) ids.forEach((id) => selected.add(id));
+				} else {
+					const id = ids[rows.indexOf(e.target)];
+					if (e.detail.checked) selected.add(id);
+					else selected.delete(id);
+				}
+				render();
 			});
-		});
+		})();
 	</script>
 }

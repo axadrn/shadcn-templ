@@ -14,19 +14,13 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
+	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
 type Team struct {
 	Name string
 	Logo func(...icon.Props) templ.Component
 	Plan string
-}
-
-func teamLogoHidden(i int) string {
-	if i == 0 {
-		return ""
-	}
-	return " hidden"
 }
 
 func TeamSwitcher(teams []Team) templ.Component {
@@ -103,23 +97,18 @@ func TeamSwitcher(teams []Team) templ.Component {
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							for i, team := range teams {
-								templ_7745c5c3_Err = team.Logo(icon.Props{
-									Class:      teamLogoHidden(i),
-									Attributes: templ.Attributes{"data-team-logo": strconv.Itoa(i)},
-								}).Render(ctx, templ_7745c5c3_Buffer)
-								if templ_7745c5c3_Err != nil {
-									return templ_7745c5c3_Err
-								}
+							templ_7745c5c3_Err = teams[0].Logo().Render(ctx, templ_7745c5c3_Buffer)
+							if templ_7745c5c3_Err != nil {
+								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><span class=\"truncate font-medium\" data-team-name>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><span class=\"truncate font-medium\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var6 string
 							templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(teams[0].Name)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/team_switcher.templ`, Line: 42, Col: 71}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/team_switcher.templ`, Line: 30, Col: 56}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 							if templ_7745c5c3_Err != nil {
@@ -208,7 +197,7 @@ func TeamSwitcher(teams []Team) templ.Component {
 									var templ_7745c5c3_Var10 string
 									templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(team.Name)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/team_switcher.templ`, Line: 62, Col: 19}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/team_switcher.templ`, Line: 47, Col: 19}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 									if templ_7745c5c3_Err != nil {
@@ -233,7 +222,7 @@ func TeamSwitcher(teams []Team) templ.Component {
 										var templ_7745c5c3_Var12 string
 										templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i + 1))
 										if templ_7745c5c3_Err != nil {
-											return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/team_switcher.templ`, Line: 64, Col: 33}
+											return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/team_switcher.templ`, Line: 49, Col: 33}
 										}
 										_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 										if templ_7745c5c3_Err != nil {
@@ -247,10 +236,7 @@ func TeamSwitcher(teams []Team) templ.Component {
 									}
 									return nil
 								})
-								templ_7745c5c3_Err = dropdownmenu.Item(dropdownmenu.ItemProps{
-									Class:      "gap-2 p-2",
-									Attributes: templ.Attributes{"data-team-index": strconv.Itoa(i)},
-								}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
+								templ_7745c5c3_Err = dropdownmenu.Item(dropdownmenu.ItemProps{Class: "gap-2 p-2"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
@@ -323,6 +309,53 @@ func TeamSwitcher(teams []Team) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = sidebar.Menu().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, team := range teams {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<template>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = team.Logo().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</template>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " <script nonce=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var14 string
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/team_switcher.templ`, Line: 70, Col: 37}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\">\n\t\t\t// The activeTeam state: an item's onClick sets it, the trigger\n\t\t\t// renders it.\n\t\t\t(() => {\n\t\t\t\tconst logos = [];\n\t\t\t\tfor (let el = document.currentScript.previousElementSibling; el?.tagName === \"TEMPLATE\"; el = el.previousElementSibling) logos.unshift(el);\n\t\t\t\tconst names = ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var15, templ_7745c5c3_Err := templruntime.ScriptContentOutsideStringLiteral(utils.Map(teams, func(t Team) string { return t.Name }))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/team_switcher.templ`, Line: 76, Col: 76}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, ";\n\t\t\t\tconst trigger = document.getElementById(\"sidebar15-team-menu-trigger\");\n\t\t\t\tconst menu = document.getElementById(\"sidebar15-team-menu\");\n\t\t\t\tmenu.querySelectorAll('[data-slot=\"dropdown-menu-item\"]').forEach((item, i) => {\n\t\t\t\t\tif (i >= names.length) return;\n\t\t\t\t\titem.addEventListener(\"click\", () => {\n\t\t\t\t\t\ttrigger.firstElementChild.replaceChildren(logos[i].content.firstElementChild.cloneNode(true));\n\t\t\t\t\t\ttrigger.querySelector(\":scope > span\").textContent = names[i];\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t})();\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

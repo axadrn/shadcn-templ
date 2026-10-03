@@ -101,8 +101,9 @@ func Trigger(ctx context.Context) templ.Attributes {
 // TriggerFor targets a dialog outside the current Dialog root by id.
 func TriggerFor(id string) templ.Attributes {
 	return templ.Attributes{
-		// useButton: tabIndex 0.
+		// useButton: tabIndex 0 and the native type.
 		"tabindex":                   "0",
+		"type":                       "button",
 		"data-slot":                  "dialog-trigger",
 		"data-base-ui-click-trigger": true,
 		"data-templ-controls":        id,
@@ -119,8 +120,9 @@ func Close(ctx context.Context) templ.Attributes {
 // CloseFor targets a dialog outside the current Dialog root by id.
 func CloseFor(id string) templ.Attributes {
 	return templ.Attributes{
-		// useButton: tabIndex 0.
+		// useButton: tabIndex 0 and the native type.
 		"tabindex":                "0",
+		"type":                    "button",
 		"data-slot":               "dialog-close",
 		"data-templ-dialog-close": id,
 	}

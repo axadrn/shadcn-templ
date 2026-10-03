@@ -166,8 +166,9 @@ func Collapsible(props ...Props) templ.Component {
 func Trigger(ctx context.Context) templ.Attributes {
 	s := state(ctx)
 	attrs := templ.Attributes{
-		// useButton: tabIndex 0.
+		// useButton: tabIndex 0 and the native type.
 		"tabindex":            "0",
+		"type":                "button",
 		"data-slot":           "collapsible-trigger",
 		"data-templ-controls": s.id,
 		"aria-expanded":       utils.IfElse(s.open, "true", "false"),
@@ -225,7 +226,7 @@ func Content(props ...ContentProps) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(s.id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/collapsible/collapsible.templ`, Line: 112, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/collapsible/collapsible.templ`, Line: 113, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {

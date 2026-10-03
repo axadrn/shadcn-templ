@@ -12,7 +12,7 @@ templ VersionSwitcher(versions []string, defaultVersion string) {
 			@dropdownmenu.DropdownMenu() {
 				@sidebar.MenuButton(sidebar.MenuButtonProps{
 					Size:       sidebar.MenuButtonSizeLg,
-					Class:      "data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground",
+					Class:      "data-open:bg-sidebar-accent data-open:text-sidebar-accent-foreground",
 					Attributes: dropdownmenu.Trigger(ctx),
 				}) {
 					<div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
@@ -20,43 +20,26 @@ templ VersionSwitcher(versions []string, defaultVersion string) {
 					</div>
 					<div class="flex flex-col gap-0.5 leading-none">
 						<span class="font-medium">Documentation</span>
-						<span class="" data-sidebar02-version-label>v{ defaultVersion }</span>
+						<span class="">v{ defaultVersion }</span>
 					</div>
 					@icon.ChevronsUpDown(icon.Props{Class: "ml-auto"})
 				}
 				@dropdownmenu.Content(dropdownmenu.ContentProps{
 					Align:      dropdownmenu.AlignStart,
-					Attributes: templ.Attributes{"data-sidebar02-version-switcher": ""},
 				}) {
 					for _, version := range versions {
-						@dropdownmenu.Item(dropdownmenu.ItemProps{
-							Attributes: templ.Attributes{"data-version": version},
-						}) {
-							v{ version }
-							@icon.Check(icon.Props{Class: "ml-auto", Attributes: templ.Attributes{"hidden": version != defaultVersion}})
+						@dropdownmenu.Item() {
+							v{ version + " " }
+							if version == defaultVersion {
+								@icon.Check(icon.Props{Class: "ml-auto"})
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-	<script nonce={ templ.GetNonce(ctx) }>
-		(() => {
-			// The setSelectedVersion pendant: a picked version updates the
-			// trigger label and moves the check mark.
-			document.addEventListener("click", (e) => {
-				if (!(e.target instanceof Element)) return;
-				const item = e.target.closest("[data-sidebar02-version-switcher] [data-version]");
-				if (!item) return;
-				const label = document.querySelector("[data-sidebar02-version-label]");
-				if (label) label.textContent = "v" + item.dataset.version;
-				item.closest("[data-sidebar02-version-switcher]")
-					.querySelectorAll("[data-version]")
-					.forEach((el) => {
-						const check = el.querySelector("svg");
-						if (check) check.toggleAttribute("hidden", el !== item);
-					});
-			});
-		})();
-	</script>
+	// The items' onSelect is a Radix prop: Base UI's MenuItem passes it to the
+	// element as the DOM's select event, which never fires on a menu item, so
+	// the selected version stays the default.
 }

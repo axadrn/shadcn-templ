@@ -87,7 +87,7 @@ templ sidebarExampleVersionSwitcher() {
 								Documentation
 							}
 							@item.Description() {
-								v<span data-version-label>{ sidebarExampleVersions[0] }</span>
+								{ "v" + sidebarExampleVersions[0] }
 							}
 						}
 						@item.Actions() {
@@ -97,27 +97,17 @@ templ sidebarExampleVersionSwitcher() {
 				}
 				@dropdownmenu.Content() {
 					for i, version := range sidebarExampleVersions {
-						@dropdownmenu.Item(dropdownmenu.ItemProps{
-							Attributes: templ.Attributes{"data-version": version},
-						}) {
-							v{ version }
-							@icon.Check(icon.Props{
-								Class:      "ml-auto" + sidebarExampleCheckHidden(i),
-								Attributes: templ.Attributes{"data-version-check": version},
-							})
+						@dropdownmenu.Item() {
+							v{ version + " " }
+							if i == 0 {
+								@icon.Check(icon.Props{Class: "ml-auto"})
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-}
-
-func sidebarExampleCheckHidden(i int) string {
-	if i == 0 {
-		return ""
-	}
-	return " hidden"
 }
 
 templ SidebarExample() {
@@ -180,20 +170,7 @@ templ SidebarExample() {
 			</div>
 		}
 	}
-	<script nonce={ templ.GetNonce(ctx) }>
-		(() => {
-			// Version switching, the pendant of the demo's selectedVersion state.
-			document.addEventListener("click", (e) => {
-				if (!(e.target instanceof Element)) return;
-				const item = e.target.closest("#sidebar-example-version-menu [data-version]");
-				if (!item) return;
-				const version = item.getAttribute("data-version");
-				const labelEl = document.querySelector("[data-version-label]");
-				if (labelEl) labelEl.textContent = version;
-				document.querySelectorAll("[data-version-check]").forEach((check) => {
-					check.classList.toggle("hidden", check.getAttribute("data-version-check") !== version);
-				});
-			});
-		})();
-	</script>
+	// The items' onSelect is a Radix prop: Base UI's MenuItem passes it to the
+	// element as React's select event, which never fires on a menu item, so
+	// the selected version stays the first one.
 }

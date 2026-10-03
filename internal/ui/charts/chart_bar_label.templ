@@ -39,8 +39,8 @@ templ ChartBarLabel() {
 			@chart.Container(chart.ContainerProps{ID: "bar-label", Config: chartBarLabelConfig}) {
 				@chart.BarChart(chart.BarChartProps{
 					AccessibilityLayer: true,
-					Data:   chartBarLabelData,
-					Margin: &chart.Margin{Top: 20},
+					Data:               chartBarLabelData,
+					Margin:             &chart.Margin{Top: 20},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.XAxis(chart.XAxisProps{

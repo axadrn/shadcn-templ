@@ -55,27 +55,16 @@ templ progressExampleWithLabel() {
 // The slider drives the progress bar.
 templ progressExampleControlled() {
 	@progressExampleSection("Controlled") {
-		<div class="flex w-full flex-col gap-4" data-progress-example-controlled>
-			@progress.Progress(progress.Props{
-				ID:    "progress-example-controlled",
-				Value: 50,
-				Class: "w-full",
-			})
+		<div class="flex w-full flex-col gap-4">
+			@progress.Progress(progress.Props{Value: 50, Class: "w-full"})
 			@slider.Slider(slider.Props{
-				DefaultValue: []float64{50},
-				Min:          0,
-				Max:          100,
-				Step:         1,
+				Value: []float64{50},
+				Min:   0,
+				Max:   100,
+				Step:  1,
 			})
 		</div>
-		<script nonce={ templ.GetNonce(ctx) }>
-			(() => {
-				const demo = document.querySelector("[data-progress-example-controlled]");
-				demo.addEventListener("slider-change", (e) => {
-					document.getElementById("progress-example-controlled").setAttribute("aria-valuenow", String(e.detail.values[0]));
-				});
-			})();
-		</script>
+		@progressControlledState()
 	}
 }
 

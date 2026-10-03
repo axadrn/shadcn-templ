@@ -744,25 +744,29 @@
     if (!accepted) return;
 
     // Controlled: the Base UI value prop, the owner commits.
-    if (!trigger.hasAttribute("data-templ-value")) {
-      content.querySelectorAll(ITEM).forEach((i) => setSelected(i, i === item));
-
-      // The null item ("") selects no value: the value shows its label and
-      // stays a placeholder.
-      const span = valueSpanFor(trigger);
-      if (span) {
-        renderValue(span, value);
-        span.toggleAttribute("data-placeholder", value === "");
-      }
-      trigger.toggleAttribute("data-placeholder", value === "");
-
-      const input = inputFor(trigger);
-      if (input && input.value !== value) {
-        input.value = value;
-        input.dispatchEvent(new Event("change", { bubbles: true }));
-      }
-    }
+    if (!trigger.hasAttribute("data-templ-value")) commitValue(trigger, content, value);
     requestOpenChange(content, false);
+  }
+
+  // Renders a value: the selected item, the value's label and the hidden
+  // input.
+  function commitValue(trigger, content, value) {
+    content.querySelectorAll(ITEM).forEach((i) => setSelected(i, (i.getAttribute("data-templ-value") || "") === value));
+
+    // The null item ("") selects no value: the value shows its label and
+    // stays a placeholder.
+    const span = valueSpanFor(trigger);
+    if (span) {
+      renderValue(span, value);
+      span.toggleAttribute("data-placeholder", value === "");
+    }
+    trigger.toggleAttribute("data-placeholder", value === "");
+
+    const input = inputFor(trigger);
+    if (input && input.value !== value) {
+      input.value = value;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
   }
 
   // Shows the selected item's label in the trigger (server only knows the
@@ -1045,4 +1049,15 @@
     true,
   );
 
+  // The owner's API: setValue is the pendant of the value prop a page
+  // renders a controlled select with.
+  window.templ = window.templ || {};
+  window.templ.select = {
+    setValue(trigger, value) {
+      const content = contentFor(trigger);
+      if (!content) return;
+      if (trigger.hasAttribute("data-templ-value")) trigger.setAttribute("data-templ-value", value);
+      commitValue(trigger, content, value);
+    },
+  };
 })();

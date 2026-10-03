@@ -269,7 +269,7 @@ func Button(props ...Props) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if p.Type != "" {
+			if _, ok := p.Attributes["type"]; !ok && p.Type != "" {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, " type=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

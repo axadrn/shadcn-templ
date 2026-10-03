@@ -39,8 +39,8 @@ templ ChartLineDefault() {
 			@chart.Container(chart.ContainerProps{ID: "line-default", Config: chartLineDefaultConfig}) {
 				@chart.LineChart(chart.LineChartProps{
 					AccessibilityLayer: true,
-					Data:   chartLineDefaultData,
-					Margin: &chart.Margin{Left: 12, Right: 12},
+					Data:               chartLineDefaultData,
+					Margin:             &chart.Margin{Left: 12, Right: 12},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.XAxis(chart.XAxisProps{

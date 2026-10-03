@@ -39,9 +39,9 @@ templ ChartBarHorizontal() {
 			@chart.Container(chart.ContainerProps{ID: "bar-horizontal", Config: chartBarHorizontalConfig}) {
 				@chart.BarChart(chart.BarChartProps{
 					AccessibilityLayer: true,
-					Data:   chartBarHorizontalData,
-					Layout: "vertical",
-					Margin: &chart.Margin{Left: -20},
+					Data:               chartBarHorizontalData,
+					Layout:             "vertical",
+					Margin:             &chart.Margin{Left: -20},
 				}) {
 					@chart.XAxis(chart.XAxisProps{Type: "number", DataKey: "desktop", Hide: true})
 					@chart.YAxis(chart.YAxisProps{

@@ -40,8 +40,8 @@ templ ChartAreaGradient() {
 			@chart.Container(chart.ContainerProps{ID: "area-gradient", Config: chartAreaGradientConfig}) {
 				@chart.AreaChart(chart.AreaChartProps{
 					AccessibilityLayer: true,
-					Data:   chartAreaGradientData,
-					Margin: &chart.Margin{Left: 12, Right: 12},
+					Data:               chartAreaGradientData,
+					Margin:             &chart.Margin{Left: 12, Right: 12},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.XAxis(chart.XAxisProps{

@@ -40,8 +40,8 @@ templ ChartLineMultiple() {
 			@chart.Container(chart.ContainerProps{ID: "line-multiple", Config: chartLineMultipleConfig}) {
 				@chart.LineChart(chart.LineChartProps{
 					AccessibilityLayer: true,
-					Data:   chartLineMultipleData,
-					Margin: &chart.Margin{Left: 12, Right: 12},
+					Data:               chartLineMultipleData,
+					Margin:             &chart.Margin{Left: 12, Right: 12},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.XAxis(chart.XAxisProps{

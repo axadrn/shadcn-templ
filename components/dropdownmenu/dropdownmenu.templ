@@ -80,8 +80,9 @@ func triggerID(menuID string) string {
 // renders it.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
-		// useButton: tabIndex 0.
+		// useButton: tabIndex 0 and the native type.
 		"tabindex":            "0",
+		"type":                "button",
 		"data-slot":           "dropdown-menu-trigger",
 		"id":                  triggerID(state(ctx).id),
 		"data-templ-controls": state(ctx).id,

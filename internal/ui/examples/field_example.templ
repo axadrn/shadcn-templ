@@ -1,7 +1,6 @@
 package examples
 
 import (
-	"github.com/axadrn/shadcn-templ/v2/utils"
 	"github.com/axadrn/shadcn-templ/v2/components/badge"
 	"github.com/axadrn/shadcn-templ/v2/components/checkbox"
 	"github.com/axadrn/shadcn-templ/v2/components/field"
@@ -13,6 +12,7 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/components/slider"
 	"github.com/axadrn/shadcn-templ/v2/components/switch"
 	"github.com/axadrn/shadcn-templ/v2/components/textarea"
+	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
 // The native select markup is inlined in this showcase.
@@ -729,10 +729,10 @@ templ fieldExampleSliderFields() {
 					Volume
 				}
 				@slider.Slider(slider.Props{
-					ID:           "slider-volume",
-					DefaultValue: []float64{50},
-					Max:          100,
-					Step:         1,
+					ID:    "slider-volume",
+					Value: []float64{50},
+					Max:   100,
+					Step:  1,
 				})
 			}
 			@field.Field() {
@@ -740,13 +740,13 @@ templ fieldExampleSliderFields() {
 					Screen Brightness
 				}
 				@slider.Slider(slider.Props{
-					ID:           "slider-brightness",
-					DefaultValue: []float64{75},
-					Max:          100,
-					Step:         5,
+					ID:    "slider-brightness",
+					Value: []float64{75},
+					Max:   100,
+					Step:  5,
 				})
 				@field.Description() {
-					Current brightness: <span data-templ-field-example-brightness>75</span>%
+					Current brightness: 75%
 				}
 			}
 			@field.Field() {
@@ -769,14 +769,14 @@ templ fieldExampleSliderFields() {
 					Temperature Range
 				}
 				@slider.Slider(slider.Props{
-					ID:           "slider-temperature",
-					DefaultValue: []float64{0.3, 0.7},
-					Min:          0,
-					Max:          1,
-					Step:         0.1,
+					ID:    "slider-temperature",
+					Value: []float64{0.3, 0.7},
+					Min:   0,
+					Max:   1,
+					Step:  0.1,
 				})
 				@field.Description() {
-					Range: <span data-templ-field-example-temperature>0.3 - 0.7</span>
+					Range: 0.3 - 0.7
 				}
 			}
 			@field.Field() {
@@ -784,13 +784,13 @@ templ fieldExampleSliderFields() {
 					Price Range
 				}
 				@slider.Slider(slider.Props{
-					ID:           "slider-price-range",
-					DefaultValue: []float64{25, 75},
-					Max:          100,
-					Step:         5,
+					ID:    "slider-price-range",
+					Value: []float64{25, 75},
+					Max:   100,
+					Step:  5,
 				})
 				@field.Description() {
-					<span data-templ-field-example-price>$25 - $75</span>
+					$25 - $75
 				}
 			}
 			@field.Field() {
@@ -798,13 +798,13 @@ templ fieldExampleSliderFields() {
 					Color Balance
 				}
 				@slider.Slider(slider.Props{
-					ID:           "slider-color-balance",
-					DefaultValue: []float64{10, 20, 70},
-					Max:          100,
-					Step:         10,
+					ID:    "slider-color-balance",
+					Value: []float64{10, 20, 70},
+					Max:   100,
+					Step:  10,
 				})
 				@field.Description() {
-					<span data-templ-field-example-color>Red: 10%, Green: 20%, Blue: 70%</span>
+					Red: 10%, Green: 20%, Blue: 70%
 				}
 			}
 			@field.Field(field.Props{Attributes: templ.Attributes{"data-invalid": "true"}}) {
@@ -836,21 +836,24 @@ templ fieldExampleSliderFields() {
 				}
 			}
 		}
-		// Keep the live slider descriptions in sync.
 		<script nonce={ templ.GetNonce(ctx) }>
+			// The volume, brightness, temperature, priceRange and colorBalance
+			// state: onValueChange sets it, the slider and its description
+			// render it.
 			(() => {
-				const bind = (id, target, format) => {
-					const root = document.getElementById(id);
-					if (!root) return;
-					root.addEventListener('slider-change', (e) => {
-						const el = document.querySelector(target);
-						if (el) el.textContent = format(e.detail.values);
+				const bind = (id, format) => {
+					const slider = document.getElementById(id);
+					const description = slider.parentElement.querySelector('[data-slot="field-description"]');
+					slider.addEventListener("slider-change", (e) => {
+						window.templ.slider.setValues(slider, e.detail.values);
+						if (format) description.textContent = format(e.detail.values);
 					});
 				};
-				bind('slider-brightness', '[data-templ-field-example-brightness]', (v) => v[0]);
-				bind('slider-temperature', '[data-templ-field-example-temperature]', (v) => v[0].toFixed(1) + ' - ' + v[1].toFixed(1));
-				bind('slider-price-range', '[data-templ-field-example-price]', (v) => '$' + v[0] + ' - $' + v[1]);
-				bind('slider-color-balance', '[data-templ-field-example-color]', (v) => 'Red: ' + v[0] + '%, Green: ' + v[1] + '%, Blue: ' + v[2] + '%');
+				bind("slider-volume");
+				bind("slider-brightness", (v) => `Current brightness: ${v[0]}%`);
+				bind("slider-temperature", (v) => `Range: ${v[0].toFixed(1)} - ${v[1].toFixed(1)}`);
+				bind("slider-price-range", (v) => `$${v[0]} - $${v[1]}`);
+				bind("slider-color-balance", (v) => `Red: ${v[0]}%, Green: ${v[1]}%, Blue: ${v[2]}%`);
 			})();
 		</script>
 	}

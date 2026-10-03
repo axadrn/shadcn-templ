@@ -7,21 +7,20 @@ import (
 )
 
 templ InputGroupButton() {
-	<div class="grid w-full max-w-sm gap-6" data-inputgroup-button-demo>
+	<div class="grid w-full max-w-sm gap-6">
 		@inputgroup.InputGroup() {
-			@inputgroup.Input(inputgroup.InputProps{Value: "https://x.com/axadrn", Attributes: templ.Attributes{"readonly": true}})
+			@inputgroup.Input(inputgroup.InputProps{Placeholder: "https://x.com/shadcn", Attributes: templ.Attributes{"readonly": true}})
 			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
 				@inputgroup.Button(inputgroup.ButtonProps{
 					Size:       inputgroup.ButtonSizeIconXs,
-					Attributes: templ.Attributes{"aria-label": "Copy", "title": "Copy", "data-templ-copy-url": "https://x.com/axadrn"},
+					Attributes: templ.Attributes{"aria-label": "Copy", "title": "Copy"},
 				}) {
-					<span class="[[data-copied=true]_&]:hidden">
-						@icon.Copy()
-					</span>
-					<span class="hidden [[data-copied=true]_&]:inline">
-						@icon.Check()
-					</span>
+					@icon.Copy()
 				}
+				// The icon isCopied renders.
+				<template>
+					@icon.Check()
+				</template>
 			}
 		}
 		@inputgroup.InputGroup(inputgroup.Props{Class: "[--radius:9999px]"}) {
@@ -47,11 +46,11 @@ templ InputGroupButton() {
 			}
 			@inputgroup.Input(inputgroup.InputProps{ID: "input-secure-19"})
 			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
-				@inputgroup.Button(inputgroup.ButtonProps{
-					Size:       inputgroup.ButtonSizeIconXs,
-					Attributes: templ.Attributes{"data-favorite-toggle": true},
-				}) {
-					@icon.Star(icon.Props{Class: "data-[favorite=true]:fill-blue-600 data-[favorite=true]:stroke-blue-600"})
+				@inputgroup.Button(inputgroup.ButtonProps{Size: inputgroup.ButtonSizeIconXs}) {
+					@icon.Star(icon.Props{
+						Class:      "data-[favorite=true]:fill-blue-600 data-[favorite=true]:stroke-blue-600",
+						Attributes: templ.Attributes{"data-favorite": "false"},
+					})
 				}
 			}
 		}
@@ -65,21 +64,26 @@ templ InputGroupButton() {
 		}
 	</div>
 	<script nonce={ templ.GetNonce(ctx) }>
-		// The vanilla pendant of the demo's copy and favorite state.
-		document.addEventListener('click', (e) => {
-			if (!(e.target instanceof Element)) return;
-			const copy = e.target.closest('[data-templ-copy-url]');
-			if (copy && copy.closest('[data-inputgroup-button-demo]')) {
-				navigator.clipboard.writeText(copy.getAttribute('data-templ-copy-url')).then(() => {
-					copy.setAttribute('data-copied', 'true');
-					setTimeout(() => copy.setAttribute('data-copied', 'false'), 1500);
+		// The isCopied state of useCopyToClipboard (2 s) and the isFavorite
+		// state.
+		(() => {
+			const demo = document.currentScript.previousElementSibling;
+			const [copyGroup, secureGroup] = demo.children;
+			const copy = copyGroup.querySelector("button");
+			const copyIcon = copy.firstElementChild;
+			const checkIcon = copyGroup.querySelector("template").content.firstElementChild;
+			let timer;
+			copy.addEventListener("click", () => {
+				navigator.clipboard.writeText("https://x.com/shadcn").then(() => {
+					copy.replaceChildren(checkIcon.cloneNode(true));
+					clearTimeout(timer);
+					timer = setTimeout(() => copy.replaceChildren(copyIcon), 2000);
 				});
-			}
-			const fav = e.target.closest('[data-favorite-toggle]');
-			if (fav && fav.closest('[data-inputgroup-button-demo]')) {
-				const star = fav.querySelector('svg');
-				star.setAttribute('data-favorite', star.getAttribute('data-favorite') === 'true' ? 'false' : 'true');
-			}
-		});
+			});
+			const star = secureGroup.querySelector('[data-favorite]');
+			star.parentElement.addEventListener("click", () => {
+				star.setAttribute("data-favorite", String(star.getAttribute("data-favorite") !== "true"));
+			});
+		})();
 	</script>
 }

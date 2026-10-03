@@ -2222,36 +2222,6 @@ function initPanel(script) {
   }
 }
 
-/* Interactive demo wiring: selects and header buttons toggle the SSR
- * rendered variants of a chart. */
-document.addEventListener("select-change", (e) => {
-  const trigger = e.target instanceof Element && e.target.closest("[data-templ-chart-range-select], [data-templ-chart-month-select]");
-  if (!trigger) return;
-  const value = e.detail && e.detail.value;
-  if (!value) return;
-  const chart = trigger.closest("[data-slot=card]");
-  if (!chart) return;
-  const attr = trigger.hasAttribute("data-templ-chart-range-select") ? "data-templ-chart-range" : "data-templ-chart-month";
-  chart.querySelectorAll(`[${attr}]`).forEach((el) => {
-    el.hidden = el.getAttribute(attr) !== value;
-  });
-});
-
-document.addEventListener("click", (e) => {
-  if (!(e.target instanceof Element)) return;
-  const btn = e.target.closest("[data-templ-chart-series]");
-  if (!btn) return;
-  const chart = btn.closest("[data-slot=card]");
-  if (!chart) return;
-  const series = btn.getAttribute("data-templ-chart-series");
-  chart.querySelectorAll("[data-templ-chart-series]").forEach((b) => {
-    b.setAttribute("data-active", b === btn ? "true" : "false");
-  });
-  chart.querySelectorAll("[data-templ-chart-series-panel]").forEach((el) => {
-    el.hidden = el.getAttribute("data-templ-chart-series-panel") !== series;
-  });
-});
-
 window.templ.lifecycle.register("script[data-templ-chart-model]", { init: initPanel });
 
 // update(wrapper, model): renders the chart in a recharts-wrapper with

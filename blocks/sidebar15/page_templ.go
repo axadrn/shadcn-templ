@@ -182,23 +182,6 @@ func Page() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<script nonce=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/sidebar15/page.templ`, Line: 38, Col: 36}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\">\n\t\t(() => {\n\t\t\t// Keep the selected team details in sync.\n\t\t\tdocument.addEventListener(\"click\", (e) => {\n\t\t\t\tif (!(e.target instanceof Element)) return;\n\t\t\t\tconst item = e.target.closest(\"#sidebar15-team-menu [data-team-index]\");\n\t\t\t\tif (!item) return;\n\t\t\t\tconst i = item.getAttribute(\"data-team-index\");\n\t\t\t\tconst name = item.textContent.trim().replace(/⌘\\d$/, \"\").trim();\n\t\t\t\tdocument.querySelectorAll(\"[data-team-logo]\").forEach((logo) => {\n\t\t\t\t\tlogo.classList.toggle(\"hidden\", logo.getAttribute(\"data-team-logo\") !== i);\n\t\t\t\t});\n\t\t\t\tconst nameEl = document.querySelector(\"[data-team-name]\");\n\t\t\t\tif (nameEl) nameEl.textContent = name;\n\t\t\t});\n\t\t})();\n\t</script>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		return nil
 	})
 }

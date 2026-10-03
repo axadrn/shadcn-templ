@@ -134,8 +134,9 @@ func Trigger(ctx context.Context) templ.Attributes {
 // TriggerFor targets a dialog outside the current Dialog root by id.
 func TriggerFor(id string) templ.Attributes {
 	return templ.Attributes{
-		// useButton: tabIndex 0.
+		// useButton: tabIndex 0 and the native type.
 		"tabindex":                   "0",
+		"type":                       "button",
 		"data-slot":                  "dialog-trigger",
 		"data-base-ui-click-trigger": true,
 		"data-templ-controls":        id,
@@ -152,8 +153,9 @@ func Close(ctx context.Context) templ.Attributes {
 // CloseFor targets a dialog outside the current Dialog root by id.
 func CloseFor(id string) templ.Attributes {
 	return templ.Attributes{
-		// useButton: tabIndex 0.
+		// useButton: tabIndex 0 and the native type.
 		"tabindex":                "0",
+		"type":                    "button",
 		"data-slot":               "dialog-close",
 		"data-templ-dialog-close": id,
 	}
@@ -272,7 +274,7 @@ func Overlay(props ...OverlayProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 170, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 172, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -374,7 +376,7 @@ func Content(props ...ContentProps) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(s.id)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 193, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 195, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -392,7 +394,7 @@ func Content(props ...ContentProps) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatBool(s.open))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 199, Col: 48}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 201, Col: 48}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -417,7 +419,7 @@ func Content(props ...ContentProps) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatBool(p.Modal == nil || *p.Modal))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 203, Col: 68}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 205, Col: 68}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -554,7 +556,7 @@ func Header(props ...HeaderProps) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 241, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 243, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -644,7 +646,7 @@ func Footer(props ...FooterProps) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 258, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 260, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -734,7 +736,7 @@ func Title(props ...TitleProps) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 277, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 279, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -824,7 +826,7 @@ func Description(props ...DescriptionProps) templ.Component {
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 297, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/dialog/dialog.templ`, Line: 299, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
