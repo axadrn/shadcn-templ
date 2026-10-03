@@ -54,6 +54,8 @@ func triggerID(popoverID string) string {
 // identifier Base UI's PopoverTrigger renders, data-templ-controls names the popover.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
+		// useButton: tabIndex 0.
+		"tabindex":                   "0",
 		"data-slot":                  "popover-trigger",
 		"data-base-ui-click-trigger": true,
 		"id":                         triggerID(state(ctx).id),

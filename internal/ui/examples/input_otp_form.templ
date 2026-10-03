@@ -29,7 +29,7 @@ templ InputOTPForm() {
 						Resend Code
 					}
 				</div>
-				@inputotp.InputOTP(inputotp.Props{ID: "otp-verification", Required: true}) {
+				@inputotp.InputOTP(inputotp.Props{ID: "otp-verification", MaxLength: 6, Required: true}) {
 					@inputotp.Group(inputotp.GroupProps{Class: "*:data-[slot=input-otp-slot]:h-12 *:data-[slot=input-otp-slot]:w-11 *:data-[slot=input-otp-slot]:text-xl"}) {
 						@inputotp.Slot(inputotp.SlotProps{Index: 0})
 						@inputotp.Slot(inputotp.SlotProps{Index: 1})

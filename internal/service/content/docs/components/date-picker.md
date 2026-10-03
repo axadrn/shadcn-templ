@@ -35,12 +35,12 @@ See installation instructions for the [Popover](/docs/components/popover#install
 		Side:  popover.SideBottom,
 		Align: popover.AlignStart,
 	}) {
-		@calendar.Calendar()
+		@calendar.Calendar(calendar.Props{Mode: calendar.ModeSingle})
 	}
 }
 ```
 
-Listen for the calendar's `calendar-change` event to show the selected date in the trigger, see the demo above for the full wiring.
+Listen for the calendar's `calendar-select` event to show the selected date in the trigger, see the demo above for the full wiring.
 
 ## Composition
 

@@ -3,7 +3,7 @@ package examples
 import "github.com/axadrn/shadcn-templ/v2/components/inputotp"
 
 templ InputOTPDemo() {
-	@inputotp.InputOTP(inputotp.Props{Value: "123456"}) {
+	@inputotp.InputOTP(inputotp.Props{MaxLength: 6, DefaultValue: "123456"}) {
 		@inputotp.Group() {
 			@inputotp.Slot(inputotp.SlotProps{Index: 0})
 			@inputotp.Slot(inputotp.SlotProps{Index: 1})

@@ -435,7 +435,7 @@ func cardUpcomingPayments() templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = calendar.Calendar(calendar.Props{Selected: time.Now(), Class: "w-full [--cell-size:--spacing(8)] md:[--cell-size:--spacing(10)]"}).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = calendar.Calendar(calendar.Props{Mode: calendar.ModeSingle, Selected: time.Now(), Class: "w-full [--cell-size:--spacing(8)] md:[--cell-size:--spacing(10)]"}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

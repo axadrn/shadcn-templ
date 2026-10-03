@@ -15,30 +15,40 @@ templ CalendarCustomCellSize() {
 	@card.Card(card.Props{Class: "mx-auto w-fit p-0"}) {
 		@card.Content(card.ContentProps{Class: "p-0"}) {
 			@calendar.Calendar(calendar.Props{
-				ID:            "calendar-custom-cell-size",
-				Mode:          calendar.ModeRange,
-				Selected:         from,
-				EndValue:      to,
-				CaptionLayout: calendar.CaptionLayoutDropdown,
-				Class:         "[--cell-size:--spacing(10)] md:[--cell-size:--spacing(12)]",
+				Mode:           calendar.ModeRange,
+				DefaultMonth:   from,
+				Selected:       calendar.DateRange{From: from, To: to},
+				NumberOfMonths: 1,
+				CaptionLayout:  calendar.CaptionLayoutDropdown,
+				Class:          "[--cell-size:--spacing(10)] md:[--cell-size:--spacing(12)]",
 			})
 		}
 	}
-	<script>
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The formatters and components props: long month names in the
+		// dropdown, a price under every day of the month.
 		(() => {
-			const root = () => document.getElementById("calendar-custom-cell-size");
-			function decorate() {
-				root().querySelectorAll("td[data-day] > button").forEach((btn) => {
-					if (btn.querySelector("span") || btn.getAttribute("data-outside") === "true") return;
-					const date = new Date(btn.parentElement.getAttribute("data-day"));
-					const weekend = date.getDay() === 0 || date.getDay() === 6;
-					const price = document.createElement("span");
-					price.textContent = weekend ? "$120" : "$100";
-					btn.appendChild(price);
+			const calendar = document.currentScript.previousElementSibling.querySelector('[data-slot="calendar"]');
+			const apply = () =>
+				window.templ.calendar.update(calendar, {
+					formatters: {
+						formatMonthDropdown: (date) => date.toLocaleString("default", { month: "long" }),
+					},
+					components: {
+						DayButton(button, { day, modifiers }) {
+							const isWeekend = day.date.getDay() === 0 || day.date.getDay() === 6;
+							if (!modifiers.outside) {
+								const price = document.createElement("span");
+								price.textContent = isWeekend ? "$120" : "$100";
+								button.append(price);
+							}
+						},
+					},
 				});
-			}
-			root().addEventListener("calendar-rendered", decorate);
-			decorate();
+			// onSelect={setRange}
+			calendar.addEventListener("calendar-select", (e) => window.templ.calendar.setSelected(calendar, e.detail.selected));
+			if (window.templ?.calendar) apply();
+			else document.addEventListener("DOMContentLoaded", apply);
 		})();
 	</script>
 }

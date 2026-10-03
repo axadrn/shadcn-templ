@@ -6,6 +6,7 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/components/field"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/components/inputotp"
+	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
 templ inputOTPExampleSection(title string) {
@@ -32,6 +33,19 @@ templ InputOTPExample() {
 			@inputOTPExampleInvalid()
 		</div>
 	</div>
+	@inputOTPState("with-separator")
+	@inputOTPState("invalid")
+}
+
+// The value state of a controlled example: onChange sets it, the input
+// renders it.
+templ inputOTPState(id string) {
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const input = document.getElementById({{ id }});
+			input?.addEventListener("input-otp-change", (e) => window.templ.inputOTP.setValue(input, e.detail.value));
+		})();
+	</script>
 }
 
 templ inputOTPExampleSimple() {
@@ -40,7 +54,7 @@ templ inputOTPExampleSimple() {
 			@field.Label(field.LabelProps{For: "simple"}) {
 				Simple
 			}
-			@inputotp.InputOTP(inputotp.Props{ID: "simple"}) {
+			@inputotp.InputOTP(inputotp.Props{ID: "simple", MaxLength: 6}) {
 				@inputotp.Group() {
 					@inputotp.Slot(inputotp.SlotProps{Index: 0})
 					@inputotp.Slot(inputotp.SlotProps{Index: 1})
@@ -63,7 +77,7 @@ templ inputOTPExamplePattern() {
 			@field.Label(field.LabelProps{For: "digits-only"}) {
 				Digits Only
 			}
-			@inputotp.InputOTP(inputotp.Props{ID: "digits-only", Pattern: inputotp.RegexpOnlyDigits}) {
+			@inputotp.InputOTP(inputotp.Props{ID: "digits-only", MaxLength: 6, Pattern: inputotp.RegexpOnlyDigits}) {
 				@inputotp.Group() {
 					@inputotp.Slot(inputotp.SlotProps{Index: 0})
 					@inputotp.Slot(inputotp.SlotProps{Index: 1})
@@ -83,7 +97,7 @@ templ inputOTPExampleWithSeparator() {
 			@field.Label(field.LabelProps{For: "with-separator"}) {
 				With Separator
 			}
-			@inputotp.InputOTP(inputotp.Props{ID: "with-separator", Value: "123456"}) {
+			@inputotp.InputOTP(inputotp.Props{ID: "with-separator", MaxLength: 6, Value: utils.Ptr("123456")}) {
 				@inputotp.Group() {
 					@inputotp.Slot(inputotp.SlotProps{Index: 0})
 					@inputotp.Slot(inputotp.SlotProps{Index: 1})
@@ -112,7 +126,7 @@ templ inputOTPExampleAlphanumeric() {
 			@field.Description() {
 				Accepts both letters and numbers.
 			}
-			@inputotp.InputOTP(inputotp.Props{ID: "alphanumeric", Pattern: inputotp.RegexpOnlyDigitsAndChars}) {
+			@inputotp.InputOTP(inputotp.Props{ID: "alphanumeric", MaxLength: 6, Pattern: inputotp.RegexpOnlyDigitsAndChars}) {
 				@inputotp.Group() {
 					@inputotp.Slot(inputotp.SlotProps{Index: 0})
 					@inputotp.Slot(inputotp.SlotProps{Index: 1})
@@ -135,7 +149,7 @@ templ inputOTPExampleDisabled() {
 			@field.Label(field.LabelProps{For: "disabled"}) {
 				Disabled
 			}
-			@inputotp.InputOTP(inputotp.Props{ID: "disabled", Disabled: true, Value: "123456"}) {
+			@inputotp.InputOTP(inputotp.Props{ID: "disabled", MaxLength: 6, Disabled: true, Value: utils.Ptr("123456")}) {
 				@inputotp.Group() {
 					@inputotp.Slot(inputotp.SlotProps{Index: 0})
 					@inputotp.Slot(inputotp.SlotProps{Index: 1})
@@ -161,7 +175,7 @@ templ inputOTPExampleFourDigits() {
 			@field.Description() {
 				Common pattern for PIN codes.
 			}
-			@inputotp.InputOTP(inputotp.Props{ID: "four-digits", Pattern: inputotp.RegexpOnlyDigits}) {
+			@inputotp.InputOTP(inputotp.Props{ID: "four-digits", MaxLength: 4, Pattern: inputotp.RegexpOnlyDigits}) {
 				@inputotp.Group() {
 					@inputotp.Slot(inputotp.SlotProps{Index: 0})
 					@inputotp.Slot(inputotp.SlotProps{Index: 1})
@@ -182,7 +196,7 @@ templ inputOTPExampleInvalid() {
 			@field.Description() {
 				Example showing the invalid error state.
 			}
-			@inputotp.InputOTP(inputotp.Props{ID: "invalid", Value: "000000"}) {
+			@inputotp.InputOTP(inputotp.Props{ID: "invalid", MaxLength: 6, Value: utils.Ptr("000000")}) {
 				@inputotp.Group() {
 					@inputotp.Slot(inputotp.SlotProps{Index: 0, Attributes: templ.Attributes{"aria-invalid": "true"}})
 					@inputotp.Slot(inputotp.SlotProps{Index: 1, Attributes: templ.Attributes{"aria-invalid": "true"}})
@@ -228,7 +242,7 @@ templ inputOTPExampleForm() {
 								Resend Code
 							}
 						</div>
-						@inputotp.InputOTP(inputotp.Props{ID: "otp-verification", Required: true}) {
+						@inputotp.InputOTP(inputotp.Props{ID: "otp-verification", MaxLength: 6, Required: true}) {
 							@inputotp.Group(inputotp.GroupProps{Class: "*:data-[slot=input-otp-slot]:text-xl style-vega:*:data-[slot=input-otp-slot]:h-16 style-vega:*:data-[slot=input-otp-slot]:w-12 style-nova:*:data-[slot=input-otp-slot]:h-12 style-nova:*:data-[slot=input-otp-slot]:w-11 style-lyra:*:data-[slot=input-otp-slot]:h-12 style-lyra:*:data-[slot=input-otp-slot]:w-11 style-maia:*:data-[slot=input-otp-slot]:h-16 style-maia:*:data-[slot=input-otp-slot]:w-12 style-mira:*:data-[slot=input-otp-slot]:h-12 style-mira:*:data-[slot=input-otp-slot]:w-11 style-luma:*:data-[slot=input-otp-slot]:h-16 style-luma:*:data-[slot=input-otp-slot]:w-12"}) {
 								@inputotp.Slot(inputotp.SlotProps{Index: 0})
 								@inputotp.Slot(inputotp.SlotProps{Index: 1})

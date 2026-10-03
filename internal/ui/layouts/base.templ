@@ -92,7 +92,7 @@ templ BaseLayout(title, description string) {
 			// (view) routes (examples, block and chart views) are bare, the
 			// (app) routes wrap themselves in AppLayout.
 			{ children... }
-			@toast.Toaster(toast.ToasterProps{ID: "toaster"})
+			@toast.Toaster()
 		</body>
 		// HTMX
 		<script nonce={ templ.GetNonce(ctx) }>

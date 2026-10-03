@@ -10,7 +10,7 @@ templ InputOTPPattern() {
 		@field.Label(field.LabelProps{For: "digits-only"}) {
 			Digits Only
 		}
-		@inputotp.InputOTP(inputotp.Props{ID: "digits-only", Pattern: inputotp.RegexpOnlyDigits}) {
+		@inputotp.InputOTP(inputotp.Props{ID: "digits-only", MaxLength: 6, Pattern: inputotp.RegexpOnlyDigits}) {
 			@inputotp.Group() {
 			@inputotp.Slot(inputotp.SlotProps{Index: 0})
 			@inputotp.Slot(inputotp.SlotProps{Index: 1})

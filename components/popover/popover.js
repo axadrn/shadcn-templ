@@ -31,6 +31,15 @@
     return triggersFor(content)[0] || null;
   }
 
+  // Base UI keeps the active trigger by the id of the element that opened
+  // the popup, a trigger compares it with its own id (useBaseUiId). An
+  // element that renders the trigger with an id of its own never matches:
+  // that trigger renders no open state, no aria-controls and no focus
+  // guards.
+  function isOpenedByTrigger(trigger, content) {
+    return trigger.id === idOf(content) + "-trigger";
+  }
+
   // The positioner from its popup's id, the popup or the positioner.
   function resolve(target) {
     const el = typeof target === "string" ? document.getElementById(target) : target;
@@ -149,11 +158,11 @@
     const trigger = triggerFor(content);
     const popup = popupFor(content);
     const onOpenChange = (open, reason, event) => requestOpenChange(content, open, { reason, event });
-    content._templTriggerGuards = trigger && window.templ.triggerFocusGuards.attach(trigger, {
+    content._templTriggerGuards = trigger && isOpenedByTrigger(trigger, content) ? window.templ.triggerFocusGuards.attach(trigger, {
       positioner: content,
       beforeContentFocusGuard: () => content._templFocus?.beforeGuard,
       onClose: (event) => onOpenChange(false, "focus-out", event),
-    });
+    }) : null;
     content._templFocus = window.templ.focusManager.useFloatingFocusManager({
       floating: content,
       reference: trigger,
@@ -187,7 +196,7 @@
     content.hidden = false;
     // PopoverTrigger renders aria-controls while the popup is open
     // (triggerPopupId).
-    triggersFor(content).forEach((trigger) => trigger.setAttribute("aria-controls", idOf(content)));
+    triggersFor(content).forEach((trigger) => isOpenedByTrigger(trigger, content) && trigger.setAttribute("aria-controls", idOf(content)));
     // useDismiss runs while open. Base UI's non modal popover dismisses a
     // mouse press on the click, a touch on the press.
     content._templDismiss = window.templ.dismiss.useDismiss({
@@ -204,7 +213,7 @@
       if (content.hidden) return;
       window.templ.transition.open(partsOf(content));
       const trigger = triggerFor(content);
-      if (trigger) {
+      if (trigger && isOpenedByTrigger(trigger, content)) {
         trigger.setAttribute("aria-expanded", "true");
         trigger.setAttribute("data-popup-open", "");
         trigger.setAttribute("data-pressed", "");

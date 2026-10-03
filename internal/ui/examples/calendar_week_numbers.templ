@@ -12,9 +12,12 @@ templ CalendarWeekNumbers() {
 	@card.Card(card.Props{Class: "mx-auto w-fit p-0"}) {
 		@card.Content(card.ContentProps{Class: "p-0"}) {
 			@calendar.Calendar(calendar.Props{
-				Selected:           selected,
+				Mode:           calendar.ModeSingle,
+				DefaultMonth:   selected,
+				Selected:       selected,
 				ShowWeekNumber: true,
 			})
 		}
 	}
+	@calendarSelectState()
 }

@@ -1,11 +1,13 @@
 package examples
 
-import "github.com/axadrn/shadcn-templ/v2/components/inputotp"
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/inputotp"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
 
-// The real input's input event carries the combined value.
 templ InputOTPControlled() {
-	<div class="space-y-2" data-otp-controlled-demo>
-		@inputotp.InputOTP() {
+	<div class="space-y-2">
+		@inputotp.InputOTP(inputotp.Props{MaxLength: 6, Value: utils.Ptr("")}) {
 			@inputotp.Group() {
 				@inputotp.Slot(inputotp.SlotProps{Index: 0})
 				@inputotp.Slot(inputotp.SlotProps{Index: 1})
@@ -15,15 +17,19 @@ templ InputOTPControlled() {
 				@inputotp.Slot(inputotp.SlotProps{Index: 5})
 			}
 		}
-		<div class="text-center text-sm" data-otp-status>Enter your one-time password.</div>
+		<div class="text-center text-sm">Enter your one-time password.</div>
 	</div>
 	<script nonce={ templ.GetNonce(ctx) }>
-		document.addEventListener('input', (e) => {
-			const demo = e.target.closest?.('[data-otp-controlled-demo]');
-			if (!demo || !e.target.hasAttribute('data-input-otp')) return;
-			const value = e.target.value;
-			demo.querySelector('[data-otp-status]').textContent =
-				value === '' ? 'Enter your one-time password.' : 'You entered: ' + value;
-		});
+		// The value state: onChange sets it, the input and the text render it.
+		(() => {
+			const demo = document.currentScript.previousElementSibling;
+			const input = demo.querySelector("[data-input-otp]");
+			const status = demo.lastElementChild;
+			input.addEventListener("input-otp-change", (e) => {
+				const value = e.detail.value;
+				window.templ.inputOTP.setValue(input, value);
+				status.textContent = value === "" ? "Enter your one-time password." : "You entered: " + value;
+			});
+		})();
 	</script>
 }

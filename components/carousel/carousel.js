@@ -153,8 +153,12 @@
 
     const prev = state.root.querySelector('[data-slot="carousel-previous"]');
     const next = state.root.querySelector('[data-slot="carousel-next"]');
-    if (prev) prev.disabled = !state.loop && state.index === 0;
-    if (next) next.disabled = !state.loop && state.index >= points.length - 1;
+    // The Button renders data-disabled with disabled.
+    [[prev, !state.loop && state.index === 0], [next, !state.loop && state.index >= points.length - 1]].forEach(([button, disabled]) => {
+      if (!button) return;
+      button.disabled = disabled;
+      button.toggleAttribute("data-disabled", disabled);
+    });
 
     // Expose the selection like embla's select event, as a bubbling event;
     // selected counts from 1.

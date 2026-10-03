@@ -207,9 +207,8 @@ type MenuButtonProps struct {
 	Variant    MenuButtonVariant // default: "default"
 	Size       MenuButtonSize    // default: "default"
 	Tooltip    string            // Tooltip text to show when sidebar is collapsed to icons
-	// TooltipHidden overrides the automatic tooltip visibility (shadcn's
-	// tooltip.hidden): nil follows the collapsed-to-icons rule, false forces
-	// the tooltip, true disables it.
+	// TooltipHidden is the tooltip prop's hidden (tooltip={{ hidden }}):
+	// nil hides the tooltip unless the sidebar is collapsed, a value pins it.
 	TooltipHidden *bool
 }
 
@@ -393,9 +392,7 @@ templ Sidebar(props ...Props) {
 					data-slot="sidebar-inner"
 					class="cn-sidebar-inner flex size-full flex-col"
 				>
-					<div data-templ-sidebar-content={ p.ID } class="flex h-full w-full flex-col">
-						{ children... }
-					</div>
+					{ children... }
 				</div>
 			</div>
 		</div>
@@ -439,7 +436,6 @@ templ Rail(props ...RailProps) {
 		{{ p = props[0] }}
 	}
 	<button
-		type="button"
 		data-sidebar="rail"
 		data-slot="sidebar-rail"
 		data-templ-sidebar-trigger={ sidebarID(ctx) }
@@ -745,23 +741,20 @@ templ MenuButton(props ...MenuButtonProps) {
 			// shadcn renders the trigger through the menu button element,
 			// whose own data-slot stays.
 			{{ delete(trigger, "data-slot") }}
-			// The tooltip only shows while the sidebar is collapsed to icons;
-			// the script keeps the attribute in sync on toggle. An explicit
-			// TooltipHidden pins the state (the fixed marker keeps the
-			// script's toggle sync away).
-			if p.TooltipHidden != nil {
-				{{ trigger["data-templ-tooltip-hidden"] = strconv.FormatBool(*p.TooltipHidden) }}
-				if *p.TooltipHidden {
-					{{ tooltip.DisableTrigger(trigger) }}
-				}
-			} else if !(s.collapsed && s.collapsible == CollapsibleIcon) {
-				{{ tooltip.DisableTrigger(trigger) }}
-			}
 			{{ tp.Attributes = utils.MergeAttributes(trigger, p.Attributes) }}
 			@menuButtonEl(tp) {
 				{ children... }
 			}
-			@tooltip.Content(tooltip.ContentProps{Side: tooltip.SideRight}) {
+			// hidden={state !== "collapsed" || isMobile}: the script keeps it in
+			// sync on toggle and below md. An explicit TooltipHidden pins it.
+			{{ content := templ.Attributes{} }}
+			if p.TooltipHidden != nil {
+				{{ content["data-templ-tooltip-hidden"] = strconv.FormatBool(*p.TooltipHidden) }}
+				{{ content["hidden"] = *p.TooltipHidden }}
+			} else {
+				{{ content["hidden"] = !s.collapsed }}
+			}
+			@tooltip.Content(tooltip.ContentProps{Side: tooltip.SideRight, Attributes: content}) {
 				{ p.Tooltip }
 			}
 		}
@@ -779,7 +772,9 @@ templ menuButtonEl(p MenuButtonProps) {
 				id={ p.ID }
 			}
 			href={ templ.SafeURL(p.Href) }
-			data-slot="sidebar-menu-button"
+			if _, ok := p.Attributes["data-slot"]; !ok {
+				data-slot="sidebar-menu-button"
+			}
 			data-sidebar="menu-button"
 			data-size={ string(p.Size) }
 			data-active?={ p.IsActive }
@@ -794,7 +789,9 @@ templ menuButtonEl(p MenuButtonProps) {
 				id={ p.ID }
 			}
 			type="button"
-			data-slot="sidebar-menu-button"
+			if _, ok := p.Attributes["data-slot"]; !ok {
+				data-slot="sidebar-menu-button"
+			}
 			data-sidebar="menu-button"
 			data-size={ string(p.Size) }
 			data-active?={ p.IsActive }
@@ -816,7 +813,9 @@ templ MenuAction(props ...MenuActionProps) {
 			id={ p.ID }
 		}
 		type="button"
-		data-slot="sidebar-menu-action"
+		if _, ok := p.Attributes["data-slot"]; !ok {
+			data-slot="sidebar-menu-action"
+		}
 		data-sidebar="menu-action"
 		class={ utils.CN(
 			"cn-sidebar-menu-action flex items-center justify-center outline-hidden transition-transform group-data-[collapsible=icon]:hidden after:absolute after:-inset-2 md:after:hidden [&>svg]:shrink-0",

@@ -3,7 +3,7 @@ package examples
 import "github.com/axadrn/shadcn-templ/v2/components/inputotp"
 
 templ InputOTPAlphanumeric() {
-	@inputotp.InputOTP(inputotp.Props{Pattern: inputotp.RegexpOnlyDigitsAndChars}) {
+	@inputotp.InputOTP(inputotp.Props{MaxLength: 6, Pattern: inputotp.RegexpOnlyDigitsAndChars}) {
 		@inputotp.Group() {
 			@inputotp.Slot(inputotp.SlotProps{Index: 0})
 			@inputotp.Slot(inputotp.SlotProps{Index: 1})

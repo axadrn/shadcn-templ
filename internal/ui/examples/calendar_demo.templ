@@ -7,10 +7,11 @@ import (
 )
 
 templ CalendarDemo() {
-	{{ now := time.Now() }}
 	@calendar.Calendar(calendar.Props{
-		Selected:         now,
-		CaptionLayout: calendar.CaptionLayoutDropdown,
+		Mode:          calendar.ModeSingle,
+		Selected:      time.Now(),
 		Class:         "rounded-lg border",
+		CaptionLayout: calendar.CaptionLayoutDropdown,
 	})
+	@calendarSelectState()
 }

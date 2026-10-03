@@ -11,71 +11,74 @@ import (
 )
 
 templ DatePickerInput() {
-	{{
-		selected := time.Date(2025, 6, 1, 0, 0, 0, 0, time.Local)
-	}}
+	{{ date := time.Date(2025, 6, 1, 0, 0, 0, 0, time.Local) }}
 	@field.Field(field.Props{Class: "mx-auto w-48"}) {
-		@field.Label(field.LabelProps{For: "date-picker-input-field"}) {
+		@field.Label(field.LabelProps{For: "date-required"}) {
 			Subscription Date
 		}
-		@popover.Popover(popover.Props{ID: "date-picker-input"}) {
-		{{
-			triggerAttrs := popover.Trigger(ctx)
-			triggerAttrs["aria-label"] = "Select date"
-		}}
-			@inputgroup.InputGroup() {
-				@inputgroup.Input(inputgroup.InputProps{
-					ID:          "date-picker-input-field",
-					Value:       "June 01, 2025",
-					Placeholder: "June 01, 2025",
-				})
-				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{
+				ID:          "date-required",
+				Value:       "June 01, 2025",
+				Placeholder: "June 01, 2025",
+			})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@popover.Popover(popover.Props{ID: "date-picker-input"}) {
+					{{
+						triggerAttrs := popover.Trigger(ctx)
+						triggerAttrs["id"] = "date-picker"
+						triggerAttrs["aria-label"] = "Select date"
+					}}
 					@inputgroup.Button(inputgroup.ButtonProps{
+						Variant:    "ghost",
 						Size:       inputgroup.ButtonSizeIconXs,
 						Attributes: triggerAttrs,
 					}) {
 						@icon.Calendar()
 						<span class="sr-only">Select date</span>
 					}
+					@popover.Content(popover.ContentProps{
+						Class:       "w-auto overflow-hidden p-0",
+						Align:       popover.AlignEnd,
+						AlignOffset: -8,
+						SideOffset:  10,
+					}) {
+						@calendar.Calendar(calendar.Props{
+							Mode:     calendar.ModeSingle,
+							Selected: date,
+							Month:    date,
+						})
+					}
 				}
-			}
-			@popover.Content(popover.ContentProps{
-				Class:     "w-auto overflow-hidden p-0",
-				Side: popover.SideBottom, Align: popover.AlignEnd,
-				SideOffset: 10,
-			}) {
-				@calendar.Calendar(calendar.Props{
-					ID:    "date-picker-input-calendar",
-					Selected: selected,
-				})
 			}
 		}
 	}
-	<script>
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The open, date, month and value state of the example.
 		(() => {
-			const input = document.getElementById("date-picker-input-field");
-			const fmt = (d) => d.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" });
-			// Delegated: the popover content is portaled to <body> at init, so it
-			// is looked up per event instead of captured at parse time.
-			document.addEventListener("calendar-change", (e) => {
-				if (!(e.target instanceof Element) || !e.target.closest("#date-picker-input")) return;
-				if (!e.detail.value) return;
-				input.value = fmt(e.detail.value);
-				window.templ.popover.close(e.target.closest("#date-picker-input"));
+			const input = document.getElementById("date-required");
+			const popup = () => document.getElementById("date-picker-input");
+			const calendar = () => popup().querySelector('[data-slot="calendar"]');
+			const formatDate = (d) => (d ? d.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" }) : "");
+			document.addEventListener("calendar-month-change", (e) => {
+				if (e.target === calendar()) window.templ.calendar.setMonth(e.target, e.detail.month);
+			});
+			document.addEventListener("calendar-select", (e) => {
+				if (e.target !== calendar()) return;
+				input.value = formatDate(e.detail.selected);
+				window.templ.calendar.setSelected(e.target, e.detail.selected);
+				window.templ.popover.close(popup());
 			});
 			input.addEventListener("input", () => {
 				const date = new Date(input.value);
-				if (!isNaN(date.getTime())) {
-					const iso = date.toLocaleDateString("sv-SE");
-					document.getElementById("date-picker-input-calendar").dispatchEvent(
-						new CustomEvent("calendar-set", { bubbles: true, detail: { date: iso } }),
-					);
-				}
+				if (isNaN(date.getTime())) return;
+				window.templ.calendar.setSelected(calendar(), date);
+				window.templ.calendar.setMonth(calendar(), date);
 			});
 			input.addEventListener("keydown", (e) => {
 				if (e.key === "ArrowDown") {
 					e.preventDefault();
-					window.templ.popover.open(document.getElementById("date-picker-input"));
+					window.templ.popover.open(popup());
 				}
 			});
 		})();

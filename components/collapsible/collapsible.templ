@@ -81,6 +81,8 @@ templ Collapsible(props ...Props) {
 func Trigger(ctx context.Context) templ.Attributes {
 	s := state(ctx)
 	attrs := templ.Attributes{
+		// useButton: tabIndex 0.
+		"tabindex":            "0",
 		"data-slot":           "collapsible-trigger",
 		"data-templ-controls": s.id,
 		"aria-expanded":       utils.IfElse(s.open, "true", "false"),

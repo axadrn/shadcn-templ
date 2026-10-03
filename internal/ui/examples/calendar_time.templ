@@ -15,8 +15,9 @@ templ CalendarTime() {
 	@card.Card(card.Props{Size: card.SizeSm, Class: "mx-auto w-fit"}) {
 		@card.Content() {
 			@calendar.Calendar(calendar.Props{
+				Mode:     calendar.ModeSingle,
 				Selected: selected,
-				Class: "p-0",
+				Class:    "p-0",
 			})
 		}
 		@card.Footer(card.FooterProps{Class: "border-t bg-card"}) {
@@ -62,4 +63,5 @@ templ CalendarTime() {
 			}
 		}
 	}
+	@calendarSelectState()
 }

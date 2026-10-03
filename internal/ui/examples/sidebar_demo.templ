@@ -8,6 +8,7 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
+	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
 // This is sample data.
@@ -105,17 +106,11 @@ templ sidebarDemoTeamSwitcher() {
 					Attributes: dropdownmenu.Trigger(ctx),
 				}) {
 					<div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-						// Render every logo up front; the demo script shows the active one.
-						for i, team := range sidebarDemoTeams {
-							@team.Logo(icon.Props{
-								Class:      "size-4" + logoHidden(i),
-								Attributes: templ.Attributes{"data-team-logo": strconv.Itoa(i)},
-							})
-						}
+						@sidebarDemoTeams[0].Logo(icon.Props{Class: "size-4"})
 					</div>
 					<div class="grid flex-1 text-left text-sm leading-tight">
-						<span class="truncate font-medium" data-team-name>{ sidebarDemoTeams[0].Name }</span>
-						<span class="truncate text-xs" data-team-plan>{ sidebarDemoTeams[0].Plan }</span>
+						<span class="truncate font-medium">{ sidebarDemoTeams[0].Name }</span>
+						<span class="truncate text-xs">{ sidebarDemoTeams[0].Plan }</span>
 					</div>
 					@icon.ChevronsUpDown(icon.Props{Class: "ml-auto"})
 				}
@@ -130,10 +125,7 @@ templ sidebarDemoTeamSwitcher() {
 							Teams
 						}
 						for i, team := range sidebarDemoTeams {
-							@dropdownmenu.Item(dropdownmenu.ItemProps{
-								Class:      "gap-2 p-2",
-								Attributes: templ.Attributes{"data-team-index": strconv.Itoa(i)},
-							}) {
+							@dropdownmenu.Item(dropdownmenu.ItemProps{Class: "gap-2 p-2"}) {
 								<div class="flex size-6 items-center justify-center rounded-md border">
 									@team.Logo(icon.Props{Class: "size-3.5 shrink-0"})
 								</div>
@@ -157,6 +149,32 @@ templ sidebarDemoTeamSwitcher() {
 			}
 		}
 	}
+	// activeTeam.logo for each team, rendered when it becomes the active one.
+	for _, team := range sidebarDemoTeams {
+		<template>
+			@team.Logo(icon.Props{Class: "size-4"})
+		</template>
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The activeTeam state: onClick={() => setActiveTeam(team)} on the
+		// items, the trigger renders the active team.
+		(() => {
+			const teams = {{ sidebarDemoTeamData() }};
+			const logos = [];
+			for (let el = document.currentScript.previousElementSibling; el?.tagName === "TEMPLATE"; el = el.previousElementSibling) logos.unshift(el);
+			const trigger = document.getElementById("sidebar-demo-team-menu-trigger");
+			const menu = document.getElementById("sidebar-demo-team-menu");
+			const items = menu.querySelector('[data-slot="dropdown-menu-group"]').querySelectorAll('[data-slot="dropdown-menu-item"]');
+			items.forEach((item, i) => {
+				item.addEventListener("click", () => {
+					trigger.firstElementChild.replaceChildren(logos[i].content.firstElementChild.cloneNode(true));
+					const [name, plan] = trigger.children[1].children;
+					name.textContent = teams[i].name;
+					plan.textContent = teams[i].plan;
+				});
+			});
+		})();
+	</script>
 	<script type="module" nonce={ templ.GetNonce(ctx) }>
 		// The pendant of useSidebar().isMobile in the block: the menu reads
 		// its side when it opens, onMobileChange keeps it current until the
@@ -168,13 +186,6 @@ templ sidebarDemoTeamSwitcher() {
 			menu.setAttribute("data-templ-side", isMobile ? "bottom" : "right");
 		});
 	</script>
-}
-
-func logoHidden(i int) string {
-	if i == 0 {
-		return ""
-	}
-	return " hidden"
 }
 
 templ sidebarDemoNavMainGroup() {
@@ -393,24 +404,10 @@ templ SidebarDemo() {
 			</header>
 		}
 	}
-	<script nonce={ templ.GetNonce(ctx) }>
-		(() => {
-			// Keep the selected team details in sync.
-			document.addEventListener("click", (e) => {
-				if (!(e.target instanceof Element)) return;
-				const item = e.target.closest("#sidebar-demo-team-menu [data-team-index]");
-				if (!item) return;
-				const i = item.getAttribute("data-team-index");
-				const name = item.textContent.trim().replace(/⌘\d$/, "").trim();
-				const plan = ["Enterprise", "Startup", "Free"][parseInt(i, 10)];
-				document.querySelectorAll("[data-team-logo]").forEach((logo) => {
-					logo.classList.toggle("hidden", logo.getAttribute("data-team-logo") !== i);
-				});
-				const nameEl = document.querySelector("[data-team-name]");
-				const planEl = document.querySelector("[data-team-plan]");
-				if (nameEl) nameEl.textContent = name;
-				if (planEl) planEl.textContent = plan;
-			});
-		})();
-	</script>
+}
+
+func sidebarDemoTeamData() []map[string]string {
+	return utils.Map(sidebarDemoTeams, func(t sidebarDemoTeam) map[string]string {
+		return map[string]string{"name": t.Name, "plan": t.Plan}
+	})
 }

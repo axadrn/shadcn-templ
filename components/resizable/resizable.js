@@ -532,7 +532,6 @@
       panel.element.style.flexBasis = "0px";
       panel.element.style.flexShrink = "1";
       panel.element.style.pointerEvents = active ? "none" : "";
-      panel.element.dataset.panelSize = String(formatLayoutNumber(state.layout[panel.id]));
       dispatchPanelResize(state, panel);
     });
     state.separators.forEach((separator) => {

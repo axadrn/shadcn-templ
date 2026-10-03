@@ -13,9 +13,10 @@ templ CalendarRange() {
 	}}
 	@calendar.Calendar(calendar.Props{
 		Mode:           calendar.ModeRange,
-		Selected:          from,
-		EndValue:       to,
+		DefaultMonth:   from,
+		Selected:       calendar.DateRange{From: from, To: to},
 		NumberOfMonths: 2,
 		Class:          "rounded-lg border",
 	})
+	@calendarSelectState()
 }

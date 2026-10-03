@@ -328,6 +328,8 @@ templ Combobox(props ...Props) {
 func Trigger(ctx context.Context) templ.Attributes {
 	s := state(ctx)
 	return templ.Attributes{
+		// useButton: tabIndex 0.
+		"tabindex":                   "0",
 		"data-slot":                  "combobox-trigger",
 		"role":                       "combobox",
 		"data-templ-combobox-anchor": s.id,

@@ -863,7 +863,7 @@ templ fieldExampleInputOTPFields() {
 				@field.Label(field.LabelProps{For: "otp-basic"}) {
 					Verification Code
 				}
-				@inputotp.InputOTP(inputotp.Props{ID: "otp-basic"}) {
+				@inputotp.InputOTP(inputotp.Props{ID: "otp-basic", MaxLength: 6}) {
 					@inputotp.Group() {
 						@inputotp.Slot(inputotp.SlotProps{Index: 0})
 						@inputotp.Slot(inputotp.SlotProps{Index: 1})
@@ -878,7 +878,7 @@ templ fieldExampleInputOTPFields() {
 				@field.Label(field.LabelProps{For: "otp-with-desc"}) {
 					Enter OTP
 				}
-				@inputotp.InputOTP(inputotp.Props{ID: "otp-with-desc"}) {
+				@inputotp.InputOTP(inputotp.Props{ID: "otp-with-desc", MaxLength: 6, Value: utils.Ptr("")}) {
 					@inputotp.Group() {
 						@inputotp.Slot(inputotp.SlotProps{Index: 0})
 						@inputotp.Slot(inputotp.SlotProps{Index: 1})
@@ -896,7 +896,7 @@ templ fieldExampleInputOTPFields() {
 				@field.Label(field.LabelProps{For: "otp-separator"}) {
 					Two-Factor Authentication
 				}
-				@inputotp.InputOTP(inputotp.Props{ID: "otp-separator"}) {
+				@inputotp.InputOTP(inputotp.Props{ID: "otp-separator", MaxLength: 6}) {
 					@inputotp.Group() {
 						@inputotp.Slot(inputotp.SlotProps{Index: 0})
 						@inputotp.Slot(inputotp.SlotProps{Index: 1})
@@ -917,7 +917,7 @@ templ fieldExampleInputOTPFields() {
 				@field.Label(field.LabelProps{For: "otp-pin"}) {
 					PIN Code
 				}
-				@inputotp.InputOTP(inputotp.Props{ID: "otp-pin", Pattern: inputotp.RegexpOnlyDigits}) {
+				@inputotp.InputOTP(inputotp.Props{ID: "otp-pin", MaxLength: 4, Pattern: inputotp.RegexpOnlyDigits, Value: utils.Ptr("")}) {
 					@inputotp.Group() {
 						@inputotp.Slot(inputotp.SlotProps{Index: 0})
 						@inputotp.Slot(inputotp.SlotProps{Index: 1})
@@ -933,7 +933,7 @@ templ fieldExampleInputOTPFields() {
 				@field.Label(field.LabelProps{For: "otp-invalid"}) {
 					Invalid OTP
 				}
-				@inputotp.InputOTP(inputotp.Props{ID: "otp-invalid"}) {
+				@inputotp.InputOTP(inputotp.Props{ID: "otp-invalid", MaxLength: 6}) {
 					@inputotp.Group() {
 						@inputotp.Slot(inputotp.SlotProps{Index: 0, Attributes: templ.Attributes{"aria-invalid": "true"}})
 						@inputotp.Slot(inputotp.SlotProps{Index: 1, Attributes: templ.Attributes{"aria-invalid": "true"}})
@@ -951,7 +951,7 @@ templ fieldExampleInputOTPFields() {
 				@field.Label(field.LabelProps{For: "otp-disabled-field"}) {
 					Disabled OTP
 				}
-				@inputotp.InputOTP(inputotp.Props{ID: "otp-disabled-field", Disabled: true}) {
+				@inputotp.InputOTP(inputotp.Props{ID: "otp-disabled-field", MaxLength: 6, Disabled: true}) {
 					@inputotp.Group() {
 						@inputotp.Slot(inputotp.SlotProps{Index: 0})
 						@inputotp.Slot(inputotp.SlotProps{Index: 1})
@@ -967,6 +967,8 @@ templ fieldExampleInputOTPFields() {
 			}
 		}
 	}
+	@inputOTPState("otp-with-desc")
+	@inputOTPState("otp-pin")
 }
 
 templ fieldExampleHorizontalFields() {

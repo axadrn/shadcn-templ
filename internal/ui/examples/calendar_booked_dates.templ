@@ -18,9 +18,14 @@ templ CalendarBookedDates() {
 	@card.Card(card.Props{Class: "mx-auto w-fit p-0"}) {
 		@card.Content(card.ContentProps{Class: "p-0"}) {
 			@calendar.Calendar(calendar.Props{
-				Selected:       selected,
-				BookedDates: booked,
+				Mode:                calendar.ModeSingle,
+				DefaultMonth:        selected,
+				Selected:            selected,
+				Disabled:            booked,
+				Modifiers:           map[string]any{"booked": booked},
+				ModifiersClassNames: map[string]string{"booked": "[&>button]:line-through opacity-100"},
 			})
 		}
 	}
+	@calendarSelectState()
 }

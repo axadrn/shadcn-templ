@@ -101,7 +101,7 @@ templ cardUpcomingPayments() {
 		@card.Content(card.ContentProps{Class: "flex flex-col gap-4"}) {
 			@item.Item(item.Props{Variant: item.VariantOutline, Class: "justify-center"}) {
 				// The source preselects today: React.useState(new Date()).
-				@calendar.Calendar(calendar.Props{Selected: time.Now(), Class: "w-full [--cell-size:--spacing(8)] md:[--cell-size:--spacing(10)]"})
+				@calendar.Calendar(calendar.Props{Mode: calendar.ModeSingle, Selected: time.Now(), Class: "w-full [--cell-size:--spacing(8)] md:[--cell-size:--spacing(10)]"})
 			}
 			@item.Group(item.GroupProps{Class: "w-full"}) {
 				@upcomingPayment("Netflix Subscription", "Apr 15, 2024", "$19.99")

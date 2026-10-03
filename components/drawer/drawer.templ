@@ -151,6 +151,8 @@ func Trigger(ctx context.Context) templ.Attributes {
 // TriggerFor targets a drawer outside the current Drawer root by id.
 func TriggerFor(id string) templ.Attributes {
 	return templ.Attributes{
+		// useButton: tabIndex 0.
+		"tabindex": "0",
 		// shadcn's DrawerTrigger keeps its slot on the element it renders.
 		"data-slot":                  "drawer-trigger",
 		"data-base-ui-click-trigger": true,
@@ -168,6 +170,8 @@ func Close(ctx context.Context) templ.Attributes {
 // CloseFor targets a drawer outside the current Drawer root by id.
 func CloseFor(id string) templ.Attributes {
 	return templ.Attributes{
+		// useButton: tabIndex 0.
+		"tabindex": "0",
 		// shadcn's DrawerClose keeps its slot on the element it renders.
 		"data-slot":               "drawer-close",
 		"data-templ-drawer-close": id,

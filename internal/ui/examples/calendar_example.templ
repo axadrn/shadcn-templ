@@ -13,7 +13,6 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
-// The multiple-date section is omitted because the calendar has no multiple mode.
 templ calendarExampleSection(title string, containerClass string, class string) {
 	<div data-slot="example" class={ utils.CN("mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none", containerClass) }>
 		if title != "" {
@@ -29,6 +28,7 @@ templ CalendarExample() {
 	<div class="w-full bg-muted dark:bg-background">
 		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
 			@calendarExampleSingle()
+			@calendarExampleMultiple()
 			@calendarExampleWeekNumbers()
 			@calendarExampleBookedDates()
 			@calendarExampleRange()
@@ -43,51 +43,91 @@ templ CalendarExample() {
 			@calendarExampleInPopover()
 		</div>
 	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The date pickers' state: onSelect sets the date, the trigger renders it.
+		(() => {
+			// date-fns format(date, "PPP") and format(date, "LLL dd, y").
+			const ppp = (d) => {
+				const n = d.getDate();
+				const s = n % 100 >= 11 && n % 100 <= 13 ? "th" : { 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th";
+				return d.toLocaleDateString("en-US", { month: "long" }) + " " + n + s + ", " + d.getFullYear();
+			};
+			const lll = (d) => d.toLocaleDateString("en-US", { month: "short" }) + " " + String(d.getDate()).padStart(2, "0") + ", " + d.getFullYear();
+			const pick = () => Object.assign(document.createElement("span"), { textContent: "Pick a date" });
+			const trigger = (id) => document.querySelector(`[data-templ-controls="${id}"]`);
+			// The Done button's onClick: setOpen(false).
+			document.addEventListener("click", (e) => {
+				const popup = e.target instanceof Element && e.target.closest("#calendar-example-date-picker-with-dropdowns");
+				if (popup && e.target.closest('[data-slot="calendar"] ~ div > [data-slot="button"]')) window.templ.popover.close(popup);
+			});
+			document.addEventListener("calendar-select", (e) => {
+				if (!(e.target instanceof Element)) return;
+				const popup = e.target.closest("[id^=calendar-example-]");
+				const value = e.detail.selected;
+				if (popup?.id === "calendar-example-date-picker-simple") {
+					const t = trigger(popup.id);
+					t.replaceChildren(t.firstElementChild, value ? ppp(value) : pick());
+				} else if (popup?.id === "calendar-example-date-picker-with-dropdowns") {
+					const t = trigger(popup.id);
+					t.replaceChildren(value ? ppp(value) : pick(), t.lastElementChild);
+				} else if (popup?.id === "calendar-example-date-picker-with-range") {
+					const t = trigger(popup.id);
+					const text = value?.from ? (value.to ? lll(value.from) + " - " + lll(value.to) : lll(value.from)) : pick();
+					t.replaceChildren(t.firstElementChild, text);
+				}
+			});
+		})();
+	</script>
+}
+
+templ calendarExampleInCard() {
+	@calendarExampleSection("In Card", "", "") {
+		@card.Card(card.Props{Class: "mx-auto w-fit p-0"}) {
+			@card.Content(card.ContentProps{Class: "p-0"}) {
+				@calendar.Calendar(calendar.Props{Mode: calendar.ModeSingle})
+			}
+		}
+	}
+}
+
+templ calendarExampleInPopover() {
+	@calendarExampleSection("In Popover", "", "") {
+		@popover.Popover(popover.Props{ID: "calendar-example-in-popover"}) {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Class:      "px-2.5 font-normal",
+				Attributes: popover.Trigger(ctx),
+			}) {
+				@icon.Calendar(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Open Calendar
+			}
+			@popover.Content(popover.ContentProps{Class: "w-auto p-0", Align: popover.AlignStart}) {
+				@calendar.Calendar(calendar.Props{Mode: calendar.ModeSingle})
+			}
+		}
+	}
 }
 
 templ calendarExampleSingle() {
-	{{ selected := time.Date(time.Now().Year(), time.Now().Month(), 12, 0, 0, 0, 0, time.Local) }}
 	@calendarExampleSection("Single", "", "") {
 		@card.Card(card.Props{Class: "mx-auto w-fit p-0"}) {
 			@card.Content(card.ContentProps{Class: "p-0"}) {
 				@calendar.Calendar(calendar.Props{
-					Selected:         selected,
+					Mode:          calendar.ModeSingle,
+					Selected:      time.Date(time.Now().Year(), time.Now().Month(), 12, 0, 0, 0, 0, time.Local),
 					CaptionLayout: calendar.CaptionLayoutDropdown,
 				})
 			}
 		}
+		@calendarSelectState()
 	}
 }
 
-templ calendarExampleWeekNumbers() {
-	{{ selected := time.Date(time.Now().Year(), 2, 3, 0, 0, 0, 0, time.Local) }}
-	@calendarExampleSection("Week Numbers", "", "justify-center") {
+templ calendarExampleMultiple() {
+	@calendarExampleSection("Multiple", "", "") {
 		@card.Card(card.Props{Class: "mx-auto w-fit p-0"}) {
 			@card.Content(card.ContentProps{Class: "p-0"}) {
-				@calendar.Calendar(calendar.Props{
-					Selected:           selected,
-					ShowWeekNumber: true,
-				})
-			}
-		}
-	}
-}
-
-templ calendarExampleBookedDates() {
-	{{
-		selected := time.Date(time.Now().Year(), 2, 3, 0, 0, 0, 0, time.Local)
-		booked := make([]time.Time, 15)
-		for i := range booked {
-			booked[i] = time.Date(time.Now().Year(), 2, 12+i, 0, 0, 0, 0, time.Local)
-		}
-	}}
-	@calendarExampleSection("Booked Dates", "", "") {
-		@card.Card(card.Props{Class: "mx-auto w-fit p-0"}) {
-			@card.Content(card.ContentProps{Class: "p-0"}) {
-				@calendar.Calendar(calendar.Props{
-					Selected:       selected,
-					BookedDates: booked,
-				})
+				@calendar.Calendar(calendar.Props{Mode: calendar.ModeMultiple})
 			}
 		}
 	}
@@ -103,14 +143,18 @@ templ calendarExampleRange() {
 			@card.Content(card.ContentProps{Class: "p-0"}) {
 				@calendar.Calendar(calendar.Props{
 					Mode:           calendar.ModeRange,
-					Selected:          from,
-					EndValue:       to,
+					DefaultMonth:   from,
+					Selected:       calendar.DateRange{From: from, To: to},
 					NumberOfMonths: 2,
-					MinDate:        time.Date(1900, 1, 1, 0, 0, 0, 0, time.Local),
-					MaxDate:        time.Now(),
+					// disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+					Disabled: []any{
+						calendar.DateAfter{After: time.Now()},
+						calendar.DateBefore{Before: time.Date(1900, 1, 1, 0, 0, 0, 0, time.Local)},
+					},
 				})
 			}
 		}
+		@calendarSelectState()
 	}
 }
 
@@ -124,281 +168,118 @@ templ calendarExampleRangeMultipleMonths() {
 			@card.Content(card.ContentProps{Class: "p-0"}) {
 				@calendar.Calendar(calendar.Props{
 					Mode:           calendar.ModeRange,
-					Selected:          from,
-					EndValue:       to,
+					DefaultMonth:   from,
+					Selected:       calendar.DateRange{From: from, To: to},
 					NumberOfMonths: 3,
-					Locale:      "es",
+					Locale:         "es",
 					FixedWeeks:     true,
 				})
+			}
+		}
+		@calendarSelectState()
+	}
+}
+
+templ calendarExampleBookedDates() {
+	{{
+		date := time.Date(time.Now().Year(), 2, 3, 0, 0, 0, 0, time.Local)
+		booked := make([]time.Time, 15)
+		for i := range booked {
+			booked[i] = time.Date(time.Now().Year(), 2, 12+i, 0, 0, 0, 0, time.Local)
+		}
+	}}
+	@calendarExampleSection("Booked Dates", "", "") {
+		@card.Card(card.Props{Class: "mx-auto w-fit p-0"}) {
+			@card.Content(card.ContentProps{Class: "p-0"}) {
+				@calendar.Calendar(calendar.Props{
+					Mode:                calendar.ModeSingle,
+					DefaultMonth:        date,
+					Selected:            date,
+					Disabled:            booked,
+					Modifiers:           map[string]any{"booked": booked},
+					ModifiersClassNames: map[string]string{"booked": "[&>button]:line-through opacity-100"},
+				})
+			}
+		}
+		@calendarSelectState()
+	}
+}
+
+templ calendarExampleTimeField(id, label, value string) {
+	@field.Field() {
+		@field.Label(field.LabelProps{For: id}) {
+			{ label }
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{
+				ID:         id,
+				Type:       "time",
+				Value:      value,
+				Class:      "appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none",
+				Attributes: templ.Attributes{"step": "1"},
+			})
+			@inputgroup.Addon() {
+				@icon.Clock2(icon.Props{Class: "text-muted-foreground"})
 			}
 		}
 	}
 }
 
 templ calendarExampleWithTime() {
-	{{ selected := time.Date(time.Now().Year(), time.Now().Month(), 12, 0, 0, 0, 0, time.Local) }}
 	@calendarExampleSection("With Time", "", "") {
 		@card.Card(card.Props{Size: card.SizeSm, Class: "mx-auto w-fit"}) {
 			@card.Content() {
 				@calendar.Calendar(calendar.Props{
-					Selected: selected,
-					Class: "p-0",
+					Mode:     calendar.ModeSingle,
+					Selected: time.Date(time.Now().Year(), time.Now().Month(), 12, 0, 0, 0, 0, time.Local),
+					Class:    "p-0",
 				})
 			}
 			@card.Footer(card.FooterProps{Class: "border-t bg-card"}) {
 				@field.Group() {
-					@field.Field() {
-						@field.Label(field.LabelProps{For: "calendar-example-time-from"}) {
-							Start Time
-						}
-						@inputgroup.InputGroup() {
-							@inputgroup.Input(inputgroup.InputProps{
-								ID:    "calendar-example-time-from",
-								Type:  "time",
-								Value: "10:30:00",
-								Class: "appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none",
-								Attributes: templ.Attributes{
-									"step": "1",
-								},
-							})
-							@inputgroup.Addon() {
-								@icon.Clock2(icon.Props{Class: "text-muted-foreground"})
-							}
-						}
-					}
-					@field.Field() {
-						@field.Label(field.LabelProps{For: "calendar-example-time-to"}) {
-							End Time
-						}
-						@inputgroup.InputGroup() {
-							@inputgroup.Input(inputgroup.InputProps{
-								ID:    "calendar-example-time-to",
-								Type:  "time",
-								Value: "12:30:00",
-								Class: "appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none",
-								Attributes: templ.Attributes{
-									"step": "1",
-								},
-							})
-							@inputgroup.Addon() {
-								@icon.Clock2(icon.Props{Class: "text-muted-foreground"})
-							}
-						}
-					}
+					@calendarExampleTimeField("time-from", "Start Time", "10:30:00")
+					@calendarExampleTimeField("time-to", "End Time", "12:30:00")
 				}
 			}
 		}
+		@calendarSelectState()
+	}
+}
+
+templ calendarExampleCustomDays() {
+	@calendarExampleSection("Custom Days", "", "") {
+		@CalendarCustomCellSize()
 	}
 }
 
 templ calendarExampleWithPresets() {
-	{{ selected := time.Date(time.Now().Year(), 2, 12, 0, 0, 0, 0, time.Local) }}
-	{{
-		presets := []struct {
-			Label string
-			Days  string
-		}{
-			{"Today", "0"},
-			{"Tomorrow", "1"},
-			{"In 3 days", "3"},
-			{"In a week", "7"},
-			{"In 2 weeks", "14"},
-		}
-	}}
 	@calendarExampleSection("With Presets", "", "") {
-		@card.Card(card.Props{
-			Size:  card.SizeSm,
-			Class: "mx-auto w-fit max-w-[300px]",
-		}) {
-			@card.Content() {
-				@calendar.Calendar(calendar.Props{
-					ID:         "calendar-example-presets",
-					Selected:      selected,
-					FixedWeeks: true,
-					Class:      "p-0 [--cell-size:--spacing(9.5)]",
-				})
-			}
-			@card.Footer(card.FooterProps{Class: "flex flex-wrap gap-2 border-t"}) {
-				for _, preset := range presets {
-					@button.Button(button.Props{
-						Variant: button.VariantOutline,
-						Size:    button.SizeSm,
-						Class:   "flex-1",
-						Attributes: templ.Attributes{
-							"data-example-preset-days": preset.Days,
-						},
-					}) {
-						{ preset.Label }
-					}
-				}
-			}
-		}
+		@CalendarPresets()
 	}
-	<script nonce={ templ.GetNonce(ctx) }>
-		(() => {
-			const calendar = () => document.getElementById("calendar-example-presets");
-			document.querySelectorAll("[data-example-preset-days]").forEach((btn) => {
-				btn.addEventListener("click", () => {
-					const date = new Date();
-					date.setDate(date.getDate() + parseInt(btn.dataset.examplePresetDays, 10));
-					const iso = date.toLocaleDateString("sv-SE");
-					calendar().dispatchEvent(
-						new CustomEvent("calendar-set", { bubbles: true, detail: { date: iso } }),
-					);
-				});
-			});
-		})();
-	</script>
-}
-
-templ calendarExampleCustomDays() {
-	{{
-		from := time.Date(time.Now().Year(), 12, 8, 0, 0, 0, 0, time.Local)
-		to := from.AddDate(0, 0, 10)
-	}}
-	@calendarExampleSection("Custom Days", "", "") {
-		@card.Card(card.Props{Class: "mx-auto w-fit p-0"}) {
-			@card.Content(card.ContentProps{Class: "p-0"}) {
-				@calendar.Calendar(calendar.Props{
-					ID:            "calendar-example-custom-days",
-					Mode:          calendar.ModeRange,
-					Selected:         from,
-					EndValue:      to,
-					CaptionLayout: calendar.CaptionLayoutDropdown,
-					Class:         "[--cell-size:--spacing(10)] md:[--cell-size:--spacing(12)]",
-				})
-			}
-		}
-	}
-	<script nonce={ templ.GetNonce(ctx) }>
-		(() => {
-			const root = () => document.getElementById("calendar-example-custom-days");
-			function decorate() {
-				root().querySelectorAll("td[data-day] > button").forEach((btn) => {
-					if (btn.querySelector("span") || btn.getAttribute("data-outside") === "true") return;
-					const date = new Date(btn.parentElement.getAttribute("data-day"));
-					const weekend = date.getDay() === 0 || date.getDay() === 6;
-					const price = document.createElement("span");
-					price.textContent = weekend ? "$120" : "$100";
-					btn.appendChild(price);
-				});
-			}
-			root().addEventListener("calendar-rendered", decorate);
-			decorate();
-		})();
-	</script>
 }
 
 templ calendarExampleDatePickerSimple() {
 	@calendarExampleSection("Date Picker Simple", "", "") {
 		@field.Field(field.Props{Class: "mx-auto w-72"}) {
-			@field.Label(field.LabelProps{For: "calendar-example-date-picker-simple-trigger"}) {
+			@field.Label(field.LabelProps{For: "date-picker-simple"}) {
 				Date
 			}
 			@popover.Popover(popover.Props{ID: "calendar-example-date-picker-simple"}) {
 				{{
 					triggerAttrs := popover.Trigger(ctx)
-					triggerAttrs["id"] = "calendar-example-date-picker-simple-trigger"
+					triggerAttrs["id"] = "date-picker-simple"
 				}}
-				@button.Button(button.Props{
-					Variant:    button.VariantOutline,
-					Class:      "justify-start px-2.5 font-normal",
-					Attributes: triggerAttrs,
-				}) {
-					<span data-icon="inline-start" class="contents">
-						@icon.Calendar()
-					</span>
+				@button.Button(button.Props{Variant: button.VariantOutline, Class: "justify-start px-2.5 font-normal", Attributes: triggerAttrs}) {
+					@icon.Calendar(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
 					<span>Pick a date</span>
 				}
-				@popover.Content(popover.ContentProps{
-					Class: "w-auto p-0",
-					Side:  popover.SideBottom, Align: popover.AlignStart,
-				}) {
-					@calendar.Calendar()
+				@popover.Content(popover.ContentProps{Class: "w-auto p-0", Align: popover.AlignStart}) {
+					@calendar.Calendar(calendar.Props{Mode: calendar.ModeSingle})
+					@calendarSelectState()
 				}
 			}
 		}
 	}
-	<script nonce={ templ.GetNonce(ctx) }>
-		(() => {
-			const fmt = (d) => {
-				const day = d.getDate();
-				const suf = day % 10 === 1 && day !== 11 ? "st" : day % 10 === 2 && day !== 12 ? "nd" : day % 10 === 3 && day !== 13 ? "rd" : "th";
-				return d.toLocaleDateString("en-US", { month: "long" }) + " " + day + suf + ", " + d.getFullYear();
-			};
-			// Delegated: the popover content is portaled to <body> at init, so it
-			// is looked up per event instead of captured at parse time.
-			document.addEventListener("calendar-change", (e) => {
-				if (!(e.target instanceof Element) || !e.target.closest("#calendar-example-date-picker-simple")) return;
-				const trigger = document.querySelector('[data-templ-controls="calendar-example-date-picker-simple"]');
-				trigger.querySelector("span:not([data-icon])").textContent = e.detail.value ? fmt(e.detail.value) : "Pick a date";
-			});
-		})();
-	</script>
-}
-
-templ calendarExampleDatePickerWithDropdowns() {
-	@calendarExampleSection("Date Picker with Dropdowns", "", "") {
-		@field.Field(field.Props{Class: "mx-auto w-72"}) {
-			@field.Label(field.LabelProps{For: "calendar-example-date-picker-dropdowns-trigger"}) {
-				Date
-			}
-			@popover.Popover(popover.Props{ID: "calendar-example-date-picker-dropdowns"}) {
-				{{
-					triggerAttrs := popover.Trigger(ctx)
-					triggerAttrs["id"] = "calendar-example-date-picker-dropdowns-trigger"
-				}}
-				@button.Button(button.Props{
-					Variant:    button.VariantOutline,
-					Class:      "justify-start px-2.5 font-normal",
-					Attributes: triggerAttrs,
-				}) {
-					<span>Pick a date</span>
-					<span data-icon="inline-start" class="contents">
-						@icon.ChevronDown(icon.Props{Class: "ml-auto"})
-					</span>
-				}
-				@popover.Content(popover.ContentProps{
-					Class: "w-auto p-0",
-					Side:  popover.SideBottom, Align: popover.AlignStart,
-				}) {
-					@calendar.Calendar(calendar.Props{
-						CaptionLayout: calendar.CaptionLayoutDropdown,
-					})
-					<div class="flex gap-2 border-t p-2">
-						@button.Button(button.Props{
-							Variant:    button.VariantOutline,
-							Size:       button.SizeSm,
-							Class:      "w-full",
-							Attributes: templ.Attributes{"data-example-date-picker-done": true},
-						}) {
-							Done
-						}
-					</div>
-				}
-			}
-		}
-	}
-	<script nonce={ templ.GetNonce(ctx) }>
-		(() => {
-			const fmt = (d) => {
-				const day = d.getDate();
-				const suf = day % 10 === 1 && day !== 11 ? "st" : day % 10 === 2 && day !== 12 ? "nd" : day % 10 === 3 && day !== 13 ? "rd" : "th";
-				return d.toLocaleDateString("en-US", { month: "long" }) + " " + day + suf + ", " + d.getFullYear();
-			};
-			// Delegated: the popover content is portaled to <body> at init, so it
-			// is looked up per event instead of captured at parse time.
-			document.addEventListener("calendar-change", (e) => {
-				if (!(e.target instanceof Element) || !e.target.closest("#calendar-example-date-picker-dropdowns")) return;
-				const trigger = document.querySelector('[data-templ-controls="calendar-example-date-picker-dropdowns"]');
-				trigger.querySelector("span:not([data-icon])").textContent = e.detail.value ? fmt(e.detail.value) : "Pick a date";
-			});
-			document.addEventListener("click", (e) => {
-				if (!(e.target instanceof Element) || !e.target.closest("[data-example-date-picker-done]")) return;
-				window.templ.popover.close("calendar-example-date-picker-dropdowns");
-			});
-		})();
-	</script>
 }
 
 templ calendarExampleDatePickerWithRange() {
@@ -408,90 +289,74 @@ templ calendarExampleDatePickerWithRange() {
 	}}
 	@calendarExampleSection("Date Picker Range", "", "") {
 		@field.Field(field.Props{Class: "mx-auto w-72"}) {
-			@field.Label(field.LabelProps{For: "calendar-example-date-picker-range-trigger"}) {
+			@field.Label(field.LabelProps{For: "date-picker-range"}) {
 				Date Picker Range
 			}
-			@popover.Popover(popover.Props{ID: "calendar-example-date-picker-range"}) {
+			@popover.Popover(popover.Props{ID: "calendar-example-date-picker-with-range"}) {
 				{{
 					triggerAttrs := popover.Trigger(ctx)
-					triggerAttrs["id"] = "calendar-example-date-picker-range-trigger"
+					triggerAttrs["id"] = "date-picker-range"
 				}}
-				@button.Button(button.Props{
-					Variant:    button.VariantOutline,
-					Class:      "justify-start px-2.5 font-normal",
-					Attributes: triggerAttrs,
-				}) {
-					<span data-icon="inline-start" class="contents">
-						@icon.Calendar()
-					</span>
-					<span>
-						{ from.Format("Jan 02, 2006") } - { to.Format("Jan 02, 2006") }
-					</span>
+				@button.Button(button.Props{Variant: button.VariantOutline, Class: "justify-start px-2.5 font-normal", Attributes: triggerAttrs}) {
+					@icon.Calendar(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+					{ from.Format("Jan 02, 2006") } - { to.Format("Jan 02, 2006") }
 				}
-				@popover.Content(popover.ContentProps{
-					Class: "w-auto p-0",
-					Side:  popover.SideBottom, Align: popover.AlignStart,
-				}) {
+				@popover.Content(popover.ContentProps{Class: "w-auto p-0", Align: popover.AlignStart}) {
 					@calendar.Calendar(calendar.Props{
 						Mode:           calendar.ModeRange,
-						Selected:          from,
-						EndValue:       to,
+						DefaultMonth:   from,
+						Selected:       calendar.DateRange{From: from, To: to},
 						NumberOfMonths: 2,
 					})
+					@calendarSelectState()
 				}
 			}
 		}
 	}
-	<script nonce={ templ.GetNonce(ctx) }>
-		(() => {
-			const fmt = (d) => d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
-			// Delegated: the popover content is portaled to <body> at init, so it
-			// is looked up per event instead of captured at parse time.
-			document.addEventListener("calendar-change", (e) => {
-				if (!(e.target instanceof Element) || !e.target.closest("#calendar-example-date-picker-range")) return;
-				const trigger = document.querySelector('[data-templ-controls="calendar-example-date-picker-range"]');
-				const display = trigger.querySelector("span:not([data-icon])");
-				if (e.detail.value && e.detail.endValue) {
-					display.textContent = fmt(e.detail.value) + " - " + fmt(e.detail.endValue);
-				} else if (e.detail.value) {
-					display.textContent = fmt(e.detail.value);
-				} else {
-					display.textContent = "Pick a date";
-				}
-			});
-		})();
-	</script>
 }
 
-templ calendarExampleInCard() {
-	@calendarExampleSection("In Card", "", "") {
+templ calendarExampleDatePickerWithDropdowns() {
+	@calendarExampleSection("Date Picker with Dropdowns", "", "") {
+		@field.Field(field.Props{Class: "mx-auto w-72"}) {
+			@popover.Popover(popover.Props{ID: "calendar-example-date-picker-with-dropdowns"}) {
+				@field.Label(field.LabelProps{For: "date-picker-with-dropdowns-desktop"}) {
+					Date
+				}
+				{{
+					triggerAttrs := popover.Trigger(ctx)
+					triggerAttrs["id"] = "date-picker-with-dropdowns-desktop"
+				}}
+				@button.Button(button.Props{Variant: button.VariantOutline, Class: "justify-start px-2.5 font-normal", Attributes: triggerAttrs}) {
+					<span>Pick a date</span>
+					@icon.ChevronDown(icon.Props{Class: "ml-auto", Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				}
+				@popover.Content(popover.ContentProps{Class: "w-auto p-0", Align: popover.AlignStart}) {
+					@calendar.Calendar(calendar.Props{Mode: calendar.ModeSingle, CaptionLayout: calendar.CaptionLayoutDropdown})
+					@calendarSelectState()
+					<div class="flex gap-2 border-t p-2">
+						@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeSm, Class: "w-full"}) {
+							Done
+						}
+					</div>
+				}
+			}
+		}
+	}
+}
+
+templ calendarExampleWeekNumbers() {
+	{{ date := time.Date(time.Now().Year(), 2, 3, 0, 0, 0, 0, time.Local) }}
+	@calendarExampleSection("Week Numbers", "", "justify-center") {
 		@card.Card(card.Props{Class: "mx-auto w-fit p-0"}) {
 			@card.Content(card.ContentProps{Class: "p-0"}) {
-				@calendar.Calendar()
+				@calendar.Calendar(calendar.Props{
+					Mode:           calendar.ModeSingle,
+					DefaultMonth:   date,
+					Selected:       date,
+					ShowWeekNumber: true,
+				})
 			}
 		}
-	}
-}
-
-templ calendarExampleInPopover() {
-	@calendarExampleSection("In Popover", "", "") {
-		@popover.Popover(popover.Props{ID: "calendar-example-in-popover"}) {
-			@button.Button(button.Props{
-				Variant:    button.VariantOutline,
-				Class:      "px-2.5 font-normal",
-				Attributes: popover.Trigger(ctx),
-			}) {
-				<span data-icon="inline-start" class="contents">
-					@icon.Calendar()
-				</span>
-				Open Calendar
-			}
-			@popover.Content(popover.ContentProps{
-				Class: "w-auto p-0",
-				Side:  popover.SideBottom, Align: popover.AlignStart,
-			}) {
-				@calendar.Calendar()
-			}
-		}
+		@calendarSelectState()
 	}
 }
