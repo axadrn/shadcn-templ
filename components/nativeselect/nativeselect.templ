@@ -1,0 +1,119 @@
+package nativeselect
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+type Size string
+
+const (
+	SizeSm      Size = "sm"
+	SizeDefault Size = "default"
+)
+
+// Props are the select element's props shadcn's NativeSelect passes on, plus
+// its Size. Class styles the wrapper, ID and Attributes land on the select.
+type Props struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Size       Size
+	Name       string
+	Disabled   bool
+	Required   bool
+}
+
+type OptionProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Value      string
+	Disabled   bool
+	Selected   bool
+}
+
+type OptGroupProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Label      string
+	Disabled   bool
+}
+
+templ NativeSelect(props ...Props) {
+	{{ var p Props }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.Size == "" {
+		{{ p.Size = SizeDefault }}
+	}
+	<div
+		class={ utils.CN("cn-native-select-wrapper group/native-select relative w-fit has-[select:disabled]:opacity-50", p.Class) }
+		data-slot="native-select-wrapper"
+		data-size={ string(p.Size) }
+	>
+		<select
+			data-slot="native-select"
+			data-size={ string(p.Size) }
+			class="cn-native-select outline-none disabled:pointer-events-none disabled:cursor-not-allowed"
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			if p.Name != "" {
+				name={ p.Name }
+			}
+			disabled?={ p.Disabled }
+			required?={ p.Required }
+			{ p.Attributes... }
+		>
+			{ children... }
+		</select>
+		@icon.ChevronDown(icon.Props{
+			Class:      "cn-native-select-icon pointer-events-none absolute select-none",
+			Attributes: templ.Attributes{"aria-hidden": "true", "data-slot": "native-select-icon"},
+		})
+	</div>
+}
+
+templ Option(props ...OptionProps) {
+	{{ var p OptionProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<option
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="native-select-option"
+		class={ utils.CN("bg-[Canvas] text-[CanvasText]", p.Class) }
+		value={ p.Value }
+		disabled?={ p.Disabled }
+		selected?={ p.Selected }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</option>
+}
+
+templ OptGroup(props ...OptGroupProps) {
+	{{ var p OptGroupProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<optgroup
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="native-select-optgroup"
+		class={ utils.CN("bg-[Canvas] text-[CanvasText]", p.Class) }
+		if p.Label != "" {
+			label={ p.Label }
+		}
+		disabled?={ p.Disabled }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</optgroup>
+}

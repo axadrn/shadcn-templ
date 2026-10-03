@@ -9,6 +9,7 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/components/input"
 	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
 	"github.com/axadrn/shadcn-templ/v2/components/kbd"
+	"github.com/axadrn/shadcn-templ/v2/components/nativeselect"
 	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
 	"github.com/axadrn/shadcn-templ/v2/components/switch"
 	"github.com/axadrn/shadcn-templ/v2/components/tabs"
@@ -266,21 +267,20 @@ templ dialogExampleChatSettings() {
 					}
 				}
 				<div class="flex flex-col gap-4">
-					<div class="cn-native-select-wrapper group/native-select relative w-fit has-[select:disabled]:opacity-50 w-full md:hidden" data-slot="native-select-wrapper" data-size="default">
-						<select data-slot="native-select" data-size="default" class="cn-native-select outline-none disabled:pointer-events-none disabled:cursor-not-allowed">
-							<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="general" selected>General</option>
-							<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="notifications">Notifications</option>
-							<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="personalization">Personalization</option>
-							<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="security">Security</option>
-						</select>
-						@icon.ChevronDown(icon.Props{
-							Class: "cn-native-select-icon pointer-events-none absolute select-none",
-							Attributes: templ.Attributes{
-								"aria-hidden": "true",
-								"data-slot":   "native-select-icon",
-							},
-						})
-					</div>
+					@nativeselect.NativeSelect(nativeselect.Props{Class: "w-full md:hidden"}) {
+						@nativeselect.Option(nativeselect.OptionProps{Value: "general", Selected: true}) {
+							General
+						}
+						@nativeselect.Option(nativeselect.OptionProps{Value: "notifications"}) {
+							Notifications
+						}
+						@nativeselect.Option(nativeselect.OptionProps{Value: "personalization"}) {
+							Personalization
+						}
+						@nativeselect.Option(nativeselect.OptionProps{Value: "security"}) {
+							Security
+						}
+					}
 					@tabs.Tabs(tabs.Props{Value: utils.Ptr("general")}) {
 						@tabs.List(tabs.ListProps{Class: "hidden w-full md:flex"}) {
 							@tabs.Trigger(tabs.TriggerProps{Value: "general"}) {

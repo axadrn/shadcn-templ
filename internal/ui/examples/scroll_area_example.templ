@@ -1,0 +1,26 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/example"
+	"github.com/axadrn/shadcn-templ/v2/components/scrollarea"
+)
+
+templ ScrollAreaExample() {
+	@example.Wrapper() {
+		@example.Example(example.Props{Title: "Vertical"}) {
+			@scrollarea.ScrollArea(scrollarea.Props{Class: "mx-auto h-72 w-48 rounded-md border style-luma:rounded-2xl style-rhea:rounded-2xl"}) {
+				@scrollAreaTagList()
+			}
+		}
+		@example.Example(example.Props{Title: "Horizontal"}) {
+			@scrollarea.ScrollArea(scrollarea.Props{Class: "mx-auto w-full max-w-96 rounded-md border p-4 style-luma:rounded-2xl style-rhea:rounded-2xl"}) {
+				<div class="flex gap-4">
+					for _, artwork := range scrollAreaWorks {
+						@scrollAreaFigure(artwork)
+					}
+				</div>
+				@scrollarea.ScrollBar(scrollarea.ScrollBarProps{Orientation: scrollarea.OrientationHorizontal})
+			}
+		}
+	}
+}

@@ -1,0 +1,23 @@
+package examples
+
+import "github.com/axadrn/shadcn-templ/v2/components/nativeselect"
+
+templ NativeSelectDemo() {
+	@nativeselect.NativeSelect() {
+		@nativeselect.Option(nativeselect.OptionProps{Value: ""}) {
+			Select status
+		}
+		@nativeselect.Option(nativeselect.OptionProps{Value: "todo"}) {
+			Todo
+		}
+		@nativeselect.Option(nativeselect.OptionProps{Value: "in-progress"}) {
+			In Progress
+		}
+		@nativeselect.Option(nativeselect.OptionProps{Value: "done"}) {
+			Done
+		}
+		@nativeselect.Option(nativeselect.OptionProps{Value: "cancelled"}) {
+			Cancelled
+		}
+	}
+}

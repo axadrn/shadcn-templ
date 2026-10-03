@@ -1,10 +1,10 @@
 package examples
 
 import (
+	"github.com/axadrn/shadcn-templ/v2/components/nativeselect"
 	"github.com/axadrn/shadcn-templ/v2/components/badge"
 	"github.com/axadrn/shadcn-templ/v2/components/checkbox"
 	"github.com/axadrn/shadcn-templ/v2/components/field"
-	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/components/input"
 	"github.com/axadrn/shadcn-templ/v2/components/inputotp"
 	"github.com/axadrn/shadcn-templ/v2/components/radiogroup"
@@ -301,29 +301,14 @@ templ fieldExampleSelectFields() {
 	}
 }
 
-// Native select markup used directly by this showcase.
 templ fieldExampleNativeSelect(id string, invalid, disabled bool) {
-	<div class="cn-native-select-wrapper group/native-select relative w-fit has-[select:disabled]:opacity-50" data-slot="native-select-wrapper" data-size="default">
-		<select
-			id={ id }
-			data-slot="native-select"
-			data-size="default"
-			class="cn-native-select outline-none disabled:pointer-events-none disabled:cursor-not-allowed"
-			if invalid {
-				aria-invalid="true"
-			}
-			disabled?={ disabled }
-		>
-			{ children... }
-		</select>
-		@icon.ChevronDown(icon.Props{
-			Class: "cn-native-select-icon pointer-events-none absolute select-none",
-			Attributes: templ.Attributes{
-				"aria-hidden": "true",
-				"data-slot":   "native-select-icon",
-			},
-		})
-	</div>
+	{{ attrs := templ.Attributes{} }}
+	if invalid {
+		{{ attrs["aria-invalid"] = "true" }}
+	}
+	@nativeselect.NativeSelect(nativeselect.Props{ID: id, Disabled: disabled, Attributes: attrs}) {
+		{ children... }
+	}
 }
 
 templ fieldExampleNativeSelectFields() {
@@ -334,10 +319,18 @@ templ fieldExampleNativeSelectFields() {
 					Basic Native Select
 				}
 				@fieldExampleNativeSelect("native-select-basic", false, false) {
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="">Choose an option</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="option1">Option 1</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="option2">Option 2</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="option3">Option 3</option>
+					@nativeselect.Option(nativeselect.OptionProps{Value: ""}) {
+						Choose an option
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "option1"}) {
+						Option 1
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "option2"}) {
+						Option 2
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "option3"}) {
+						Option 3
+					}
 				}
 			}
 			@field.Field() {
@@ -345,10 +338,18 @@ templ fieldExampleNativeSelectFields() {
 					Country
 				}
 				@fieldExampleNativeSelect("native-select-country", false, false) {
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="">Select your country</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="us">United States</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="uk">United Kingdom</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="ca">Canada</option>
+					@nativeselect.Option(nativeselect.OptionProps{Value: ""}) {
+						Select your country
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "us"}) {
+						United States
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "uk"}) {
+						United Kingdom
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "ca"}) {
+						Canada
+					}
 				}
 				@field.Description() {
 					Select the country where you currently reside.
@@ -362,10 +363,18 @@ templ fieldExampleNativeSelectFields() {
 					Choose your local timezone for accurate scheduling.
 				}
 				@fieldExampleNativeSelect("native-select-timezone", false, false) {
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="">Select timezone</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="utc">UTC</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="est">Eastern Time</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="pst">Pacific Time</option>
+					@nativeselect.Option(nativeselect.OptionProps{Value: ""}) {
+						Select timezone
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "utc"}) {
+						UTC
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "est"}) {
+						Eastern Time
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "pst"}) {
+						Pacific Time
+					}
 				}
 			}
 			@field.Field() {
@@ -373,17 +382,31 @@ templ fieldExampleNativeSelectFields() {
 					Grouped Options
 				}
 				@fieldExampleNativeSelect("native-select-grouped", false, false) {
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="">Select a region</option>
-					<optgroup data-slot="native-select-optgroup" class="bg-[Canvas] text-[CanvasText]" label="North America">
-						<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="us">United States</option>
-						<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="ca">Canada</option>
-						<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="mx">Mexico</option>
-					</optgroup>
-					<optgroup data-slot="native-select-optgroup" class="bg-[Canvas] text-[CanvasText]" label="Europe">
-						<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="uk">United Kingdom</option>
-						<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="fr">France</option>
-						<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="de">Germany</option>
-					</optgroup>
+					@nativeselect.Option(nativeselect.OptionProps{Value: ""}) {
+						Select a region
+					}
+					@nativeselect.OptGroup(nativeselect.OptGroupProps{Label: "North America"}) {
+						@nativeselect.Option(nativeselect.OptionProps{Value: "us"}) {
+							United States
+						}
+						@nativeselect.Option(nativeselect.OptionProps{Value: "ca"}) {
+							Canada
+						}
+						@nativeselect.Option(nativeselect.OptionProps{Value: "mx"}) {
+							Mexico
+						}
+					}
+					@nativeselect.OptGroup(nativeselect.OptGroupProps{Label: "Europe"}) {
+						@nativeselect.Option(nativeselect.OptionProps{Value: "uk"}) {
+							United Kingdom
+						}
+						@nativeselect.Option(nativeselect.OptionProps{Value: "fr"}) {
+							France
+						}
+						@nativeselect.Option(nativeselect.OptionProps{Value: "de"}) {
+							Germany
+						}
+					}
 				}
 				@field.Description() {
 					Native select with grouped options using optgroup.
@@ -394,10 +417,18 @@ templ fieldExampleNativeSelectFields() {
 					Invalid Native Select
 				}
 				@fieldExampleNativeSelect("native-select-invalid", true, false) {
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="">This field has an error</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="option1">Option 1</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="option2">Option 2</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="option3">Option 3</option>
+					@nativeselect.Option(nativeselect.OptionProps{Value: ""}) {
+						This field has an error
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "option1"}) {
+						Option 1
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "option2"}) {
+						Option 2
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "option3"}) {
+						Option 3
+					}
 				}
 				@field.Description() {
 					This field contains validation errors.
@@ -408,10 +439,18 @@ templ fieldExampleNativeSelectFields() {
 					Disabled Field
 				}
 				@fieldExampleNativeSelect("native-select-disabled-field", false, true) {
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="">Cannot select</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="option1">Option 1</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="option2">Option 2</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="option3">Option 3</option>
+					@nativeselect.Option(nativeselect.OptionProps{Value: ""}) {
+						Cannot select
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "option1"}) {
+						Option 1
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "option2"}) {
+						Option 2
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "option3"}) {
+						Option 3
+					}
 				}
 				@field.Description() {
 					This field is currently disabled.
@@ -1036,10 +1075,18 @@ templ fieldExampleHorizontalFields() {
 					}
 				}
 				@fieldExampleNativeSelect("horizontal-native-select", false, false) {
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="">Select a country</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="us">United States</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="uk">United Kingdom</option>
-					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="ca">Canada</option>
+					@nativeselect.Option(nativeselect.OptionProps{Value: ""}) {
+						Select a country
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "us"}) {
+						United States
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "uk"}) {
+						United Kingdom
+					}
+					@nativeselect.Option(nativeselect.OptionProps{Value: "ca"}) {
+						Canada
+					}
 				}
 			}
 			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {

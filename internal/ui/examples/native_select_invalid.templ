@@ -1,0 +1,20 @@
+package examples
+
+import "github.com/axadrn/shadcn-templ/v2/components/nativeselect"
+
+templ NativeSelectInvalid() {
+	@nativeselect.NativeSelect(nativeselect.Props{Attributes: templ.Attributes{"aria-invalid": "true"}}) {
+		@nativeselect.Option(nativeselect.OptionProps{Value: ""}) {
+			Error state
+		}
+		@nativeselect.Option(nativeselect.OptionProps{Value: "apple"}) {
+			Apple
+		}
+		@nativeselect.Option(nativeselect.OptionProps{Value: "banana"}) {
+			Banana
+		}
+		@nativeselect.Option(nativeselect.OptionProps{Value: "blueberry"}) {
+			Blueberry
+		}
+	}
+}

@@ -1,0 +1,44 @@
+package examples
+
+import "github.com/axadrn/shadcn-templ/v2/components/nativeselect"
+
+templ NativeSelectGroups() {
+	@nativeselect.NativeSelect() {
+		@nativeselect.Option(nativeselect.OptionProps{Value: ""}) {
+			Select department
+		}
+		@nativeselect.OptGroup(nativeselect.OptGroupProps{Label: "Engineering"}) {
+			@nativeselect.Option(nativeselect.OptionProps{Value: "frontend"}) {
+				Frontend
+			}
+			@nativeselect.Option(nativeselect.OptionProps{Value: "backend"}) {
+				Backend
+			}
+			@nativeselect.Option(nativeselect.OptionProps{Value: "devops"}) {
+				DevOps
+			}
+		}
+		@nativeselect.OptGroup(nativeselect.OptGroupProps{Label: "Sales"}) {
+			@nativeselect.Option(nativeselect.OptionProps{Value: "sales-rep"}) {
+				Sales Rep
+			}
+			@nativeselect.Option(nativeselect.OptionProps{Value: "account-manager"}) {
+				Account Manager
+			}
+			@nativeselect.Option(nativeselect.OptionProps{Value: "sales-director"}) {
+				Sales Director
+			}
+		}
+		@nativeselect.OptGroup(nativeselect.OptGroupProps{Label: "Operations"}) {
+			@nativeselect.Option(nativeselect.OptionProps{Value: "support"}) {
+				Customer Support
+			}
+			@nativeselect.Option(nativeselect.OptionProps{Value: "product-manager"}) {
+				Product Manager
+			}
+			@nativeselect.Option(nativeselect.OptionProps{Value: "ops-manager"}) {
+				Operations Manager
+			}
+		}
+	}
+}

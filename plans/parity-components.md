@@ -251,7 +251,7 @@ Checks: `go test ./...` green, a11y 30 of 30 and behavior in both engines. `comp
 
 The calendar formats other locales through `Intl`, not date-fns' locale data. AGENTS.md says a part merged onto another component's element keeps that element's slot; the pin renders the trigger's slot when the element is a client component (`sidebar.MenuButton`), as in task 12; AGENTS.md says so now.
 
-Next's `Image` (owner, 2026-10-03: plain HTML, no helper): `aspect-ratio-*`, `item-header`, `item-image` and the aspect ratio example write the `img` Next renders (`loading`, `decoding`, `data-nimg`, its style, `sizes` and `srcset` on the original image) and upstream's image URLs, `card-image` too; the placeholder image is gone. `item-header`'s chromium pixels stay apart: upstream serves its photos through Next's image optimizer (256 px, re-encoded), which a plain page has not.
+Next's `Image` (owner, 2026-10-03: plain HTML, no helper): `aspect-ratio-*`, `item-header`, `item-image` and the aspect ratio example write the `img` Next renders (`loading`, `decoding`, `data-nimg`, its style, `sizes` and `srcset` on the original image) and upstream's image URLs, `card-image` too; the placeholder image is gone. `item-header`'s chromium pixels were the photos still loading over the network (task 16 lets `compare.mjs` wait for visible images).
 
 Checks: `go test ./...` green (the registry test finds the toast classes in its templ now, the sidebar blocks check DayPicker's attributes), a11y 30 of 30 in both engines, behavior in both (the calendar suite expects upstream's focus, the sidebar suites the trigger slots and the tooltip's `hidden`, the input OTP suite the bare characters), `escape.mjs` 0 failures, `htmx.mjs` 0 failed expectations against a fresh fixture binary on 8093. New scenarios: toast (a press), calendar (a day press, arrows, PageDown, both navigation buttons), date picker (open, a day press, Escape). `compare.mjs all` ran in chunks of 40 examples (one process each, the long single run lost its browser): chromium 3262 pass and 27 fail, webkit 3269 and 36. Input OTP, toast, sidebar, chart, calendar, date picker, popover, resizable and carousel pass every check except `carousel-api`'s marker (task 15); `slider-controlled` failed once as a flake and passes alone, `dialog-close-button`'s webkit pixels are task 8's text question.
 
@@ -268,5 +268,15 @@ Open: `progress-controlled` passes `value={50}` to shadcn's Slider, a number, so
 Also: `table-actions` is a server component upstream, its dropdown trigger keeps `button` (`serverRendered`); `item-avatar` stacks its avatars in upstream's plain `div` with upstream's pictures.
 
 Checks: `go test ./...` green (the dashboard test checks the one chart and its templates), a11y 30 of 30, behavior 30 of 30 in both engines (the chart suite switches the series by the header button). `compare.mjs all` in chunks, after `go clean -cache` because the full disk had broken the dev server mid run: chromium 3290 pass and 15 fail, webkit 3283 and 22. Every example marker is gone; what fails is the open owner points (pictures, `pagination-simple`, `progress-controlled`'s two thumbs, `item-header`'s optimized images), `button-render`'s hover step on both apps, the select's guard markers in webkit, flakes (`drawer-nested`, `carousel-plugin`'s autoplay).
+
+### Task 16
+
+Each new component gets its templ (and script), its `registry.json` item, its docs page from upstream's mdx, upstream's examples and its `-example` in the create list, and its family in `scenarios.json` and `both.txt`.
+
+- **Scroll area.** A port of Base UI's ScrollArea (Root, Viewport, Scrollbar, Thumb, Corner) with shadcn's ScrollArea and ScrollBar: the viewport scrolls natively without its scrollbar (`base-ui-disable-scrollbar` in `<head>`), the parts render the overflow state (`data-has-overflow-*`, `data-overflow-*-start`/`-end`, `data-scrolling`, `data-hovering`), the thumbs follow the scroll position, a press on the track jumps there, the thumb drags, the scrollbars and the corner mount once there is overflow. Like shadcn, the children render inside the viewport, so a horizontal `ScrollBar` sits in it. Scenarios: hover, wheel, rest, Tab.
+- **Native select.** shadcn's NativeSelect, NativeSelectOption and NativeSelectOptGroup; `Class` styles the wrapper, `ID` and `Attributes` land on the select. The dialog and field examples render it instead of copied markup.
+- **Harness.** `compare.mjs` waits for the visible images and knows a `wheel` step.
+
+Checks so far: `go test ./...` green (the registry and inliner counts include the two items), `scroll-area` and `native-select` families pass every check in both engines, their docs and create pages load without page errors.
 
 ## Planner review

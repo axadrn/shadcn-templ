@@ -1,0 +1,109 @@
+package scrollarea
+
+import (
+	"context"
+
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+type Orientation string
+
+const (
+	OrientationVertical   Orientation = "vertical"
+	OrientationHorizontal Orientation = "horizontal"
+)
+
+type Props struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type ScrollBarProps struct {
+	ID          string
+	Class       string
+	Attributes  templ.Attributes
+	Orientation Orientation
+}
+
+type ctxKey struct{}
+
+// rootID is ScrollAreaRoot's useBaseUiId, its parts render it in data-id.
+func rootID(ctx context.Context) string {
+	id, _ := ctx.Value(ctxKey{}).(string)
+	return id
+}
+
+// ScrollArea is shadcn's ScrollArea: Base UI's ScrollArea.Root with the
+// Viewport around the children, a vertical ScrollBar and the Corner.
+// scrollarea.js measures the overflow; the scrollbars and the corner render
+// once there is overflow, like Base UI mounts them.
+templ ScrollArea(props ...Props) {
+	{{ var p Props }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ id := "base-ui-" + utils.RandomID() }}
+	{{ ctx = context.WithValue(ctx, ctxKey{}, id) }}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		role="presentation"
+		style="position:relative;--scroll-area-corner-height:0px;--scroll-area-corner-width:0px"
+		data-slot="scroll-area"
+		class={ utils.CN("cn-scroll-area relative", p.Class) }
+		{ p.Attributes... }
+	>
+		<div
+			role="presentation"
+			data-id={ id + "-viewport" }
+			tabindex="-1"
+			class="cn-scroll-area-viewport size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 base-ui-disable-scrollbar"
+			style="overflow:scroll"
+			data-slot="scroll-area-viewport"
+		>
+			{ children... }
+		</div>
+		@ScrollBar()
+		// ScrollAreaPrimitive.Corner, unstyled.
+		<div hidden style="position:absolute;bottom:0;inset-inline-end:0;width:0;height:0"></div>
+	</div>
+}
+
+templ ScrollBar(props ...ScrollBarProps) {
+	{{ var p ScrollBarProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.Orientation == "" {
+		{{ p.Orientation = OrientationVertical }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		hidden
+		data-orientation={ string(p.Orientation) }
+		data-id={ rootID(ctx) + "-scrollbar" }
+		data-slot="scroll-area-scrollbar"
+		class={ utils.CN("cn-scroll-area-scrollbar flex touch-none p-px transition-colors select-none", p.Class) }
+		if p.Orientation == OrientationVertical {
+			style="position:absolute;touch-action:none;user-select:none;top:0;bottom:var(--scroll-area-corner-height);inset-inline-end:0"
+		} else {
+			style="position:absolute;touch-action:none;user-select:none;inset-inline-start:0;inset-inline-end:var(--scroll-area-corner-width);bottom:0"
+		}
+		{ p.Attributes... }
+	>
+		<div
+			data-orientation={ string(p.Orientation) }
+			data-slot="scroll-area-thumb"
+			class="cn-scroll-area-thumb relative flex-1 bg-border"
+			if p.Orientation == OrientationVertical {
+				style="visibility:hidden;height:var(--scroll-area-thumb-height)"
+			} else {
+				style="visibility:hidden;width:var(--scroll-area-thumb-width)"
+			}
+		></div>
+	</div>
+}
