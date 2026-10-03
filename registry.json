@@ -2592,6 +2592,21 @@
       "categories": [
         "display-media"
       ]
+    },
+    {
+      "name": "bubble",
+      "type": "registry:ui",
+      "title": "Bubble",
+      "description": "Displays conversational content in a message bubble. Supports variants, alignment, grouping, reactions, and collapsible content.",
+      "files": [
+        {
+          "path": "components/bubble/bubble.templ",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "display-media"
+      ]
     }
   ]
 }

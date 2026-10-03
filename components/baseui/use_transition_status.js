@@ -11,7 +11,9 @@
 // when Base UI unmounts. Opening again before that cancels the pending close.
 //
 // status is an array of the parts that render the status, or
-// { parts, positioner, stateParts }. parts[0] carries the pending status.
+// { parts, positioner, stateParts, styleParts }. parts[0] carries the pending
+// status; styleParts render only the starting and ending style (the
+// collapsible trigger's mapping).
 (function () {
   "use strict";
 
@@ -20,17 +22,21 @@
   }
 
   function resolve(status) {
-    const { parts, positioner = null, stateParts = [] } = Array.isArray(status) ? { parts: status } : status;
-    return { parts: parts.filter(Boolean), open: [positioner, ...stateParts].filter(Boolean), positioner };
+    const { parts, positioner = null, stateParts = [], styleParts = [] } = Array.isArray(status) ? { parts: status } : status;
+    const own = parts.filter(Boolean);
+    return {
+      parts: [...own, ...styleParts.filter(Boolean)],
+      open: [...own, positioner, ...stateParts].filter(Boolean),
+      positioner,
+    };
   }
 
   // usePositioner's inert: a closed positioner takes no pointer events, also
   // during its exit animation. Opening only takes back that none, so a value
   // safePolygon set stays, as React leaves a style it did not render.
   function setOpen(status, isOpen) {
-    const all = [...status.parts, ...status.open];
-    set(all, "data-open", isOpen);
-    set(all, "data-closed", !isOpen);
+    set(status.open, "data-open", isOpen);
+    set(status.open, "data-closed", !isOpen);
     const style = status.positioner?.style;
     if (!style) return;
     if (!isOpen) style.pointerEvents = "none";

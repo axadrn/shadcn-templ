@@ -61,12 +61,20 @@
   // The type is read after the new state applied, since the motion classes
   // hang on data-open and data-closed, like the source's layout effect after
   // the render with the new state.
-  function open(panel, prefix) {
+  // shared are the parts that render the root's transition status with the
+  // panel, { parts, styleParts } as window.templ.transition takes them: the
+  // collapsible's root and trigger, the accordion's item and header.
+  function statusOf(panel, shared) {
+    return { parts: [panel, ...(shared.parts || [])], styleParts: shared.styleParts || [] };
+  }
+
+  function open(panel, prefix, shared = {}) {
+    const parts = statusOf(panel, shared);
     panel.hidden = false;
-    transition().open([panel], panel, () => setDimensions(panel, prefix, null));
+    transition().open(parts, panel, () => setDimensions(panel, prefix, null));
     const type = getAnimationType(panel, false);
     if (type === "none") {
-      transition().reset([panel], true);
+      transition().reset(parts, true);
       setDimensions(panel, prefix, null);
       return;
     }
@@ -74,7 +82,8 @@
   }
 
   // onUnmount runs once the panel is hidden, Base UI's mounted turning false.
-  function close(panel, prefix, onUnmount) {
+  function close(panel, prefix, onUnmount, shared = {}) {
+    const parts = statusOf(panel, shared);
     const hasSuppressedMountAnimation = !!panel._templPreventMountAnimation;
     if (hasSuppressedMountAnimation) {
       panel._templPreventMountAnimation = false;
@@ -85,7 +94,7 @@
       setDimensions(panel, prefix, null);
       onUnmount?.();
     };
-    transition().close([panel], panel, unmount, {
+    transition().close(parts, panel, unmount, {
       deferEnding: true,
       onEnding() {
         const dimensions = getDimensions(panel);
@@ -95,7 +104,7 @@
     });
     const type = getAnimationType(panel, hasSuppressedMountAnimation);
     if (type === "none") {
-      transition().reset([panel], false);
+      transition().reset(parts, false);
       unmount();
       return;
     }

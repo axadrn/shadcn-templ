@@ -1,0 +1,47 @@
+package examples
+
+import "github.com/axadrn/shadcn-templ/v2/components/bubble"
+
+templ BubbleLinkButtonDemo() {
+	<div class="flex w-full max-w-sm flex-col gap-8 py-12">
+		@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+			@bubble.Content() {
+				How can I help you today?
+			}
+		}
+		@bubble.Group() {
+			// BubbleContent render={<button />}: the button carries the
+			// content's state.
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantTinted, Align: bubble.AlignEnd}) {
+				<button class={ bubble.ContentClass(bubble.ContentProps{}) } data-slot="bubble-content">
+					I forgot my password
+				</button>
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantTinted, Align: bubble.AlignEnd}) {
+				<button class={ bubble.ContentClass(bubble.ContentProps{}) } data-slot="bubble-content">
+					I need help with my subscription
+				</button>
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantTinted, Align: bubble.AlignEnd}) {
+				<button class={ bubble.ContentClass(bubble.ContentProps{}) } data-slot="bubble-content">
+					Something else. Talk to a human.
+				</button>
+			}
+		}
+	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			// onClick: the example calls sonner's toast, which shadcn-templ does
+			// not port; the toast manager shows the same message.
+			const messages = [
+				"You clicked forgot password",
+				"You clicked help with subscription",
+				"You clicked something else. Talk to a human.",
+			];
+			const buttons = document.currentScript.previousElementSibling.querySelectorAll("button");
+			buttons.forEach((button, i) =>
+				button.addEventListener("click", () => window.templ.toast.add({ description: messages[i] })),
+			);
+		})();
+	</script>
+}

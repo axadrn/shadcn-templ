@@ -1,0 +1,31 @@
+package examples
+
+import "github.com/axadrn/shadcn-templ/v2/components/bubble"
+
+templ BubbleMarkdownDemo() {
+	<div class="flex w-full max-w-sm flex-col gap-8 py-12">
+		@bubble.Bubble(bubble.Props{Align: bubble.AlignEnd, Variant: bubble.VariantMuted}) {
+			@bubble.Content() {
+				// The site's Markdown (Streamdown) renders the markdown as this HTML.
+				<div class="space-y-4 whitespace-normal [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 cn-markdown w-full min-w-0 overflow-hidden">
+					<p>Hello! Are you actually <span class="font-semibold" data-streamdown="strong">thinking</span>?</p>
+				</div>
+			}
+		}
+		@bubble.Bubble(bubble.Props{Variant: bubble.VariantGhost}) {
+			@bubble.Content() {
+				@bubbleGhostMarkdown()
+			}
+		}
+	</div>
+}
+
+// bubbleGhostMarkdown is the ghost bubble's markdown of bubble-markdown and
+// bubble-variants, as the site's Markdown (Streamdown) renders it.
+templ bubbleGhostMarkdown() {
+	<div class="space-y-4 whitespace-normal [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 cn-markdown w-full min-w-0 overflow-hidden">
+		<p>Ghost bubbles work for assistant text, <span class="font-semibold" data-streamdown="strong">markdown</span>, and other content that should not be framed.</p>
+		<p>This is perfect for assistant messages that should not have a frame and can take the full width of the container. You can also render <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-sm" data-streamdown="inline-code">code</code> in it.</p>
+		<p>Ghost bubbles are full width and can take the full width of the container.</p>
+	</div>
+}

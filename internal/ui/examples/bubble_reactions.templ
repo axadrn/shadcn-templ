@@ -1,0 +1,57 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+)
+
+templ BubbleReactionsDemo() {
+	<div class="flex w-full max-w-sm flex-col gap-12 py-12">
+		@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted, Align: bubble.AlignEnd}) {
+			@bubble.Content() {
+				I don't need tests, I know my code works.
+			}
+			@bubble.Reactions(bubble.ReactionsProps{Align: bubble.AlignStart, Attributes: templ.Attributes{"role": "img", "aria-label": "Reactions: thumbs up, surprised"}}) {
+				<span>👍</span>
+				<span>😮</span>
+			}
+		}
+		@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+			@bubble.Content() {
+				Bold. Fine I'll add some tests. I'll let you know when
+				they're done.
+			}
+			@bubble.Reactions(bubble.ReactionsProps{Attributes: templ.Attributes{"role": "img", "aria-label": "Reactions: eyes, rocket, and 2 more"}}) {
+				<span>👀</span>
+				<span>🚀</span>
+				<span>+2</span>
+			}
+		}
+		@bubble.Bubble(bubble.Props{Variant: bubble.VariantDefault, Align: bubble.AlignEnd}) {
+			@bubble.Content() {
+				Tests passed on the first try. All 142 of them. Looking good!
+			}
+			@bubble.Reactions(bubble.ReactionsProps{Side: bubble.SideTop, Align: bubble.AlignStart, Attributes: templ.Attributes{"role": "img", "aria-label": "Reactions: party popper, clapping hands"}}) {
+				<span>🎉</span>
+				<span>👏</span>
+			}
+		}
+		@bubble.Bubble(bubble.Props{Variant: bubble.VariantDestructive}) {
+			@bubble.Content() {
+				Are you sure I can run this command?
+			}
+			@bubble.Reactions() {
+				@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeXs}) {
+					Yes, run it
+				}
+			}
+		}
+	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		// onClick: the example calls sonner's toast.success, which shadcn-templ
+		// does not port; the toast manager shows the same message.
+		document.currentScript.previousElementSibling.querySelector("button").addEventListener("click", () =>
+			window.templ.toast.add({ type: "success", description: "You clicked yes, running command..." }),
+		);
+	</script>
+}

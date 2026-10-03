@@ -1,0 +1,467 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/collapsible"
+	"github.com/axadrn/shadcn-templ/v2/components/example"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ BubbleExample() {
+	@example.Wrapper() {
+		@bubbleExampleSizes()
+		@bubbleExampleVariants()
+		@bubbleExampleAlignment()
+		@bubbleExampleGrouped()
+		@bubbleExampleCollapsible()
+		@bubbleExampleButtonLinks()
+		@bubbleExampleWithReactions()
+		@bubbleExampleReactionsButtons()
+	}
+}
+
+templ bubbleExampleVariants() {
+	@example.Example(example.Props{Title: "Variants"}) {
+		<div class="flex w-full max-w-md flex-col gap-8">
+			@bubble.Bubble() {
+				@bubble.Content() {
+					Default bubbles use the primary color for the active user side of a
+					chat.
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantSecondary}) {
+				@bubble.Content() {
+					Secondary bubbles are the standard neutral surface for assistant and
+					conversation content.
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+				@bubble.Content() {
+					Muted bubbles lower the emphasis for quiet system notes or for
+					displaying supporting content.
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantTinted, Align: bubble.AlignEnd}) {
+				@bubble.Content() {
+					Tinted bubbles use a softer primary tint when primary fill is too
+					strong.
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantOutline}) {
+				@bubble.Content() {
+					Outline bubbles can be used to frame message content and give it a
+					border.
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantDestructive}) {
+				@bubble.Content() {
+					Destructive bubbles flag errors or failed actions in a conversation.
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantGhost}) {
+				@bubble.Content() {
+					<span class="whitespace-pre-wrap">{ bubbleExampleGhostVariants }</span>
+				}
+			}
+		</div>
+	}
+}
+
+const bubbleExampleGhostVariants = `Ghost bubbles work for assistant text and other content that should not be framed.
+
+This is perfect for assistant messages that should not have a frame and can take the full width of the container.
+
+Ghost bubbles are full width and can take the full width of the container.
+`
+
+const bubbleExampleGhostCollapsible = `Ghost bubbles work for assistant text and other content that should not be framed.
+
+This is perfect for assistant messages that should not have a frame and can take the full width of the container.
+
+Use this for content that needs the whole row.`
+
+templ bubbleExampleSizes() {
+	@example.Example(example.Props{Title: "Sizes"}) {
+		<div class="flex w-full max-w-md flex-col gap-8">
+			@bubble.Bubble() {
+				@bubble.Content() {
+					This is a one line bubble.
+				}
+			}
+			@bubble.Bubble() {
+				@bubble.Content() {
+					This bubble has multiple lines. It should wrap to the next line and
+					you should see a different radius on the corners.
+				}
+			}
+			@bubble.Bubble() {
+				@bubble.Content() {
+					<p>This bubble has multiple lines.</p>
+					<p>
+						It should wrap to the next line and you should see a different
+						radius on the corners.
+					</p>
+					<p>Here is some more text to see how it wraps.</p>
+				}
+			}
+		</div>
+	}
+}
+
+templ bubbleExampleGrouped() {
+	@example.Example(example.Props{Title: "Grouped"}) {
+		<div class="flex w-full max-w-md flex-col gap-8">
+			@bubble.Group() {
+				@bubble.Bubble(bubble.Props{Variant: bubble.VariantSecondary}) {
+					@bubble.Content() {
+						I finished the audit pass.
+					}
+				}
+				@bubble.Bubble(bubble.Props{Variant: bubble.VariantSecondary}) {
+					@bubble.Content() {
+						The registry output looks clean, but I found one stale route.
+					}
+				}
+				@bubble.Bubble(bubble.Props{Variant: bubble.VariantSecondary}) {
+					@bubble.Content() {
+						Want me to remove it now?
+					}
+				}
+			}
+			@bubble.Group() {
+				@bubble.Bubble(bubble.Props{Variant: bubble.VariantTinted, Align: bubble.AlignEnd}) {
+					@bubble.Content() {
+						Yes, clean that up.
+					}
+				}
+				@bubble.Bubble(bubble.Props{Variant: bubble.VariantTinted, Align: bubble.AlignEnd}) {
+					@bubble.Content() {
+						Then rerun the registry build.
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ bubbleExampleCollapsible() {
+	@example.Example(example.Props{Title: "Collapsible"}) {
+		<div class="flex w-full max-w-md flex-col gap-8">
+			@collapsible.Collapsible(collapsible.Props{Open: utils.Ptr(false)}) {
+				@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted, Align: bubble.AlignEnd}) {
+					@bubble.Content(bubble.ContentProps{Class: "whitespace-pre-line"}) {
+						<div>{ bubbleCollapsiblePreview }</div>
+						@button.Button(button.Props{
+							Variant:    button.VariantLink,
+							Class:      "gap-1 p-0 text-muted-foreground",
+							Attributes: collapsible.Trigger(ctx),
+						}) {
+							Show more
+							@icon.ChevronDown(icon.Props{
+								Class:      "group-data-panel-open/button:rotate-180",
+								Attributes: templ.Attributes{"data-icon": "inline-end"},
+							})
+						}
+					}
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantGhost}) {
+				@bubble.Content() {
+					<span class="whitespace-pre-wrap">{ bubbleExampleGhostCollapsible }</span>
+				}
+			}
+		</div>
+		@bubbleExampleCollapsibleState(bubbleCollapsibleText, bubbleCollapsiblePreview)
+	}
+}
+
+// bubbleExampleCollapsibleState is the section's open state, as
+// bubbleCollapsibleState: the collapsible here wraps the bubble.
+templ bubbleExampleCollapsibleState(text, preview string) {
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const text = {{ text }};
+			const preview = {{ preview }};
+			const root = document.currentScript.previousElementSibling.querySelector('[data-slot="collapsible"]');
+			const content = root.querySelector('[data-slot="bubble-content"]');
+			const [label, trigger] = content.children;
+			root.addEventListener("collapsible-open-change", (e) => {
+				const open = e.detail.open;
+				window.templ.collapsible.setOpen(root, open);
+				label.textContent = open ? text : preview;
+				trigger.firstChild.textContent = open ? "Show less" : "Show more";
+			});
+		})();
+	</script>
+}
+
+templ bubbleExampleWithReactions() {
+	@example.Example(example.Props{Title: "Reaction Placement"}) {
+		<div class="flex w-full max-w-md flex-col gap-12">
+			@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+				@marker.Content() {
+					side=bottom align=end
+				}
+			}
+			@bubble.Bubble() {
+				@bubble.Content() {
+					This is a one line message.
+				}
+				@bubble.Reactions(bubble.ReactionsProps{Side: bubble.SideBottom, Align: bubble.AlignEnd, Attributes: templ.Attributes{"role": "img", "aria-label": "Reaction: thumbs up"}}) {
+					<span>👍</span>
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantSecondary, Align: bubble.AlignEnd}) {
+				@bubble.Content() {
+					A longer message that wraps across lines so the reaction offset is
+					easier to inspect.
+				}
+				@bubble.Reactions(bubble.ReactionsProps{Side: bubble.SideBottom, Align: bubble.AlignStart, Attributes: templ.Attributes{"role": "img", "aria-label": "Reactions: thumbs up, surprised"}}) {
+					<span>👍</span>
+					<span>😮</span>
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantTinted}) {
+				@bubble.Content() {
+					A longer message that wraps across lines so the reaction offset is
+					easier to inspect.
+				}
+				@bubble.Reactions(bubble.ReactionsProps{Side: bubble.SideBottom, Align: bubble.AlignEnd, Attributes: templ.Attributes{"role": "img", "aria-label": "Reactions: thumbs up, surprised, fire, eyes, and 8 more"}}) {
+					<span>👍</span>
+					<span>😮</span>
+					<span>🔥</span>
+					<span>👀</span>
+					<span>+8</span>
+				}
+			}
+			@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+				@marker.Content() {
+					side=bottom align=start
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantSecondary}) {
+				@bubble.Content() {
+					This is a one line message.
+				}
+				@bubble.Reactions(bubble.ReactionsProps{Side: bubble.SideBottom, Align: bubble.AlignStart, Attributes: templ.Attributes{"role": "img", "aria-label": "Reaction: fire"}}) {
+					<span>🔥</span>
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantSecondary}) {
+				@bubble.Content() {
+					A longer message that wraps across lines so the reaction offset is
+					easier to inspect.
+				}
+				@bubble.Reactions(bubble.ReactionsProps{Side: bubble.SideBottom, Align: bubble.AlignStart, Attributes: templ.Attributes{"role": "img", "aria-label": "Reactions: thumbs up, surprised, fire, eyes"}}) {
+					<span>👍</span>
+					<span>😮</span>
+					<span>🔥</span>
+					<span>👀</span>
+				}
+			}
+			@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+				@marker.Content() {
+					side=top align=start
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantSecondary}) {
+				@bubble.Content() {
+					This is a one line message.
+				}
+				@bubble.Reactions(bubble.ReactionsProps{Side: bubble.SideTop, Align: bubble.AlignStart, Attributes: templ.Attributes{"role": "img", "aria-label": "Reaction: fire"}}) {
+					<span>🔥</span>
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantSecondary}) {
+				@bubble.Content() {
+					A longer message that wraps across lines so the reaction offset is
+					easier to inspect.
+				}
+				@bubble.Reactions(bubble.ReactionsProps{Side: bubble.SideTop, Align: bubble.AlignStart, Attributes: templ.Attributes{"role": "img", "aria-label": "Reactions: thumbs up, surprised, fire, eyes"}}) {
+					<span>👍</span>
+					<span>😮</span>
+					<span>🔥</span>
+					<span>👀</span>
+				}
+			}
+			@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+				@marker.Content() {
+					side=bottom align=end
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+				@bubble.Content() {
+					This is a one line message.
+				}
+				@bubble.Reactions(bubble.ReactionsProps{Side: bubble.SideTop, Align: bubble.AlignEnd, Attributes: templ.Attributes{"role": "img", "aria-label": "Reaction: thumbs up"}}) {
+					<span>👍</span>
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+				@bubble.Content() {
+					A longer message that wraps across lines so the reaction offset.
+				}
+				@bubble.Reactions(bubble.ReactionsProps{Side: bubble.SideTop, Align: bubble.AlignEnd, Class: "px-1.5 py-0.5", Attributes: templ.Attributes{"role": "img", "aria-label": "Reactions: thumbs up, surprised, fire, eyes"}}) {
+					<span>👍</span>
+					<span>😮</span>
+					<span>🔥</span>
+					<span>👀</span>
+				}
+			}
+		</div>
+	}
+}
+
+templ bubbleExampleReactionsButtons() {
+	@example.Example(example.Props{Title: "Reactions Buttons"}) {
+		<div class="flex w-full max-w-md flex-col gap-8">
+			@bubble.Bubble() {
+				@bubble.Content() {
+					This is a one line message.
+				}
+				@bubble.Reactions() {
+					@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeXs}) {
+						Button
+					}
+				}
+			}
+			@bubble.Bubble(bubble.Props{Align: bubble.AlignEnd}) {
+				@bubble.Content() {
+					This is a one line message.
+				}
+				@bubble.Reactions(bubble.ReactionsProps{Align: bubble.AlignStart}) {
+					@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeIconXs}) {
+						🎉
+					}
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantTinted}) {
+				@bubble.Content() {
+					We are going to the movies first then dinner. Are you in?
+				}
+				@bubble.Reactions(bubble.ReactionsProps{Class: "gap-1 bg-background"}) {
+					@button.Button(button.Props{Variant: button.VariantSecondary, Size: button.SizeIconXs, Attributes: templ.Attributes{"aria-label": "Thumbs up"}}) {
+						@icon.ThumbsUp()
+					}
+					@button.Button(button.Props{Variant: button.VariantSecondary, Size: button.SizeIconXs, Attributes: templ.Attributes{"aria-label": "Thumbs down"}}) {
+						@icon.ThumbsDown()
+					}
+				}
+			}
+		</div>
+		<script nonce={ templ.GetNonce(ctx) }>
+			(() => {
+				// onClick: the example calls sonner's toast, which shadcn-templ does
+				// not port; the toast manager shows the same message.
+				const messages = [
+					"You clicked the button in the bubble reaction",
+					"Confetti!",
+					"You agree!",
+					"You disagree!",
+				];
+				const buttons = document.currentScript.previousElementSibling.querySelectorAll("button");
+				buttons.forEach((button, i) =>
+					button.addEventListener("click", () => window.templ.toast.add({ description: messages[i] })),
+				);
+			})();
+		</script>
+	}
+}
+
+templ bubbleExampleAlignment() {
+	@example.Example(example.Props{Title: "Alignment"}) {
+		<div class="flex w-full max-w-md flex-col gap-8">
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+				@bubble.Content() {
+					This bubble is aligned to the start.
+				}
+			}
+			@bubble.Bubble(bubble.Props{Align: bubble.AlignEnd}) {
+				@bubble.Content() {
+					This bubble is aligned to the end.
+				}
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+				@bubble.Content() {
+					This multiline bubble is aligned to the start. The corners should
+					adjust when the text wraps to show the grouped side of the
+					conversation.
+				}
+			}
+			@bubble.Bubble(bubble.Props{Align: bubble.AlignEnd}) {
+				@bubble.Content() {
+					This multiline bubble is aligned to the end. It should sit on the
+					opposite side with the matching corner radius for wrapped text.
+				}
+			}
+		</div>
+	}
+}
+
+var bubbleExampleQuickReplies = []struct{ Label, Message string }{
+	{"I need help with my account.", "I need help with my account."},
+	{"I forgot my password.", "I forgot my password."},
+	{"I have another question. I'd like to talk to a human. Can you help me?", "I have another question."},
+}
+
+templ bubbleExampleButtonLinks() {
+	@example.Example(example.Props{Title: "Button & Links"}) {
+		<div class="flex w-full max-w-md flex-col gap-8">
+			@bubble.Bubble() {
+				@bubble.Content(bubble.ContentProps{Href: "#"}) {
+					This bubble is a link.
+				}
+			}
+			// BubbleContent render={<button type="button" />}: the button
+			// carries the content's state.
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantSecondary}) {
+				<button type="button" class={ bubble.ContentClass(bubble.ContentProps{}) } data-slot="bubble-content">
+					This one is a button you can click.
+				</button>
+			}
+			@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+				<button type="button" class={ bubble.ContentClass(bubble.ContentProps{}) } data-slot="bubble-content">
+					You can also do tinted buttons. Even ones that are multilines.
+				</button>
+			}
+			@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+				@marker.Content() {
+					Chat Suggestions
+				}
+			}
+			@bubble.Bubble() {
+				@bubble.Content() {
+					How can I help you today?
+				}
+			}
+			@bubble.Group() {
+				for _, reply := range bubbleExampleQuickReplies {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantOutline, Align: bubble.AlignEnd}) {
+						<button type="button" class={ bubble.ContentClass(bubble.ContentProps{Class: "border-dashed border-primary"}) } data-slot="bubble-content">
+							{ reply.Label }
+						</button>
+					}
+				}
+			}
+		</div>
+		@bubbleExampleQuickRepliesToast(bubbleExampleQuickReplies)
+	}
+}
+
+// bubbleExampleQuickRepliesToast is the quick replies' onClick: the example
+// calls sonner's toast, which shadcn-templ does not port; the toast manager
+// shows the same message.
+templ bubbleExampleQuickRepliesToast(replies []struct{ Label, Message string }) {
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const replies = {{ replies }};
+			const group = document.currentScript.previousElementSibling.querySelector('[data-slot="bubble-group"]');
+			group.querySelectorAll("button").forEach((button, i) =>
+				button.addEventListener("click", () => window.templ.toast.add({ description: replies[i].Message })),
+			);
+		})();
+	</script>
+}
