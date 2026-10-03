@@ -275,8 +275,9 @@ Each new component gets its templ (and script), its `registry.json` item, its do
 
 - **Scroll area.** A port of Base UI's ScrollArea (Root, Viewport, Scrollbar, Thumb, Corner) with shadcn's ScrollArea and ScrollBar: the viewport scrolls natively without its scrollbar (`base-ui-disable-scrollbar` in `<head>`), the parts render the overflow state (`data-has-overflow-*`, `data-overflow-*-start`/`-end`, `data-scrolling`, `data-hovering`), the thumbs follow the scroll position, a press on the track jumps there, the thumb drags, the scrollbars and the corner mount once there is overflow. Like shadcn, the children render inside the viewport, so a horizontal `ScrollBar` sits in it. Scenarios: hover, wheel, rest, Tab.
 - **Native select.** shadcn's NativeSelect, NativeSelectOption and NativeSelectOptGroup; `Class` styles the wrapper, `ID` and `Attributes` land on the select. The dialog and field examples render it instead of copied markup.
+- **Marker.** shadcn's Marker, MarkerIcon and MarkerContent; `useRender`'s state renders `data-slot` and `data-variant`, `Href` is the render prop with a link, `marker.Variants` the classes for a button of the example's own. The examples render in base-rhea like upstream's, the docs previews carry `theme-blue` (ported from shadcn's legacy themes). `marker-link-button` and the create example call sonner's `toast` upstream, ours the toast manager (sonner is out of scope).
 - **Harness.** `compare.mjs` waits for the visible images and knows a `wheel` step.
 
-Checks so far: `go test ./...` green (the registry and inliner counts include the two items), `scroll-area` and `native-select` families pass every check in both engines, their docs and create pages load without page errors.
+Checks so far: `go test ./...` green (the registry and inliner counts include the new items), the `scroll-area`, `native-select` and `marker` families pass every check in both engines, their docs and create pages load without page errors.
 
 ## Planner review

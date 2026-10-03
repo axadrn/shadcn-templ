@@ -2577,6 +2577,21 @@
       "categories": [
         "form-input"
       ]
+    },
+    {
+      "name": "marker",
+      "type": "registry:ui",
+      "title": "Marker",
+      "description": "Displays an inline status, system note, bordered row, or labeled separator in a conversation.",
+      "files": [
+        {
+          "path": "components/marker/marker.templ",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "display-media"
+      ]
     }
   ]
 }

@@ -4857,6 +4857,7 @@ func createRegistryNavItems() []createOption {
 		{Value: "item-example", Label: "Item"},
 		{Value: "kbd-example", Label: "Kbd"},
 		{Value: "label-example", Label: "Label"},
+		{Value: "marker-example", Label: "Marker"},
 		{Value: "native-select-example", Label: "Native Select"},
 		{Value: "pagination-example", Label: "Pagination"},
 		{Value: "popover-example", Label: "Popover"},
@@ -5078,7 +5079,7 @@ func createActionMenuItem(name, title, keywords string, checked bool) templ.Comp
 			var templ_7745c5c3_Var224 string
 			templ_7745c5c3_Var224, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 1068, Col: 9}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 1069, Col: 9}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var224))
 			if templ_7745c5c3_Err != nil {

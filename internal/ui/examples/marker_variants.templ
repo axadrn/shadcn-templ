@@ -1,0 +1,25 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+)
+
+templ MarkerVariantsDemo() {
+	<div class="flex w-full max-w-sm flex-col gap-8 py-12">
+		@marker.Marker() {
+			@marker.Content() {
+				A default marker for inline notes.
+			}
+		}
+		@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+			@marker.Content() {
+				A separator marker
+			}
+		}
+		@marker.Marker(marker.Props{Variant: marker.VariantBorder}) {
+			@marker.Content() {
+				A border marker for row boundaries.
+			}
+		}
+	</div>
+}
