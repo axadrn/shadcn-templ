@@ -41,10 +41,18 @@ templ ItemImage() {
 					Attributes: templ.Attributes{"role": "listitem"},
 				}) {
 					@item.Media(item.MediaProps{Variant: item.MediaVariantImage}) {
+						// next/image width={32} height={32}: the img it renders.
 						<img
-							src={ "https://avatar.vercel.sh/" + song.Title }
 							alt={ song.Title }
+							loading="lazy"
+							width="32"
+							height="32"
+							decoding="async"
+							data-nimg="1"
 							class="object-cover grayscale"
+							style="color:transparent"
+							srcset={ "https://avatar.vercel.sh/" + song.Title + " 1x" }
+							src={ "https://avatar.vercel.sh/" + song.Title }
 						/>
 					}
 					@item.Content() {

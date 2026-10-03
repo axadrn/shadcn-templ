@@ -33,10 +33,18 @@ templ ItemHeaderDemo() {
 			for _, model := range models {
 				@item.Item(item.Props{Variant: item.VariantOutline}) {
 					@item.Header() {
+						// next/image width={128} height={128}: the img it renders.
 						<img
-							src={ model.Image }
 							alt={ model.Name }
+							loading="lazy"
+							width="128"
+							height="128"
+							decoding="async"
+							data-nimg="1"
 							class="aspect-square w-full rounded-sm object-cover"
+							style="color:transparent"
+							srcset={ model.Image + " 1x" }
+							src={ model.Image }
 						/>
 					}
 					@item.Content() {

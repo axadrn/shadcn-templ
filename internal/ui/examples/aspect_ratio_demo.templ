@@ -7,10 +7,17 @@ templ AspectRatioDemo() {
 		Ratio: "16/9",
 		Class: "w-full max-w-sm rounded-lg bg-muted",
 	}) {
+		// next/image with fill: the img it renders.
 		<img
-			src="/assets/img/aspect_ratio_placeholder.jpeg"
 			alt="Photo"
-			class="absolute inset-0 h-full w-full rounded-lg object-cover grayscale dark:brightness-20"
+			loading="lazy"
+			decoding="async"
+			data-nimg="fill"
+			class="rounded-lg object-cover grayscale dark:brightness-20"
+			style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent"
+			sizes="100vw"
+			srcset="https://avatar.vercel.sh/shadcn1 1x"
+			src="https://avatar.vercel.sh/shadcn1"
 		/>
 	}
 }
