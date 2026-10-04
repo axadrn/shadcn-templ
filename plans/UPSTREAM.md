@@ -22,3 +22,5 @@ Moving the pin is its own plan.
 ## Final run
 
 `plans/parity-components.md` task 18, 2026-10-04, Chromium, against `parity/reference-next.sh` (the real `next build` of `apps/v4`): 557 examples, 5789 checks (DOM, focus, scroll lock, pixels, console and network errors per step), 5729 pass, 60 fail. Every fail is one of the accepted differences above, or an Escape step that passes alone and failed only with three compares in parallel (`alert-dialog-media`, `alert-dialog-small-media`, `dialog-demo`, `dialog-scrollable-content`, `sheet-no-close-button`, `drawer-nested`). `parity/errors.mjs`: 705 pages (every docs page and every preview), no page error, console error or warning, failed request or HTTP error.
+
+Release run for `v2.0.0-beta.11`, 2026-10-04, after templ `v0.3.1070` regenerated every template: 5873 checks, 5820 pass, 53 fail, every fail an accepted difference above or a step that passes alone. `parity/errors.mjs`: 705 pages without an error.
