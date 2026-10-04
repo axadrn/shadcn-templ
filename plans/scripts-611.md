@@ -2,7 +2,7 @@
 
 - **Planner**: Claude
 - **Executor**: Codex
-- **Status**: ready
+- **Status**: done
 
 ## Context
 
@@ -74,7 +74,7 @@ Checks: `go test ./cmd/shadcn-templ/...`, `task dev` with a deliberate edit, `gi
 
 ### 3. The shipped surface shrinks to `scripts.templ`
 
-- [ ] Done
+- [x] Done
 
 Delete `components/scripts.go`, `components/embed.go` and `cmd/shadcn-templ/templates/templ-app/components/scripts.go.tmpl`, `.../embed.go.tmpl`. `components/scripts.templ` and its `.tmpl` twin become the hand written half from Decisions: the script tag against `bundleSrc`, nothing else, with a comment naming `scripts_bundle.go` as where that constant comes from. The `developmentComponentsDir` rewrite in `transformContent` goes away with the file it targeted, and no rewrite replaces it. In the `scripts` registry item, `components/scripts.go` and `components/embed.go` are replaced by `components/scripts_bundle.go`. `components/scripts_test.go`: render `Scripts()` and assert the tag carries the generated `bundleSrc` and the nonce, replacing the handler tests. Two existing tests assert the old shipped surface and have to follow: `cmd/shadcn-templ/utils/updaters/update_files_test.go:29,42,68` carries `components/scripts.go` as its fixture and asserts its target path, and `cmd/shadcn-templ/commands/add_scripts_test.go:84,89` asserts `internal/design/scripts.go` and `internal/design/embed.go` are written - both move to `scripts_bundle.go`, and the latter is what proves the package clause of Decisions. The comment at `update_files.go:188` names `ScriptsHandler` and needs repointing. The `GET /components/{bundle}` route leaves `cmd/shadcn-templ/templates/templ-app/main.go.tmpl:69` along with the `components` import if it is then unused.
 
@@ -175,3 +175,6 @@ Reviewed the six commits as a whole, then ran the work end to end rather than tr
 1. `UpdateScripts` with no component JS at all writes a zero byte asset and a manifest pointing at it. `add` only calls it behind `HasJS()` or an existing manifest, so this is reachable only through a bare `shadcn-templ bundle` in a project with no scripts yet. Harmless, slightly odd.
 2. The builder's atomic write, the `.min.js` skip, the `*/*.js` shape and the alias aware package clause all match Decisions, and the temp files (`.bundle-*`) carry no `.js` suffix, so the watcher cannot retrigger itself on its own writes.
 3. Task 2's log records a deviation worth keeping visible: `add` rebuilds whenever the tree contains the manifest, not only when JS bytes changed, so a repeated `add --overwrite` cannot leave the registry's URL and hash in a local project. That is the right call and it has a regression test.
+
+**Close, 2026-10-04.** Task 3's box is checked: its only open check was the `positioning_test.go` failure fixed above, `go test ./...` is green. The gzip finding is accepted as documented (`installation.md`: compression belongs to the asset server or proxy), owner decision to work through plans without check-ins. Status done.
+

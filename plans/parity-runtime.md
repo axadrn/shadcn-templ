@@ -3,7 +3,7 @@
 - **Planner**: Claude
 - **Executor**: Claude
 - **Reviewer**: none, owner decision 2026-09-25
-- **Status**: ready
+- **Status**: done
 - **Commits**: one per task on the branch, owner decision 2026-09-25
 - **Branch**: `feat/parity-runtime` from `main` 614b9d5c (parity-attributes merged as PR #619)
 
@@ -421,3 +421,12 @@ The changelog entry `2026-09-parity-runtime.md` lists what users notice.
 Checks: a11y 30 of 30, behavior 30 of 30, `go test ./...` green (inliner count 48), in chromium and webkit. `compare.mjs` 392 pass and 75 fail in both engines instead of 386 and 81, and every one of the 75 is a plan 3 decision: 65 trigger slot names, 4 on the select's null item, 3 on the slider thumb's input, 2 on the select's listbox role, 1 on the `combobox-popup` trigger's role. Against task 1's baseline of 308 and 159 that is 84 closed. `compare.mjs dismiss` 39, `compare.mjs hover` unchanged, `escape.mjs` 0 failures, `transition.mjs` and `position.mjs` unchanged apart from sampling jitter, `htmx.mjs` 110 of 110 in both engines. On the reference and here the tooltip and the hover card open on keyboard focus, close on Escape, reopen on a new focus and the tooltip closes on a press on its trigger, alike in both engines.
 
 ## Planner review
+
+Reviewed 2026-10-04 against the Executor log and the tree at 19df7525. Verdict: tasks 1 to 11 pass their "done when" lines.
+
+- The greps hold on `main`: `new MutationObserver` only in `baseui/lifecycle.js` and `progress/progress.js`, `_templPortalOwner` only in `baseui/portal.js` and `baseui/lifecycle.js`, `computePosition` only in the anchor positioning block and the vendored Floating UI, `showModal` nowhere. `go test ./...` green.
+- The changelog entry `2026-09-parity-runtime.md` exists.
+- Deviation from the header: the commits went onto `main` directly instead of `feat/parity-runtime`. One commit per task held, so the history reads the same. Accepted.
+- The 75 remaining `compare.mjs` differences are all written into `plans/parity-components.md` Decisions and close there.
+- `tmp/` was not kept on the current machine. `parity-components` task 1 rebuilds the reference app and the harness.
+
