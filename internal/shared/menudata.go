@@ -11,7 +11,7 @@ import (
 // (and their raw markdown under /docs/<slug>.md). cmd/docs registers the
 // routes from this list and cmd/sitemap generates the sitemap from it.
 var DocSlugs = []string{
-	"introduction", "installation", "components-json", "package-imports", "theming", "typeset", "dark-mode", "cli", "import-workflow",
+	"introduction", "installation", "components-json", "package-imports", "theming", "typeset", "dark-mode", "cli", "monorepo", "import-workflow",
 	"utils/scroll-fade", "utils/shimmer",
 	"registry", "registry/getting-started", "registry/registry-json", "registry/registry-item-json",
 }
@@ -178,6 +178,11 @@ var Sections = []Section{
 			{
 				Text: "CLI",
 				Href: "/docs/cli",
+			},
+			// Monorepo follows CLI, per shadcn's (root)/meta.json order.
+			{
+				Text: "Monorepo",
+				Href: "/docs/monorepo",
 			},
 			// Changelog before llms.txt, per shadcn's (root)/meta.json order.
 			{

@@ -55,7 +55,7 @@ Today the CLI assumes one app per module. `utils.ModulePath(cwd)` reads `cwd/go.
 
 ### 4. Docs
 
-- [ ] Done
+- [x] Done
 
 `internal/service/content/docs/monorepo.md`, slug and sidebar link in `internal/shared/menudata.go`, links from `components-json.md` and `cli.md`. Done when the page renders through the docs slug list. Checks: `go test ./internal/...`.
 
@@ -78,3 +78,9 @@ Build the CLI, scratch module with two apps under `cmd/`, `init`/`add`/`bundle` 
 ### Task 3
 
 `init` needed no change to find the module (it goes through `ModulePath` and `ResolveConfigPaths`); new is the bundle step: when `<components>/*/*.js` exist after the base install, `init` runs `UpdateScripts`, so an app joining a module with installed components gets its own bundle file. A single-app re-init with components now rebuilds the bundle too, which is idempotent. `init --template` refuses inside a module also from a subdirectory now (walk up), scaffolding outside a module is unchanged. File summaries, the CSS line and vendored stylesheets print through `utils.DisplayPath`. Comments in `add.go` and `init.go` updated (`--monorepo` stays dropped: it scaffolds a Turborepo workspace, a Go module needs none). Test `TestMonorepoAppsShareComponents` (in-process registry): template refused in `cmd/servicea`, init nova in servicea, add dialog, init vega in serviceb, both apps with module aliases, own CSS with the theme, own style, shared `components/` and `utils/` only at the root, the same bundle in both `assets/js`, the manifest naming it; add popover from serviceb renews both bundles and the manifest; bundle from servicea passes. `go vet` and `go test ./cmd/shadcn-templ/...` green.
+
+### Task 4
+
+`internal/service/content/docs/monorepo.md` follows shadcn's monorepo page (Getting started steps, File Structure, Requirements) with Go usage, plus a Scripts section for the shared bundle. Slug `monorepo` in `DocSlugs` and the Get Started sidebar link after CLI, per shadcn's `(root)/meta.json`. `components-json.md`: `tailwind.css` and `scripts.dir` are relative to the directory of `components.json`, aliases resolve against the `go.mod` directory, the shared `scripts.path` constraint. `cli.md`: go.mod in cwd or a parent, bundle covers every sharing app. Requirement 4 mirrors shadcn's "same style, iconLibrary and baseColor", minus baseColor: colors live in each app's CSS. Checked with a throwaway test (deleted) that `DocsService.GetPage("monorepo")` parses with the expected TOC.
+
+Environment note: this worktree has no generated `internal/**/*_templ.go` (gitignored, written by the watchers). For `go build ./...` and `go test ./internal/...` they were copied from the main checkout where the `.templ` source is identical; for `internal/ui/modules/code.templ` and `code_figure.templ`, whose main checkout source carries another session's uncommitted `Value:` line, the copied output minus that line was used. Nothing of it is tracked. `go test` needs `GOTMPDIR` outside any Go module (here `$CLAUDE_JOB_DIR/tmp/gotmp`, since /tmp ran out of quota), because the template scaffold test refuses to scaffold inside a module, which now includes parent directories. `go build ./...`, `go vet ./cmd/shadcn-templ/...`, `go test ./cmd/shadcn-templ/... ./internal/...` green.
