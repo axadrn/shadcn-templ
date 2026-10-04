@@ -43,6 +43,9 @@ export default defineConfig({
       { find: /^next\/font\/google$/, replacement: path.join(S, "font.ts") },
       { find: /^next\/navigation$/, replacement: path.join(S, "navigation.ts") },
       { find: /^server-only$/, replacement: path.join(S, "empty.ts") },
+      // tsconfig.json's temporary aliases for the create sources.
+      { find: /^@\/app\/\(create\)\//, replacement: V4 + "/app/(app)/(create)/" },
+      { find: /^@\/app\/\(app\)\/create\//, replacement: V4 + "/app/(app)/(create)/" },
       { find: /^@\//, replacement: V4 + "/" },
     ],
   },

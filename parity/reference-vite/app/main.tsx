@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { ActiveThemeProvider } from "@/components/active-theme"
 import { TooltipProvider as BaseTooltipProvider } from "@/registry/bases/base/ui/tooltip"
 import { Toaster as BaseToaster } from "@/styles/base-nova/ui/toast"
+import { Toaster } from "@/registry/bases/radix/ui/sonner"
+import { TooltipProvider as RadixTooltipProvider } from "@/registry/bases/radix/ui/tooltip"
 import "./ref.css"
 
 // Pendant of app/layout.tsx around (view)/examples/[base]/[name]/page.tsx,
@@ -30,8 +32,11 @@ if (!load) {
     <ThemeProvider>
       <ActiveThemeProvider>
         <BaseTooltipProvider delay={0}>
-          <Example />
-          <BaseToaster />
+          <RadixTooltipProvider delayDuration={0}>
+            <Example />
+            <Toaster position="top-center" />
+            <BaseToaster />
+          </RadixTooltipProvider>
         </BaseTooltipProvider>
       </ActiveThemeProvider>
     </ThemeProvider>
