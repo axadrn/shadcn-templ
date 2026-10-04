@@ -99,6 +99,17 @@
       "key": "Enter"
     }
   ],
+  "combobox-disabled": [
+    {
+      "click": "input[role=combobox], [role=combobox]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Enter"
+    }
+  ],
   "family:combobox": [
     {
       "click": "input[role=combobox], [role=combobox]"
@@ -111,6 +122,12 @@
     },
     {
       "key": "Enter"
+    },
+    {
+      "click": "input[role=combobox], [role=combobox]"
+    },
+    {
+      "click": "[data-slot=combobox-item]"
     }
   ],
   "family:popover": [

@@ -688,6 +688,17 @@
     }
   }
 
+  // ComboboxItem's onPointerDownCapture and onMouseDown: pressing an item
+  // never takes the focus from the input (iOS Safari sends a synthetic
+  // mousedown for a tap without a pointerdown).
+  function keepInputFocus(e) {
+    if (!(e.target instanceof Element)) return;
+    const item = e.target.closest(ITEM);
+    if (item && positionerOf(item)) e.preventDefault();
+  }
+  document.addEventListener("pointerdown", keepInputFocus, true);
+  document.addEventListener("mousedown", keepInputFocus);
+
   document.addEventListener("pointerdown", (e) => {
     if (e.button !== 0 || !(e.target instanceof Element)) return;
 
