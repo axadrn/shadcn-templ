@@ -533,7 +533,7 @@
   ],
   "attachment-trigger": [
     {
-      "click": "[data-slot=dialog-trigger]"
+      "click": "[data-slot=attachment-trigger]"
     },
     {
       "key": "Tab"

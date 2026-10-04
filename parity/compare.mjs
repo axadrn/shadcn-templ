@@ -173,7 +173,11 @@ async function compareExample(name) {
     // A dev server that is restarting after an edit refuses the connection or
     // answers 502: wait for it (up to 5 minutes) instead of comparing nothing.
     for (let tries = 0; tries < 100; tries++) {
-      const res = await p.goto(base + name, { waitUntil: "load", timeout: 60000 }).catch(() => null);
+      const res = await p.goto(base + name, { waitUntil: "commit", timeout: 60000 }).catch(() => null);
+      // Chromium resets the pointer on a navigation and sends a mouseover at
+      // 0,0 with the first layout: park it again before that.
+      await p.mouse.move(1279, 899).catch(() => {});
+      await p.waitForLoadState("load", { timeout: 60000 }).catch(() => {});
       if (res && res.status() !== 502 && res.status() !== 503) break;
       await p.waitForTimeout(3000);
     }

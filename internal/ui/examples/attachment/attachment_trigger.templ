@@ -4,6 +4,7 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/components/attachment"
 	"github.com/axadrn/shadcn-templ/v2/components/dialog"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/internal/ui/examples/shared"
 	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
@@ -31,9 +32,10 @@ templ AttachmentTrigger() {
 					}
 				}
 				@attachment.Trigger(attachment.TriggerProps{
+					// A server component: the rendered AttachmentTrigger keeps its slot.
 					Attributes: utils.MergeAttributes(
-						dialog.Trigger(ctx),
-						templ.Attributes{"data-slot": "dialog-trigger", "tabindex": "0", "aria-label": "Preview research-summary.pdf"},
+						shared.ServerRendered(dialog.Trigger(ctx)),
+						templ.Attributes{"aria-label": "Preview research-summary.pdf"},
 					),
 				})
 			}
