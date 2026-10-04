@@ -2,7 +2,7 @@
 
 - **Planner**: Claude
 - **Executor**: Claude
-- **Status**: in progress
+- **Status**: review
 - **Branch**: feat/init-monorepo (from feat/parity-components)
 
 ## Context
@@ -57,7 +57,7 @@ monorepo-623 taught the CLI to run in an app directory below `go.mod` (aliases a
 
 ### 3. End to end smoke test
 
-- [ ] Done
+- [x] Done
 
 Build the CLI, `init demo --monorepo` and `add button dialog --cwd apps/web` against the local registry in a scratch dir, `go mod tidy`, `task build`, run `apps/web/bin/app` on a free port, curl `/` and the hashed bundle. Done when the commands and results are recorded below.
 
@@ -74,3 +74,39 @@ The worktree's generated `*_templ.go` (gitignored) were copied from the main che
 ### Task 2
 
 `monorepo.md`: intro names `apps/web` and `apps/admin` (or `cmd/...`, the CLI does not care), Getting started opens with `shadcn-templ init my-app --monorepo` and its next steps, "Or start from an existing module" keeps the per app `init` path, Add components and Import components on `apps/web` and the `my-app` module, a new "Add another app" step (copy `apps/web` without `components.json`, fix import paths, `init --cwd apps/admin`, one more include in the root Taskfile). File Structure is the scaffold's. Requirements gain 3: each app's CSS needs `@source` to the root components (measured in the task 3 smoke test: without it the scaffold's `output.css` drops from 67127 to 9164 bytes and no component class is in it; this holds for the existing module path as well, which monorepo-623 had not covered). Scripts mentions the per app and root `task build`. `cli.md` init: the new-project paragraph with `-t templ` and `--monorepo` examples, the usage line with `[name]`, `--template`, `--monorepo` and both flags in the options. `installation.md` Create Project: one line pointing to the monorepo page. A throwaway test (deleted) parsed `monorepo`, `cli`, `installation` through `DocsService.GetPage`, the monorepo TOC lists the five steps. `go test ./internal/...` green.
+
+### Task 3
+
+Scratch `S=$CLAUDE_JOB_DIR/tmp/initmono` (outside any module), `GOTMPDIR` and `TMPDIR` in the job dir, registry `R=http://localhost:8090` (the running docs server, not started or stopped here). Scripts `smoke1.sh` to `smoke4.sh` in `$S`.
+
+```shell
+go build -o $S/cli ./cmd/shadcn-templ
+cd $S && $S/cli init demo --monorepo --registry $R
+  # Creating a new templ monorepo project in demo. ... Next steps: cd demo, go mod tidy, task dev
+cd demo && $S/cli add button dialog --cwd apps/web --registry $R
+  # components/... at the module root, Bundle: assets/js/shadcn-templ-37c1316ab4a74363.js
+  # tree: go.mod, Taskfile.yml, Dockerfile, .dockerignore, .gitignore, utils/shadcn-templ.go, components/{scripts.templ,
+  # scripts_bundle.go,button,dialog,componentexample,...}, apps/web/{components.json,main.go,Taskfile.yml,layouts,pages,
+  # assets/{assets.go,css/{globals,tw-animate,shadcn-tailwind}.css,js/shadcn-templ-37c1316ab4a74363.js}}
+  # apps/web/components.json: aliases demo/components, demo/utils
+go mod tidy && task build
+  # FAILS at web:build 'go tool shadcn-templ bundle': "no go.mod found at .../demo/apps/web"
+  # tidy pins the tool to the published v2.0.0-beta.10, which predates monorepo-623 (go.mod walk up)
+go mod edit -replace github.com/axadrn/shadcn-templ/v2=<this worktree> && go mod tidy
+  # tools: templ v0.3.1070, shadcn-templ v2.0.0-beta.10 => this branch
+task build
+  # [web:build] tailwindcss --minify, go tool shadcn-templ bundle (Bundle: assets/js/shadcn-templ-37c1316ab4a74363.js),
+  # go tool templ generate -path ../.. (updates=18, root components and app), go build -o bin/app . -> apps/web/bin/app OK
+cd $S && PORT=8197 demo/apps/web/bin/app &     # run from outside the project, assets from the embed
+curl http://localhost:8197/                                   # 200, <script ... src="/assets/js/shadcn-templ-37c1316ab4a74363.js">
+curl http://localhost:8197/assets/js/shadcn-templ-37c1316ab4a74363.js  # 200, 385830 bytes, Cache-Control: public, max-age=31536000, immutable
+curl http://localhost:8197/assets/css/output.css              # 200
+kill <pid of that app>                                        # stopped, only that process
+$S/cli init --monorepo --registry $R                          # default name templ-monorepo, exit 0 (removed after)
+```
+
+`@source` check: the same Tailwind build in `apps/web` without the `@source` line gives 9164 bytes instead of 67127 and lacks every component class (`rounded-4xl`: 0 hits), so the line is required, see task 2.
+
+Not run: `task dev` (its templ proxy defaults to port 7331, off limits here) and the Docker build. `git status` in the repo clean after the smoke test.
+
+Open: the scaffold's `task build` needs a shadcn-templ release that contains monorepo-623; with the current published v2.0.0-beta.10 the `go tool shadcn-templ bundle` step fails in `apps/web` until the next release is tagged (the single-app scaffold is unaffected).
