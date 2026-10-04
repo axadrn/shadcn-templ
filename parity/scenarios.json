@@ -675,5 +675,142 @@
       "click": "[data-slot=carousel-previous]",
       "wait": 1200
     }
+  ],
+  "sidebar-header": [
+    {
+      "click": "[aria-haspopup=menu]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "sidebar-footer": [
+    {
+      "click": "[aria-haspopup=menu]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "sidebar-menu-action": [
+    {
+      "click": "[aria-haspopup=menu]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "sidebar-controlled": [
+    {
+      "click": "[data-slot=sidebar-inset] [data-slot=button]"
+    },
+    {
+      "click": "[data-slot=sidebar-inset] [data-slot=button]"
+    }
+  ],
+  "sidebar-group-action": [
+    {
+      "click": "[data-slot=sidebar-group-action]"
+    }
+  ],
+  "sidebar-group-collapsible": [
+    {
+      "click": "[aria-expanded]"
+    }
+  ],
+  "sidebar-menu-collapsible": [
+    {
+      "click": "[aria-expanded]"
+    }
+  ],
+  "date-picker-natural-language": [
+    {
+      "click": "#date-optional"
+    },
+    {
+      "key": "Control+a"
+    },
+    {
+      "type": "tomorrow"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "click": "[data-slot=calendar] td[data-day$=\"-15\"]:not([data-outside]) > button"
+    },
+    {
+      "click": "[data-slot=popover-trigger]"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "data-picker-with-dropdowns": [
+    {
+      "click": "[data-slot=popover-trigger]"
+    },
+    {
+      "click": "[data-slot=calendar] td[data-day$=\"-15\"]:not([data-outside]) > button"
+    },
+    {
+      "click": "[data-slot=popover-content] [data-slot=button]"
+    }
+  ],
+  "carousel-multiple": [
+    {
+      "click": "[data-slot=carousel-next]",
+      "wait": 1200
+    },
+    {
+      "click": "[data-slot=carousel-previous]",
+      "wait": 1200
+    }
+  ],
+  "command-dialog": [
+    {
+      "key": "Control+j"
+    },
+    {
+      "type": "pro"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "data-table-demo": [
+    {
+      "click": "[data-slot=dropdown-menu-trigger]"
+    },
+    {
+      "click": "[data-slot=dropdown-menu-checkbox-item]"
+    },
+    {
+      "key": "Escape"
+    },
+    {
+      "click": "[data-slot=table-body] [data-slot=checkbox]"
+    },
+    {
+      "click": "[data-slot=table-header] [data-slot=button]"
+    },
+    {
+      "click": "[data-slot=input]"
+    },
+    {
+      "type": "ab"
+    }
   ]
 }

@@ -1,0 +1,46 @@
+package item
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/item"
+	"github.com/axadrn/shadcn-templ/v2/components/progress"
+)
+
+type fileUploadListFile struct {
+	ID            string
+	Name          string
+	Progress      int
+	TimeRemaining string
+}
+
+var fileUploadListFiles = []fileUploadListFile{
+	{ID: "1", Name: "document.pdf", Progress: 45, TimeRemaining: "2m 30s"},
+	{ID: "2", Name: "presentation.pptx", Progress: 78, TimeRemaining: "45s"},
+	{ID: "3", Name: "spreadsheet.xlsx", Progress: 12, TimeRemaining: "5m 12s"},
+	{ID: "4", Name: "image.jpg", Progress: 100, TimeRemaining: "Complete"},
+}
+
+templ FileUploadList() {
+	@item.Group() {
+		for _, file := range fileUploadListFiles {
+			@item.Item(item.Props{Size: item.SizeXs, Class: "px-0"}) {
+				@item.Media(item.MediaProps{Variant: item.MediaVariantIcon}) {
+					@icon.File(icon.Props{Class: "size-5"})
+				}
+				@item.Content(item.ContentProps{Class: "inline-block truncate"}) {
+					@item.Title(item.TitleProps{Class: "inline"}) {
+						{ file.Name }
+					}
+				}
+				@item.Content() {
+					@progress.Progress(progress.Props{Value: file.Progress, Class: "w-32"})
+				}
+				@item.Actions(item.ActionsProps{Class: "w-16 justify-end"}) {
+					<span class="text-sm text-muted-foreground">
+						{ file.TimeRemaining }
+					</span>
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,59 @@
+package datepicker
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/calendar"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/popover"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ DataPickerWithDropdowns() {
+	@field.Field(field.Props{Class: "mx-auto w-72"}) {
+		@popover.Popover() {
+			@field.Label(field.LabelProps{For: "date-picker-with-dropdowns-desktop"}) {
+				Date
+			}
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Class:      "justify-start px-2.5 font-normal",
+				Attributes: utils.MergeAttributes(popover.Trigger(ctx), templ.Attributes{"id": "date-picker-with-dropdowns-desktop"}),
+			}) {
+				@icon.ChevronDown(icon.Props{Class: "ml-auto"})
+				<span>Pick a date</span>
+			}
+			@popover.Content(popover.ContentProps{Class: "w-auto p-0", Align: popover.AlignStart}) {
+				@calendar.Calendar(calendar.Props{
+					Mode:          calendar.ModeSingle,
+					CaptionLayout: calendar.CaptionLayoutDropdown,
+				})
+				<div class="flex gap-2 border-t p-2">
+					@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeSm, Class: "w-full"}) {
+						Done
+					}
+				</div>
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			// The date and open state: the calendar's onSelect sets the date,
+			// the trigger renders it as date-fns' "PPP"; Done closes.
+			const demo = document.currentScript.previousElementSibling;
+			const trigger = demo.querySelector('[data-slot="popover-trigger"]');
+			const popup = document.getElementById(trigger.getAttribute("data-templ-controls"));
+			const calendar = popup.querySelector('[data-slot="calendar"]');
+			const ordinal = (n) => n + (n % 10 === 1 && n !== 11 ? "st" : n % 10 === 2 && n !== 12 ? "nd" : n % 10 === 3 && n !== 13 ? "rd" : "th");
+			const ppp = (d) => d.toLocaleDateString("en-US", { month: "long" }) + " " + ordinal(d.getDate()) + ", " + d.getFullYear();
+			calendar.addEventListener("calendar-select", (e) => {
+				const date = e.detail.selected;
+				window.templ.calendar.setSelected(calendar, date);
+				const icon = trigger.querySelector("svg");
+				while (icon.nextSibling) icon.nextSibling.remove();
+				trigger.append(date ? document.createTextNode(ppp(date)) : Object.assign(document.createElement("span"), { textContent: "Pick a date" }));
+			});
+			popup.querySelector('[data-slot="button"]').addEventListener("click", () => window.templ.popover.close(popup));
+		})();
+	</script>
+}

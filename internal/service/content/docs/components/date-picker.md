@@ -83,6 +83,12 @@ A date picker component with a time input field for selecting a time.
 
 <ComponentPreview name="date-picker-time" />
 
+## Natural Language Picker
+
+This example parses natural language dates in a small inline script: today, tomorrow, yesterday, `in N days`, `in N weeks`, `in N months`, next week, next month and anything `Date` parses.
+
+<ComponentPreview name="date-picker-natural-language" />
+
 ## RTL
 
 To enable RTL support, see the [Direction](/docs/components/direction) component.

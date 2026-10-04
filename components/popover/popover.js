@@ -36,8 +36,10 @@
   // element that renders the trigger with an id of its own never matches:
   // that trigger renders no open state, no aria-controls and no focus
   // guards.
+  // An open without a trigger (the open prop, window.templ.popover.open)
+  // makes the registered trigger the active one, whatever its id.
   function isOpenedByTrigger(trigger, content) {
-    return trigger.id === idOf(content) + "-trigger";
+    return trigger.id === idOf(content) + "-trigger" || content._templProgrammaticOpen === true;
   }
 
   // The positioner from its popup's id, the popup or the positioner.
@@ -216,7 +218,8 @@
       if (trigger && isOpenedByTrigger(trigger, content)) {
         trigger.setAttribute("aria-expanded", "true");
         trigger.setAttribute("data-popup-open", "");
-        trigger.setAttribute("data-pressed", "");
+        // pressableTriggerOpenStateMapping: pressed only when a press opened it.
+        if (!content._templProgrammaticOpen) trigger.setAttribute("data-pressed", "");
       }
     };
     startAutoPositioning(content).then(finish, finish);
@@ -226,6 +229,7 @@
   function close(target, details) {
     const content = resolve(target);
     if (!content || content.hidden) return;
+    content._templProgrammaticOpen = false;
     content._templDismiss?.();
     content._templDismiss = null;
     content._templFocus?.close(details);
@@ -315,7 +319,11 @@
 
   window.templ = window.templ || {};
   window.templ.popover = {
-    open,
+    open(target) {
+      const content = resolve(target);
+      if (content && !isOpen(content)) content._templProgrammaticOpen = true;
+      open(target);
+    },
     close,
     closeAll,
     closeNearest,

@@ -3,6 +3,8 @@ package progress
 import (
 	"context"
 	"fmt"
+	"io"
+	"strings"
 
 	"github.com/axadrn/shadcn-templ/v2/utils"
 )
@@ -193,6 +195,25 @@ templ Value(props ...ValueProps) {
 		{ statusAttr(s.value, s.max)... }
 		{ p.Attributes... }
 	>
-		{ fmt.Sprintf("%d%%", percentage(s.value, s.max)) }
+		@childrenOr(fmt.Sprintf("%d%%", percentage(s.value, s.max))) {
+			{ children... }
+		}
 	</span>
+}
+
+// childrenOr is ProgressValue's children function: what the caller renders,
+// or the formatted value without children.
+func childrenOr(label string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		html, err := templ.ToGoHTML(ctx, templ.GetChildren(ctx))
+		if err != nil {
+			return err
+		}
+		if strings.TrimSpace(string(html)) == "" {
+			_, err = io.WriteString(w, templ.EscapeString(label))
+			return err
+		}
+		_, err = io.WriteString(w, string(html))
+		return err
+	})
 }

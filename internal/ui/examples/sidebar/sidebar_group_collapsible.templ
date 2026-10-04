@@ -1,9 +1,12 @@
 package sidebar
 
 import (
+	"context"
+
 	"github.com/axadrn/shadcn-templ/v2/components/collapsible"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
+	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
 templ SidebarGroupCollapsible() {
@@ -12,13 +15,17 @@ templ SidebarGroupCollapsible() {
 			@sidebar.Content() {
 				@collapsible.Collapsible(collapsible.Props{DefaultOpen: true, Class: "group/collapsible"}) {
 					@sidebar.Group() {
-						@sidebar.GroupLabel(sidebar.GroupLabelProps{
-							Class:      "text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-							Attributes: collapsible.Trigger(ctx),
-						}) {
+						// SidebarGroupLabel rendered as a CollapsibleTrigger: the
+						// trigger's button with the label's slot and classes.
+						<button
+							data-slot="sidebar-group-label"
+							data-sidebar="group-label"
+							class={ utils.CN("cn-sidebar-group-label flex shrink-0 items-center outline-hidden [&>svg]:shrink-0", "text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground") }
+							{ sidebarGroupCollapsibleTrigger(ctx)... }
+						>
 							Help
 							@icon.ChevronDown(icon.Props{Class: "ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180"})
-						}
+						</button>
 						@collapsible.Content() {
 							@sidebar.GroupContent() {
 								@sidebarHelpMenu()
@@ -29,4 +36,10 @@ templ SidebarGroupCollapsible() {
 			}
 		}
 	}
+}
+
+func sidebarGroupCollapsibleTrigger(ctx context.Context) templ.Attributes {
+	attrs := collapsible.Trigger(ctx)
+	delete(attrs, "data-slot")
+	return attrs
 }

@@ -93,6 +93,7 @@ calendar-booked-dates
 calendar-caption
 calendar-custom-days
 calendar-demo
+calendar-multiple
 calendar-presets
 calendar-range
 calendar-rtl
@@ -106,6 +107,7 @@ card-small
 card-spacing
 carousel-api
 carousel-demo
+carousel-multiple
 carousel-orientation
 carousel-plugin
 carousel-rtl
@@ -146,6 +148,7 @@ combobox-popup
 combobox-rtl
 command-basic
 command-demo
+command-dialog
 command-groups
 command-rtl
 command-scrollable
@@ -161,11 +164,14 @@ context-menu-rtl
 context-menu-shortcuts
 context-menu-sides
 context-menu-submenu
+data-picker-with-dropdowns
+data-table-demo
 data-table-rtl
 date-picker-basic
 date-picker-demo
 date-picker-dob
 date-picker-input
+date-picker-natural-language
 date-picker-range
 date-picker-rtl
 date-picker-time
@@ -217,6 +223,7 @@ field-select
 field-slider
 field-switch
 field-textarea
+file-upload-list
 hover-card-demo
 hover-card-rtl
 hover-card-sides
@@ -288,6 +295,7 @@ kbd-rtl
 kbd-tooltip
 label-demo
 label-rtl
+markdown-demo
 marker-border
 marker-demo
 marker-icon
@@ -342,6 +350,7 @@ popover-rtl
 progress-controlled
 progress-demo
 progress-label
+progress-rtl
 questionnaire-animated
 questionnaire-card
 questionnaire-conditional
@@ -403,7 +412,19 @@ shimmer-none
 shimmer-once
 shimmer-rtl
 shimmer-spread
+sidebar-controlled
 sidebar-demo
+sidebar-footer
+sidebar-group
+sidebar-group-action
+sidebar-group-collapsible
+sidebar-header
+sidebar-menu
+sidebar-menu-action
+sidebar-menu-badge
+sidebar-menu-collapsible
+sidebar-menu-sub
+sidebar-rsc
 sidebar-rtl
 skeleton-avatar
 skeleton-card

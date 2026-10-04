@@ -382,4 +382,10 @@ First part, stopped to split the examples package first (`plans/examples-package
 - Components grew what the RTL examples use: embla's `direction` on the carousel (mirrored axis), Recharts' `reversed` on the chart's x axis, date-fns `ar-SA` in the calendar (weekday and month names, `PPPP`), and `drawer.Content` spreads its attributes onto the popup like upstream.
 - Upstream's prebuilt calendar keeps `cn-calendar-dropdown-root` unflattened (transform-style-map.ts does not rewrite `classNames={{...}}`), so its dropdowns have no border; ours do, within the pixel tolerance.
 
+Second part, after the package split, compared against the Next reference (`parity/reference-next.sh`): the sidebar parts, `calendar-multiple`, `carousel-multiple`, `command-dialog`, `data-picker-with-dropdowns`, `data-table-demo`, `date-picker-natural-language`, `file-upload-list`, `markdown-demo` and `progress-rtl` (ProgressValue renders its children, the render function pendant). Every example of task 17 passes DOM, focus and lock; the pixels too, apart from `sidebar-group-action`'s sonner toast (the open sonner question).
+
+- Fonts are next/font's now: Geist and Geist Mono as the Google Fonts subsets next/font downloads, Noto Sans Arabic and Hebrew, the `"Geist", "Geist Fallback"` stacks and the metric adjusted `local(Arial)` fallbacks it emits. Our vendored variable Geist rendered text 0.2 to 1.8 % different and Arabic fell back to another font.
+- Fixes the examples found: a mixed checkbox renders neither `data-checked` nor `data-unchecked` (Base UI's useStateAttributesMapping), and a popover opened without a trigger (the open prop, `window.templ.popover.open`) shows its registered trigger as open, its focus guards included, without `data-pressed`.
+- Not ported: `calendar-hijri` (react-day-picker's Persian calendar, a calendar system our calendar does not have). Upstream's `command-dialog` reference crashes on its shortcut (`Cannot read properties of undefined (reading 'subscribe')`); ours opens and closes. `date-picker-natural-language` parses with a small inline parser instead of chrono-node.
+
 ## Planner review

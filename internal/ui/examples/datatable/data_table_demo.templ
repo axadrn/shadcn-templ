@@ -1,0 +1,241 @@
+package datatable
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/checkbox"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+	"github.com/axadrn/shadcn-templ/v2/components/table"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+type dataTableDemoPayment struct {
+	ID     string
+	Amount float64
+	Status string
+	Email  string
+	// Formatted is Intl.NumberFormat("en-US", { style: "currency",
+	// currency: "USD" }) of Amount.
+	Formatted string
+}
+
+var dataTableDemoData = []dataTableDemoPayment{
+	{ID: "m5gr84i9", Amount: 316, Status: "success", Email: "ken99@example.com", Formatted: "$316.00"},
+	{ID: "3u1reuv4", Amount: 242, Status: "success", Email: "Abe45@example.com", Formatted: "$242.00"},
+	{ID: "derv1ws0", Amount: 837, Status: "processing", Email: "Monserrat44@example.com", Formatted: "$837.00"},
+	{ID: "5kma53ae", Amount: 874, Status: "success", Email: "Silas22@example.com", Formatted: "$874.00"},
+	{ID: "bhqecj4p", Amount: 721, Status: "failed", Email: "carmella@example.com", Formatted: "$721.00"},
+}
+
+// The table state (sorting, column filters, column visibility, row selection)
+// lives in the script after the example.
+templ DataTableDemo() {
+	<div class="w-full">
+		<div class="flex items-center py-4">
+			@input.Input(input.Props{Placeholder: "Filter emails...", Class: "max-w-sm", Attributes: templ.Attributes{"value": ""}})
+			@dropdownmenu.DropdownMenu() {
+				@button.Button(button.Props{Variant: button.VariantOutline, Class: "ml-auto", Attributes: dropdownmenu.Trigger(ctx)}) {
+					Columns 
+					@icon.ChevronDown()
+				}
+				@dropdownmenu.Content(dropdownmenu.ContentProps{Align: dropdownmenu.AlignEnd, Class: "w-44"}) {
+					@dropdownmenu.Group() {
+						for _, id := range []string{"status", "email", "amount"} {
+							@dropdownmenu.CheckboxItem(dropdownmenu.CheckboxItemProps{Class: "capitalize", DefaultChecked: true}) {
+								{ id }
+							}
+						}
+					}
+				}
+			}
+		</div>
+		<div class="overflow-hidden rounded-md border">
+			@table.Table() {
+				@table.Header() {
+					@table.Row() {
+						@table.Head() {
+							@checkbox.Checkbox(checkbox.Props{Checked: utils.Ptr(false), Attributes: templ.Attributes{"aria-label": "Select all"}})
+						}
+						@table.Head() {
+							Status
+						}
+						@table.Head() {
+							@button.Button(button.Props{Variant: button.VariantGhost}) {
+								Email
+								@icon.ArrowUpDown()
+							}
+						}
+						@table.Head() {
+							<div class="text-right">Amount</div>
+						}
+						@table.Head()
+					}
+				}
+				@table.Body() {
+					for _, row := range dataTableDemoData {
+						@table.Row(table.RowProps{Attributes: templ.Attributes{"data-state": "false"}}) {
+							@table.Cell() {
+								@checkbox.Checkbox(checkbox.Props{Checked: utils.Ptr(false), Attributes: templ.Attributes{"aria-label": "Select row"}})
+							}
+							@table.Cell() {
+								<div class="capitalize">{ row.Status }</div>
+							}
+							@table.Cell() {
+								<div class="lowercase">{ row.Email }</div>
+							}
+							@table.Cell() {
+								<div class="text-right font-medium">{ row.Formatted }</div>
+							}
+							@table.Cell() {
+								@dropdownmenu.DropdownMenu() {
+									@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeIconXs, Attributes: dropdownmenu.Trigger(ctx)}) {
+										<span class="sr-only">Open menu</span>
+										@icon.Ellipsis()
+									}
+									@dropdownmenu.Content(dropdownmenu.ContentProps{Align: dropdownmenu.AlignEnd, Class: "w-44"}) {
+										@dropdownmenu.Group() {
+											@dropdownmenu.Label() {
+												Actions
+											}
+											@dropdownmenu.Item() {
+												Copy payment ID
+											}
+										}
+										@dropdownmenu.Separator()
+										@dropdownmenu.Group() {
+											@dropdownmenu.Item() {
+												View customer
+											}
+											@dropdownmenu.Item() {
+												View payment details
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		</div>
+		<div class="flex items-center justify-end space-x-2 py-4">
+			<div class="flex-1 text-sm text-muted-foreground">
+				0 of 5 row(s) selected.
+			</div>
+			<div class="space-x-2">
+				@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeSm, Disabled: true}) {
+					Previous
+				}
+				@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeSm, Disabled: true}) {
+					Next
+				}
+			</div>
+		</div>
+	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const root = document.currentScript.previousElementSibling;
+			const ids = {{ utils.Map(dataTableDemoData, func(p dataTableDemoPayment) string { return p.ID }) }};
+			const columns = ["select", "status", "email", "amount", "actions"];
+			const filterInput = root.querySelector('[data-slot="input"]');
+			const tbody = root.querySelector('[data-slot="table-body"]');
+			const headRow = root.querySelector('[data-slot="table-header"] [data-slot="table-row"]');
+			const headCells = [...headRow.children];
+			const all = headCells[0].querySelector('[data-slot="checkbox"]');
+			const sortButton = headCells[2].querySelector('[data-slot="button"]');
+			const rows = [...tbody.children].map((tr, i) => ({
+				id: ids[i],
+				tr,
+				cells: [...tr.children],
+				email: tr.children[2].textContent.trim(),
+				checkbox: tr.children[0].querySelector('[data-slot="checkbox"]'),
+			}));
+			const summary = root.lastElementChild.firstElementChild;
+			// The noResults row, colSpan={columns.length}.
+			const empty = document.createElement("tr");
+			empty.setAttribute("data-slot", "table-row");
+			empty.className = rows[0].tr.className;
+			const emptyCell = document.createElement("td");
+			emptyCell.setAttribute("data-slot", "table-cell");
+			emptyCell.setAttribute("colspan", String(columns.length));
+			emptyCell.className = rows[0].cells[0].className + " h-24 text-center";
+			emptyCell.textContent = "No results.";
+			empty.append(emptyCell);
+
+			const state = { sorting: null, filter: "", hidden: new Set(), selected: new Set() };
+			const visible = (_, i) => !state.hidden.has(columns[i]);
+			// sortFn_alphanumeric, ascending unless desc.
+			const compare = (a, b) => a.email.toLowerCase().localeCompare(b.email.toLowerCase(), "en", { numeric: true });
+
+			// React reconciles: an unchanged row keeps its elements (and focus).
+			const sync = (parent, children) => {
+				if (children.length === parent.children.length && children.every((c, i) => parent.children[i] === c)) return;
+				parent.replaceChildren(...children);
+			};
+			const render = () => {
+				let model = rows.filter((r) => r.email.toLowerCase().includes(state.filter.toLowerCase()));
+				if (state.sorting) {
+					model = [...model].sort(compare);
+					if (state.sorting === "desc") model.reverse();
+				}
+				sync(headRow, headCells.filter(visible));
+				if (model.length) {
+					sync(tbody, model.map((r) => {
+						sync(r.tr, r.cells.filter(visible));
+						return r.tr;
+					}));
+				} else {
+					sync(tbody, [empty]);
+				}
+				rows.forEach((r) => {
+					const on = state.selected.has(r.id);
+					window.templ.checkbox.setChecked(r.checkbox, on);
+					r.tr.setAttribute("data-state", on ? "selected" : "false");
+				});
+				const selectedOnPage = model.filter((r) => state.selected.has(r.id)).length;
+				const allSelected = model.length > 0 && selectedOnPage === model.length;
+				all.nextElementSibling.indeterminate = selectedOnPage > 0 && !allSelected;
+				window.templ.checkbox.setChecked(all, allSelected);
+				summary.textContent = selectedOnPage + " of " + model.length + " row(s) selected.";
+			};
+
+			filterInput.addEventListener("input", () => {
+				state.filter = filterInput.value;
+				render();
+			});
+			sortButton.addEventListener("click", () => {
+				state.sorting = state.sorting === "asc" ? "desc" : "asc";
+				render();
+			});
+			root.addEventListener("checkbox-change", (e) => {
+				if (e.target === all) {
+					const model = rows.filter((r) => r.email.toLowerCase().includes(state.filter.toLowerCase()));
+					model.forEach((r) => (e.detail.checked ? state.selected.add(r.id) : state.selected.delete(r.id)));
+				} else {
+					const row = rows.find((r) => r.checkbox === e.target);
+					if (!row) return;
+					if (e.detail.checked) state.selected.add(row.id);
+					else state.selected.delete(row.id);
+				}
+				render();
+			});
+			// The columns menu: one checkbox item per hideable column.
+			const menuOf = (trigger) => document.getElementById(trigger.getAttribute("data-templ-controls"));
+			const columnsMenu = menuOf(root.querySelector('[data-slot="dropdown-menu-trigger"]'));
+			const columnItems = [...columnsMenu.querySelectorAll('[data-slot="dropdown-menu-checkbox-item"]')];
+			columnsMenu.addEventListener("dropdownmenu-checked-change", (e) => {
+				const id = ["status", "email", "amount"][columnItems.indexOf(e.target)];
+				if (!id) return;
+				if (e.detail.checked) state.hidden.delete(id);
+				else state.hidden.add(id);
+				render();
+			});
+			// The copy payment ID item of each row's actions menu.
+			rows.forEach((r) => {
+				const menu = menuOf(r.cells[4].querySelector('[data-slot="dropdown-menu-trigger"]'));
+				menu.querySelector('[data-slot="dropdown-menu-item"]').addEventListener("click", () => navigator.clipboard?.writeText(r.id).catch(() => {}));
+			});
+		})();
+	</script>
+}
