@@ -1,4 +1,12 @@
 {
+  "button-render": [
+    {
+      "hover": "a"
+    },
+    {
+      "key": "Tab"
+    }
+  ],
   "family:button": [
     {
       "hover": "[data-slot=button], button"
