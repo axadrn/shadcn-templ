@@ -1,0 +1,5 @@
+.git
+**/bin
+**/assets/css/output.css
+**/assets/js/shadcn-templ-*.js
+tmp

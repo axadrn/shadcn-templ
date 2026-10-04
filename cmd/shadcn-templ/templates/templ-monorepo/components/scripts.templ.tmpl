@@ -1,0 +1,7 @@
+package components
+
+// Scripts renders the one script tag that loads the component JS bundle.
+// Render it once in the layout <head>. The URL comes from scripts_bundle.go.
+templ Scripts() {
+	<script defer nonce={ templ.GetNonce(ctx) } src={ bundleSrc }></script>
+}

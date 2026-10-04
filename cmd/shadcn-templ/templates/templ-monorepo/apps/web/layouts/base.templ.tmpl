@@ -1,0 +1,24 @@
+package layouts
+
+import "templ-app/components"
+
+templ Base(title string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title }</title>
+			<link rel="stylesheet" href="/assets/css/output.css"/>
+			// htmx is the stack's swap layer: blocks like dashboard-01 drive
+			// their partial updates (pagination, lazy drawers) through hx-*
+			// attributes against templ fragments. Swap in your own layer
+			// (Datastar etc.) by translating those attributes.
+			<script src="https://cdn.jsdelivr.net/npm/htmx.org@4.0.0-beta6/dist/htmx.min.js"></script>
+			@components.Scripts()
+		</head>
+		<body>
+			{ children... }
+		</body>
+	</html>
+}
