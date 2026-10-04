@@ -3,10 +3,13 @@
 // defaults), write components.json, merge the theme CSS into the user's
 // Tailwind entry file and install the utils lib item. --template scaffolds a
 // new project from an embedded template first, like their init -t next.
+// Run in an app directory below go.mod (cmd/<app>), init sets up that app
+// and installs into the module's shared packages, see /docs/monorepo.
 //
 // Dropped npm-only options, all without a Go pendant: --base (component
-// library selection; shadcn-templ ships one implementation), --monorepo,
-// --cssVariables/--rtl/--pointer toggles beyond what a preset encodes,
+// library selection; shadcn-templ ships one implementation), --monorepo
+// (it scaffolds a Turborepo workspace; a Go module needs no scaffolding to
+// hold several apps), --cssVariables/--rtl/--pointer toggles beyond what a preset encodes,
 // --defaults/-y prompt shortcuts (this init does not prompt for design
 // choices), and the interactive preset picker.
 package commands
@@ -21,6 +24,7 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/cmd/shadcn-templ/registry"
 	"github.com/axadrn/shadcn-templ/v2/cmd/shadcn-templ/templates"
 	"github.com/axadrn/shadcn-templ/v2/cmd/shadcn-templ/utils"
+	"github.com/axadrn/shadcn-templ/v2/cmd/shadcn-templ/utils/updaters"
 )
 
 // InitOptions are the flags of shadcn-templ init.
@@ -71,8 +75,9 @@ func RunInit(opts InitOptions) error {
 		if !ok {
 			return fmt.Errorf("unknown template %q, valid templates: %s", opts.Template, strings.Join(templates.Names(), ", "))
 		}
-		// Scaffolding nests a fresh module; inside an existing one that
-		// pollutes the parent repo (and its embeds/builds).
+		// Scaffolding nests a fresh module; inside an existing one (cwd or
+		// any parent holds go.mod) that pollutes the parent repo (and its
+		// embeds/builds).
 		if module, err := utils.ModulePath(cwd); err == nil {
 			return fmt.Errorf("refusing to scaffold inside the Go module %s; run this outside a module or pass a target with --cwd", module)
 		}
@@ -192,6 +197,19 @@ func RunInit(opts InitOptions) error {
 		Silent:           opts.Silent,
 	}); err != nil {
 		return err
+	}
+
+	// An app joining a module whose shared components already carry
+	// scripts needs its own copy of the bundle in its scripts.dir; add
+	// bundles only when it writes scripts.
+	if scripts, _ := filepath.Glob(filepath.Join(config.ResolvedPaths.Components, "*", "*.js")); len(scripts) > 0 {
+		bundlePaths, _, err := updaters.UpdateScripts(config)
+		if err != nil {
+			return err
+		}
+		for _, bundlePath := range bundlePaths {
+			logf(opts.Silent, "Bundle: %s\n", utils.DisplayPath(config, bundlePath))
+		}
 	}
 
 	if scaffolded {

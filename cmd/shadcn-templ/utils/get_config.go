@@ -78,8 +78,13 @@ type RawConfig struct {
 // ResolvedPaths is the resolvedPaths pendant: absolute paths derived from the
 // aliases and the go.mod module path.
 type ResolvedPaths struct {
-	Scripts     string
-	Cwd         string
+	Scripts string
+	// Cwd is the directory of components.json (the app). File paths in
+	// components.json (tailwind.css, scripts.dir) are relative to it.
+	Cwd string
+	// ModuleRoot is the directory of go.mod. Import path aliases resolve
+	// against it, so several apps of one module share their components.
+	ModuleRoot  string
 	TailwindCSS string
 	Components  string
 	Utils       string
@@ -124,17 +129,18 @@ func GetRawConfig(cwd string) (*RawConfig, error) {
 
 // ResolveConfigPaths is the resolveConfigPaths pendant: derive absolute
 // directories from the Go import path aliases via the go.mod module path.
+// go.mod may sit in cwd or any parent directory (an app in a monorepo).
 func ResolveConfigPaths(cwd string, raw *RawConfig) (*Config, error) {
-	module, err := ModulePath(cwd)
+	root, module, err := FindModule(cwd)
 	if err != nil {
 		return nil, err
 	}
 
-	componentsDir, err := aliasDir(cwd, module, raw.Aliases.Components, "components")
+	componentsDir, err := aliasDir(root, module, raw.Aliases.Components, "components")
 	if err != nil {
 		return nil, err
 	}
-	utilsDir, err := aliasDir(cwd, module, raw.Aliases.Utils, "utils")
+	utilsDir, err := aliasDir(root, module, raw.Aliases.Utils, "utils")
 	if err != nil {
 		return nil, err
 	}
@@ -158,6 +164,7 @@ func ResolveConfigPaths(cwd string, raw *RawConfig) (*Config, error) {
 		ResolvedPaths: ResolvedPaths{
 			Scripts:     filepath.Join(cwd, filepath.FromSlash(resolved.Scripts.Dir)),
 			Cwd:         cwd,
+			ModuleRoot:  root,
 			TailwindCSS: filepath.Join(cwd, filepath.FromSlash(raw.Tailwind.CSS)),
 			Components:  componentsDir,
 			Utils:       utilsDir,
@@ -165,38 +172,112 @@ func ResolveConfigPaths(cwd string, raw *RawConfig) (*Config, error) {
 	}, nil
 }
 
-// aliasDir maps an import path alias under the module to a directory.
-func aliasDir(cwd, module, alias, key string) (string, error) {
+// aliasDir maps an import path alias under the module to a directory below
+// the module root.
+func aliasDir(root, module, alias, key string) (string, error) {
 	if alias == "" {
 		return "", fmt.Errorf("missing aliases.%s in %s", key, ConfigFileName)
 	}
 	if alias == module {
-		return cwd, nil
+		return root, nil
 	}
 	rel, ok := strings.CutPrefix(alias, module+"/")
 	if !ok {
 		return "", fmt.Errorf("aliases.%s %q is not under the module path %q; configure an import path inside your module", key, alias, module)
 	}
-	return filepath.Join(cwd, filepath.FromSlash(rel)), nil
+	return filepath.Join(root, filepath.FromSlash(rel)), nil
 }
 
-// ModulePath reads the module path from go.mod, the pendant of shadcn
-// resolving tsconfig path aliases.
+// ModulePath returns the module path of the go.mod in cwd or its closest
+// parent directory, the pendant of shadcn resolving tsconfig path aliases.
 func ModulePath(cwd string) (string, error) {
-	data, err := os.ReadFile(filepath.Join(cwd, "go.mod"))
-	if err != nil {
-		if os.IsNotExist(err) {
-			return "", fmt.Errorf("no go.mod found at %s. A Go module is required. Run 'go mod init' first", cwd)
+	_, module, err := FindModule(cwd)
+	return module, err
+}
+
+// FindModule walks up from dir to the closest go.mod, like the go command,
+// and returns its directory and module path.
+func FindModule(dir string) (root, module string, err error) {
+	for root = dir; ; {
+		data, err := os.ReadFile(filepath.Join(root, "go.mod"))
+		if err == nil {
+			for line := range strings.Lines(string(data)) {
+				line = strings.TrimSpace(line)
+				if module, ok := strings.CutPrefix(line, "module "); ok {
+					return root, strings.Trim(strings.TrimSpace(module), `"`), nil
+				}
+			}
+			return "", "", fmt.Errorf("no module directive in %s", filepath.Join(root, "go.mod"))
 		}
-		return "", err
+		if !os.IsNotExist(err) {
+			return "", "", err
+		}
+		parent := filepath.Dir(root)
+		if parent == root {
+			return "", "", fmt.Errorf("no go.mod found in %s or any parent directory. A Go module is required. Run 'go mod init' first", dir)
+		}
+		root = parent
 	}
-	for line := range strings.Lines(string(data)) {
-		line = strings.TrimSpace(line)
-		if module, ok := strings.CutPrefix(line, "module "); ok {
-			return strings.TrimSpace(module), nil
+}
+
+// GetSharedConfigs returns the configs of the other apps in config's module
+// whose aliases.components resolve to the same directory: the apps that
+// share one installed components package and its scripts_bundle.go. It
+// walks the module root for components.json, skipping what the go command
+// skips (dot and underscore directories, testdata), vendor, node_modules
+// and nested modules. A components.json that does not load or resolve
+// belongs to something else and is ignored.
+func GetSharedConfigs(config *Config) ([]*Config, error) {
+	root := config.ResolvedPaths.ModuleRoot
+	var shared []*Config
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			if path == root {
+				return err
+			}
+			return nil
+		}
+		if !d.IsDir() {
+			return nil
+		}
+		if path != root {
+			name := d.Name()
+			if strings.HasPrefix(name, ".") || strings.HasPrefix(name, "_") || name == "testdata" || name == "vendor" || name == "node_modules" {
+				return fs.SkipDir
+			}
+			if _, err := os.Stat(filepath.Join(path, "go.mod")); err == nil {
+				return fs.SkipDir
+			}
+		}
+		if path == config.ResolvedPaths.Cwd {
+			return nil
+		}
+		if _, err := os.Stat(filepath.Join(path, ConfigFileName)); err != nil {
+			return nil
+		}
+		other, err := GetConfig(path)
+		if err != nil || other == nil || other.ResolvedPaths.Components != config.ResolvedPaths.Components {
+			return nil
+		}
+		shared = append(shared, other)
+		return nil
+	})
+	return shared, err
+}
+
+// DisplayPath is the path printed for a written file: relative to the app
+// for files inside it, relative to the module root for shared files.
+func DisplayPath(config *Config, path string) string {
+	for _, base := range []string{config.ResolvedPaths.Cwd, config.ResolvedPaths.ModuleRoot} {
+		if base == "" {
+			continue
+		}
+		rel, err := filepath.Rel(base, path)
+		if err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			return rel
 		}
 	}
-	return "", fmt.Errorf("no module directive in %s", filepath.Join(cwd, "go.mod"))
+	return path
 }
 
 // WriteConfig writes components.json (2-space indent plus trailing newline,

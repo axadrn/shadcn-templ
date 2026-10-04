@@ -41,10 +41,11 @@ func TestUpdateScripts(t *testing.T) {
 	write("internal/design/own.js", "ignored")
 	write("internal/design/a/nested/x.js", "ignored")
 	write("assets/js/custom.js", "keep")
-	path, written, err := UpdateScripts(config)
-	if err != nil || !written {
-		t.Fatalf("first build: written=%v err=%v", written, err)
+	paths, written, err := UpdateScripts(config)
+	if err != nil || !written || len(paths) != 1 {
+		t.Fatalf("first build: paths=%v written=%v err=%v", paths, written, err)
 	}
+	path := paths[0]
 	want := []byte("// components/baseui/block.js\nblock\n// components/a/a.js\nfirst\n// components/z/z.js\nlast\n")
 	got, err := os.ReadFile(path)
 	if err != nil || !bytes.Equal(got, want) {
@@ -96,7 +97,7 @@ func TestUpdateScripts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if next == path {
+	if next[0] == path {
 		t.Fatal("hash did not change")
 	}
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
@@ -104,5 +105,87 @@ func TestUpdateScripts(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(cwd, "assets/js/custom.js")); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestUpdateScriptsSharedComponents(t *testing.T) {
+	root := t.TempDir()
+	write := func(name, content string) {
+		t.Helper()
+		name = filepath.Join(root, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(name), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(name, []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write("go.mod", "module example.com/mono\n")
+	write("components/a/a.js", "first")
+	app := func(dir, scriptsDir string) *utils.Config {
+		t.Helper()
+		raw := &utils.RawConfig{
+			Scripts:  &utils.Scripts{Dir: scriptsDir, Path: "/assets/js"},
+			Tailwind: utils.Tailwind{CSS: "assets/css/globals.css"},
+			Aliases:  utils.Aliases{Components: "example.com/mono/components", Utils: "example.com/mono/utils"},
+		}
+		cwd := filepath.Join(root, filepath.FromSlash(dir))
+		if err := os.MkdirAll(cwd, 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := utils.WriteConfig(cwd, raw); err != nil {
+			t.Fatal(err)
+		}
+		config, err := utils.GetConfig(cwd)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return config
+	}
+	a := app("cmd/a", "assets/js")
+	b := app("cmd/b", "web/static/js")
+	write("cmd/b/web/static/js/shadcn-templ-0000000000000000.js", "stale")
+
+	paths, written, err := UpdateScripts(a)
+	if err != nil || !written || len(paths) == 0 {
+		t.Fatalf("build: paths=%v written=%v err=%v", paths, written, err)
+	}
+	name := filepath.Base(paths[0])
+	want := []string{
+		filepath.Join(root, "cmd", "a", "assets", "js", name),
+		filepath.Join(root, "cmd", "b", "web", "static", "js", name),
+	}
+	if strings.Join(paths, "\n") != strings.Join(want, "\n") {
+		t.Fatalf("paths %v, want %v", paths, want)
+	}
+	for _, path := range want {
+		if got, err := os.ReadFile(path); err != nil || string(got) != "// components/a/a.js\nfirst\n" {
+			t.Fatalf("%s: %q %v", path, got, err)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(root, "cmd/b/web/static/js/shadcn-templ-0000000000000000.js")); !os.IsNotExist(err) {
+		t.Fatalf("stale bundle of the other app retained: %v", err)
+	}
+	manifest, _ := os.ReadFile(filepath.Join(root, "components", "scripts_bundle.go"))
+	if !strings.Contains(string(manifest), `const bundleSrc = "/assets/js/`+name+`"`) {
+		t.Fatalf("manifest: %s", manifest)
+	}
+
+	// Bundling from the other app is a no-op: same bytes, same manifest.
+	if _, written, err := UpdateScripts(b); err != nil || written {
+		t.Fatalf("second app: written=%v err=%v", written, err)
+	}
+
+	// One manifest cannot serve two URL prefixes.
+	b.Scripts.Path = "/b/assets/js"
+	if err := utils.WriteConfig(b.ResolvedPaths.Cwd, &b.RawConfig); err != nil {
+		t.Fatal(err)
+	}
+	write("components/a/a.js", "changed")
+	if _, _, err := UpdateScripts(a); err == nil || !strings.Contains(err.Error(), "scripts.path") {
+		t.Fatalf("expected a scripts.path conflict, got %v", err)
+	}
+	if _, err := os.Stat(want[0]); err != nil {
+		t.Fatalf("conflict must not write anything: %v", err)
 	}
 }

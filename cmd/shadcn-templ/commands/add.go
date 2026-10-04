@@ -1,6 +1,8 @@
 // The add command, the pendant of src/commands/add.ts, with the shared
-// install pipeline of src/utils/add-components.ts inlined below (shadcn-templ has
-// no monorepo/workspace split, so one pipeline is enough).
+// install pipeline of src/utils/add-components.ts inlined below. One pipeline
+// covers addWorkspaceComponents too: in a Go module the import path aliases
+// already route shared files to the module root and page targets to the
+// app, so there is no second workspace config to load (see utils.Config).
 //
 // Dropped npm-only options: -y/--yes (this add never prompts), --dry-run/
 // --diff/--view (no pendant yet) and the interactive component multiselect.
@@ -154,11 +156,14 @@ func addComponents(components []string, config *utils.Config, registryURL string
 	}
 	if needsBundle {
 		defaulted := config.ScriptsDefaulted
-		bundlePath, _, err := updaters.UpdateScripts(config)
+		bundlePaths, _, err := updaters.UpdateScripts(config)
 		if err != nil {
 			return err
 		}
-		logf(options.Silent, "Bundle: %s. Render @%s.Scripts() once in your layout <head>.\n", bundlePath, path.Base(config.Aliases.Components))
+		for _, bundlePath := range bundlePaths {
+			logf(options.Silent, "Bundle: %s\n", utils.DisplayPath(config, bundlePath))
+		}
+		logf(options.Silent, "Render @%s.Scripts() once in your layout <head>.\n", path.Base(config.Aliases.Components))
 		if defaulted {
 			logf(options.Silent, "Serve %s at %s.\n", config.Scripts.Dir, config.Scripts.Path)
 		}
@@ -167,7 +172,7 @@ func addComponents(components []string, config *utils.Config, registryURL string
 	// CSS last, so a file watcher rebuild sees the finished component files.
 	overwriteCssVars := options.OverwriteCssVars || tree.HasThemeItem
 	if !tree.CSSVars.Empty() || tree.CSS.Len() > 0 {
-		relCSS, _ := filepath.Rel(config.ResolvedPaths.Cwd, config.ResolvedPaths.TailwindCSS)
+		relCSS := utils.DisplayPath(config, config.ResolvedPaths.TailwindCSS)
 		logf(options.Silent, "Updating %s.\n", relCSS)
 		vendored, err := updaters.UpdateCSS(config.ResolvedPaths.TailwindCSS, updaters.UpdateCSSOptions{
 			CSSVars:          tree.CSSVars,
@@ -221,7 +226,7 @@ func vendorCSSImports(names []string, config *utils.Config, registryURL string, 
 		if err := writeFile(target, content); err != nil {
 			return err
 		}
-		rel, _ := filepath.Rel(config.ResolvedPaths.Cwd, target)
+		rel := utils.DisplayPath(config, target)
 		logf(silent, "Created %s\n", rel)
 	}
 	return nil
