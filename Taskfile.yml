@@ -32,15 +32,9 @@ tasks:
     cmds:
       - "tailwindcss -i ./assets/css/globals.css -o ./assets/css/output.css --watch"
 
-  kill-ports:
-    desc: Kill leftover processes on the dev ports (8090 app, 7331 templ proxy, 3000 shiki)
-    cmds:
-      - lsof -ti:8090,7331,3000 | xargs kill -9 2>/dev/null || true
-
   dev:
     desc: Start development server with hot reload
     deps:
-      - kill-ports
       - tailwind-clean
     cmds:
       - task --parallel tailwind-watch scripts-watch templ shiki-highlighter
