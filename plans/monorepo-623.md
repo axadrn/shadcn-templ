@@ -2,7 +2,7 @@
 
 - **Planner**: Claude
 - **Executor**: Claude
-- **Status**: review
+- **Status**: done
 - **Branch**: feat/monorepo-623 (from feat/parity-components)
 
 ## Context
@@ -119,3 +119,9 @@ Each app then got a `pages/home.templ` (servicea: button, dialog, sidebar07 bloc
 Corrected during the smoke test: no registry item uses a file `target`, so the docs no longer promise block pages in the app; blocks install once under `components/blocks/` (Decisions updated).
 
 Open: shadcn's `init --monorepo` scaffolds a Turborepo template; there is no Go pendant scaffold (`init --template` still makes a single-app module). Requirement 4 (same `style` across apps sharing components) is documented, not enforced.
+
+## Planner review
+
+### Review (Claude, 2026-10-04)
+
+Accepted. Read the five commits; the design is the smallest Go pendant of shadcn's monorepo support: go.mod found by walking up, aliases against the module root, file paths against the app, one shared components package whose bundle every sharing app receives, and a hard stop on different `scripts.path` before anything is written. The shared config walk costs 0.12 s over this repository's 969 directories, so `bundle --watch` stays fast; the shadcn templates and the JSON schema under `tmp/` and `static/` do not resolve as configs and are skipped. Planner checks after the merge into `feat/parity-components`: `go build ./...`, `go vet ./cmd/shadcn-templ/...`, `go test ./...` (42 packages) green; a beta.10 scratch project upgraded with this CLI (`add utils <components> --overwrite`, `bundle`) builds and its bundle loads without errors. Open items stay as listed: no `init --monorepo` scaffold, the same `style` per shared package is documented, not enforced.
