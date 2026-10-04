@@ -253,6 +253,12 @@ You can add an addon to the combobox by using the `inputgroup.Addon` component i
 
 <ComponentPreview name="combobox-input-group" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="combobox-rtl" direction="rtl" align="start" />
+
 ## API Reference
 
 ### Combobox

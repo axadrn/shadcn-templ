@@ -154,6 +154,12 @@ Set the `Href` prop to render the item as a link. The hover and focus states wil
 
 <ComponentPreview name="item-dropdown" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="item-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Item

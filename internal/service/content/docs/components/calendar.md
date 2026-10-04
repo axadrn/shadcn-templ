@@ -125,6 +125,23 @@ Use `ShowWeekNumber` to show week numbers.
 
 <ComponentPreview name="calendar-week-numbers" previewClassName="h-96" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="calendar-rtl" direction="rtl" previewClassName="h-96" />
+
+When using RTL, pass both the `Locale` and `Dir` props to the Calendar component:
+
+```templ showLineNumbers
+@calendar.Calendar(calendar.Props{
+	Mode:     calendar.ModeSingle,
+	Selected: date,
+	Locale:   "ar-SA",
+	Dir:      "rtl",
+})
+```
+
 ## API Reference
 
 ### Calendar

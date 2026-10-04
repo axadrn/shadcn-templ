@@ -70,6 +70,12 @@ Use `ScrollBar` with `Orientation: scrollarea.OrientationHorizontal` for horizon
 
 <ComponentPreview name="scroll-area-horizontal-demo" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="scroll-area-rtl" direction="rtl" previewClassName="h-auto" />
+
 ## API Reference
 
 ### ScrollArea

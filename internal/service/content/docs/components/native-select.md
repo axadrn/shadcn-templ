@@ -107,6 +107,12 @@ Use `aria-invalid` to show validation errors and the `data-invalid` attribute on
 - Use `NativeSelect` for native browser behavior, better performance, or mobile-optimized dropdowns.
 - Use `Select` for custom styling, animations, or complex interactions.
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="native-select-rtl" direction="rtl" />
+
 ## API Reference
 
 ### NativeSelect

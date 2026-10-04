@@ -92,6 +92,12 @@ Set `Href` on `Link` to render it as a link. Use `navigationmenu.TriggerStyle()`
 }
 ```
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="navigation-menu-rtl" direction="rtl" previewClassName="h-96" />
+
 ## API Reference
 
 See the [Base UI Navigation Menu](https://base-ui.com/react/components/navigation-menu#api-reference) documentation for the behavior.

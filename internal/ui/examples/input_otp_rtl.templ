@@ -1,0 +1,30 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/inputotp"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ InputOTPRtl() {
+	@field.Field(field.Props{Class: "mx-auto max-w-xs"}) {
+		@field.Label(field.LabelProps{For: "input-otp-rtl"}) {
+			رمز التحقق
+		}
+		@inputotp.InputOTP(inputotp.Props{
+			ID:           "input-otp-rtl",
+			MaxLength:    6,
+			DefaultValue: "123456",
+			Attributes:   templ.Attributes{"dir": "rtl"},
+		}) {
+			@inputotp.Group() {
+				@inputotp.Slot(inputotp.SlotProps{Index: 0})
+				@inputotp.Slot(inputotp.SlotProps{Index: 1})
+				@inputotp.Slot(inputotp.SlotProps{Index: 2})
+				@inputotp.Slot(inputotp.SlotProps{Index: 3})
+				@inputotp.Slot(inputotp.SlotProps{Index: 4})
+				@inputotp.Slot(inputotp.SlotProps{Index: 5})
+			}
+		}
+	}
+}

@@ -1,0 +1,66 @@
+package examples
+
+import "github.com/axadrn/shadcn-templ/v2/components/table"
+
+// The upstream example's Arabic translation, its default language.
+var tableRtlInvoices = []tableInvoice{
+	{"INV001", "مدفوع", "$250.00", "بطاقة ائتمانية"},
+	{"INV002", "قيد الانتظار", "$150.00", "PayPal"},
+	{"INV003", "غير مدفوع", "$350.00", "تحويل بنكي"},
+	{"INV004", "مدفوع", "$450.00", "بطاقة ائتمانية"},
+	{"INV005", "مدفوع", "$550.00", "PayPal"},
+	{"INV006", "قيد الانتظار", "$200.00", "تحويل بنكي"},
+	{"INV007", "غير مدفوع", "$300.00", "بطاقة ائتمانية"},
+}
+
+templ TableRtl() {
+	@table.Table(table.Props{Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@table.Caption() {
+			قائمة بفواتيرك الأخيرة.
+		}
+		@table.Header() {
+			@table.Row() {
+				@table.Head(table.HeadProps{Class: "w-[100px]"}) {
+					الفاتورة
+				}
+				@table.Head() {
+					الحالة
+				}
+				@table.Head() {
+					الطريقة
+				}
+				@table.Head(table.HeadProps{Class: "text-right"}) {
+					المبلغ
+				}
+			}
+		}
+		@table.Body() {
+			for _, invoice := range tableRtlInvoices {
+				@table.Row() {
+					@table.Cell(table.CellProps{Class: "font-medium"}) {
+						{ invoice.Invoice }
+					}
+					@table.Cell() {
+						{ invoice.PaymentStatus }
+					}
+					@table.Cell() {
+						{ invoice.PaymentMethod }
+					}
+					@table.Cell(table.CellProps{Class: "text-right"}) {
+						{ invoice.TotalAmount }
+					}
+				}
+			}
+		}
+		@table.Footer() {
+			@table.Row() {
+				@table.Cell(table.CellProps{Attributes: templ.Attributes{"colspan": "3"}}) {
+					المجموع
+				}
+				@table.Cell(table.CellProps{Class: "text-right"}) {
+					$2,500.00
+				}
+			}
+		}
+	}
+}

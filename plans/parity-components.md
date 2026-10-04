@@ -374,4 +374,12 @@ Checks so far: `go test ./...` green (the registry and inliner counts include th
 
 Task 16 is complete; the full `compare.mjs all` run follows task 17 (not run since the collapsible and transition runtime change, only the affected families). Each new component also adds its examples to `parity/examples.txt` and bumps the counts in `internal/registryapi/invariant_test.go` (+1 item, +1 registry:ui, +48 builds).
 
+### Task 17
+
+First part, stopped to split the examples package first (`plans/examples-packages.md`). 83 of the missing upstream examples ported, compared in Chromium against the reference: all 56 RTL variants but `progress-rtl`, and the non RTL ones but the sidebar parts, `calendar-hijri`, `calendar-multiple`, `carousel-multiple`, `command-dialog`, `data-picker-with-dropdowns`, `data-table-demo`, `date-picker-natural-language`, `file-upload-list` and `markdown-demo`. `ai-sdk-helper-demo` and `tanstack-ai-helper-demo` belong to upstream's React helper docs and are out of scope.
+
+- RTL examples render the Arabic values of upstream's `useTranslation(translations, "ar")`, `dir` and `data-lang` where upstream passes them, and compile with the RTL transform (`RTL: true`). Their logical utilities are Tailwind candidates now: `cmd/generate-style-classes` lists the RTL form of every style map and component class. Noto Sans Arabic and Hebrew are self hosted for `[data-lang]` like upstream's next/font, in the site and in the reference.
+- Components grew what the RTL examples use: embla's `direction` on the carousel (mirrored axis), Recharts' `reversed` on the chart's x axis, date-fns `ar-SA` in the calendar (weekday and month names, `PPPP`), and `drawer.Content` spreads its attributes onto the popup like upstream.
+- Upstream's prebuilt calendar keeps `cn-calendar-dropdown-root` unflattened (transform-style-map.ts does not rewrite `classNames={{...}}`), so its dropdowns have no border; ours do, within the pixel tolerance.
+
 ## Planner review

@@ -79,6 +79,12 @@ Use the `Size` prop to change the size of the toggle.
 
 <ComponentPreview name="toggle-disabled" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="toggle-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Toggle

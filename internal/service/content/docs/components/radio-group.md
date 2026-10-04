@@ -107,6 +107,12 @@ Use `aria-invalid` on `radiogroup.Item` and `Invalid` on `field.Field` to show v
 
 <ComponentPreview name="radio-group-invalid" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="radio-group-rtl" direction="rtl" />
+
 ## API Reference
 
 ### RadioGroup

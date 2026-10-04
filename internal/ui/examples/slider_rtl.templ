@@ -1,0 +1,14 @@
+package examples
+
+import "github.com/axadrn/shadcn-templ/v2/components/slider"
+
+// The upstream example's Arabic translation, its default language.
+templ SliderRtl() {
+	@slider.Slider(slider.Props{
+		DefaultValue: []float64{75},
+		Max:          100,
+		Step:         1,
+		Class:        "mx-auto w-full max-w-xs",
+		Attributes:   templ.Attributes{"dir": "rtl"},
+	})
+}

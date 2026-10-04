@@ -1,0 +1,49 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/combobox"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+)
+
+// comboboxRtlCategories are the upstream categories with their Arabic
+// labels, the categoryLabels the chips and items render.
+var comboboxRtlCategories = []combobox.ItemData{
+	{Value: "technology", Label: "التكنولوجيا"},
+	{Value: "design", Label: "التصميم"},
+	{Value: "business", Label: "الأعمال"},
+	{Value: "marketing", Label: "التسويق"},
+	{Value: "education", Label: "التعليم"},
+	{Value: "health", Label: "الصحة"},
+}
+
+// The upstream example's Arabic translation, its default language.
+templ ComboboxRtl() {
+	@field.Field(field.Props{Class: "mx-auto w-full max-w-xs"}) {
+		@field.Label() {
+			الفئات
+		}
+		@combobox.Combobox(combobox.Props{
+			Multiple:      true,
+			AutoHighlight: true,
+			Items:         comboboxRtlCategories,
+			DefaultValues: []string{"technology"},
+		}) {
+			@combobox.Chips() {
+				@combobox.Value()
+				@combobox.ChipsInput(combobox.ChipsInputProps{Placeholder: "أضف فئات"})
+			}
+			@combobox.Content(combobox.ContentProps{Attributes: templ.Attributes{"dir": "rtl", "data-lang": "ar"}}) {
+				@combobox.Empty() {
+					لم يتم العثور على فئات.
+				}
+				@combobox.List() {
+					for _, item := range comboboxRtlCategories {
+						@combobox.Item(combobox.ItemProps{Value: item.Value}) {
+							{ item.Label.(string) }
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,24 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ InputRtl() {
+	@field.Field(field.Props{Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@field.Label(field.LabelProps{For: "input-rtl-api-key"}) {
+			مفتاح API
+		}
+		@input.Input(input.Props{
+			ID:          "input-rtl-api-key",
+			Type:        "password",
+			Placeholder: "sk-...",
+			Attributes:  templ.Attributes{"dir": "rtl"},
+		})
+		@field.Description() {
+			مفتاح API الخاص بك مشفر ومخزن بأمان.
+		}
+	}
+}

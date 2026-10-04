@@ -107,6 +107,12 @@ You can add an `inputgroup.InputGroup` component to the `empty.Content` componen
 
 <ComponentPreview name="empty-input-group" previewClassName="h-96 p-0" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="empty-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Empty

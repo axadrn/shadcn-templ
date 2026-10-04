@@ -208,6 +208,9 @@ type XAxisProps struct {
 	// AllowDataOverflow keeps numeric domain bounds instead of extending
 	// them to contain the data, like Recharts' allowDataOverflow.
 	AllowDataOverflow bool
+	// Reversed runs the categories from right to left, like Recharts'
+	// reversed.
+	Reversed bool
 }
 
 // YAxisProps is the pendant of Recharts' YAxis.
@@ -1206,6 +1209,7 @@ func buildModel(ctx context.Context, st *chartState) Model {
 		m.XTickLine = x.TickLine
 		m.XAxisLine = x.AxisLine
 		m.XAxisHide = x.Hide
+		m.XReversed = x.Reversed
 		if x.Hide {
 			m.XAxisHeight = 0
 		}
@@ -1726,6 +1730,7 @@ type Model struct {
 	// Layout "vertical" swaps the axes and draws the bars horizontally.
 	Layout      string                `json:"layout,omitempty"`
 	XAxisHide   bool                  `json:"xAxisHide,omitempty"`
+	XReversed   bool                  `json:"xReversed,omitempty"`
 	YAxisHide   bool                  `json:"yAxisHide,omitempty"`
 	Stacked     bool                  `json:"stacked,omitempty"`
 	StackOffset string                `json:"stackOffset,omitempty"` // "expand" normalizes each stack to 1

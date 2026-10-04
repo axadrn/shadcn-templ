@@ -1,0 +1,182 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/checkbox"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+	"github.com/axadrn/shadcn-templ/v2/components/textarea"
+)
+
+// The select items as upstream passes them: the trigger shows these labels,
+// the list the Arabic ones.
+var fieldRtlMonths = []selectcomp.ItemData{
+	{Label: "MM", Value: ""},
+	{Label: "01", Value: "01"},
+	{Label: "02", Value: "02"},
+	{Label: "03", Value: "03"},
+	{Label: "04", Value: "04"},
+	{Label: "05", Value: "05"},
+	{Label: "06", Value: "06"},
+	{Label: "07", Value: "07"},
+	{Label: "08", Value: "08"},
+	{Label: "09", Value: "09"},
+	{Label: "10", Value: "10"},
+	{Label: "11", Value: "11"},
+	{Label: "12", Value: "12"},
+}
+
+// getMonthLabel's Arabic month labels.
+var fieldRtlMonthLabels = []string{"ش.ش", "٠١", "٠٢", "٠٣", "٠٤", "٠٥", "٠٦", "٠٧", "٠٨", "٠٩", "١٠", "١١", "١٢"}
+
+var fieldRtlYears = []selectcomp.ItemData{
+	{Label: "YYYY", Value: ""},
+	{Label: "2024", Value: "2024"},
+	{Label: "2025", Value: "2025"},
+	{Label: "2026", Value: "2026"},
+	{Label: "2027", Value: "2027"},
+	{Label: "2028", Value: "2028"},
+	{Label: "2029", Value: "2029"},
+}
+
+// The upstream example's Arabic translation, its default language.
+templ FieldRtl() {
+	<div class="w-full max-w-md py-6" dir="rtl">
+		<form>
+			@field.Group() {
+				@field.Set() {
+					@field.Legend() {
+						طريقة الدفع
+					}
+					@field.Description() {
+						جميع المعاملات آمنة ومشفرة
+					}
+					@field.Group() {
+						@field.Field() {
+							@field.Label(field.LabelProps{For: "checkout-7j9-card-name-43j-rtl"}) {
+								الاسم على البطاقة
+							}
+							@input.Input(input.Props{
+								ID:          "checkout-7j9-card-name-43j-rtl",
+								Placeholder: "Evil Rabbit",
+								Required:    true,
+							})
+						}
+						@field.Field() {
+							@field.Label(field.LabelProps{For: "checkout-7j9-card-number-uw1-rtl"}) {
+								رقم البطاقة
+							}
+							@input.Input(input.Props{
+								ID:          "checkout-7j9-card-number-uw1-rtl",
+								Placeholder: "1234 5678 9012 3456",
+								Required:    true,
+							})
+							@field.Description() {
+								أدخل رقم البطاقة المكون من 16 رقمًا
+							}
+						}
+						<div class="grid grid-cols-3 gap-4">
+							@field.Field() {
+								@field.Label(field.LabelProps{For: "checkout-exp-month-ts6-rtl"}) {
+									الشهر
+								}
+								@selectcomp.Select(selectcomp.Props{Items: fieldRtlMonths}) {
+									@selectcomp.Trigger(selectcomp.TriggerProps{ID: "checkout-exp-month-ts6-rtl"}) {
+										@selectcomp.Value()
+									}
+									@selectcomp.Content(selectcomp.ContentProps{Attributes: templ.Attributes{"dir": "rtl"}}) {
+										@selectcomp.Group() {
+											for i, item := range fieldRtlMonths {
+												@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+													{ fieldRtlMonthLabels[i] }
+												}
+											}
+										}
+									}
+								}
+							}
+							@field.Field() {
+								@field.Label(field.LabelProps{For: "checkout-7j9-exp-year-f59-rtl"}) {
+									السنة
+								}
+								@selectcomp.Select(selectcomp.Props{Items: fieldRtlYears}) {
+									@selectcomp.Trigger(selectcomp.TriggerProps{ID: "checkout-7j9-exp-year-f59-rtl"}) {
+										@selectcomp.Value()
+									}
+									@selectcomp.Content(selectcomp.ContentProps{Attributes: templ.Attributes{"dir": "rtl"}}) {
+										@selectcomp.Group() {
+											for _, item := range fieldRtlYears {
+												@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+													{ item.Label.(string) }
+												}
+											}
+										}
+									}
+								}
+							}
+							@field.Field() {
+								@field.Label(field.LabelProps{For: "checkout-7j9-cvv-rtl"}) {
+									CVV
+								}
+								@input.Input(input.Props{
+									ID:          "checkout-7j9-cvv-rtl",
+									Placeholder: "123",
+									Required:    true,
+								})
+							}
+						</div>
+					}
+				}
+				@field.Separator()
+				@field.Set() {
+					@field.Legend() {
+						عنوان الفوترة
+					}
+					@field.Description() {
+						عنوان الفوترة المرتبط بطريقة الدفع الخاصة بك
+					}
+					@field.Group() {
+						@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+							@checkbox.Checkbox(checkbox.Props{
+								ID:             "checkout-7j9-same-as-shipping-wgm-rtl",
+								DefaultChecked: true,
+							})
+							@field.Label(field.LabelProps{
+								For:   "checkout-7j9-same-as-shipping-wgm-rtl",
+								Class: "font-normal",
+							}) {
+								نفس عنوان الشحن
+							}
+						}
+					}
+				}
+				@field.Set() {
+					@field.Group() {
+						@field.Field() {
+							@field.Label(field.LabelProps{For: "checkout-7j9-optional-comments-rtl"}) {
+								تعليقات
+							}
+							@textarea.Textarea(textarea.Props{
+								ID:          "checkout-7j9-optional-comments-rtl",
+								Placeholder: "أضف أي تعليقات إضافية",
+								Class:       "resize-none",
+							})
+						}
+					}
+				}
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@button.Button(button.Props{Type: button.TypeSubmit}) {
+						إرسال
+					}
+					@button.Button(button.Props{
+						Variant: button.VariantOutline,
+						Type:    button.TypeButton,
+					}) {
+						إلغاء
+					}
+				}
+			}
+		</form>
+	</div>
+}

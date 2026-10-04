@@ -1,0 +1,173 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/textarea"
+)
+
+templ InputGroupTextareaExamples() {
+	@field.Group() {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "textarea-header-footer-12"}) {
+				Default Textarea (No Input Group)
+			}
+			@textarea.Textarea(textarea.Props{
+				ID:          "textarea-header-footer-12",
+				Placeholder: "Enter your text here...",
+			})
+		}
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "textarea-header-footer-13"}) {
+				Input Group
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Textarea(inputgroup.TextareaProps{
+					ID:          "textarea-header-footer-13",
+					Placeholder: "Enter your text here...",
+				})
+			}
+			@field.Description() {
+				This is a description of the input group.
+			}
+		}
+		@field.Field(field.Props{Attributes: templ.Attributes{"data-invalid": "true"}}) {
+			@field.Label(field.LabelProps{For: "textarea-header-footer-14"}) {
+				Invalid
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Textarea(inputgroup.TextareaProps{
+					ID:          "textarea-header-footer-14",
+					Placeholder: "Enter your text here...",
+					Attributes:  templ.Attributes{"aria-invalid": "true"},
+				})
+			}
+			@field.Description() {
+				This is a description of the input group.
+			}
+		}
+		@field.Field(field.Props{Attributes: templ.Attributes{"data-disabled": "true"}}) {
+			@field.Label(field.LabelProps{For: "textarea-header-footer-15"}) {
+				Disabled
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Textarea(inputgroup.TextareaProps{
+					ID:          "textarea-header-footer-15",
+					Placeholder: "Enter your text here...",
+					Disabled:    true,
+				})
+			}
+			@field.Description() {
+				This is a description of the input group.
+			}
+		}
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "prompt-31"}) {
+				Addon (block-start)
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Textarea(inputgroup.TextareaProps{ID: "prompt-31"})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockStart}) {
+					@inputgroup.Text() {
+						Ask, Search or Chat...
+					}
+					@icon.Info(icon.Props{Class: "ml-auto text-muted-foreground"})
+				}
+			}
+			@field.Description() {
+				This is a description of the input group.
+			}
+		}
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "textarea-header-footer-30"}) {
+				Addon (block-end)
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Textarea(inputgroup.TextareaProps{
+					ID:          "textarea-header-footer-30",
+					Placeholder: "Enter your text here...",
+				})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockEnd}) {
+					@inputgroup.Text() {
+						0/280 characters
+					}
+					@inputgroup.Button(inputgroup.ButtonProps{
+						Variant: button.VariantDefault,
+						Size:    inputgroup.ButtonSizeIconXs,
+						Class:   "ml-auto rounded-full",
+					}) {
+						@icon.ArrowUp()
+						<span class="sr-only">Send</span>
+					}
+				}
+			}
+		}
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "textarea-comment-31"}) {
+				Addon (Buttons)
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Textarea(inputgroup.TextareaProps{
+					ID:          "textarea-comment-31",
+					Placeholder: "Share your thoughts...",
+					Class:       "min-h-[120px]",
+				})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockEnd}) {
+					@inputgroup.Button(inputgroup.ButtonProps{
+						Variant: button.VariantGhost,
+						Class:   "ml-auto",
+						Size:    inputgroup.ButtonSizeSm,
+					}) {
+						Cancel
+					}
+					@inputgroup.Button(inputgroup.ButtonProps{
+						Variant: button.VariantDefault,
+						Size:    inputgroup.ButtonSizeSm,
+					}) {
+						Post Comment
+					}
+				}
+			}
+		}
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "textarea-code-32"}) {
+				Code Editor
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Textarea(inputgroup.TextareaProps{
+					ID:          "textarea-code-32",
+					Placeholder: "console.log('Hello, world!');",
+					Class:       "min-h-[300px] py-3",
+				})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockStart, Class: "border-b"}) {
+					@inputgroup.Text(inputgroup.TextProps{Class: "font-mono font-medium"}) {
+						@icon.Code()
+						script.js
+					}
+					@inputgroup.Button(inputgroup.ButtonProps{
+						Size:  inputgroup.ButtonSizeIconXs,
+						Class: "ml-auto",
+					}) {
+						@icon.RefreshCw()
+					}
+					@inputgroup.Button(inputgroup.ButtonProps{
+						Size:    inputgroup.ButtonSizeIconXs,
+						Variant: button.VariantGhost,
+					}) {
+						@icon.Copy()
+					}
+				}
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockEnd, Class: "border-t"}) {
+					@inputgroup.Text() {
+						Line 1, Column 1
+					}
+					@inputgroup.Text(inputgroup.TextProps{Class: "ml-auto"}) {
+						JavaScript
+					}
+				}
+			}
+		}
+	}
+}

@@ -144,6 +144,12 @@ You can use the `Avatar` component as a trigger for a dropdown menu.
 
 <ComponentPreview name="avatar-dropdown" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="avatar-rtl" direction="rtl" previewClassName="h-72" />
+
 ## API Reference
 
 ### Avatar

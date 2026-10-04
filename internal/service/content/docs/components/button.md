@@ -128,6 +128,12 @@ Set the `Href` prop to render the button as a semantic link that looks like a bu
 
 <ComponentPreview name="button-render" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="button-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Button

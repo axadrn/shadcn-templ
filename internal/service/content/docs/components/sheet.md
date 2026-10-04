@@ -87,6 +87,12 @@ Use `HideCloseButton` on `sheet.Content` to hide the close button.
 
 <ComponentPreview name="sheet-no-close-button" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="sheet-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Sheet

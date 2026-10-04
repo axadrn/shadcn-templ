@@ -134,6 +134,12 @@ Here's an example of a custom resizable textarea.
 
 <ComponentPreview name="input-group-custom" previewClassName="h-56" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="input-group-rtl" direction="rtl" previewClassName="h-[30rem]" />
+
 ## API Reference
 
 ### InputGroup

@@ -66,6 +66,12 @@ For form fields, use the [Field](/docs/components/field) component which include
 
 <ComponentPreview name="field-demo" previewClassName="h-[44rem]" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="label-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Label

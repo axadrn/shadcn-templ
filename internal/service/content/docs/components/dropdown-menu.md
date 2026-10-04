@@ -216,6 +216,12 @@ A richer example combining groups, icons, and submenus.
 
 <ComponentPreview name="dropdown-menu-complex" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="dropdown-menu-rtl" direction="rtl" />
+
 ## Accessibility
 
 The trigger opens the menu on `Enter`, `Space` and `ArrowDown` with the first

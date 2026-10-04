@@ -122,6 +122,12 @@ A table showing actions for each row using a `DropdownMenu` component.
 
 <ComponentPreview name="table-actions" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="table-rtl" direction="rtl" previewClassName="h-auto" />
+
 ## API Reference
 
 ### Table

@@ -31,6 +31,9 @@
       horizontal: root.getAttribute("data-templ-orientation") !== "vertical",
       align: root.getAttribute("data-templ-align") || "center",
       loop: root.getAttribute("data-templ-loop") === "true",
+      // embla's direction option: with rtl the horizontal axis is mirrored,
+      // slides run from the right edge and the track moves to the right.
+      rtl: root.getAttribute("data-templ-direction") === "rtl",
       autoplay: root.getAttribute("data-templ-autoplay") === "true",
       interval: parseInt(root.getAttribute("data-templ-interval"), 10) || 5000,
       timer: null,
@@ -63,6 +66,14 @@
     );
   }
 
+  // A slide's start along the scroll axis: its left (or top) edge, with rtl
+  // the distance of its right edge from the viewport's right.
+  function start(state, item) {
+    if (!state.horizontal) return item.offsetTop;
+    if (state.rtl) return -(item.offsetLeft + item.offsetWidth);
+    return item.offsetLeft;
+  }
+
   // Snap offsets per slide relative to the first slide, so the gutter margin
   // on the track cancels against the slide padding and content sits flush.
   // The last snaps are clamped so the track end aligns with the viewport
@@ -70,26 +81,27 @@
   function snaps(state) {
     const its = items(state);
     if (!its.length) return [0];
-    const base = state.horizontal ? its[0].offsetLeft : its[0].offsetTop;
+    const base = start(state, its[0]);
     const last = its[its.length - 1];
-    const end =
-      (state.horizontal ? last.offsetLeft + last.offsetWidth : last.offsetTop + last.offsetHeight) -
-      base;
+    const end = start(state, last) + (state.horizontal ? last.offsetWidth : last.offsetHeight) - base;
     const viewportSize = state.horizontal
       ? state.viewport.clientWidth
       : state.viewport.clientHeight;
     // The slide boxes carry the gutter as leading padding, the visible
     // content ends one gutter before the last box edge.
     const style = getComputedStyle(its[0]);
-    const gutter = parseFloat(state.horizontal ? style.paddingLeft : style.paddingTop) || 0;
+    const gutter =
+      parseFloat(
+        state.horizontal ? (state.rtl ? style.paddingRight : style.paddingLeft) : style.paddingTop,
+      ) || 0;
     const max = Math.max(0, end - gutter - viewportSize);
     const points = [];
     for (const item of its) {
-      const start = (state.horizontal ? item.offsetLeft : item.offsetTop) - base;
+      const itemStart = start(state, item) - base;
       const size = (state.horizontal ? item.offsetWidth : item.offsetHeight) - gutter;
-      let offset = start;
-      if (state.align === "center") offset = start - (viewportSize - size) / 2;
-      else if (state.align === "end") offset = start - (viewportSize - size);
+      let offset = itemStart;
+      if (state.align === "center") offset = itemStart - (viewportSize - size) / 2;
+      else if (state.align === "end") offset = itemStart - (viewportSize - size);
       // Clamp into the scrollable range (embla's trimSnaps), edge slides
       // collapse onto the flush bounds and dedupe.
       offset = Math.max(0, Math.min(offset, max));
@@ -100,7 +112,7 @@
 
   function render(state) {
     state.track.style.transform = state.horizontal
-      ? "translate3d(" + -state.offset + "px, 0, 0)"
+      ? "translate3d(" + (state.rtl ? state.offset : -state.offset) + "px, 0, 0)"
       : "translate3d(0, " + -state.offset + "px, 0)";
   }
 
@@ -202,7 +214,9 @@
     stopEngine(state);
     const points = snaps(state);
     const max = points[points.length - 1];
-    const startCoord = state.horizontal ? e.clientX : e.clientY;
+    // With rtl the pointer moves the track the other way along the offsets.
+    const sign = state.horizontal && state.rtl ? -1 : 1;
+    const startCoord = sign * (state.horizontal ? e.clientX : e.clientY);
     const startOffset = state.offset;
     let lastCoord = startCoord;
     let lastTime = performance.now();
@@ -210,7 +224,7 @@
     let moved = false;
 
     const onMove = (ev) => {
-      const coord = state.horizontal ? ev.clientX : ev.clientY;
+      const coord = sign * (state.horizontal ? ev.clientX : ev.clientY);
       const now = performance.now();
       if (now > lastTime) velocity = (coord - lastCoord) / (now - lastTime);
       lastCoord = coord;

@@ -1,0 +1,49 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/checkbox"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/label"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ CheckboxRtl() {
+	@field.Group(field.GroupProps{Class: "max-w-sm", Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@checkbox.Checkbox(checkbox.Props{ID: "terms-checkbox-rtl", Name: "terms-checkbox"})
+			@label.Label(label.Props{For: "terms-checkbox-rtl"}) {
+				قبول الشروط والأحكام
+			}
+		}
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@checkbox.Checkbox(checkbox.Props{ID: "terms-checkbox-2-rtl", Name: "terms-checkbox-2", DefaultChecked: true})
+			@field.Content() {
+				@field.Label(field.LabelProps{For: "terms-checkbox-2-rtl"}) {
+					قبول الشروط والأحكام
+				}
+				@field.Description() {
+					بالنقر على هذا المربع، فإنك توافق على الشروط.
+				}
+			}
+		}
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-disabled": "true"}}) {
+			@checkbox.Checkbox(checkbox.Props{ID: "toggle-checkbox-rtl", Name: "toggle-checkbox", Disabled: true})
+			@field.Label(field.LabelProps{For: "toggle-checkbox-rtl"}) {
+				تفعيل الإشعارات
+			}
+		}
+		@field.Label() {
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@checkbox.Checkbox(checkbox.Props{ID: "toggle-checkbox-2", Name: "toggle-checkbox-2"})
+				@field.Content() {
+					@field.Title() {
+						تفعيل الإشعارات
+					}
+					@field.Description() {
+						يمكنك تفعيل أو إلغاء تفعيل الإشعارات في أي وقت.
+					}
+				}
+			}
+		}
+	}
+}

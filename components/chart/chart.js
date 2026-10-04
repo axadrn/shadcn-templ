@@ -637,9 +637,13 @@ function renderCartesian(panel, m, state, alpha = 1) {
   const catStart = vertical ? plotY : plotX;
   const catLength = vertical ? plotH : plotW;
   const bandSize = m.kind === "bar" ? catLength / n : 0;
+  // XAxis reversed: the range runs from the right, category i sits at the
+  // position of n - 1 - i.
+  const reversed = !!m.xReversed && !vertical;
+  const catSlot = (i) => (reversed ? n - 1 - i : i);
   const cats = [];
   for (let i = 0; i < n; i++) {
-    cats.push(m.kind === "bar" ? catStart + i * bandSize + bandSize / 2 : plotX + (i * plotW) / (n - 1));
+    cats.push(m.kind === "bar" ? catStart + catSlot(i) * bandSize + bandSize / 2 : plotX + (catSlot(i) * plotW) / (n - 1));
   }
 
   // Explicit pixel size like Recharts' Surface: the svg never stretches
@@ -767,7 +771,7 @@ function renderCartesian(panel, m, state, alpha = 1) {
         const to = m.stacked ? stackBase[i] + raw : raw;
         const base = valuePos(from);
         const end = valuePos(to);
-        const cat = catStart + i * band + offsets[slot];
+        const cat = catStart + catSlot(i) * band + offsets[slot];
         // The signed rectangle like Recharts computes it: the origin sits
         // at the value end and the size runs back to the baseline.
         let rect = vertical
@@ -834,7 +838,7 @@ function renderCartesian(panel, m, state, alpha = 1) {
         for (const ll of s.labelLists) {
           svg += `<g class="recharts-layer recharts-label-list">`;
           for (let i = 0; i < n; i++) {
-            const catCenter = catStart + i * band + offsets[slot] + barSize / 2;
+            const catCenter = catStart + catSlot(i) * band + offsets[slot] + barSize / 2;
             const offset = ll.offset || 5;
             // getAttrsOfCartesianLabel: the sign of the rectangle flips the
             // offset and the anchor, so a negative bar labels below its end.
@@ -999,7 +1003,9 @@ function renderCartesian(panel, m, state, alpha = 1) {
     svg += `<line orientation="bottom" class="recharts-cartesian-axis-line" stroke="#666" fill="none" x1="${fmtF(plotX)}" y1="${fmtF(plotBottom)}" x2="${fmtF(plotX + plotW)}" y2="${fmtF(plotBottom)}"/>`;
   }
   svg += `<g class="recharts-cartesian-axis-ticks">`;
-  for (const tk of preserveEndTicks(coords, widths, 0, W, m.minTickGap || 5)) {
+  // getTickBoundaries: descending coordinates (reversed) swap the bounds.
+  const [tickStart, tickEnd] = coords.length >= 2 && coords[1] < coords[0] ? [W, 0] : [0, W];
+  for (const tk of preserveEndTicks(coords, widths, tickStart, tickEnd, m.minTickGap || 5)) {
     svg += `<g class="recharts-layer recharts-cartesian-axis-tick">`;
     if (m.xTickLine) {
       svg += `<line orientation="bottom" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="${fmtF(coords[tk.index])}" y1="${fmtF(plotBottom + TICK_SIZE)}" x2="${fmtF(coords[tk.index])}" y2="${fmtF(plotBottom)}"/>`;
@@ -1013,7 +1019,7 @@ function renderCartesian(panel, m, state, alpha = 1) {
   swapSVG(panel, svg);
 
   state.points.tops = state.tops || [];
-  state.geom = { W, H, plotX, plotY, plotW, plotH, plotBottom, band, xs, cats, n, vertical };
+  state.geom = { W, H, plotX, plotY, plotW, plotH, plotBottom, band, xs, cats, n, vertical, reversed };
 }
 
 /* Pie sector path, the port of the Go SectorPath (degrees, 0 at three
@@ -1830,7 +1836,7 @@ function showCursor(panel, m, state, i) {
   if (m.kind === "bar") {
     const d = g.vertical
       ? `M ${fmtF(g.plotX)},${fmtF(g.plotY + i * g.band)} h ${fmtF(g.plotW)} v ${fmtF(g.band)} h ${fmtF(-g.plotW)} Z`
-      : `M ${fmtF(g.plotX + i * g.band)},${fmtF(g.plotY)} h ${fmtF(g.band)} v ${fmtF(g.plotH)} h ${fmtF(-g.band)} Z`;
+      : `M ${fmtF(g.plotX + (g.reversed ? g.n - 1 - i : i) * g.band)},${fmtF(g.plotY)} h ${fmtF(g.band)} v ${fmtF(g.plotH)} h ${fmtF(-g.band)} Z`;
     if (!cursor) {
       seriesLayer.insertAdjacentHTML(
         "beforebegin",
@@ -2039,10 +2045,12 @@ function initPanel(script) {
     if (m.kind === "bar") {
       // The category runs down the y axis in a vertical layout.
       const along = g.vertical ? chartY - g.plotY : chartX - g.plotX;
-      return Math.max(0, Math.min(g.n - 1, Math.floor(along / g.band)));
+      const at = Math.max(0, Math.min(g.n - 1, Math.floor(along / g.band)));
+      return g.reversed ? g.n - 1 - at : at;
     }
     const step = g.plotW / (g.n - 1);
-    return Math.max(0, Math.min(g.n - 1, Math.round((chartX - g.plotX) / step)));
+    const at = Math.max(0, Math.min(g.n - 1, Math.round((chartX - g.plotX) / step)));
+    return g.reversed ? g.n - 1 - at : at;
   };
 
   // parseEventsOfWrapper: the tooltip listens to mouse events, and an axis

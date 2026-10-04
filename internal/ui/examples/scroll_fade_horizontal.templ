@@ -1,0 +1,35 @@
+package examples
+
+var scrollFadeHorizontalTags = []string{
+	"Design",
+	"Engineering",
+	"Marketing",
+	"Product",
+	"Research",
+	"Sales",
+	"Support",
+	"Operations",
+	"Finance",
+	"Legal",
+	"People",
+	"Security",
+}
+
+templ ScrollFadeHorizontal() {
+	<div class="mx-auto w-full max-w-xs overflow-hidden rounded-2xl border">
+		<div class="scroll-fade-x scrollbar-none overflow-x-auto">
+			@scrollFadeTags(scrollFadeHorizontalTags)
+		</div>
+	</div>
+}
+
+// scrollFadeTags is the row of tags the horizontal scroll fade examples scroll.
+templ scrollFadeTags(tags []string) {
+	<div class="flex w-max gap-1.5 p-1.5">
+		for _, tag := range tags {
+			<div class="shrink-0 rounded-lg bg-muted px-3 py-2.5 text-sm">
+				{ tag }
+			</div>
+		}
+	</div>
+}

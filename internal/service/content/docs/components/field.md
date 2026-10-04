@@ -201,6 +201,12 @@ Stack `field.Field` components with `field.Group`. Add `field.Separator` to divi
 
 <ComponentPreview name="field-group" previewClassName="h-96" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="field-rtl" direction="rtl" previewClassName="h-auto p-6" />
+
 ## Responsive Layout
 
 - **Vertical fields:** Default orientation stacks label, control, and helper text—ideal for mobile-first layouts.

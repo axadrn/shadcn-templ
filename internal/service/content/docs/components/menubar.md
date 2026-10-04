@@ -137,6 +137,12 @@ Use `menubar.Sub`, `menubar.SubTrigger`, and `menubar.SubContent` for nested men
 
 <ComponentPreview name="menubar-icons" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="menubar-rtl" direction="rtl" />
+
 ## API Reference
 
 The menus are the [Dropdown Menu](/docs/components/dropdown-menu)'s Base UI menus. See the [Base UI Menubar](https://base-ui.com/react/components/menubar#api-reference) documentation.

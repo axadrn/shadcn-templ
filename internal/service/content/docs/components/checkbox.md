@@ -89,6 +89,12 @@ Use multiple fields to create a checkbox list.
 
 <ComponentPreview name="checkbox-table" previewClassName="p-4 md:p-8" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="checkbox-rtl" direction="rtl" previewClassName="h-80" />
+
 ## API Reference
 
 ### Checkbox

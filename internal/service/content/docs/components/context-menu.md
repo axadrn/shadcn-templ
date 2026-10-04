@@ -190,6 +190,12 @@ Control submenu placement with `Side` and `Align` props.
 
 <ComponentPreview name="context-menu-sides" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="context-menu-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Content

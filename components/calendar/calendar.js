@@ -74,8 +74,8 @@
     };
   }
 
-  // date-fns enUS for the tokens DayPicker formats with; another locale
-  // goes through Intl.
+  // date-fns enUS for the tokens DayPicker formats with; a ported date-fns
+  // locale below, another locale goes through Intl.
   const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const pad = (n, l = 2) => String(n).padStart(l, "0");
@@ -88,6 +88,40 @@
     }
     return n + "th";
   }
+  // date-fns locales ported for the tokens DayPicker formats with (the
+  // localize month and day values, ordinalNumber and formatLong's full
+  // date), used instead of Intl for their code. arSA is
+  // react-day-picker/locale's arSA, date-fns locale/ar-SA.
+  const DATE_FNS_LOCALES = {
+    "ar-SA": {
+      months: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
+      days: {
+        short: ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"],
+        wide: ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
+      },
+      ordinalNumber: (n) => String(n),
+      // formatLong.date full: "EEEE, MMMM do, y".
+      dateFull: (date, l) =>
+        `${l.days.wide[date.getDay()]}, ${l.months[date.getMonth()]} ${l.ordinalNumber(date.getDate())}, ${date.getFullYear()}`,
+      weekStartsOn: 0,
+    },
+  };
+  function formatDateFns(date, fmt, l) {
+    switch (fmt) {
+      case "LLLL y":
+        return `${l.months[date.getMonth()]} ${date.getFullYear()}`;
+      case "LLLL":
+        return l.months[date.getMonth()];
+      case "PPPP":
+        return l.dateFull(date, l);
+      case "cccc":
+        return l.days.wide[date.getDay()];
+      case "cccccc":
+        return l.days.short[date.getDay()];
+    }
+    return date.toString();
+  }
+
   function format(date, fmt, locale) {
     switch (fmt) {
       case "yyyy-MM-dd":
@@ -99,6 +133,7 @@
       case "d":
         return String(date.getDate());
     }
+    if (locale && DATE_FNS_LOCALES[locale]) return formatDateFns(date, fmt, DATE_FNS_LOCALES[locale]);
     if (locale && !/^en(-US)?$/.test(locale)) {
       const opts = {
         "LLLL y": { month: "long", year: "numeric" },
@@ -405,6 +440,7 @@
     if (prop) return parseInt(prop, 10);
     const locale = root.getAttribute("data-templ-locale");
     if (!locale) return 0;
+    if (DATE_FNS_LOCALES[locale]) return DATE_FNS_LOCALES[locale].weekStartsOn;
     try {
       const l = new Intl.Locale(locale);
       const info = l.getWeekInfo?.() ?? l.weekInfo;

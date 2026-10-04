@@ -1,0 +1,82 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+)
+
+templ InputGroupInCard() {
+	@card.Card(card.Props{Class: "w-full"}) {
+		@card.Header() {
+			@card.Title() {
+				Card with Input Group
+			}
+			@card.Description() {
+				This is a card with an input group.
+			}
+		}
+		@card.Content() {
+			@field.Group() {
+				@field.Field() {
+					@field.Label(field.LabelProps{For: "email-input"}) {
+						Email Address
+					}
+					@inputgroup.InputGroup() {
+						@inputgroup.Input(inputgroup.InputProps{
+							ID:          "email-input",
+							Type:        "email",
+							Placeholder: "you@example.com",
+						})
+						@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+							@icon.Mail()
+						}
+					}
+				}
+				@field.Field() {
+					@field.Label(field.LabelProps{For: "website-input"}) {
+						Website URL
+					}
+					@inputgroup.InputGroup() {
+						@inputgroup.Addon() {
+							@inputgroup.Text() {
+								https://
+							}
+						}
+						@inputgroup.Input(inputgroup.InputProps{ID: "website-input", Placeholder: "example.com"})
+						@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+							@icon.ExternalLink()
+						}
+					}
+				}
+				@field.Field() {
+					@field.Label(field.LabelProps{For: "feedback-textarea"}) {
+						Feedback &amp; Comments
+					}
+					@inputgroup.InputGroup() {
+						@inputgroup.Textarea(inputgroup.TextareaProps{
+							ID:          "feedback-textarea",
+							Placeholder: "Share your thoughts...",
+							Class:       "min-h-[100px]",
+						})
+						@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockEnd}) {
+							@inputgroup.Text() {
+								0/500 characters
+							}
+						}
+					}
+				}
+			}
+		}
+		@card.Footer(card.FooterProps{Class: "justify-end gap-2"}) {
+			@button.Button(button.Props{Variant: button.VariantOutline}) {
+				Cancel
+			}
+			@button.Button() {
+				Submit
+			}
+		}
+	}
+}

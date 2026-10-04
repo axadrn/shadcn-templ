@@ -144,6 +144,12 @@ func splitClassName(className string) (variant, name, alpha string) {
 	return variant, nameWithAlpha[:slashIndex], nameWithAlpha[slashIndex+1:]
 }
 
+// ApplyRtlMapping is applyRtlMapping for callers outside the pipeline, e.g.
+// the Tailwind candidates generator, which must list the RTL forms.
+func ApplyRtlMapping(input string) string {
+	return applyRtlMapping(input)
+}
+
 // applyRtlMapping ports applyRtlMapping for one class string.
 func applyRtlMapping(input string) string {
 	classNames := strings.Split(input, " ")

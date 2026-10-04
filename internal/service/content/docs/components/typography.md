@@ -58,3 +58,9 @@ We do not ship any typography styles by default. This page is an example of how 
 ## Muted
 
 <ComponentPreview name="typography-muted" />
+
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="typography-rtl" direction="rtl" className="[&_.preview]:h-auto!" />

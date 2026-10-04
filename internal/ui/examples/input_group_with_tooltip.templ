@@ -1,0 +1,171 @@
+package examples
+
+import (
+	"context"
+
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/buttongroup"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/popover"
+	"github.com/axadrn/shadcn-templ/v2/components/tooltip"
+)
+
+// InputGroupWithTooltip renders upstream's example as its route does: without
+// the country and setCountry props, so the trigger shows no country.
+templ InputGroupWithTooltip() {
+	@field.Group() {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "input-tooltip-20"}) {
+				Tooltip
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-tooltip-20"})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					@tooltip.Tooltip() {
+						@inputgroup.Button(inputgroup.ButtonProps{
+							Class:      "rounded-full",
+							Size:       inputgroup.ButtonSizeIconXs,
+							Attributes: tooltip.Trigger(ctx),
+						}) {
+							@icon.Info()
+						}
+						@tooltip.Content() {
+							This is content in a tooltip.
+						}
+					}
+				}
+			}
+			@field.Description() {
+				This is a description of the input group.
+			}
+		}
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "input-dropdown-21"}) {
+				Dropdown
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-dropdown-21"})
+				@inputgroup.Addon() {
+					@dropdownmenu.DropdownMenu() {
+						@inputgroup.Button(inputgroup.ButtonProps{
+							Class:      "text-muted-foreground tabular-nums",
+							Attributes: dropdownmenu.Trigger(ctx),
+						}) {
+							{ " " }
+							@icon.ChevronDown()
+						}
+						@dropdownmenu.Content(dropdownmenu.ContentProps{
+							Align:       dropdownmenu.AlignStart,
+							Class:       "min-w-16",
+							SideOffset:  10,
+							AlignOffset: -8,
+						}) {
+							@dropdownmenu.Item() {
+								+1
+							}
+							@dropdownmenu.Item() {
+								+44
+							}
+							@dropdownmenu.Item() {
+								+46
+							}
+						}
+					}
+				}
+			}
+			@field.Description() {
+				This is a description of the input group.
+			}
+		}
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "input-secure-19"}) {
+				Popover
+			}
+			@inputgroup.InputGroup() {
+				@popover.Popover() {
+					// PopoverTrigger rendered as an InputGroupAddon with
+					// nativeButton false: the addon's element and classes, the
+					// trigger's slot and role button instead of the native type.
+					<div
+						data-align="inline-start"
+						class="cn-input-group-addon flex cursor-text items-center justify-center select-none cn-input-group-addon-align-inline-start order-first"
+						{ inputGroupWithTooltipAddonTrigger(ctx)... }
+					>
+						@inputgroup.Button(inputgroup.ButtonProps{
+							Variant: button.VariantSecondary,
+							Size:    inputgroup.ButtonSizeIconXs,
+						}) {
+							@icon.Info()
+						}
+					</div>
+					@popover.Content(popover.ContentProps{Align: popover.AlignStart}) {
+						@popover.Header() {
+							@popover.Title() {
+								Your connection is not secure.
+							}
+							@popover.Description() {
+								You should not enter any sensitive information on this site.
+							}
+						}
+					}
+				}
+				@inputgroup.Addon(inputgroup.AddonProps{Class: "pl-1 text-muted-foreground"}) {
+					https://
+				}
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-secure-19"})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					@inputgroup.Button(inputgroup.ButtonProps{Size: inputgroup.ButtonSizeIconXs}) {
+						@icon.Star()
+					}
+				}
+			}
+			@field.Description() {
+				This is a description of the input group.
+			}
+		}
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "url"}) {
+				Button Group
+			}
+			@buttongroup.ButtonGroup() {
+				@buttongroup.Text() {
+					https://
+				}
+				@inputgroup.InputGroup() {
+					@inputgroup.Input(inputgroup.InputProps{ID: "url"})
+					@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+						@icon.Info()
+					}
+				}
+				@buttongroup.Text() {
+					.com
+				}
+			}
+			@field.Description() {
+				This is a description of the input group.
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			// onClick: the example calls sonner's toast, which shadcn-templ does
+			// not port; the toast manager shows the same message.
+			const demo = document.currentScript.previousElementSibling;
+			demo.querySelector("#input-secure-19 ~ [data-slot=input-group-addon] [data-slot=button]").addEventListener("click", () =>
+				window.templ.toast.add({ description: "Added to favorites" }),
+			);
+		})();
+	</script>
+}
+
+// inputGroupWithTooltipAddonTrigger is PopoverTrigger's props with
+// nativeButton false: role button, no native type.
+func inputGroupWithTooltipAddonTrigger(ctx context.Context) templ.Attributes {
+	attrs := popover.Trigger(ctx)
+	delete(attrs, "type")
+	attrs["role"] = "button"
+	return attrs
+}

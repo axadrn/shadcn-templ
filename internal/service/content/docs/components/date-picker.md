@@ -82,3 +82,9 @@ A date picker component with an input field for selecting a date.
 A date picker component with a time input field for selecting a time.
 
 <ComponentPreview name="date-picker-time" />
+
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="date-picker-rtl" direction="rtl" />

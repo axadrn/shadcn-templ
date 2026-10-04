@@ -1,0 +1,55 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/breadcrumb"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ BreadcrumbRtl() {
+	@breadcrumb.Breadcrumb(breadcrumb.Props{Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@breadcrumb.List() {
+			@breadcrumb.Item() {
+				@breadcrumb.Link(breadcrumb.LinkProps{Href: "/"}) {
+					الرئيسية
+				}
+			}
+			@breadcrumb.Separator() {
+				@icon.Dot()
+			}
+			@breadcrumb.Item() {
+				@dropdownmenu.DropdownMenu() {
+					<button type="button" tabindex="0" class="flex items-center gap-1" { dropdownmenu.Trigger(ctx)... }>
+						المكونات
+						@icon.ChevronDown(icon.Props{Class: "size-3.5", Attributes: templ.Attributes{"data-icon": "inline-end"}})
+					</button>
+					@dropdownmenu.Content(dropdownmenu.ContentProps{
+						Align:      dropdownmenu.AlignEnd,
+						Attributes: templ.Attributes{"data-lang": "ar", "dir": "rtl"},
+					}) {
+						@dropdownmenu.Group() {
+							@dropdownmenu.Item() {
+								التوثيق
+							}
+							@dropdownmenu.Item() {
+								السمات
+							}
+							@dropdownmenu.Item() {
+								جيت هاب
+							}
+						}
+					}
+				}
+			}
+			@breadcrumb.Separator() {
+				@icon.Dot()
+			}
+			@breadcrumb.Item() {
+				@breadcrumb.Page() {
+					مسار التنقل
+				}
+			}
+		}
+	}
+}

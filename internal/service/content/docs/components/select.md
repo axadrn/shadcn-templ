@@ -157,6 +157,12 @@ Set the `Invalid` prop on the `field.Field` component and `aria-invalid` on the 
 
 <ComponentPreview name="select-invalid" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="select-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Select

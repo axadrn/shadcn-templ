@@ -1,0 +1,58 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
+)
+
+templ SidebarControlled() {
+	@sidebar.Provider() {
+		@sidebar.Sidebar() {
+			@sidebar.Content() {
+				@sidebar.Group() {
+					@sidebar.GroupLabel() {
+						Projects
+					}
+					@sidebar.GroupContent() {
+						@sidebarMenuProjectsMenu()
+					}
+				}
+			}
+		}
+		@sidebar.Inset() {
+			<header class="flex h-12 items-center justify-between px-4">
+				@button.Button(button.Props{Size: button.SizeSm, Variant: button.VariantGhost}) {
+					@icon.PanelLeftClose()
+					<span>Close Sidebar</span>
+				}
+			</header>
+		}
+	}
+	<template>
+		@icon.PanelLeftClose()
+	</template>
+	<template>
+		@icon.PanelLeftOpen()
+	</template>
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			// The open state: the button toggles it (setOpen), the provider
+			// and the button render it.
+			const openIcon = document.currentScript.previousElementSibling;
+			const closeIcon = openIcon.previousElementSibling;
+			const demo = closeIcon.previousElementSibling;
+			const wrapper = demo.matches("[data-templ-sidebar-id]") ? demo : demo.querySelector("[data-templ-sidebar-id]");
+			const sidebarId = wrapper.getAttribute("data-templ-sidebar-id");
+			const toggle = demo.querySelector('[data-slot="sidebar-inset"] [data-slot="button"]');
+			toggle.addEventListener("click", () => {
+				const open = !window.templ.sidebar.open(sidebarId);
+				window.templ.sidebar.setOpen(open, sidebarId);
+				toggle.replaceChildren(
+					(open ? closeIcon : openIcon).content.firstElementChild.cloneNode(true),
+					Object.assign(document.createElement("span"), { textContent: (open ? "Close" : "Open") + " Sidebar" }),
+				);
+			});
+		})();
+	</script>
+}

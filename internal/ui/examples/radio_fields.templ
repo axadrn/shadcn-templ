@@ -1,0 +1,156 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/radiogroup"
+)
+
+templ RadioFields() {
+	@field.Group() {
+		@field.Set() {
+			@field.Legend(field.LegendProps{Variant: field.LegendVariantLabel}) {
+				Subscription Plan
+			}
+			@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "free"}) {
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{Value: "free", ID: "radio-free"})
+				@field.Label(field.LabelProps{For: "radio-free", Class: "font-normal"}) {
+					Free Plan
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{Value: "pro", ID: "radio-pro"})
+				@field.Label(field.LabelProps{For: "radio-pro", Class: "font-normal"}) {
+					Pro Plan
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{Value: "enterprise", ID: "radio-enterprise"})
+				@field.Label(field.LabelProps{For: "radio-enterprise", Class: "font-normal"}) {
+					Enterprise
+				}
+			}
+			}
+		}
+		@field.Set() {
+			@field.Legend(field.LegendProps{Variant: field.LegendVariantLabel}) {
+				Battery Level
+			}
+			@field.Description() {
+				Choose your preferred battery level.
+			}
+			@radiogroup.RadioGroup() {
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{Value: "high", ID: "battery-high"})
+				@field.Label(field.LabelProps{For: "battery-high"}) {
+					High
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{Value: "medium", ID: "battery-medium"})
+				@field.Label(field.LabelProps{For: "battery-medium"}) {
+					Medium
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{Value: "low", ID: "battery-low"})
+				@field.Label(field.LabelProps{For: "battery-low"}) {
+					Low
+				}
+			}
+			}
+		}
+		@radiogroup.RadioGroup(radiogroup.Props{Class: "gap-6"}) {
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{Value: "option1", ID: "radio-content-1"})
+				@field.Content() {
+					@field.Label(field.LabelProps{For: "radio-content-1"}) {
+						Enable Touch ID
+					}
+					@field.Description() {
+						Enable Touch ID to quickly unlock your device.
+					}
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{Value: "option2", ID: "radio-content-2"})
+				@field.Content() {
+					@field.Label(field.LabelProps{For: "radio-content-2"}) {
+						Enable Touch ID and Face ID to make it even faster to unlock your
+						device. This is a long label to test the layout.
+					}
+					@field.Description() {
+						Enable Touch ID to quickly unlock your device.
+					}
+				}
+			}
+		}
+		@radiogroup.RadioGroup(radiogroup.Props{Class: "gap-3"}) {
+			@field.Label(field.LabelProps{For: "radio-title-1"}) {
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@radiogroup.Item(radiogroup.ItemProps{Value: "title1", ID: "radio-title-1"})
+					@field.Content() {
+						@field.Title() {
+							Enable Touch ID
+						}
+						@field.Description() {
+							Enable Touch ID to quickly unlock your device.
+						}
+					}
+				}
+			}
+			@field.Label(field.LabelProps{For: "radio-title-2"}) {
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@radiogroup.Item(radiogroup.ItemProps{Value: "title2", ID: "radio-title-2"})
+					@field.Content() {
+						@field.Title() {
+							Enable Touch ID and Face ID to make it even faster to unlock
+							your device. This is a long label to test the layout.
+						}
+						@field.Description() {
+							Enable Touch ID to quickly unlock your device.
+						}
+					}
+				}
+			}
+		}
+		@field.Set() {
+			@field.Legend(field.LegendProps{Variant: field.LegendVariantLabel}) {
+				Invalid Radio Group
+			}
+			@radiogroup.RadioGroup() {
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-invalid": "true"}}) {
+				@radiogroup.Item(radiogroup.ItemProps{Value: "invalid1", ID: "radio-invalid-1", Attributes: templ.Attributes{"aria-invalid": "true"}})
+				@field.Label(field.LabelProps{For: "radio-invalid-1"}) {
+					Invalid Option 1
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-invalid": "true"}}) {
+				@radiogroup.Item(radiogroup.ItemProps{Value: "invalid2", ID: "radio-invalid-2", Attributes: templ.Attributes{"aria-invalid": "true"}})
+				@field.Label(field.LabelProps{For: "radio-invalid-2"}) {
+					Invalid Option 2
+				}
+			}
+			}
+		}
+		@field.Set() {
+			@field.Legend(field.LegendProps{Variant: field.LegendVariantLabel}) {
+				Disabled Radio Group
+			}
+			@radiogroup.RadioGroup(radiogroup.Props{Disabled: true}) {
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-disabled": "true"}}) {
+				@radiogroup.Item(radiogroup.ItemProps{Value: "disabled1", ID: "radio-disabled-1", Disabled: true})
+				@field.Label(field.LabelProps{For: "radio-disabled-1"}) {
+					Disabled Option 1
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-disabled": "true"}}) {
+				@radiogroup.Item(radiogroup.ItemProps{Value: "disabled2", ID: "radio-disabled-2", Disabled: true})
+				@field.Label(field.LabelProps{For: "radio-disabled-2"}) {
+					Disabled Option 2
+				}
+			}
+			}
+		}
+	}
+}

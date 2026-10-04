@@ -1,0 +1,98 @@
+package examples
+
+import "github.com/axadrn/shadcn-templ/v2/components/sidebar"
+
+type sidebarDocsItem struct {
+	Title string
+	URL   string
+	Items []sidebarDocsSubItem
+}
+
+type sidebarDocsSubItem struct {
+	Title string
+	URL   string
+}
+
+// sidebarDocsItems is the docs navigation of the sidebar submenu examples.
+var sidebarDocsItems = []sidebarDocsItem{
+	{
+		Title: "Getting Started", URL: "#",
+		Items: []sidebarDocsSubItem{
+			{Title: "Installation", URL: "#"},
+			{Title: "Project Structure", URL: "#"},
+		},
+	},
+	{
+		Title: "Build Your Application", URL: "#",
+		Items: []sidebarDocsSubItem{
+			{Title: "Routing", URL: "#"},
+			{Title: "Data Fetching", URL: "#"},
+			{Title: "Rendering", URL: "#"},
+			{Title: "Caching", URL: "#"},
+			{Title: "Styling", URL: "#"},
+			{Title: "Optimizing", URL: "#"},
+			{Title: "Configuring", URL: "#"},
+			{Title: "Testing", URL: "#"},
+			{Title: "Authentication", URL: "#"},
+			{Title: "Deploying", URL: "#"},
+			{Title: "Upgrading", URL: "#"},
+			{Title: "Examples", URL: "#"},
+		},
+	},
+	{
+		Title: "API Reference", URL: "#",
+		Items: []sidebarDocsSubItem{
+			{Title: "Components", URL: "#"},
+			{Title: "File Conventions", URL: "#"},
+			{Title: "Functions", URL: "#"},
+			{Title: "next.config.js Options", URL: "#"},
+			{Title: "CLI", URL: "#"},
+			{Title: "Edge Runtime", URL: "#"},
+		},
+	},
+	{
+		Title: "Architecture", URL: "#",
+		Items: []sidebarDocsSubItem{
+			{Title: "Accessibility", URL: "#"},
+			{Title: "Fast Refresh", URL: "#"},
+			{Title: "Next.js Compiler", URL: "#"},
+			{Title: "Supported Browsers", URL: "#"},
+			{Title: "Turbopack", URL: "#"},
+		},
+	},
+}
+
+templ SidebarMenuSub() {
+	@sidebar.Provider() {
+		@sidebar.Sidebar() {
+			@sidebar.Content() {
+				@sidebar.Group() {
+					@sidebar.GroupContent() {
+						@sidebar.Menu() {
+							for _, item := range sidebarDocsItems {
+								@sidebar.MenuItem() {
+									@sidebar.MenuButton(sidebar.MenuButtonProps{Href: item.URL}) {
+										<span>{ item.Title }</span>
+									}
+									@sidebarDocsSubMenu(item.Items)
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+templ sidebarDocsSubMenu(items []sidebarDocsSubItem) {
+	@sidebar.MenuSub() {
+		for _, subItem := range items {
+			@sidebar.MenuSubItem() {
+				@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{Href: subItem.URL}) {
+					<span>{ subItem.Title }</span>
+				}
+			}
+		}
+	}
+}

@@ -604,5 +604,76 @@
     {
       "key": "Control+Enter"
     }
+  ],
+  "shimmer-once": [
+    {
+      "click": "[data-slot=button]"
+    }
+  ],
+  "input-group-tooltip": [
+    {
+      "hover": "[data-base-ui-tooltip-trigger]"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "input-group-label": [
+    {
+      "hover": "[data-base-ui-tooltip-trigger]"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "input-group-with-tooltip": [
+    {
+      "hover": "[data-base-ui-tooltip-trigger]"
+    },
+    {
+      "key": "Escape"
+    },
+    {
+      "click": "[aria-haspopup=menu]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Escape"
+    },
+    {
+      "click": "[data-slot=popover-trigger]"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "input-group-with-addons": [
+    {
+      "click": "[data-slot=input-group-addon] [data-slot=button]"
+    }
+  ],
+  "radio-fields": [
+    {
+      "click": "[data-slot=\"radio-group-item\"]"
+    },
+    {
+      "key": "ArrowDown"
+    }
+  ],
+  "carousel-rtl": [
+    {
+      "click": "[data-slot=carousel-next]",
+      "wait": 1200
+    },
+    {
+      "click": "[data-slot=carousel-next]",
+      "wait": 1200
+    },
+    {
+      "click": "[data-slot=carousel-previous]",
+      "wait": 1200
+    }
   ]
 }

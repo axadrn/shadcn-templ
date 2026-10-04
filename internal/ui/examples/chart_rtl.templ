@@ -1,0 +1,64 @@
+package examples
+
+import "github.com/axadrn/shadcn-templ/v2/components/chart"
+
+// The upstream example's Arabic translation, its default language.
+
+var chartRtlData = []chart.Datum{
+	{"month": "january", "desktop": 186, "mobile": 80},
+	{"month": "february", "desktop": 305, "mobile": 200},
+	{"month": "march", "desktop": 237, "mobile": 120},
+	{"month": "april", "desktop": 73, "mobile": 190},
+	{"month": "may", "desktop": 209, "mobile": 130},
+	{"month": "june", "desktop": 214, "mobile": 140},
+}
+
+var chartRtlMonths = map[string]string{
+	"january":  "يناير",
+	"february": "فبراير",
+	"march":    "مارس",
+	"april":    "أبريل",
+	"may":      "مايو",
+	"june":     "يونيو",
+}
+
+var chartRtlConfig = chart.Config{
+	{Key: "desktop", Label: "سطح المكتب", Color: "var(--chart-2)"},
+	{Key: "mobile", Label: "الجوال", Color: "var(--chart-1)"},
+}
+
+// chartRtlMonthShort is the tick formatter, t[value].slice(0, 3).
+func chartRtlMonthShort(v any) string {
+	r := []rune(chartRtlMonths[v.(string)])
+	if len(r) > 3 {
+		r = r[:3]
+	}
+	return string(r)
+}
+
+func chartRtlMonth(v any) string {
+	return chartRtlMonths[v.(string)]
+}
+
+templ ChartRtl() {
+	@chart.Container(chart.ContainerProps{ID: "chart-rtl", Config: chartRtlConfig, Class: "min-h-[200px] w-full"}) {
+		@chart.BarChart(chart.BarChartProps{Data: chartRtlData, AccessibilityLayer: true}) {
+			@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
+			@chart.XAxis(chart.XAxisProps{
+				DataKey:       "month",
+				TickMargin:    10,
+				TickFormatter: chartRtlMonthShort,
+				Reversed:      true,
+			})
+			@chart.Tooltip(chart.TooltipProps{
+				Content: chart.TooltipContentProps{
+					LabelFormatter: chartRtlMonth,
+					LabelClassName: "w-32",
+				},
+			})
+			@chart.Legend()
+			@chart.Bar(chart.BarProps{DataKey: "desktop", Fill: "var(--color-desktop)", Radius: 4})
+			@chart.Bar(chart.BarProps{DataKey: "mobile", Fill: "var(--color-mobile)", Radius: 4})
+		}
+	}
+}

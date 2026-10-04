@@ -1,0 +1,30 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ ButtonRtl() {
+	<div class="flex flex-wrap items-center gap-2 md:flex-row" dir="rtl">
+		@button.Button(button.Props{Variant: button.VariantOutline}) {
+			زر
+		}
+		@button.Button(button.Props{Variant: button.VariantDestructive}) {
+			حذف
+		}
+		@button.Button(button.Props{Variant: button.VariantOutline}) {
+			إرسال{ " " }
+			@icon.ArrowRight(icon.Props{Class: "rtl:rotate-180", Attributes: templ.Attributes{"data-icon": "inline-end"}})
+		}
+		@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeIcon, Attributes: templ.Attributes{"aria-label": "Add"}}) {
+			@icon.Plus()
+		}
+		@button.Button(button.Props{Variant: button.VariantSecondary, Disabled: true}) {
+			@spinner.Spinner(spinner.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+			جاري التحميل
+		}
+	</div>
+}

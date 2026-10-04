@@ -105,6 +105,12 @@ Use nested collapsibles to build a file tree.
 
 <ComponentPreview name="collapsible-file-tree" previewClassName="h-[36rem]" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="collapsible-rtl" direction="rtl" align="start" />
+
 ## API Reference
 
 ### Collapsible

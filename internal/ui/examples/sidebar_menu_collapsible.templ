@@ -1,0 +1,38 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/collapsible"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
+)
+
+templ SidebarMenuCollapsible() {
+	@sidebar.Provider() {
+		@sidebar.Sidebar() {
+			@sidebar.Content() {
+				@sidebar.Group() {
+					@sidebar.GroupContent() {
+						@sidebar.Menu() {
+							for index, item := range sidebarDocsItems {
+								@collapsible.Collapsible(collapsible.Props{
+									Class:       "group/collapsible",
+									DefaultOpen: index == 0,
+								}) {
+									@sidebar.MenuItem() {
+										@sidebar.MenuButton(sidebar.MenuButtonProps{Attributes: collapsible.Trigger(ctx)}) {
+											<span>{ item.Title }</span>
+											@icon.ChevronRight(icon.Props{Class: "ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90"})
+										}
+										@collapsible.Content() {
+											@sidebarDocsSubMenu(item.Items)
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

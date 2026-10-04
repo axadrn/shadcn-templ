@@ -3,6 +3,8 @@ title: "scroll-fade"
 description: "Utilities for adding a fade effect to the edges of a scroll container."
 ---
 
+<ComponentPreview styleName="base-rhea" name="scroll-fade-demo" previewClassName="h-auto" />
+
 ## Installation
 
 If your project was set up with `shadcn-templ init`, you already have `scroll-fade`. It ships in the vendored `shadcn-tailwind.css`, which the CLI imports in your Tailwind entry file.
@@ -57,9 +59,13 @@ The fade is applied with `mask-image`, so it dissolves the content itself rather
 
 If the content does not overflow, no fade is shown. You can apply `scroll-fade` to any list without checking whether it scrolls.
 
+<ComponentPreview styleName="base-rhea" name="scroll-fade-overflow" previewClassName="h-auto" />
+
 ## Horizontal Scrolling
 
 Use `scroll-fade-x` on containers that scroll horizontally, i.e. the element that has `overflow-x-auto`.
+
+<ComponentPreview styleName="base-rhea" name="scroll-fade-horizontal" previewClassName="h-64" />
 
 ```templ
 <div class="flex scroll-fade-x overflow-x-auto"><!-- ... --></div>
@@ -71,6 +77,8 @@ The horizontal fade is direction-aware. In RTL layouts, the crisp edge and the f
 
 Use edge utilities when only one edge should track the scroll position.
 
+<ComponentPreview styleName="base-rhea" name="scroll-fade-edge" previewClassName="h-auto" />
+
 ```templ
 <div class="scroll-fade-b overflow-y-auto"><!-- ... --></div>
 ```
@@ -80,6 +88,8 @@ The edge utilities are scroll-aware. Start edges fade in after you scroll away f
 ## Fade Size
 
 The fade depth defaults to `12%` of the container, capped at `40px` so tall scrollers stay subtle. Use `scroll-fade-<number>` to set a fixed size on the spacing scale instead, the same way `scroll-mt-<number>` works.
+
+<ComponentPreview styleName="base-rhea" name="scroll-fade-size" previewClassName="h-auto" />
 
 ```templ
 <div class="scroll-fade overflow-y-auto scroll-fade-24"><!-- ... --></div>
@@ -119,6 +129,8 @@ Use `scroll-fade-none` to remove the fade. It works in any class order, so the t
 </div>
 ```
 
+<ComponentPreview styleName="base-rhea" name="scroll-fade-none" previewClassName="h-auto" />
+
 ## Fallback
 
 The scroll-aware behavior is implemented with [CSS scroll-driven animations](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_scroll-driven_animations), with no JavaScript and no scroll listeners. In browsers that do not support scroll-driven animations, `scroll-fade` falls back to a static fade on both edges, and edge utilities fall back to a static fade on the selected edge.
@@ -130,3 +142,5 @@ Since the mask is applied to the scroll container itself, a visible scrollbar fa
 To install RTL-compiled components, see the [`rtl` setting](/docs/components-json#rtl) in your `components.json`.
 
 `scroll-fade-x` follows the reading direction. At rest, the start edge is crisp and the end edge fades. In RTL layouts that means a crisp right edge and a fade on the left, mirrored from LTR.
+
+<ComponentPreview styleName="base-nova" name="scroll-fade-rtl" direction="rtl" />

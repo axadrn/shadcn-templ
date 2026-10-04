@@ -65,6 +65,12 @@ Horizontal separators between list items.
 
 <ComponentPreview name="separator-list" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="separator-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Separator

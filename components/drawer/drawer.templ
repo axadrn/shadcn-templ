@@ -260,8 +260,8 @@ templ Content(props ...ContentProps) {
 					"pointer-events-none fixed inset-0 z-50 select-none data-[modal=true]:pointer-events-auto",
 				),
 			}
-			{ p.Attributes... }
 		>
+			// DrawerContent spreads its props onto Drawer.Popup.
 			<div
 				id={ s.id }
 				data-slot="drawer-popup"
@@ -305,6 +305,7 @@ templ Content(props ...ContentProps) {
 						p.Class,
 					),
 				}
+				{ p.Attributes... }
 			>
 				if s.showSwipeHandle {
 					@SwipeHandle()

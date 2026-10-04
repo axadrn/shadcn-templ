@@ -1,0 +1,50 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/item"
+)
+
+templ OutlineItemGroup() {
+	@item.Group() {
+		@item.Item(item.Props{Variant: item.VariantOutline}) {
+			@item.Media(item.MediaProps{Variant: item.MediaVariantIcon}) {
+				@icon.Inbox()
+			}
+			@item.Content() {
+				@item.Title() {
+					Item 1
+				}
+				@item.Description() {
+					First item with icon.
+				}
+			}
+		}
+		@item.Item(item.Props{Variant: item.VariantOutline}) {
+			@item.Media(item.MediaProps{Variant: item.MediaVariantIcon}) {
+				@icon.Inbox()
+			}
+			@item.Content() {
+				@item.Title() {
+					Item 2
+				}
+				@item.Description() {
+					Second item with icon.
+				}
+			}
+		}
+		@item.Item(item.Props{Variant: item.VariantOutline}) {
+			@item.Media(item.MediaProps{Variant: item.MediaVariantIcon}) {
+				@icon.Inbox()
+			}
+			@item.Content() {
+				@item.Title() {
+					Item 3
+				}
+				@item.Description() {
+					Third item with icon.
+				}
+			}
+		}
+	}
+}

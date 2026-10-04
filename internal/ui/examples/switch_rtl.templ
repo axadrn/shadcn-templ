@@ -1,0 +1,21 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	switchcomp "github.com/axadrn/shadcn-templ/v2/components/switch"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ SwitchRtl() {
+	@field.Field(field.Props{Orientation: field.OrientationHorizontal, Class: "max-w-sm", Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@field.Content() {
+			@field.Label(field.LabelProps{For: "switch-focus-mode-rtl", Attributes: templ.Attributes{"dir": "rtl"}}) {
+				المشاركة عبر الأجهزة
+			}
+			@field.Description(field.DescriptionProps{Attributes: templ.Attributes{"dir": "rtl"}}) {
+				يتم مشاركة التركيز عبر الأجهزة، ويتم إيقاف تشغيله عند مغادرة التطبيق.
+			}
+		}
+		@switchcomp.Switch(switchcomp.Props{ID: "switch-focus-mode-rtl", Attributes: templ.Attributes{"dir": "rtl"}})
+	}
+}

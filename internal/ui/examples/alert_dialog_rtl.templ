@@ -1,0 +1,68 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/alertdialog"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ AlertDialogRtl() {
+	<div class="flex gap-4" dir="rtl">
+		@alertdialog.AlertDialog() {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Attributes: alertdialog.Trigger(ctx),
+			}) {
+				إظهار الحوار
+			}
+			@alertdialog.Content(alertdialog.ContentProps{Attributes: templ.Attributes{"dir": "rtl", "data-lang": "ar"}}) {
+				@alertdialog.Header() {
+					@alertdialog.Title() {
+						هل أنت متأكد تمامًا؟
+					}
+					@alertdialog.Description() {
+						لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف حسابك نهائيًا من خوادمنا.
+					}
+				}
+				@alertdialog.Footer() {
+					@alertdialog.Cancel() {
+						إلغاء
+					}
+					@alertdialog.Action() {
+						متابعة
+					}
+				}
+			}
+		}
+		@alertdialog.AlertDialog() {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Attributes: alertdialog.Trigger(ctx),
+			}) {
+				إظهار الحوار (صغير)
+			}
+			@alertdialog.Content(alertdialog.ContentProps{Size: alertdialog.SizeSm, Attributes: templ.Attributes{"dir": "rtl", "data-lang": "ar"}}) {
+				@alertdialog.Header() {
+					@alertdialog.Media() {
+						@icon.Bluetooth()
+					}
+					@alertdialog.Title() {
+						السماح للملحق بالاتصال؟
+					}
+					@alertdialog.Description() {
+						هل تريد السماح لملحق USB بالاتصال بهذا الجهاز؟
+					}
+				}
+				@alertdialog.Footer() {
+					@alertdialog.Cancel() {
+						عدم السماح
+					}
+					@alertdialog.Action() {
+						السماح
+					}
+				}
+			}
+		}
+	</div>
+}

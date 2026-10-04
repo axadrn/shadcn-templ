@@ -73,6 +73,12 @@ Pair with `Button` to create a textarea with a submit button.
 
 <ComponentPreview name="textarea-button" previewClassName="*:max-w-xs" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="textarea-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Textarea

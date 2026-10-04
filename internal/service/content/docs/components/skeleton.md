@@ -67,6 +67,12 @@ import "github.com/axadrn/shadcn-templ/v2/components/skeleton"
 
 <ComponentPreview name="skeleton-table" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="skeleton-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Skeleton

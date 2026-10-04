@@ -307,6 +307,9 @@ type XAxisProps struct {
 	// AllowDataOverflow keeps numeric domain bounds instead of extending
 	// them to contain the data, like Recharts' allowDataOverflow.
 	AllowDataOverflow bool
+	// Reversed runs the categories from right to left, like Recharts'
+	// reversed.
+	Reversed bool
 }
 
 // YAxisProps is the pendant of Recharts' YAxis.
@@ -2018,6 +2021,7 @@ func buildModel(ctx context.Context, st *chartState) Model {
 		m.XTickLine = x.TickLine
 		m.XAxisLine = x.AxisLine
 		m.XAxisHide = x.Hide
+		m.XReversed = x.Reversed
 		if x.Hide {
 			m.XAxisHeight = 0
 		}
@@ -2553,7 +2557,7 @@ func legendContent(items []LegendItem, p *LegendProps) templ.Component {
 				var templ_7745c5c3_Var41 string
 				templ_7745c5c3_Var41, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("background-color:" + it.Color)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/chart/chart.templ`, Line: 1679, Col: 88}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/chart/chart.templ`, Line: 1683, Col: 88}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 				if templ_7745c5c3_Err != nil {
@@ -2567,7 +2571,7 @@ func legendContent(items []LegendItem, p *LegendProps) templ.Component {
 			var templ_7745c5c3_Var42 string
 			templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(it.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/chart/chart.templ`, Line: 1681, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/chart/chart.templ`, Line: 1685, Col: 15}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 			if templ_7745c5c3_Err != nil {
@@ -2627,6 +2631,7 @@ type Model struct {
 	// Layout "vertical" swaps the axes and draws the bars horizontally.
 	Layout      string                `json:"layout,omitempty"`
 	XAxisHide   bool                  `json:"xAxisHide,omitempty"`
+	XReversed   bool                  `json:"xReversed,omitempty"`
 	YAxisHide   bool                  `json:"yAxisHide,omitempty"`
 	Stacked     bool                  `json:"stacked,omitempty"`
 	StackOffset string                `json:"stackOffset,omitempty"` // "expand" normalizes each stack to 1

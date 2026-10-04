@@ -1,0 +1,58 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+	"github.com/axadrn/shadcn-templ/v2/components/sheet"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ SheetRtl() {
+	@sheet.Sheet() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: sheet.Trigger(ctx),
+		}) {
+			فتح
+		}
+		@sheet.Content(sheet.ContentProps{
+			Side:       sheet.SideLeft,
+			Attributes: templ.Attributes{"dir": "rtl", "data-lang": "ar"},
+		}) {
+			@sheet.Header() {
+				@sheet.Title() {
+					تعديل الملف الشخصي
+				}
+				@sheet.Description() {
+					قم بإجراء تغييرات على ملفك الشخصي هنا. انقر حفظ عند الانتهاء.
+				}
+			}
+			@field.Group(field.GroupProps{Class: "px-4"}) {
+				@field.Field() {
+					@field.Label(field.LabelProps{For: "sheet-rtl-name"}) {
+						الاسم
+					}
+					@input.Input(input.Props{ID: "sheet-rtl-name", Value: "Pedro Duarte"})
+				}
+				@field.Field() {
+					@field.Label(field.LabelProps{For: "sheet-rtl-username"}) {
+						اسم المستخدم
+					}
+					@input.Input(input.Props{ID: "sheet-rtl-username", Value: "peduarte"})
+				}
+			}
+			@sheet.Footer() {
+				@button.Button(button.Props{Type: button.TypeSubmit}) {
+					حفظ التغييرات
+				}
+				@button.Button(button.Props{
+					Variant:    button.VariantOutline,
+					Attributes: sheet.Close(ctx),
+				}) {
+					إغلاق
+				}
+			}
+		}
+	}
+}

@@ -120,6 +120,12 @@ Use the `Side` and `Align` props on `hovercard.Content` to control placement.
 
 <ComponentPreview name="hover-card-sides" previewClassName="h-[22rem]" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="hover-card-rtl" direction="rtl" previewClassName="h-80" />
+
 ## API Reference
 
 ### HoverCard

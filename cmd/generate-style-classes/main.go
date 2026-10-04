@@ -5,6 +5,11 @@
 // the utilities living only in the style sheets' @apply lines would never be
 // generated into output.css. globals.css @source's the file.
 //
+// The RTL examples render the components compiled with the RTL transform
+// (inliner.Options.RTL), whose logical utilities (ms-, ps-, start-, rtl:
+// variants) appear in no source file: the file lists the RTL form of every
+// style map utility and of every class in the components' templ sources.
+//
 // Usage, from the repo root:
 //
 //	go run ./cmd/generate-style-classes
@@ -12,8 +17,10 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -36,6 +43,36 @@ func main() {
 		for _, utilities := range styleMap {
 			for _, class := range strings.Fields(utilities) {
 				classes[class] = true
+			}
+		}
+	}
+
+	// The RTL forms, of the style maps and of the components' own classes.
+	sources := []string{}
+	for class := range classes {
+		sources = append(sources, class)
+	}
+	quoted := regexp.MustCompile(`"([^"\n]*)"`)
+	err := filepath.WalkDir("components", func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".templ") {
+			return err
+		}
+		src, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		for _, m := range quoted.FindAllStringSubmatch(string(src), -1) {
+			sources = append(sources, strings.Fields(m[1])...)
+		}
+		return nil
+	})
+	if err != nil {
+		fatal("scan components: %v", err)
+	}
+	for _, class := range sources {
+		for _, rtl := range strings.Fields(inliner.ApplyRtlMapping(class)) {
+			if rtl != class {
+				classes[rtl] = true
 			}
 		}
 	}

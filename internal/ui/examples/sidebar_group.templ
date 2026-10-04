@@ -1,0 +1,41 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
+)
+
+templ SidebarGroup() {
+	@sidebar.Provider() {
+		@sidebar.Sidebar() {
+			@sidebar.Content() {
+				@sidebar.Group() {
+					@sidebar.GroupLabel() {
+						Help
+					}
+					@sidebar.GroupContent() {
+						@sidebarHelpMenu()
+					}
+				}
+			}
+		}
+	}
+}
+
+// sidebarHelpMenu is the Support and Feedback menu of the sidebar group examples.
+templ sidebarHelpMenu() {
+	@sidebar.Menu() {
+		@sidebar.MenuItem() {
+			@sidebar.MenuButton() {
+				@icon.LifeBuoy()
+				Support
+			}
+		}
+		@sidebar.MenuItem() {
+			@sidebar.MenuButton() {
+				@icon.Send()
+				Feedback
+			}
+		}
+	}
+}

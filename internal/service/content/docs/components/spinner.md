@@ -95,6 +95,12 @@ Add a spinner to a badge to indicate a loading state. Place the `@spinner.Spinne
 
 <ComponentPreview name="spinner-empty" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="spinner-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Spinner

@@ -1,0 +1,385 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/avatar"
+	"github.com/axadrn/shadcn-templ/v2/components/collapsible"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
+)
+
+// The upstream example's translations; it renders Arabic, its default
+// language, and the language selector switches between them.
+var sidebarRtlTranslations = map[string]map[string]string{
+	"en": {
+		"teamName": "Acme Inc", "teamPlan": "Enterprise", "platform": "Platform", "projects": "Projects",
+		"viewProject": "View Project", "shareProject": "Share Project", "deleteProject": "Delete Project",
+		"more": "More", "upgradeToPro": "Upgrade to Pro", "account": "Account", "billing": "Billing",
+		"notifications": "Notifications", "logOut": "Log out", "playground": "Playground", "history": "History",
+		"starred": "Starred", "settings": "Settings", "models": "Models", "genesis": "Genesis",
+		"explorer": "Explorer", "quantum": "Quantum", "documentation": "Documentation",
+		"introduction": "Introduction", "getStarted": "Get Started", "tutorials": "Tutorials",
+		"changelog": "Changelog", "general": "General", "team": "Team", "limits": "Limits",
+		"designEngineering": "Design Engineering", "salesMarketing": "Sales & Marketing", "travel": "Travel",
+	},
+	"ar": {
+		"teamName": "شركة أكمي", "teamPlan": "المؤسسة", "platform": "المنصة", "projects": "المشاريع",
+		"viewProject": "عرض المشروع", "shareProject": "مشاركة المشروع", "deleteProject": "حذف المشروع",
+		"more": "المزيد", "upgradeToPro": "ترقية إلى Pro", "account": "الحساب", "billing": "الفوترة",
+		"notifications": "الإشعارات", "logOut": "تسجيل الخروج", "playground": "ملعب", "history": "السجل",
+		"starred": "المميز", "settings": "الإعدادات", "models": "النماذج", "genesis": "جينيسيس",
+		"explorer": "إكسبلورر", "quantum": "كوانتوم", "documentation": "التوثيق",
+		"introduction": "مقدمة", "getStarted": "ابدأ", "tutorials": "الدروس",
+		"changelog": "سجل التغييرات", "general": "عام", "team": "الفريق", "limits": "الحدود",
+		"designEngineering": "هندسة التصميم", "salesMarketing": "المبيعات والتسويق", "travel": "السفر",
+	},
+	"he": {
+		"teamName": "אקמי בע״מ", "teamPlan": "ארגוני", "platform": "פלטפורמה", "projects": "פרויקטים",
+		"viewProject": "הצג פרויקט", "shareProject": "שתף פרויקט", "deleteProject": "מחק פרויקט",
+		"more": "עוד", "upgradeToPro": "שדרג ל-Pro", "account": "חשבון", "billing": "חיוב",
+		"notifications": "התראות", "logOut": "התנתק", "playground": "מגרש משחקים", "history": "היסטוריה",
+		"starred": "מועדפים", "settings": "הגדרות", "models": "מודלים", "genesis": "ג'נסיס",
+		"explorer": "אקספלורר", "quantum": "קוונטום", "documentation": "תיעוד",
+		"introduction": "מבוא", "getStarted": "התחל", "tutorials": "מדריכים",
+		"changelog": "יומן שינויים", "general": "כללי", "team": "צוות", "limits": "מגבלות",
+		"designEngineering": "הנדסת עיצוב", "salesMarketing": "מכירות ושיווק", "travel": "נסיעות",
+	},
+}
+
+// languageOptions of the site's LanguageSelector.
+var sidebarRtlLanguages = []selectcomp.ItemData{
+	{Value: "en", Label: "English"},
+	{Value: "ar", Label: "Arabic (العربية)"},
+	{Value: "he", Label: "Hebrew (עברית)"},
+}
+
+var sidebarRtlNavMain = []sidebarDemoNavItem{
+	{
+		Title: "playground", URL: "#", Icon: icon.SquareTerminal, IsActive: true,
+		Items: []sidebarDemoNavSubItem{{Title: "history", URL: "#"}, {Title: "starred", URL: "#"}, {Title: "settings", URL: "#"}},
+	},
+	{
+		Title: "models", URL: "#", Icon: icon.Bot,
+		Items: []sidebarDemoNavSubItem{{Title: "genesis", URL: "#"}, {Title: "explorer", URL: "#"}, {Title: "quantum", URL: "#"}},
+	},
+	{
+		Title: "documentation", URL: "#", Icon: icon.BookOpen,
+		Items: []sidebarDemoNavSubItem{{Title: "introduction", URL: "#"}, {Title: "getStarted", URL: "#"}, {Title: "tutorials", URL: "#"}, {Title: "changelog", URL: "#"}},
+	},
+	{
+		Title: "settings", URL: "#", Icon: icon.Settings2,
+		Items: []sidebarDemoNavSubItem{{Title: "general", URL: "#"}, {Title: "team", URL: "#"}, {Title: "billing", URL: "#"}, {Title: "limits", URL: "#"}},
+	},
+}
+
+var sidebarRtlProjects = []sidebarDemoProject{
+	{Name: "designEngineering", URL: "#", Icon: icon.Frame},
+	{Name: "salesMarketing", URL: "#", Icon: icon.ChartPie},
+	{Name: "travel", URL: "#", Icon: icon.Map},
+}
+
+var sidebarRtlUser = struct {
+	Name   string
+	Email  string
+	Avatar string
+}{
+	Name:   "shadcn",
+	Email:  "m@example.com",
+	Avatar: "/assets/img/avatars/shadcn.jpg",
+}
+
+func sidebarRtlT(key string) string {
+	return sidebarRtlTranslations["ar"][key]
+}
+
+templ SidebarRtl() {
+	<div class="relative" dir="rtl">
+		@selectcomp.Select(selectcomp.Props{Items: sidebarRtlLanguages, Value: sidebarRtlLanguage()}) {
+			@selectcomp.Trigger(selectcomp.TriggerProps{
+				Size:       selectcomp.SizeSm,
+				Class:      "w-36 absolute top-4 right-4 z-10 rtl:right-auto rtl:left-4",
+				Attributes: templ.Attributes{"dir": "ltr", "data-name": "language-selector"},
+			}) {
+				@selectcomp.Value()
+			}
+			@selectcomp.Content(selectcomp.ContentProps{
+				Class:      "data-open:animate-none data-closed:animate-none",
+				Attributes: templ.Attributes{"dir": "ltr"},
+			}) {
+				@selectcomp.Group() {
+					for _, option := range sidebarRtlLanguages {
+						@selectcomp.Item(selectcomp.ItemProps{Value: option.Value}) {
+							{ option.Label.(string) }
+						}
+					}
+				}
+			}
+		}
+		@sidebar.Provider() {
+			@sidebar.Sidebar(sidebar.Props{
+				Collapsible: sidebar.CollapsibleIcon,
+				Side:        sidebar.SideRight,
+				Variant:     sidebar.VariantFloating,
+			}) {
+				@sidebar.Header() {
+					@sidebar.Menu() {
+						@sidebar.MenuItem() {
+							@sidebar.MenuButton(sidebar.MenuButtonProps{Size: sidebar.MenuButtonSizeLg, Href: "#"}) {
+								<div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+									@icon.GalleryVerticalEnd(icon.Props{Class: "size-4"})
+								</div>
+								<div class="flex flex-col gap-0.5 leading-none">
+									<span class="font-medium">{ sidebarRtlT("teamName") }</span>
+									<span class="">{ sidebarRtlT("teamPlan") }</span>
+								</div>
+							}
+						}
+					}
+				}
+				@sidebar.Content() {
+					@sidebar.Group() {
+						@sidebar.GroupLabel() {
+							{ sidebarRtlT("platform") }
+						}
+						@sidebar.Menu() {
+							for _, item := range sidebarRtlNavMain {
+								@collapsible.Collapsible(collapsible.Props{
+									DefaultOpen: item.IsActive,
+									Class:       "group/collapsible",
+								}) {
+									@sidebar.MenuItem() {
+										@sidebar.MenuButton(sidebar.MenuButtonProps{
+											Tooltip:    sidebarRtlT(item.Title),
+											Attributes: collapsible.Trigger(ctx),
+										}) {
+											@item.Icon()
+											<span>{ sidebarRtlT(item.Title) }</span>
+											@icon.ChevronRight(icon.Props{Class: "ms-auto transition-transform duration-200 group-data-open/collapsible:rotate-90 rtl:rotate-180 rtl:group-data-open/collapsible:rotate-90"})
+										}
+										@collapsible.Content() {
+											@sidebar.MenuSub() {
+												for _, subItem := range item.Items {
+													@sidebar.MenuSubItem() {
+														@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{Href: subItem.URL}) {
+															<span>{ sidebarRtlT(subItem.Title) }</span>
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					@sidebar.Group(sidebar.GroupProps{Class: "group-data-[collapsible=icon]:hidden"}) {
+						@sidebar.GroupLabel() {
+							{ sidebarRtlT("projects") }
+						}
+						@sidebar.Menu() {
+							for _, item := range sidebarRtlProjects {
+								@sidebar.MenuItem() {
+									@sidebar.MenuButton(sidebar.MenuButtonProps{Href: item.URL}) {
+										@item.Icon()
+										<span>{ sidebarRtlT(item.Name) }</span>
+									}
+									@dropdownmenu.DropdownMenu() {
+										@sidebar.MenuAction(sidebar.MenuActionProps{
+											ShowOnHover: true,
+											Attributes:  dropdownmenu.Trigger(ctx),
+										}) {
+											@icon.Ellipsis()
+											<span class="sr-only">{ sidebarRtlT("more") }</span>
+										}
+										@dropdownmenu.Content(dropdownmenu.ContentProps{
+											Class:      "w-48 rounded-lg",
+											Side:       dropdownmenu.Side("inline-end"),
+											Align:      dropdownmenu.AlignStart,
+											Attributes: templ.Attributes{"dir": "rtl"},
+										}) {
+											@dropdownmenu.Group() {
+												@dropdownmenu.Item() {
+													@icon.Folder(icon.Props{Class: "text-muted-foreground"})
+													<span>{ sidebarRtlT("viewProject") }</span>
+												}
+												@dropdownmenu.Item() {
+													@icon.Forward(icon.Props{Class: "text-muted-foreground"})
+													<span>{ sidebarRtlT("shareProject") }</span>
+												}
+											}
+											@dropdownmenu.Separator()
+											@dropdownmenu.Group() {
+												@dropdownmenu.Item() {
+													@icon.Trash2(icon.Props{Class: "text-muted-foreground"})
+													<span>{ sidebarRtlT("deleteProject") }</span>
+												}
+											}
+										}
+									}
+								}
+							}
+							@sidebar.MenuItem() {
+								@sidebar.MenuButton(sidebar.MenuButtonProps{Class: "text-sidebar-foreground/70"}) {
+									@icon.Ellipsis(icon.Props{Class: "text-sidebar-foreground/70"})
+									<span>{ sidebarRtlT("more") }</span>
+								}
+							}
+						}
+					}
+				}
+				@sidebar.Footer() {
+					@sidebar.Menu() {
+						@sidebar.MenuItem() {
+							@dropdownmenu.DropdownMenu() {
+								@sidebar.MenuButton(sidebar.MenuButtonProps{
+									Size:       sidebar.MenuButtonSizeLg,
+									Class:      "data-open:bg-sidebar-accent data-open:text-sidebar-accent-foreground",
+									Attributes: dropdownmenu.Trigger(ctx),
+								}) {
+									@avatar.Avatar(avatar.Props{Class: "rounded-lg"}) {
+										@avatar.Image(avatar.ImageProps{Src: sidebarRtlUser.Avatar, Alt: sidebarRtlUser.Name})
+										@avatar.Fallback(avatar.FallbackProps{Class: "rounded-lg"}) {
+											CN
+										}
+									}
+									<div class="grid flex-1 text-start text-sm leading-tight">
+										<span class="truncate font-medium">{ sidebarRtlUser.Name }</span>
+										<span class="truncate text-xs">{ sidebarRtlUser.Email }</span>
+									</div>
+									@icon.ChevronsUpDown(icon.Props{Class: "ms-auto size-4"})
+								}
+								@dropdownmenu.Content(dropdownmenu.ContentProps{
+									Class:      "w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg",
+									Side:       dropdownmenu.Side("inline-end"),
+									Align:      dropdownmenu.AlignEnd,
+									SideOffset: 4,
+									Attributes: templ.Attributes{"dir": "rtl"},
+								}) {
+									@dropdownmenu.Group() {
+										@dropdownmenu.Label(dropdownmenu.LabelProps{Class: "p-0 font-normal"}) {
+											<div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+												@avatar.Avatar() {
+													@avatar.Image(avatar.ImageProps{Src: sidebarRtlUser.Avatar, Alt: sidebarRtlUser.Name})
+													@avatar.Fallback(avatar.FallbackProps{Class: "rounded-lg"}) {
+														CN
+													}
+												}
+												<div class="grid flex-1 text-start text-sm leading-tight">
+													<span class="truncate font-medium">
+														{ sidebarRtlUser.Name }
+													</span>
+													<span class="truncate text-xs">{ sidebarRtlUser.Email }</span>
+												</div>
+											</div>
+										}
+									}
+									@dropdownmenu.Separator()
+									@dropdownmenu.Group() {
+										@dropdownmenu.Item() {
+											@icon.Sparkles()
+											{ sidebarRtlT("upgradeToPro") }
+										}
+									}
+									@dropdownmenu.Separator()
+									@dropdownmenu.Group() {
+										@dropdownmenu.Item() {
+											@icon.BadgeCheck()
+											{ sidebarRtlT("account") }
+										}
+										@dropdownmenu.Item() {
+											@icon.CreditCard()
+											{ sidebarRtlT("billing") }
+										}
+										@dropdownmenu.Item() {
+											@icon.Bell()
+											{ sidebarRtlT("notifications") }
+										}
+									}
+									@dropdownmenu.Separator()
+									@dropdownmenu.Group() {
+										@dropdownmenu.Item() {
+											@icon.LogOut()
+											{ sidebarRtlT("logOut") }
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				@sidebar.Rail()
+			}
+			@sidebar.Inset() {
+				<header
+					class="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
+					dir="rtl"
+				>
+					<div class="flex items-center gap-2 px-4">
+						@sidebar.Trigger(sidebar.TriggerProps{Class: "-ml-1"})
+					</div>
+				</header>
+			}
+		}
+	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const root = document.currentScript.previousElementSibling;
+			const translations = {{ sidebarRtlTranslations }};
+			const dirs = { en: "ltr", ar: "rtl", he: "rtl" };
+			const languageTrigger = root.querySelector('[data-name="language-selector"]');
+			const popupOf = (trigger) => document.getElementById(trigger.getAttribute("data-templ-controls"));
+			const footerTrigger = root.querySelector('[data-slot="sidebar-footer"] [data-templ-controls]');
+			const projectTriggers = [...root.querySelectorAll('[data-slot="sidebar-menu-action"]')];
+			const menus = [...projectTriggers, footerTrigger].map(popupOf);
+			const tooltipTriggers = [...root.querySelectorAll("[data-templ-tooltip-trigger]")];
+			let language = "ar";
+
+			// side={isMobile ? "bottom" : "inline-end"}, the project menus
+			// also align={isMobile ? "end" : "start"}.
+			// The bundle runs after this script on a first load.
+			const onMobileChange = () => window.templ.sidebar.onMobileChange((isMobile) => {
+				if (!root.isConnected) return false;
+				menus.forEach((menu, i) => {
+					menu.setAttribute("data-templ-side", isMobile ? "bottom" : "inline-end");
+					if (i < projectTriggers.length) menu.setAttribute("data-templ-align", isMobile ? "end" : "start");
+				});
+			});
+			if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", onMobileChange);
+			else onMobileChange();
+
+			// The LanguageProvider's language state: the selector sets it, the
+			// example renders the translation and its direction again.
+			languageTrigger.addEventListener("select-change", (e) => {
+				const next = e.detail.value;
+				window.templ.select.setValue(languageTrigger, next);
+				if (next === language) return;
+				const from = new Map(Object.entries(translations[language]).map(([k, v]) => [v, k]));
+				const scopes = [root, ...menus, ...tooltipTriggers.map((t) => document.getElementById(t.getAttribute("data-templ-tooltip-trigger")))];
+				for (const scope of scopes) {
+					if (!scope) continue;
+					const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+					for (let node; (node = walker.nextNode()); ) {
+						const key = from.get(node.textContent.trim());
+						if (key) node.textContent = node.textContent.replace(translations[language][key], translations[next][key]);
+					}
+				}
+				const dir = dirs[next];
+				root.setAttribute("dir", dir);
+				root.querySelector("header").setAttribute("dir", dir);
+				menus.forEach((menu) => menu.setAttribute("dir", dir));
+				const side = dir === "ltr" ? "left" : "right";
+				root.querySelectorAll('[data-slot="sidebar"][data-side], [data-slot="sidebar-container"]').forEach((el) => el.setAttribute("data-side", side));
+				// The collapsibles are keyed by their title: a new language
+				// mounts them again with their defaultOpen.
+				root.querySelectorAll('[data-slot="sidebar-group"]:first-of-type [data-slot="collapsible"]').forEach((c, i) => window.templ.collapsible.setOpen(c, i === 0));
+				language = next;
+			});
+		})();
+	</script>
+}
+
+func sidebarRtlLanguage() *string {
+	v := "ar"
+	return &v
+}

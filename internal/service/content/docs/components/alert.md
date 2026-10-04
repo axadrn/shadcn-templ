@@ -96,6 +96,12 @@ You can customize the alert colors by adding custom classes such as `bg-amber-50
 
 <ComponentPreview name="alert-colors" previewClassName="h-auto sm:h-72 p-6" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="alert-rtl" direction="rtl" previewClassName="h-auto sm:h-72 p-6" />
+
 ## API Reference
 
 ### Alert

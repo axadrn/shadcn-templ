@@ -156,7 +156,7 @@ Use the `Orientation` prop to set the orientation of the carousel.
 
 ## Options
 
-You can configure the carousel using the `Align`, `Loop`, `Autoplay` and `Interval` props.
+You can configure the carousel using the `Align`, `Loop`, `Direction`, `Autoplay` and `Interval` props.
 
 ```templ showLineNumbers {2-3}
 @carousel.Carousel(carousel.Props{
@@ -214,6 +214,31 @@ Use the `Autoplay` prop with an optional `Interval` to advance the slides automa
 ```
 
 <ComponentPreview name="carousel-plugin" previewClassName="sm:h-[32rem]" />
+
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="carousel-rtl" direction="rtl" previewClassName="h-80 sm:h-[32rem]" />
+
+When localizing the carousel for RTL languages, set the `Direction` prop (embla's `direction` option) to match the text direction. This ensures the carousel scrolls in the correct direction.
+
+```templ showLineNumbers {2-3}
+@carousel.Carousel(carousel.Props{
+	Direction:  "rtl",
+	Attributes: templ.Attributes{"dir": "rtl"},
+}) {
+	@carousel.Content() {
+		@carousel.Item() { ... }
+		@carousel.Item() { ... }
+		@carousel.Item() { ... }
+	}
+	@carousel.Previous(carousel.PreviousProps{Class: "rtl:rotate-180"})
+	@carousel.Next(carousel.NextProps{Class: "rtl:rotate-180"})
+}
+```
+
+`Direction` accepts `"ltr"` or `"rtl"` and should match the `dir` attribute. You may also want to rotate the navigation buttons using the `rtl:rotate-180` class to ensure they point in the correct direction.
 
 ## API Reference
 
