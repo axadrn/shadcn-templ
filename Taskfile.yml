@@ -11,7 +11,7 @@ tasks:
     cmds:
       # templ binds its proxy to 127.0.0.1 by default; 0.0.0.0 makes the
       # live-reload proxy reachable from other machines (e.g. http://dev-01:7331).
-      - go tool templ generate --watch --proxy="http://localhost:8090" --proxybind="0.0.0.0" --cmd="go run ./cmd/docs/main.go" --open-browser=false
+      - go tool templ generate --watch --proxy="http://localhost:8090" --proxybind="0.0.0.0" --cmd="go run ./cmd/docs/main.go" --open-browser=false --log-level=error
 
   shiki-highlighter:
     desc: Start shiki syntax highlighter service
