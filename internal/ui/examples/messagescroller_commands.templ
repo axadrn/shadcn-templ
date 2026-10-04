@@ -1,0 +1,117 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/messagescroller"
+)
+
+var msCommandMessages = []msMessage{
+	{ID: "command-activation", Role: "user", Text: "We're seeing activation dip after workspace creation. Can you help me find the likely step?"},
+	{ID: "msg-1", Role: "assistant", Text: "The sharpest drop is between creating the workspace and inviting the first teammate.\n\nWorkspace creation is still healthy, but the invite step is where users pause. That suggests the product is asking for collaboration before the user has enough confidence in the workspace."},
+	{ID: "command-compare", Role: "user", Text: "What should I compare before we change the onboarding flow?"},
+	{ID: "msg-2", Role: "assistant", Text: "Compare three cohorts:\n\n1. Users who choose a template before inviting teammates.\n2. Users who start from a blank workspace.\n3. Users who skip invites and return within 24 hours.\n\nIf template users invite faster, the fix is probably better first-run guidance rather than a louder invite prompt."},
+	{ID: "command-experiment", Role: "user", Text: "Can you turn that into an experiment?"},
+	{ID: "msg-3", Role: "assistant", Text: "Yes. Create a variant that shows a short checklist after workspace creation:\n\n- Pick a template.\n- Add one project detail.\n- Invite a teammate when the workspace has context.\n\nMeasure first invite completion, 24-hour return rate, and whether teams create a second project."},
+	{ID: "command-risk", Role: "user", Text: "What's the risk if we delay the invite prompt?"},
+	{ID: "msg-4", Role: "assistant", Text: "The main risk is reducing team creation for accounts that already know who they want to invite.\n\nTo protect that path, keep the invite action visible in the header and only change the primary empty-state guidance. That gives confident teams a direct route without forcing uncertain users through the invite step too early."},
+}
+
+// msTrimmed is getTrimmedMessageText: 42 characters at most.
+func msTrimmed(text string) string {
+	r := []rune(text)
+	if len(r) > 42 {
+		return string(r[:39]) + "..."
+	}
+	return text
+}
+
+func msUserMessages(messages []msMessage) []msMessage {
+	var out []msMessage
+	for _, m := range messages {
+		if m.Role == "user" {
+			out = append(out, m)
+		}
+	}
+	return out
+}
+
+// msTranscript is the scroller over a fixed transcript with user anchors.
+templ msTranscript(messages []msMessage) {
+	@messagescroller.MessageScroller() {
+		@messagescroller.Viewport() {
+			@messagescroller.Content(messagescroller.ContentProps{Class: "p-(--card-spacing)"}) {
+				for _, m := range messages {
+					@msMessageItem(m, m.Role == "user", bubble.VariantMuted, bubble.VariantGhost)
+				}
+			}
+		}
+		@messagescroller.Button()
+	}
+}
+
+templ MessageScrollerCommands() {
+	@messagescroller.Provider(messagescroller.ProviderProps{DefaultScrollPosition: messagescroller.DefaultScrollPositionEnd}) {
+		<div class="relative flex flex-col gap-4">
+			@card.Card(card.Props{Class: "mx-auto h-140 w-full max-w-sm gap-0"}) {
+				@card.Header(card.HeaderProps{Class: "gap-1 border-b"}) {
+					@card.Title() {
+						Commands
+					}
+					@card.Description() {
+						Drive the transcript from outside.
+					}
+					@card.Action() {
+						@dropdownmenu.DropdownMenu() {
+							@button.Button(button.Props{
+								Variant:    button.VariantSecondary,
+								Attributes: dropdownmenu.Trigger(ctx),
+							}) {
+								Jump to...
+							}
+							@dropdownmenu.Content(dropdownmenu.ContentProps{Align: dropdownmenu.AlignEnd, Side: dropdownmenu.SideBottom, Class: "w-64"}) {
+								@dropdownmenu.Group() {
+									@dropdownmenu.Label() {
+										Conversations
+									}
+									for _, m := range msUserMessages(msCommandMessages) {
+										@dropdownmenu.Item() {
+											<span class="line-clamp-1 min-w-0">{ msTrimmed(m.Text) }</span>
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				@card.Content(card.ContentProps{Class: "flex-1 overflow-hidden p-0"}) {
+					@msTranscript(msCommandMessages)
+				}
+			}
+			<div class="mx-auto max-w-sm px-0.5 text-center text-xs text-balance text-muted-foreground">
+				Use the controls to jump to any message in the conversation.
+			</div>
+		</div>
+		<script nonce={ templ.GetNonce(ctx) }>
+			(() => {
+				// The menu items jump to their message, in the order of ids.
+				const demo = document.currentScript.previousElementSibling;
+				const ids = {{ msIDs(msUserMessages(msCommandMessages)) }};
+				const root = demo.querySelector('[data-slot="message-scroller"]');
+				demo.querySelectorAll('[data-slot="dropdown-menu-item"]').forEach((item, i) => {
+					item.addEventListener("click", () => window.templ.messageScroller.scrollToMessage(root, ids[i], { align: "start", behavior: "smooth" }));
+				});
+			})();
+		</script>
+	}
+}
+
+func msIDs(messages []msMessage) []string {
+	out := make([]string, len(messages))
+	for i, m := range messages {
+		out[i] = m.ID
+	}
+	return out
+}

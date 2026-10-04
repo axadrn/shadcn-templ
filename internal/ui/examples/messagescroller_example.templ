@@ -1,0 +1,218 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/example"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+	"github.com/axadrn/shadcn-templ/v2/components/message"
+	"github.com/axadrn/shadcn-templ/v2/components/messagescroller"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+)
+
+// The scripted conversation of message-scroller-example (createChat()):
+// Sleep is the pause before an assistant reply starts streaming.
+var msExampleTurns = []msMessage{
+	{ID: "msg-1", Role: "user", Text: "Hello there!"},
+	{ID: "msg-2", Role: "assistant", Sleep: 2000, Text: "Hey, how's it going?"},
+	{ID: "msg-3", Role: "user", Text: "I'm prototyping an AI chat surface for our product docs.\n\nCan you sketch a sensible component breakdown and call out anything I'd regret baking into v1?"},
+	{ID: "msg-4", Role: "assistant", Sleep: 2000, Text: "## Recommended layout\n\nTreat the chat as three layers so scrolling and the composer never fight each other:\n\n| Layer | Responsibility |\n| --- | --- |\n| **Shell** | Card or page frame, title, status indicator |\n| **Transcript** | `overflow-y-auto` message list |\n| **Composer** | Input group, send, stop |\n\n### Message rendering\n\n- **User messages**: right-aligned, muted background, `max-w-[80%]`.\n- **Assistant messages**: full width within the column; use `whitespace-pre-wrap` for text.\n\n### Suggested component split\n\n```tsx\n<ChatCard>\n  <ChatHeader status={status} />\n  <ChatTranscript messages={messages} />\n  <ChatComposer onSubmit={sendMessage} onStop={stop} />\n</ChatCard>\n```\n\n### v1 pitfalls to avoid\n\n1. **Inlining transport logic in the UI** — keep scripted/demo transport beside your example, not inside shared components.\n2. **Fixed transcript height without `overflow-hidden`** — parent must clip, child must scroll, or the composer jumps.\n3. **Not giving the scroller a ref or auto-scroll flag** — long replies should stay pinned to the bottom unless the user scrolls up.\n\n### Practical next step\n\nStart with plain `whitespace-pre-wrap` text to validate spacing and scroll behavior. Once the transcript feels right, you can swap assistant text rendering to a richer renderer if you need it.\n\nWant me to walk through auto-scroll vs. manual scroll-to-bottom next?"},
+	{ID: "msg-5", Role: "user", Text: "What about message spacing when one reply is short and the next is really long?"},
+	{ID: "msg-6", Role: "assistant", Sleep: 2000, Text: "Good question. The scroll container should own vertical rhythm, not individual bubbles.\n\nUse a consistent `gap` on the message list (something like `gap-4` or `gap-6`) so short and long messages sit on the same grid. For assistant replies that span many paragraphs, keep everything in one bubble rather than splitting on every line break — otherwise the transcript feels choppy when you're skimming.\n\nWhen a long reply streams in, pin the viewport to the bottom with `MessageScroller autoScroll` until the user scrolls up. If they've scrolled away, show a scroll-to-bottom affordance instead of yanking them back mid-read.\n\nThat's usually enough for v1. Fancy diff animations or per-paragraph fade-ins can wait until you've validated that the base scroll + composer layout holds up on real devices."},
+	{ID: "msg-7", Role: "user", Text: "Thanks, that helps."},
+	{ID: "msg-8", Role: "assistant", Sleep: 1000, Text: "Happy to help — send another message when you're ready to keep stepping through the demo."},
+}
+
+// MessageScrollerExample is message-scroller-example.tsx.
+templ MessageScrollerExample() {
+	@example.Wrapper() {
+		@messageScrollerExampleDemo()
+	}
+}
+
+// messageScrollerExampleRow is one transcript row of the example.
+templ messageScrollerExampleRow(m msMessage) {
+	@messagescroller.Item(messagescroller.ItemProps{MessageID: m.ID, ScrollAnchor: m.Role == "user"}) {
+		@message.Message(message.Props{Align: msAlign(m.Role)}) {
+			@message.Content() {
+				@bubble.Bubble(bubble.Props{Variant: msVariant(m.Role, bubble.VariantDefault, bubble.VariantMuted)}) {
+					@bubble.Content(bubble.ContentProps{Class: "whitespace-pre-wrap"}) {
+						{ m.Text }
+					}
+				}
+			}
+		}
+	}
+}
+
+templ messageScrollerExampleDemo() {
+	@example.Example(example.Props{Title: "Chat", ContainerClass: "self-start"}) {
+		@card.Card(card.Props{Class: "h-140"}) {
+			@card.Header() {
+				@card.Title() {
+					How can I help you today?
+				}
+				@card.Description() {
+					Status: ready
+				}
+			}
+			@card.Content(card.ContentProps{Class: "min-h-0 flex-1 overflow-hidden p-0"}) {
+				@messagescroller.Provider() {
+					@messagescroller.MessageScroller() {
+						@messagescroller.Viewport() {
+							@messagescroller.Content(messagescroller.ContentProps{Class: "p-(--card-spacing)"})
+						}
+						@messagescroller.Button()
+					}
+				}
+			}
+			@card.Footer() {
+				<form class="w-full" id="chat-form">
+					@inputgroup.InputGroup() {
+						@inputgroup.Textarea(inputgroup.TextareaProps{
+							Placeholder: "Ask me anything...",
+							Class:       "h-10 min-h-10 overflow-y-auto",
+							Value:       msExampleTurns[0].Text,
+							Attributes:  templ.Attributes{"readonly": true},
+						})
+						@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockEnd, Class: "p-2"}) {
+							@inputgroup.Button(inputgroup.ButtonProps{
+								Variant:    button.VariantDefault,
+								Size:       inputgroup.ButtonSizeIconSm,
+								Type:       button.TypeSubmit,
+								Class:      "ml-auto data-[hidden=true]:hidden",
+								Attributes: templ.Attributes{"data-hidden": "false"},
+							}) {
+								@icon.ArrowUp()
+								<span class="sr-only">Send</span>
+							}
+							@inputgroup.Button(inputgroup.ButtonProps{
+								Size:       inputgroup.ButtonSizeIconSm,
+								Type:       button.TypeButton,
+								Class:      "ml-auto data-[hidden=true]:hidden",
+								Attributes: templ.Attributes{"data-hidden": "true"},
+							}) {
+								@icon.CircleStop()
+								<span class="sr-only">Stop</span>
+							}
+						}
+					}
+				</form>
+			}
+		}
+		// The rows the script appends, in transcript order, then the
+		// "Thinking..." row shown while a reply is submitted.
+		for _, m := range msExampleTurns {
+			<template>
+				@messageScrollerExampleRow(m)
+			</template>
+		}
+		<template>
+			@messagescroller.Item() {
+				@marker.Marker(marker.Props{Attributes: templ.Attributes{"role": "status"}}) {
+					@marker.Icon() {
+						@spinner.Spinner()
+					}
+					@marker.Content() {
+						Thinking...
+					}
+				}
+			}
+		</template>
+	}
+	@messageScrollerExampleScript(msTurns(msExampleTurns))
+}
+
+// messageScrollerExampleScript is useChat with createChat's transport
+// (delayMs 10): send appends the next user turn, the reply streams in word
+// deltas after its sleep, and stop aborts it.
+templ messageScrollerExampleScript(turns []msTurn) {
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const root = document.currentScript.previousElementSibling;
+			const turns = {{ turns }};
+			const templates = [...root.querySelectorAll(':scope > [data-slot="example-content"] > template')];
+			const rows = templates.slice(0, turns.length);
+			const thinking = templates[turns.length];
+			const content = root.querySelector('[data-slot="message-scroller-content"]');
+			const description = root.querySelector('[data-slot="card-description"]');
+			const form = root.querySelector("form");
+			const textarea = form.querySelector("textarea");
+			const send = form.querySelector('button[type="submit"]');
+			const stopButton = form.querySelector('button[type="button"]');
+			let count = 0;
+			let status = "ready";
+			let timers = [];
+			let marker = null;
+			const nextUser = () => {
+				for (let i = count; i < turns.length; i++) if (turns[i].role === "user") return i;
+				return -1;
+			};
+			const render = () => {
+				const busy = status === "submitted" || status === "streaming";
+				const next = nextUser();
+				description.textContent = "Status: " + status;
+				textarea.value = busy || next < 0 ? "" : turns[next].text;
+				send.disabled = next < 0 || busy;
+				send.setAttribute("data-hidden", String(busy));
+				stopButton.setAttribute("data-hidden", String(!busy));
+				if (status === "submitted" && !marker) {
+					marker = thinking.content.firstElementChild.cloneNode(true);
+					content.append(marker);
+				} else if (status !== "submitted" && marker) {
+					marker.remove();
+					marker = null;
+				}
+			};
+			const append = (i) => {
+				const row = rows[i].content.firstElementChild.cloneNode(true);
+				if (marker) marker.before(row);
+				else content.append(row);
+				return row;
+			};
+			const stream = (i) => {
+				status = "streaming";
+				render();
+				const target = append(i).querySelector('[data-slot="bubble-content"]');
+				const deltas = turns[i].text.match(/\S+\s*/g) || [turns[i].text];
+				let text = "";
+				let k = 0;
+				target.textContent = "";
+				const tick = () => {
+					text += deltas[k++];
+					target.textContent = text;
+					if (k < deltas.length) timers.push(setTimeout(tick, 10));
+					else {
+						timers = [];
+						status = "ready";
+						render();
+					}
+				};
+				timers.push(setTimeout(tick, 10));
+			};
+			form.addEventListener("submit", (e) => {
+				e.preventDefault();
+				const i = nextUser();
+				if (i < 0 || status === "submitted" || status === "streaming") return;
+				append(i);
+				count = i + 1;
+				status = "submitted";
+				render();
+				const a = count;
+				if (a < turns.length && turns[a].role === "assistant") {
+					count = a + 1;
+					timers.push(setTimeout(() => stream(a), turns[a].sleep));
+				}
+			});
+			stopButton.addEventListener("click", () => {
+				timers.forEach(clearTimeout);
+				timers = [];
+				status = "ready";
+				render();
+			});
+		})();
+	</script>
+}

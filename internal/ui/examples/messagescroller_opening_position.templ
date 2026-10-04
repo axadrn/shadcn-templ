@@ -1,0 +1,69 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/messagescroller"
+	"github.com/axadrn/shadcn-templ/v2/components/tabs"
+)
+
+var msOpeningMessages = []msMessage{
+	{ID: "open-1", Role: "user", Text: "This is the first message the user sent in the conversation."},
+	{ID: "open-2", Role: "assistant", Text: "Workspace creation rose 8%, but first invite completion only rose 2%."},
+	{ID: "open-3", Role: "user", Text: "This is the last message the user sent in the conversation."},
+	{ID: "open-4", Role: "assistant", Text: "Start with the invite step. Teams are creating workspaces but waiting to add collaborators.\n\nRecommended follow-up:\n\n1. Compare invite drop-off by account size.\n2. Check whether users who skip invites still return within 24 hours.\n3. Review the empty-state copy on the first project screen.\n4. Segment activation by template, since template users may not need invites right away.\n\nIf that pattern holds, the next experiment should make collaboration useful earlier instead of prompting for invites harder."},
+}
+
+templ MessageScrollerOpeningPosition() {
+	<div class="relative flex flex-col gap-4">
+		@card.Card(card.Props{Class: "mx-auto h-140 w-full max-w-sm gap-0"}) {
+			@card.Header(card.HeaderProps{Class: "gap-1 border-b"}) {
+				@card.Title() {
+					Opening Position
+				}
+				@card.Description() {
+					Choose where a saved transcript opens.
+				}
+			}
+			@card.Content(card.ContentProps{Class: "flex-1 overflow-hidden p-0"}) {
+				@messagescroller.Provider() {
+					@msTranscript(msOpeningMessages)
+				}
+			}
+			@card.Footer(card.FooterProps{Class: "flex items-center justify-center border-t"}) {
+				@tabs.Tabs(tabs.Props{DefaultValue: "last-anchor", Class: "w-full"}) {
+					@tabs.List(tabs.ListProps{Class: "w-full"}) {
+						for _, v := range []string{"start", "end", "last-anchor"} {
+							@tabs.Trigger(tabs.TriggerProps{Value: v}) {
+								{ v }
+							}
+						}
+					}
+				}
+			}
+		}
+		<div class="mx-auto max-w-sm px-0.5 text-center text-xs text-muted-foreground">
+			Toggle the defaultScrollPosition to see where the transcript starts when
+			you open the thread
+		</div>
+	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			// OpeningPositionScroller's layout effect: one frame after a
+			// position is picked, move there with the scroll commands.
+			const demo = document.currentScript.previousElementSibling;
+			const apply = (position) => requestAnimationFrame(() => {
+				const root = demo.querySelector('[data-slot="message-scroller"]');
+				const ms = window.templ.messageScroller;
+				if (position === "start") ms.scrollToStart(root, { behavior: "auto" });
+				else if (position === "end") ms.scrollToEnd(root, { behavior: "auto" });
+				else ms.scrollToMessage(root, "open-3", { align: "start", behavior: "auto", scrollMargin: 64 });
+			});
+			const init = () => {
+				apply("last-anchor");
+				demo.addEventListener("tabs-value-change", (e) => apply(e.detail.value));
+			};
+			if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+			else init();
+		})();
+	</script>
+}

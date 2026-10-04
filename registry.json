@@ -2891,6 +2891,33 @@
       ]
     },
     {
+      "name": "message-scroller",
+      "type": "registry:ui",
+      "title": "Message Scroller",
+      "description": "A chat scroll container that anchors turns, opens saved transcripts, follows streamed responses, loads history without jumping, and jumps to any message.",
+      "registryDependencies": [
+        "button",
+        "icon"
+      ],
+      "files": [
+        {
+          "path": "components/messagescroller/messagescroller.templ",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/messagescroller/messagescroller.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "display-media"
+      ]
+    },
+    {
       "name": "attachment",
       "type": "registry:ui",
       "title": "Attachment",

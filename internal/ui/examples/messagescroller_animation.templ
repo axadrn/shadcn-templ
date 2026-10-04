@@ -1,0 +1,106 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/messagescroller"
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+)
+
+var msAnimationTurns = []msMessage{
+	{ID: "msg-1", Role: "user", Text: "Can user messages pop in like iMessage without breaking anchoring?"},
+	{ID: "msg-2", Role: "assistant", Sleep: 1000, Text: "Yes. Animate the user row with transform and opacity, and let the assistant response stream normally below it.\n\nThat keeps the row measurement predictable while still giving the newly sent bubble a more tactile entrance."},
+	{ID: "msg-3", Role: "user", Text: "What makes the animation feel more like iMessage?"},
+	{ID: "msg-4", Role: "assistant", Sleep: 1000, Text: "Use a quick spring from the trailing edge: a little scale, a small upward move, and no layout animation.\n\nThe bubble feels tactile, but the measured row stays predictable, so anchoring and auto-scroll do not have to fight a changing layout."},
+	{ID: "msg-5", Role: "user", Text: "Can I switch between presets while testing the same thread?"},
+	{ID: "msg-6", Role: "assistant", Sleep: 1000, Text: "Yes. Keep the conversation in place while you change the preset, then send the next message to compare the new entrance against the same context.\n\nThat makes it easier to judge the difference between a subtle fade, a snappy pop, and a more dramatic 3D tilt without rebuilding the scenario each time."},
+}
+
+var msAnimationPresets = [][2]string{
+	{"fade", "Fade"},
+	{"slide-up", "Slide Up"},
+	{"slide-side", "Slide Side"},
+	{"pop", "Pop"},
+	{"spring-bounce", "Spring Bounce"},
+	{"blur-fade", "Blur Fade"},
+	{"scale-fade", "Scale Fade"},
+}
+
+// The presets of lib/message-animations.ts run as Web Animations on the
+// new user row (skipped under prefers-reduced-motion, like motion's
+// useReducedMotion).
+templ MessageScrollerAnimation() {
+	<div class="relative flex flex-col gap-4">
+		@card.Card(card.Props{Class: "mx-auto h-140 w-full max-w-sm gap-0"}) {
+			@card.Header(card.HeaderProps{Class: "border-b"}) {
+				@card.Title() {
+					Animation
+				}
+				@card.Description() {
+					Choose how user messages are animated when they are added to the
+					conversation.
+				}
+				@card.Action(card.ActionProps{Class: "flex items-center gap-2"}) {
+					@button.Button(button.Props{
+						Variant:    button.VariantOutline,
+						Size:       button.SizeIcon,
+						Disabled:   true,
+						Attributes: templ.Attributes{"aria-label": "Reset animated messages"},
+					}) {
+						@icon.RotateCw()
+					}
+				}
+			}
+			@card.Content(card.ContentProps{Class: "min-h-0 flex-1 overflow-hidden p-0"}) {
+				@msEmptyState("No Messages Yet", "Click the button below to send the first message.")
+			}
+			@card.Footer(card.FooterProps{Class: "border-t"}) {
+				@selectcomp.Select(selectcomp.Props{DefaultValue: "fade"}) {
+					@selectcomp.Trigger(selectcomp.TriggerProps{Attributes: templ.Attributes{"aria-label": "Animation preset"}}) {
+						@selectcomp.Value()
+					}
+					@selectcomp.Content(selectcomp.ContentProps{Align: selectcomp.AlignStart}) {
+						@selectcomp.Group() {
+							for _, preset := range msAnimationPresets {
+								@selectcomp.Item(selectcomp.ItemProps{Value: preset[0]}) {
+									{ preset[1] }
+								}
+							}
+						}
+					}
+				}
+				@button.Button(button.Props{
+					Size:  button.SizeIcon,
+					Class: "ml-auto",
+				}) {
+					@icon.ArrowUp()
+					<span class="sr-only">Send Message</span>
+				}
+			}
+		}
+		<div class="mx-auto max-w-sm px-0.5 text-center text-xs text-balance text-muted-foreground">
+			Select an animation then click send to see it in action.
+		</div>
+		<template>
+			@messagescroller.Provider() {
+				@msScroller(nil, true)
+			}
+		</template>
+		<template>
+			@msEmptyState("No Messages Yet", "Click the button below to send the first message.")
+		</template>
+		@msTurnTemplates(msAnimationTurns, true, bubble.VariantMuted, bubble.VariantGhost)
+	</div>
+	@msChatScript(msChatOptions{
+		Turns:              msTurns(msAnimationTurns),
+		Templates:          []string{"scroller", "empty-state"},
+		Delay:              15,
+		ResetNeedsMessages: true,
+		Animation:          "fade",
+		AnimationSelect:    true,
+		Send:               `[data-slot="card-footer"] > [data-slot="button"]`,
+		Reset:              `[aria-label="Reset animated messages"]`,
+	})
+}

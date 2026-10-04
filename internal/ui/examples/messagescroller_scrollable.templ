@@ -1,0 +1,76 @@
+package examples
+
+import (
+	"fmt"
+
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/messagescroller"
+)
+
+func msScrollableMessages() []msMessage {
+	out := make([]msMessage, 12)
+	for i := range out {
+		if i%2 == 0 {
+			out[i] = msMessage{ID: fmt.Sprintf("scrollable-%d", i+1), Role: "user", Text: fmt.Sprintf("Review scroll checkpoint %d.", i+1)}
+		} else {
+			out[i] = msMessage{ID: fmt.Sprintf("scrollable-%d", i+1), Role: "assistant", Text: fmt.Sprintf("Checkpoint %d is synced. The scrollable hook updates as the viewport moves.\n\nWhen the reader is at the first message, the footer should only point them down. Once they move into the middle of the transcript, it should explain that both directions are available.\n\nAt the latest message, the footer should switch again and only point them back up.", i+1)}
+		}
+	}
+	return out
+}
+
+templ MessageScrollerScrollable() {
+	<div class="mx-auto flex w-full max-w-sm flex-col gap-4">
+		@card.Card(card.Props{Class: "h-140 w-full gap-0 overflow-hidden"}) {
+			@card.Header(card.HeaderProps{Class: "gap-1 border-b"}) {
+				@card.Title() {
+					Scroll Status
+				}
+				@card.Description() {
+					Where the reader can go scroll to based on current scroll position.
+				}
+			}
+			@messagescroller.Provider(messagescroller.ProviderProps{DefaultScrollPosition: messagescroller.DefaultScrollPositionStart}) {
+				@card.Content(card.ContentProps{Class: "flex-1 overflow-hidden p-0"}) {
+					@messagescroller.MessageScroller() {
+						@messagescroller.Viewport() {
+							@messagescroller.Content(messagescroller.ContentProps{Class: "gap-4 p-(--card-spacing)"}) {
+								for _, m := range msScrollableMessages() {
+									@msMessageItem(m, m.Role == "user", bubble.VariantMuted, bubble.VariantGhost)
+								}
+							}
+						}
+						@messagescroller.Button()
+					}
+				}
+				@card.Footer(card.FooterProps{Class: "justify-center border-t text-center text-sm text-muted-foreground"}) {
+					All messages fit in the viewport.
+				}
+			}
+		}
+		<div class="px-0.5 text-center text-xs text-muted-foreground">
+			Scroll the transcript to see the footer update.
+		</div>
+	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const demo = document.currentScript.previousElementSibling;
+			// ScrollStateFooter: useMessageScrollerScrollable's { start, end }.
+			const status = ({ start, end }) =>
+				start && end ? "You can scroll both ways."
+				: end ? "You are at the top. You can only scroll down."
+				: start ? "You are at the bottom. You can only scroll up."
+				: "All messages fit in the viewport.";
+			const init = () => {
+				const root = demo.querySelector('[data-slot="message-scroller"]');
+				const footer = demo.querySelector('[data-slot="card-footer"]');
+				const paint = (state) => { footer.textContent = status(state); };
+				paint(window.templ.messageScroller.scrollable(root));
+				window.templ.messageScroller.onScrollableChange(root, paint);
+			};
+			if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+			else init();
+		})();
+	</script>
+}

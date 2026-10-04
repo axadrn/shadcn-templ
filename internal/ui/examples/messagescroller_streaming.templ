@@ -1,0 +1,47 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/messagescroller"
+)
+
+// Streaming is simulated like upstream's createChat transport: the reply
+// streams in word deltas every 20 ms after a one second pause.
+templ MessageScrollerStreaming() {
+	@messagescroller.Provider(messagescroller.ProviderProps{AutoScroll: true}) {
+		<div class="relative flex flex-col gap-4">
+			@card.Card(card.Props{Class: "mx-auto h-140 w-full max-w-sm gap-0"}) {
+				@card.Header(card.HeaderProps{Class: "gap-1 border-b"}) {
+					@card.Title() {
+						Streaming Messages
+					}
+					@card.Description() {
+						Auto-scroll follows the live edge of the conversation.
+					}
+					@card.Action() {
+						@msResetButton("Reset stream", true)
+					}
+				}
+				@card.Content(card.ContentProps{Class: "flex-1 overflow-hidden p-0"}) {
+					@msEmptyState("Ready to Stream", "Press send to stream a scripted launch summary.")
+				}
+				@card.Footer(card.FooterProps{Class: "flex-col gap-2"}) {
+					@msComposer(msStreamingTurns[0].Text, nil)
+				}
+			}
+			<div class="px-0.5 text-center text-xs text-muted-foreground">
+				Streaming is simulated. `autoScroll` is enabled.
+			</div>
+			<template>
+				@msScroller(nil, true)
+			</template>
+			<template>
+				@msEmptyState("Ready to Stream", "Press send to stream a scripted launch summary.")
+			</template>
+			@msNoneTemplate("No messages queued. Reset the stream.")
+			@msTurnTemplates(msStreamingTurns, true, bubble.VariantMuted, bubble.VariantGhost)
+		</div>
+		@msChatScript(msComposerChat(msStreamingTurns, 0, true, "Reset stream"))
+	}
+}
