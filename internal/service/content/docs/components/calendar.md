@@ -69,6 +69,19 @@ The `Calendar` component is a native templ and vanilla JavaScript implementation
 
 You can use the `Calendar` component to build a date picker. See the [Date Picker](/docs/components/date-picker) page for more information.
 
+## Persian / Hijri / Jalali Calendar
+
+To use the Persian calendar, set `DateLib: calendar.DateLibPersian`, the pendant of react-day-picker's `react-day-picker/persian`. It shows the Jalali calendar with Persian month and day names in Eastern Arabic-Indic numerals, right to left.
+
+```go
+@calendar.Calendar(calendar.Props{
+	Mode:    calendar.ModeSingle,
+	DateLib: calendar.DateLibPersian,
+})
+```
+
+<ComponentPreview name="calendar-hijri" previewClassName="h-[400px]" />
+
 ## Basic
 
 A basic calendar component. We used `Class: "rounded-lg border"` to style the calendar.
@@ -168,6 +181,7 @@ The `Calendar` component displays a month grid for selecting a date or a range o
 | `Required`            | `*bool`                                                              | -                    |
 | `Locale`              | `string` (BCP 47, e.g. "de-DE")                                      | en-US                |
 | `Dir`                 | `string`                                                             | -                    |
+| `DateLib`             | `DateLibPersian`                                                     | Gregorian            |
 | `ButtonVariant`       | `button.Variant`                                                     | `VariantGhost`       |
 | `Class`               | `string`                                                             | -                    |
 

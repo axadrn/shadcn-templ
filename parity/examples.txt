@@ -93,6 +93,7 @@ calendar-booked-dates
 calendar-caption
 calendar-custom-days
 calendar-demo
+calendar-hijri
 calendar-multiple
 calendar-presets
 calendar-range

@@ -440,6 +440,26 @@
       "click": "[data-slot=calendar] nav > button:first-child"
     }
   ],
+  "calendar-hijri": [
+    {
+      "click": "[data-slot=calendar] td[data-day$=\"-۱۵\"]:not([data-outside]) > button"
+    },
+    {
+      "key": "ArrowRight"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "PageDown"
+    },
+    {
+      "click": "[data-slot=calendar] nav > button:last-child"
+    },
+    {
+      "click": "[data-slot=calendar] nav > button:first-child"
+    }
+  ],
   "family:date-picker": [
     {
       "click": "[data-slot=popover-trigger]"

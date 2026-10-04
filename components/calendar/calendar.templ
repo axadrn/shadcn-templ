@@ -39,6 +39,14 @@ const (
 	CaptionLayoutDropdownYears  CaptionLayout = "dropdown-years"
 )
 
+// DateLib is react-day-picker's dateLib prop as the calendar system.
+type DateLib string
+
+// DateLibPersian is react-day-picker/persian's DayPicker: the Jalali
+// calendar of date-fns-jalali, formatted with its faIR locale in Eastern
+// Arabic-Indic numerals, dir rtl unless Dir is set.
+const DateLibPersian DateLib = "persian"
+
 // DateRange is react-day-picker's DateRange, the range mode's selection and
 // a matcher.
 type DateRange struct {
@@ -88,6 +96,8 @@ type Props struct {
 	// Locale is a BCP 47 tag, the pendant of the date-fns locale's code.
 	Locale        string
 	Dir           string
+	// DateLib is the calendar system, the Gregorian one by default.
+	DateLib       DateLib
 	ButtonVariant button.Variant
 }
 
@@ -176,6 +186,9 @@ templ Calendar(props ...Props) {
 		if p.CaptionLayout == "" {
 			p.CaptionLayout = CaptionLayoutLabel
 		}
+		if p.DateLib == DateLibPersian && p.Dir == "" {
+			p.Dir = "rtl"
+		}
 		if p.ButtonVariant == "" {
 			p.ButtonVariant = button.VariantGhost
 		}
@@ -248,6 +261,9 @@ templ Calendar(props ...Props) {
 		}
 		if p.Locale != "" {
 			data-templ-locale={ p.Locale }
+		}
+		if p.DateLib != "" {
+			data-templ-date-lib={ string(p.DateLib) }
 		}
 		{ p.Attributes... }
 	>

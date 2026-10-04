@@ -157,6 +157,15 @@ async function compareExample(name) {
   const pages = [];
   for (const base of [SHADCN, TEMPL]) {
     const p = await browser.newPage({ viewport: { width: 1280, height: 900 }, reducedMotion: "reduce" });
+    // Everything the browser reports as broken while the example loads and
+    // runs its steps: script errors, console errors, failed requests.
+    p._templErrors = [];
+    // The reference app's Vercel analytics has no endpoint locally.
+    const ignored = (url) => url.includes("/_vercel/");
+    p.on("pageerror", (e) => p._templErrors.push("page error: " + String(e.message || e).split("\n")[0]));
+    p.on("console", (m) => m.type() === "error" && !ignored(m.location()?.url || "") && !(m.text().startsWith("Failed to load resource") && ignored(m.location()?.url || "")) && p._templErrors.push("console: " + m.text().split("\n")[0].slice(0, 200)));
+    p.on("requestfailed", (r) => !ignored(r.url()) && p._templErrors.push("request failed: " + r.url() + " " + (r.failure()?.errorText || "")));
+    p.on("response", (r) => r.status() >= 400 && !r.url().endsWith("/favicon.ico") && !ignored(r.url()) && p._templErrors.push(`HTTP ${r.status()}: ${r.url()}`));
     // The pointer starts at 0,0, over whatever an example renders first:
     // whether that counts as a hover depends on when each app attaches its
     // listeners. Park it in the empty corner.
@@ -196,6 +205,11 @@ async function compareExample(name) {
       if (diff || !quiet) out.push(`${diff ? "FAIL" : "PASS"} ${name} ${label(s)} ${check}${diff ? ": " + diff : ""}`);
     }
   }
+  // Errors on our side fail the example; the reference's own are reported.
+  const [refErrors, ourErrors] = pages.map((p) => [...new Set(p._templErrors)]);
+  if (ourErrors.length) fail++; else pass++;
+  if (ourErrors.length || !quiet) out.push(ourErrors.length ? `FAIL ${name} errors: ${ourErrors.slice(0, 3).join(" | ")}` : `PASS ${name} errors`);
+  if (refErrors.length) out.push(`NOTE ${name} reference errors: ${refErrors.slice(0, 3).join(" | ")}`);
   await Promise.all(pages.map((p) => p.close()));
   return out;
 }

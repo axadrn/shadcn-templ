@@ -100,7 +100,9 @@ templ DatePickerNaturalLanguage() {
 				}
 			});
 			calendar.addEventListener("calendar-select", (e) => {
-				setDate(e.detail.selected);
+				// The calendar holds its own selection already, like the
+				// re-render of the same DayPicker: no remount.
+				output.textContent = formatDate(e.detail.selected);
 				input.value = formatDate(e.detail.selected);
 				window.templ.popover.close(popup);
 			});

@@ -1,0 +1,22 @@
+package calendar
+
+import (
+	"time"
+
+	"github.com/axadrn/shadcn-templ/v2/components/calendar"
+)
+
+// The upstream example's Calendar is shadcn's on react-day-picker/persian,
+// with its own p-3 and cell size, in next/font's Vazirmatn.
+templ CalendarHijri() {
+	<div class="font-(family-name:--font-vazirmatn)">
+		@calendar.Calendar(calendar.Props{
+			Mode:         calendar.ModeSingle,
+			DefaultMonth: time.Date(2025, time.June, 12, 0, 0, 0, 0, time.Local),
+			Selected:     time.Date(2025, time.June, 12, 0, 0, 0, 0, time.Local),
+			Class:        "rounded-lg border p-3 [--cell-size:--spacing(8)]",
+			DateLib:      calendar.DateLibPersian,
+		})
+	</div>
+	@calendarSelectState()
+}

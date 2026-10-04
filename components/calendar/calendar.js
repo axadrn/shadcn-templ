@@ -14,55 +14,166 @@
   function newDate(y, m, d) {
     return new Date(y, m, d);
   }
+  // The functions of a day, the same in every calendar system.
   const startOfDay = (d) => newDate(d.getFullYear(), d.getMonth(), d.getDate());
-  const startOfMonth = (d) => newDate(d.getFullYear(), d.getMonth(), 1);
-  const endOfMonth = (d) => newDate(d.getFullYear(), d.getMonth() + 1, 0);
-  const startOfYear = (d) => newDate(d.getFullYear(), 0, 1);
-  const endOfYear = (d) => newDate(d.getFullYear(), 11, 31);
   const addDays = (d, n) => newDate(d.getFullYear(), d.getMonth(), d.getDate() + n);
   const addWeeks = (d, n) => addDays(d, n * 7);
-  function addMonths(d, n) {
-    const target = newDate(d.getFullYear(), d.getMonth() + n, 1);
-    const days = endOfMonth(target).getDate();
-    return newDate(target.getFullYear(), target.getMonth(), Math.min(d.getDate(), days));
-  }
-  const addYears = (d, n) => addMonths(d, n * 12);
-  const setMonth = (d, m) => addMonths(d, m - d.getMonth());
-  const setYear = (d, y) => addMonths(d, (y - d.getFullYear()) * 12);
   const isSameDay = (a, b) => +startOfDay(a) === +startOfDay(b);
-  const isSameMonth = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
-  const isSameYear = (a, b) => a.getFullYear() === b.getFullYear();
   const isBefore = (a, b) => +a < +b;
   const isAfter = (a, b) => +a > +b;
   const differenceInCalendarDays = (a, b) => Math.round((+startOfDay(a) - +startOfDay(b)) / 864e5);
-  const differenceInCalendarMonths = (a, b) => (a.getFullYear() - b.getFullYear()) * 12 + (a.getMonth() - b.getMonth());
   const isDate = (v) => v instanceof Date;
   const max = (dates) => new Date(Math.max(...dates.map(Number)));
   const min = (dates) => new Date(Math.min(...dates.map(Number)));
 
+  // A calendar system: the year, month (0-11) and day of a Date, and the Date
+  // of a year, month and day, out of range values rolling over like Date's.
+  // date-fns works on the Gregorian one, date-fns-jalali on the Jalali one.
+  const GREGORIAN = {
+    getFullYear: (d) => d.getFullYear(),
+    getMonth: (d) => d.getMonth(),
+    getDate: (d) => d.getDate(),
+    newDate,
+  };
+
+  // date-fns-jalali's _lib/jalali.js: Jalali and Gregorian dates through the
+  // Julian Day number.
+  const PERSIAN_EPOCH = 1948320;
+  const PERSIAN_NUM_DAYS = [0, 31, 62, 93, 124, 155, 186, 216, 246, 276, 306, 336];
+  const div = (a, b) => ~~(a / b);
+  const mod = (a, b) => a - ~~(a / b) * b;
+  const pmod = (a, b) => mod(mod(a, b) + b, b);
+  function normalizeMonth(year, month) {
+    month = month - 1;
+    if (month < 0) {
+      const oldMonth = month;
+      month = pmod(month, 12);
+      year -= div(month - oldMonth, 12);
+    }
+    if (month > 11) {
+      year += div(month, 12);
+      month = mod(month, 12);
+    }
+    return [year, month + 1];
+  }
+  function j2d(jy, jm, jd) {
+    [jy, jm] = normalizeMonth(jy, jm);
+    let julianDay = PERSIAN_EPOCH - 1 + 365 * (jy - 1) + div(8 * jy + 21, 33);
+    if (jm !== 1) julianDay += PERSIAN_NUM_DAYS[jm - 1];
+    return julianDay + jd;
+  }
+  function d2j(julianDay) {
+    const daysSinceEpoch = julianDay - PERSIAN_EPOCH;
+    let year = 1 + div(33 * daysSinceEpoch + 3, 12053);
+    let dayOfYear = daysSinceEpoch - (365 * (year - 1) + div(8 * year + 21, 33));
+    if (dayOfYear < 0) {
+      year--;
+      dayOfYear = daysSinceEpoch - (365 * (year - 1) + div(8 * year + 21, 33));
+    }
+    const month = dayOfYear < 216 ? div(dayOfYear, 31) : div(dayOfYear - 6, 30);
+    return { jy: year, jm: month + 1, jd: dayOfYear - PERSIAN_NUM_DAYS[month] + 1 };
+  }
+  function g2d(gy, gm, gd) {
+    [gy, gm] = normalizeMonth(gy, gm);
+    return (
+      div(1461 * (gy + 4800 + div(gm - 14, 12)), 4) +
+      div(367 * (gm - 2 - 12 * div(gm - 14, 12)), 12) -
+      div(3 * div(gy + 4900 + div(gm - 14, 12), 100), 4) +
+      gd -
+      32075
+    );
+  }
+  function d2g(jdn) {
+    let L = jdn + 68569;
+    const n = div(4 * L, 146097);
+    L = L - div(146097 * n + 3, 4);
+    const i = div(4000 * (L + 1), 1461001);
+    L = L - div(1461 * i, 4) + 31;
+    const j = div(80 * L, 2447);
+    const gd = L - div(2447 * j, 80);
+    L = div(j, 11);
+    return { gy: 100 * (n - 49) + i + L, gm: j + 2 - 12 * L, gd };
+  }
+  const jalaliOf = (d) => d2j(g2d(d.getFullYear(), d.getMonth() + 1, d.getDate()));
+  // date-fns-jalali's _core: getFullYear, getMonth, getDate and newDate.
+  const JALALI = {
+    getFullYear: (d) => jalaliOf(d).jy,
+    getMonth: (d) => jalaliOf(d).jm - 1,
+    getDate: (d) => jalaliOf(d).jd,
+    newDate(y, m, d) {
+      const g = d2g(j2d(y, m + 1, d));
+      return newDate(g.gy, g.gm - 1, g.gd);
+    },
+  };
+
+  // The functions of months and years in a calendar system.
+  function calendarFns(c) {
+    const startOfMonth = (d) => c.newDate(c.getFullYear(d), c.getMonth(d), 1);
+    const endOfMonth = (d) => c.newDate(c.getFullYear(d), c.getMonth(d) + 1, 0);
+    function addMonths(d, n) {
+      const target = c.newDate(c.getFullYear(d), c.getMonth(d) + n, 1);
+      const days = c.getDate(endOfMonth(target));
+      return c.newDate(c.getFullYear(target), c.getMonth(target), Math.min(c.getDate(d), days));
+    }
+    return {
+      newDate: c.newDate,
+      getYear: c.getFullYear,
+      getMonth: c.getMonth,
+      getDate: c.getDate,
+      startOfMonth,
+      endOfMonth,
+      startOfYear: (d) => c.newDate(c.getFullYear(d), 0, 1),
+      endOfYear: (d) => c.newDate(c.getFullYear(d) + 1, 0, 0),
+      addMonths,
+      addYears: (d, n) => addMonths(d, n * 12),
+      setMonth: (d, m) => addMonths(d, m - c.getMonth(d)),
+      setYear: (d, y) => addMonths(d, (y - c.getFullYear(d)) * 12),
+      isSameMonth: (a, b) => c.getFullYear(a) === c.getFullYear(b) && c.getMonth(a) === c.getMonth(b),
+      isSameYear: (a, b) => c.getFullYear(a) === c.getFullYear(b),
+      differenceInCalendarMonths: (a, b) => (c.getFullYear(a) - c.getFullYear(b)) * 12 + (c.getMonth(a) - c.getMonth(b)),
+    };
+  }
+
+  // options.dateLib "persian" is react-day-picker/persian's getDateLib, the
+  // date-fns-jalali functions; its format falls back to date-fns-jalali's
+  // faIR whatever the locale. options.numerals replaces the digits of what
+  // format returns, like DateLib's numerals.
   function createDateLib(options) {
+    const persian = options.dateLib === "persian";
+    const c = persian ? JALALI : GREGORIAN;
+    const fns = calendarFns(c);
     const weekStartsOn = options.weekStartsOn ?? 0;
-    // enUS: the first week contains January 1st.
+    // enUS and faIR: the first week contains the first day of the year.
     const firstWeekContainsDate = 1;
     const startOfWeek = (d) => addDays(startOfDay(d), -((d.getDay() - weekStartsOn + 7) % 7));
     const endOfWeek = (d) => addDays(startOfWeek(d), 6);
     const startOfISOWeek = (d) => addDays(startOfDay(d), -((d.getDay() + 6) % 7));
     const endOfISOWeek = (d) => addDays(startOfISOWeek(d), 6);
     function getWeekYear(d) {
-      const year = d.getFullYear();
-      if (+d >= +startOfWeek(newDate(year + 1, 0, firstWeekContainsDate))) return year + 1;
-      if (+d >= +startOfWeek(newDate(year, 0, firstWeekContainsDate))) return year;
+      const year = c.getFullYear(d);
+      if (+d >= +startOfWeek(c.newDate(year + 1, 0, firstWeekContainsDate))) return year + 1;
+      if (+d >= +startOfWeek(c.newDate(year, 0, firstWeekContainsDate))) return year;
       return year - 1;
     }
     const getWeek = (d) =>
-      Math.round((+startOfWeek(d) - +startOfWeek(newDate(getWeekYear(d), 0, firstWeekContainsDate))) / MS_WEEK) + 1;
+      Math.round((+startOfWeek(d) - +startOfWeek(c.newDate(getWeekYear(d), 0, firstWeekContainsDate))) / MS_WEEK) + 1;
     function getISOWeek(d) {
       const thursday = addDays(startOfISOWeek(d), 3);
       const firstThursday = addDays(startOfISOWeek(newDate(thursday.getFullYear(), 0, 4)), 3);
       return Math.round((+thursday - +firstThursday) / MS_WEEK) + 1;
     }
+    let digits;
+    const formatNumber = (value) => {
+      if (!options.numerals || options.numerals === "latn") return String(value);
+      if (!digits) {
+        const formatter = new Intl.NumberFormat("en-US", { numberingSystem: options.numerals });
+        digits = Array.from({ length: 10 }, (_, i) => formatter.format(i));
+      }
+      return String(value).replace(/\d/g, (d) => digits[d]);
+    };
     return {
       options,
+      ...fns,
       today: () => startOfDay(new Date()),
       startOfWeek,
       endOfWeek,
@@ -70,7 +181,8 @@
       endOfISOWeek,
       getWeek,
       getISOWeek,
-      format: (date, fmt) => format(date, fmt, options.locale),
+      formatNumber,
+      format: (date, fmt) => formatNumber(format(date, fmt, persian ? FA_IR : options.locale, c)),
     };
   }
 
@@ -101,19 +213,32 @@
       },
       ordinalNumber: (n) => String(n),
       // formatLong.date full: "EEEE, MMMM do, y".
-      dateFull: (date, l) =>
-        `${l.days.wide[date.getDay()]}, ${l.months[date.getMonth()]} ${l.ordinalNumber(date.getDate())}, ${date.getFullYear()}`,
+      dateFull: (date, l, c) =>
+        `${l.days.wide[date.getDay()]}, ${l.months[c.getMonth(date)]} ${l.ordinalNumber(c.getDate(date))}, ${c.getFullYear(date)}`,
       weekStartsOn: 0,
     },
   };
-  function formatDateFns(date, fmt, l) {
+  // date-fns-jalali's faIR (locale/fa-IR), the default locale of its format.
+  const FA_IR = {
+    months: ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"],
+    days: {
+      short: ["1ش", "2ش", "3ش", "4ش", "5ش", "ج", "ش"],
+      wide: ["یک‌شنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"],
+    },
+    ordinalNumber: (n) => n + "-ام",
+    // formatLong.date full: "EEEE do MMMM y".
+    dateFull: (date, l, c) =>
+      `${l.days.wide[date.getDay()]} ${l.ordinalNumber(c.getDate(date))} ${l.months[c.getMonth(date)]} ${c.getFullYear(date)}`,
+    weekStartsOn: 6,
+  };
+  function formatDateFns(date, fmt, l, c) {
     switch (fmt) {
       case "LLLL y":
-        return `${l.months[date.getMonth()]} ${date.getFullYear()}`;
+        return `${l.months[c.getMonth(date)]} ${c.getFullYear(date)}`;
       case "LLLL":
-        return l.months[date.getMonth()];
+        return l.months[c.getMonth(date)];
       case "PPPP":
-        return l.dateFull(date, l);
+        return l.dateFull(date, l, c);
       case "cccc":
         return l.days.wide[date.getDay()];
       case "cccccc":
@@ -122,18 +247,20 @@
     return date.toString();
   }
 
-  function format(date, fmt, locale) {
+  // locale is a code or a ported locale, c the calendar system.
+  function format(date, fmt, locale, c = GREGORIAN) {
     switch (fmt) {
       case "yyyy-MM-dd":
-        return `${pad(date.getFullYear(), 4)}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+        return `${pad(c.getFullYear(date), 4)}-${pad(c.getMonth(date) + 1)}-${pad(c.getDate(date))}`;
       case "yyyy-MM":
-        return `${pad(date.getFullYear(), 4)}-${pad(date.getMonth() + 1)}`;
+        return `${pad(c.getFullYear(date), 4)}-${pad(c.getMonth(date) + 1)}`;
       case "yyyy":
-        return pad(date.getFullYear(), 4);
+        return pad(c.getFullYear(date), 4);
       case "d":
-        return String(date.getDate());
+        return String(c.getDate(date));
     }
-    if (locale && DATE_FNS_LOCALES[locale]) return formatDateFns(date, fmt, DATE_FNS_LOCALES[locale]);
+    if (locale && typeof locale === "object") return formatDateFns(date, fmt, locale, c);
+    if (locale && DATE_FNS_LOCALES[locale]) return formatDateFns(date, fmt, DATE_FNS_LOCALES[locale], c);
     if (locale && !/^en(-US)?$/.test(locale)) {
       const opts = {
         "LLLL y": { month: "long", year: "numeric" },
@@ -255,18 +382,20 @@
   // ----- the calendar model -------------------------------------------------
 
   class CalendarDay {
-    constructor(date, displayMonth) {
+    constructor(date, displayMonth, dateLib) {
       this.date = date;
       this.displayMonth = displayMonth;
-      this.outside = Boolean(displayMonth && !isSameMonth(date, displayMonth));
+      this.dateLib = dateLib;
+      this.outside = Boolean(displayMonth && !dateLib.isSameMonth(date, displayMonth));
     }
     isEqualTo(day) {
-      return isSameDay(day.date, this.date) && isSameMonth(day.displayMonth, this.displayMonth);
+      return isSameDay(day.date, this.date) && this.dateLib.isSameMonth(day.displayMonth, this.displayMonth);
     }
   }
 
   function getNavMonths(props, dateLib) {
     let { startMonth, endMonth } = props;
+    const { startOfYear, startOfMonth, endOfMonth, addYears, endOfYear } = dateLib;
     const hasYearDropdown = props.captionLayout === "dropdown" || props.captionLayout === "dropdown-years";
     if (startMonth) startMonth = startOfMonth(startMonth);
     else if (hasYearDropdown) startMonth = startOfYear(addYears(dateLib.today(), -100));
@@ -277,6 +406,7 @@
 
   function getInitialMonth(props, navStart, navEnd, dateLib) {
     const { month, defaultMonth, numberOfMonths = 1 } = props;
+    const { differenceInCalendarMonths, addMonths, startOfMonth } = dateLib;
     let initialMonth = month || defaultMonth || dateLib.today();
     if (navEnd && differenceInCalendarMonths(navEnd, initialMonth) < numberOfMonths - 1) {
       initialMonth = addMonths(navEnd, -1 * (numberOfMonths - 1));
@@ -288,6 +418,7 @@
   // useCalendar: the displayed months with their weeks and days.
   function getCalendar(props, firstMonth, navStart, navEnd, dateLib) {
     const { numberOfMonths = 1, fixedWeeks, ISOWeek } = props;
+    const { addMonths, endOfMonth, differenceInCalendarMonths, startOfMonth } = dateLib;
     const displayMonths = [];
     for (let i = 0; i < numberOfMonths; i++) {
       const month = addMonths(firstMonth, i);
@@ -327,7 +458,7 @@
       const weeks = [];
       for (const date of monthDates) {
         const weekNumber = ISOWeek ? dateLib.getISOWeek(date) : dateLib.getWeek(date);
-        const day = new CalendarDay(date, month);
+        const day = new CalendarDay(date, month, dateLib);
         const week = weeks.find((w) => w.weekNumber === weekNumber);
         if (!week) weeks.push({ weekNumber, days: [day] });
         else week.days.push(day);
@@ -347,6 +478,7 @@
   // createGetModifiers
   function createGetModifiers(days, props, navStart, navEnd, dateLib) {
     const { disabled, hidden, modifiers, showOutsideDays } = props;
+    const { startOfMonth, endOfMonth, isSameMonth } = dateLib;
     const computedNavStart = navStart && startOfMonth(navStart);
     const computedNavEnd = navEnd && endOfMonth(navEnd);
     const internal = { focused: [], outside: [], disabled: [], hidden: [], today: [] };
@@ -411,8 +543,8 @@
     const moveFns = {
       day: addDays,
       week: addWeeks,
-      month: addMonths,
-      year: addYears,
+      month: dateLib.addMonths,
+      year: dateLib.addYears,
       startOfWeek: (d) => (props.ISOWeek ? dateLib.startOfISOWeek(d) : dateLib.startOfWeek(d)),
       endOfWeek: (d) => (props.ISOWeek ? dateLib.endOfISOWeek(d) : dateLib.endOfWeek(d)),
     };
@@ -421,7 +553,7 @@
     else if (moveDir === "after" && navEnd) date = min([navEnd, date]);
     const isDisabled = Boolean(props.disabled && dateMatchModifiers(date, props.disabled));
     const isHidden = Boolean(props.hidden && dateMatchModifiers(date, props.hidden));
-    const focusDay = new CalendarDay(date, date);
+    const focusDay = new CalendarDay(date, date, dateLib);
     if (!isDisabled && !isHidden) return focusDay;
     return getNextFocus(moveBy, moveDir, focusDay, navStart, navEnd, props, dateLib, attempt + 1);
   }
@@ -438,6 +570,8 @@
   function weekStartsOn(root) {
     const prop = root.getAttribute("data-templ-week-starts-on");
     if (prop) return parseInt(prop, 10);
+    // react-day-picker/persian's date-fns-jalali falls back to faIR's.
+    if (root.getAttribute("data-templ-date-lib") === "persian") return FA_IR.weekStartsOn;
     const locale = root.getAttribute("data-templ-locale");
     if (!locale) return 0;
     if (DATE_FNS_LOCALES[locale]) return DATE_FNS_LOCALES[locale].weekStartsOn;
@@ -462,6 +596,7 @@
       ISOWeek: false,
       dir: root.getAttribute("dir") || undefined,
       locale: root.getAttribute("data-templ-locale") || undefined,
+      dateLib: root.getAttribute("data-templ-date-lib") || undefined,
       weekStartsOn: weekStartsOn(root),
       month: parseDate(root.getAttribute("data-templ-month")),
       defaultMonth: parseDate(root.getAttribute("data-templ-default-month")),
@@ -480,7 +615,13 @@
   function stateOf(root) {
     if (!root._templCalendar) {
       const props = readProps(root);
-      const dateLib = createDateLib({ locale: props.locale, weekStartsOn: props.weekStartsOn });
+      // react-day-picker/persian's DayPicker defaults numerals to arabext.
+      const dateLib = createDateLib({
+        locale: props.locale,
+        weekStartsOn: props.weekStartsOn,
+        dateLib: props.dateLib,
+        numerals: props.dateLib === "persian" ? "arabext" : undefined,
+      });
       const [navStart, navEnd] = getNavMonths(props, dateLib);
       root._templCalendar = {
         props,
@@ -617,7 +758,7 @@
     const s = stateOf(root);
     const { props, dateLib } = s;
     const p = parts(root);
-    const firstMonth = props.month ? startOfMonth(props.month) : s.firstMonth;
+    const firstMonth = props.month ? dateLib.startOfMonth(props.month) : s.firstMonth;
     const calendar = getCalendar(props, firstMonth, s.navStart, s.navEnd, dateLib);
     s.calendar = calendar;
     const { months, days, previousMonth, nextMonth } = calendar;
@@ -652,16 +793,19 @@
       const captionText = dateLib.format(calendarMonth.date, "LLLL y");
       if (props.captionLayout.startsWith("dropdown")) {
         const nav = el("div", { class: CLASS.dropdowns });
+        // getMonthOptions and getYearOptions
         const monthOptions = Array.from({ length: 12 }, (_, m) => {
-          const month = newDate(calendarMonth.date.getFullYear(), m, 1);
-          const disabled = (s.navStart && month < startOfMonth(s.navStart)) || (s.navEnd && month > startOfMonth(s.navEnd)) || false;
-          return { value: m, label: formatMonthDropdown(s, month), disabled };
+          const month = dateLib.addMonths(dateLib.startOfYear(calendarMonth.date), m);
+          const disabled =
+            (s.navStart && month < dateLib.startOfMonth(s.navStart)) || (s.navEnd && month > dateLib.startOfMonth(s.navEnd)) || false;
+          return { value: dateLib.getMonth(month), label: formatMonthDropdown(s, month), disabled };
         });
         let yearOptions;
         if (s.navStart && s.navEnd) {
           yearOptions = [];
-          for (let y = s.navStart.getFullYear(); y <= s.navEnd.getFullYear(); y++) {
-            yearOptions.push({ value: y, label: dateLib.format(newDate(y, 0, 1), "yyyy"), disabled: false });
+          const lastNavYear = dateLib.endOfYear(s.navEnd);
+          for (let year = dateLib.startOfYear(s.navStart); !isAfter(year, lastNavYear); year = dateLib.addYears(year, 1)) {
+            yearOptions.push({ value: dateLib.getYear(year), label: dateLib.format(year, "yyyy"), disabled: false });
           }
         }
         nav.append(
@@ -670,7 +814,7 @@
                 className: "rdp-months_dropdown",
                 ariaLabel: "Choose the Month",
                 options: monthOptions,
-                value: calendarMonth.date.getMonth(),
+                value: dateLib.getMonth(calendarMonth.date),
               })
             : el("span", {}, [formatMonthDropdown(s, calendarMonth.date)]),
           props.captionLayout === "dropdown" || props.captionLayout === "dropdown-years"
@@ -678,7 +822,7 @@
                 className: "rdp-years_dropdown",
                 ariaLabel: "Choose the Year",
                 options: yearOptions,
-                value: calendarMonth.date.getFullYear(),
+                value: dateLib.getYear(calendarMonth.date),
               })
             : el("span", {}, [dateLib.format(calendarMonth.date, "yyyy")]),
           el("span", { role: "status", "aria-live": "polite", style: STATUS_STYLE }, [captionText]),
@@ -706,7 +850,7 @@
           el("tr", { class: CLASS.week }, [
             props.showWeekNumber &&
               el("td", { week: "[object Object]", "aria-label": `Week ${week.weekNumber}`, class: CLASS.weekNumber, scope: "row", role: "rowheader" }, [
-                el("div", { class: CLASS.weekNumberContent }, [week.weekNumber < 10 ? `0${week.weekNumber}` : `${week.weekNumber}`]),
+                el("div", { class: CLASS.weekNumberContent }, [dateLib.formatNumber(week.weekNumber < 10 ? `0${week.weekNumber}` : `${week.weekNumber}`)]),
               ]),
             ...week.days.map((day) => dayCell(s, p, day, getModifiers, isSelected, focusTarget, isInteractive)),
           ]),
@@ -866,6 +1010,7 @@
   // useCalendar's goToMonth: a controlled month only reports the change.
   function goToMonth(root, date) {
     const s = stateOf(root);
+    const { startOfMonth } = s.dateLib;
     let newMonth = startOfMonth(date);
     if (s.navStart && newMonth < startOfMonth(s.navStart)) newMonth = startOfMonth(s.navStart);
     if (s.navEnd && newMonth > startOfMonth(s.navEnd)) newMonth = startOfMonth(s.navEnd);
@@ -919,6 +1064,7 @@
     const dropdownRoot = e.target.parentElement;
     const month = dropdownRoot.closest("nav ~ div");
     const index = [...month.parentElement.children].filter((c) => c.tagName !== "NAV").indexOf(month);
+    const { startOfMonth, setYear, setMonth } = s.dateLib;
     const date = startOfMonth(s.calendar.months[index].date);
     const value = Number(e.target.value);
     goToMonth(root, dropdownRoot.previousElementSibling ? setYear(date, value) : setMonth(date, value));
@@ -991,8 +1137,8 @@
     },
     setMonth(root, month) {
       const s = stateOf(root);
-      if (s.props.month) s.props.month = startOfMonth(month);
-      else s.firstMonth = startOfMonth(month);
+      if (s.props.month) s.props.month = s.dateLib.startOfMonth(month);
+      else s.firstMonth = s.dateLib.startOfMonth(month);
       render(root, { remount: true });
     },
     update(root, { formatters, components } = {}) {

@@ -34,6 +34,7 @@ The Tailwind and script watchers of `task dev` must run as well.
 | Command | What it checks |
 | --- | --- |
 | `node compare.mjs chromium <example...\|all\|family:<prefix>> [--quiet] [--jobs=N]` | Per example and step: the rendered DOM tree, the focused element, the scroll lock, a screenshot pixel diff. Failing screenshots land in `out/<engine>/`. |
+| `node errors.mjs chromium` | Every docs page of the sitemap and every preview in `examples.txt`: page errors, console errors and warnings, failed requests, HTTP status 400 and above. `compare.mjs` checks the same per example: ours fail, the reference's are a note. |
 | `./all.sh` | `compare.mjs` over every example in `examples.txt`, in chunks. Results in `all-<engine>.log`, `all-<engine>-fails.log`, `all-summary.log` (ends with `done`). `ENGINES="chromium webkit" ./all.sh` adds WebKit. |
 | `node behavior.mjs [engine] [component...]` | Interaction suites on our docs pages. |
 | `node a11y.mjs [engine]` | Accessibility checks on our docs pages. |
