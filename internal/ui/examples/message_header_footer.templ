@@ -1,0 +1,37 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/message"
+)
+
+templ MessageHeaderFooter() {
+	<div class="flex w-full max-w-sm flex-col gap-8 py-12">
+		@message.Message() {
+			@message.Content() {
+				@message.Header() {
+					Olivia
+				}
+				@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+					@bubble.Content() {
+						I already checked the logs.
+					}
+				}
+			}
+		}
+		@message.Message(message.Props{Align: message.AlignEnd}) {
+			@message.Content() {
+				@bubble.Bubble() {
+					@bubble.Content() {
+						{ "Send the report to the team. Ping @shadcn if you need help." }
+					}
+				}
+				@message.Footer() {
+					<div>
+						Read <span class="font-normal">Yesterday</span>
+					</div>
+				}
+			}
+		}
+	</div>
+}

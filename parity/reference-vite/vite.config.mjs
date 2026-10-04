@@ -35,6 +35,7 @@ export const Button = React.forwardRef(function Button(props, ref) {
 
 export default defineConfig({
   root: path.join(V4, ".vite-ref"),
+  publicDir: path.join(V4, "public"),
   plugins: [serverComponents, react(), tailwindcss()],
   resolve: {
     alias: [

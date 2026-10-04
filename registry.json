@@ -2594,6 +2594,21 @@
       ]
     },
     {
+      "name": "message",
+      "type": "registry:ui",
+      "title": "Message",
+      "description": "Displays a message in a conversation, with optional avatar, header, footer, and alignment.",
+      "files": [
+        {
+          "path": "components/message/message.templ",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "display-media"
+      ]
+    },
+    {
       "name": "attachment",
       "type": "registry:ui",
       "title": "Attachment",

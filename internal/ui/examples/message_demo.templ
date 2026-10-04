@@ -1,0 +1,78 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+	"github.com/axadrn/shadcn-templ/v2/components/message"
+)
+
+templ MessageDemo() {
+	<div class="flex w-full max-w-sm flex-col gap-6 py-12">
+		@message.Message(message.Props{Align: message.AlignEnd}) {
+			@message.Avatar() {
+				@messageAvatar("/assets/img/avatars/10.png", "@me", "ME")
+			}
+			@message.Content() {
+				@bubble.Bubble() {
+					@bubble.Content() {
+						Deploying to prod real quick.
+					}
+				}
+			}
+		}
+		@message.Message() {
+			@message.Avatar() {
+				@messageAvatar("/assets/img/avatars/02.png", "@rabbit", "R")
+			}
+			@message.Content() {
+				@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+					@bubble.Content() {
+						It's 4:55 PM. On a Friday.
+					}
+				}
+			}
+		}
+		@message.Message(message.Props{Align: message.AlignEnd}) {
+			@message.Avatar() {
+				@messageAvatar("/assets/img/avatars/10.png", "@me", "ME")
+			}
+			@message.Content() {
+				@bubble.Bubble() {
+					@bubble.Content() {
+						It's a one-line change.
+					}
+				}
+				@message.Footer() {
+					Delivered
+				}
+			}
+		}
+		@message.Message() {
+			@message.Avatar() {
+				@messageAvatar("/assets/img/avatars/02.png", "@rabbit", "R")
+			}
+			@message.Content() {
+				@bubble.Group() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content() {
+							It's always a one-line change 😭.
+						}
+					}
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content() {
+							Alright, let me take a look.
+						}
+						@bubble.Reactions(bubble.ReactionsProps{Attributes: templ.Attributes{"aria-label": "Reactions: thumbs up"}}) {
+							<span>👍</span>
+						}
+					}
+				}
+			}
+		}
+		@marker.Marker(marker.Props{Attributes: templ.Attributes{"role": "status"}}) {
+			@marker.Content(marker.ContentProps{Class: "shimmer"}) {
+				<span class="font-medium">Oliver</span> is typing...
+			}
+		}
+	</div>
+}
