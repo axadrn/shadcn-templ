@@ -21,7 +21,9 @@ templ PaginationSimple() {
 				}
 			}
 			@pagination.Item() {
-				@pagination.Link(pagination.LinkProps{Href: "#"}) {
+				// Upstream renders this one link with the Button's slot, in the
+				// server HTML and after hydration: ported as rendered.
+				@pagination.Link(pagination.LinkProps{Href: "#", Attributes: templ.Attributes{"data-slot": "button"}}) {
 					4
 				}
 			}
