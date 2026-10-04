@@ -1,0 +1,124 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dialog"
+	"github.com/axadrn/shadcn-templ/v2/components/questionnaire"
+)
+
+// The question title and description render as the dialog's title and
+// description (render={<DialogTitle />}, render={<DialogDescription />});
+// the dialog markers let dialog.js label the popup with them.
+var (
+	questionnaireDialogTitle = &questionnaire.Render{
+		Tag:        "h2",
+		Class:      "cn-dialog-title cn-font-heading",
+		Attributes: templ.Attributes{"data-templ-dialog-title": true},
+	}
+	questionnaireDialogDescription = &questionnaire.Render{
+		Tag:        "p",
+		Class:      "cn-dialog-description",
+		Attributes: templ.Attributes{"data-templ-dialog-description": true},
+	}
+)
+
+templ QuestionnaireDialog() {
+	@dialog.Dialog() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: dialog.Trigger(ctx),
+		}) {
+			Open clarification
+		}
+		@dialog.Content() {
+			@questionnaire.Questionnaire(questionnaire.Props{
+				DefaultItem: "scope",
+				Items: []questionnaire.ItemDefinition{
+					{Name: "scope", Required: true},
+					{Name: "tests", Required: true},
+				},
+			}) {
+				@questionnaire.Item(questionnaire.ItemProps{Name: "scope", Required: true}) {
+					@dialog.Header() {
+						@questionnaire.Progress()
+						@questionnaire.Title(questionnaire.TitleProps{Render: questionnaireDialogTitle}) {
+							Which files are in scope?
+						}
+						@questionnaire.Description(questionnaire.DescriptionProps{Render: questionnaireDialogDescription}) {
+							Choose how broadly the agent can update the workspace.
+						}
+					}
+					@questionnaire.Choices() {
+						@questionnaire.Choice(questionnaire.ChoiceProps{Value: "component"}) {
+							Component only
+						}
+						@questionnaire.Choice(questionnaire.ChoiceProps{Value: "feature"}) {
+							Complete feature directory
+						}
+						@questionnaire.Choice(questionnaire.ChoiceProps{Value: "workspace"}) {
+							Any related workspace file
+						}
+					}
+					@questionnaire.Error()
+				}
+				@questionnaire.Item(questionnaire.ItemProps{Name: "tests", Required: true}) {
+					@dialog.Header() {
+						@questionnaire.Progress()
+						@questionnaire.Title(questionnaire.TitleProps{Render: questionnaireDialogTitle}) {
+							How much verification is needed?
+						}
+						@questionnaire.Description(questionnaire.DescriptionProps{Render: questionnaireDialogDescription}) {
+							Choose the checks the agent should run before handoff.
+						}
+					}
+					@questionnaire.Choices() {
+						@questionnaire.Choice(questionnaire.ChoiceProps{Value: "targeted"}) {
+							Targeted tests
+						}
+						@questionnaire.Choice(questionnaire.ChoiceProps{Value: "package"}) {
+							Package tests
+						}
+						@questionnaire.Choice(questionnaire.ChoiceProps{Value: "full"}) {
+							Full workspace verification
+						}
+					}
+					@questionnaire.Error()
+				}
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Variant:    button.VariantOutline,
+						Attributes: dialog.Close(ctx),
+					}) {
+						Cancel
+					}
+					@questionnaire.Actions() {
+						@questionnaire.Previous()
+						@questionnaire.Next() {
+							Next
+						}
+						@questionnaire.Submit() {
+							Send answer
+						}
+					}
+				}
+			}
+			<script nonce={ templ.GetNonce(ctx) }>
+				// The vanilla pendant of the example's onSubmit: close and toast. It
+				// sits right after the questionnaire, inside the popup.
+				(() => {
+					const root = document.currentScript.previousElementSibling;
+					document.addEventListener("submit", (e) => {
+						if (e.target !== root) return;
+						e.preventDefault();
+						const formData = new FormData(e.target);
+						window.templ.dialog.close(e.target);
+						window.templ.toast.add({
+							title: "Clarification sent",
+							description: `Scope: ${formData.get("scope") ?? "None"} · Verification: ${formData.get("tests") ?? "None"}`,
+						});
+					});
+				})();
+			</script>
+		}
+	}
+}

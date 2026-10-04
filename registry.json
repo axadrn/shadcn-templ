@@ -743,6 +743,33 @@
       ]
     },
     {
+      "name": "questionnaire",
+      "type": "registry:ui",
+      "title": "Questionnaire",
+      "description": "A multi-step questionnaire with single-choice, multiple-choice, freeform, and skippable questions.",
+      "registryDependencies": [
+        "button",
+        "icon"
+      ],
+      "files": [
+        {
+          "path": "components/questionnaire/questionnaire.templ",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/questionnaire/questionnaire.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "form-input"
+      ]
+    },
+    {
       "name": "icon",
       "type": "registry:ui",
       "title": "Icon",

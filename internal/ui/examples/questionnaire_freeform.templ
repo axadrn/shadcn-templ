@@ -1,0 +1,57 @@
+package examples
+
+import "github.com/axadrn/shadcn-templ/v2/components/questionnaire"
+
+templ QuestionnaireFreeform() {
+	@questionnaire.Questionnaire(questionnaire.Props{
+		Class:     "mx-auto max-w-md",
+		Shortcuts: questionnaire.ShortcutsLetters,
+		Items: []questionnaire.ItemDefinition{
+			{Name: "approach", Required: true, Choices: []questionnaire.ChoiceDefinition{{Value: "incremental"}, {Value: "module"}, {Value: "rewrite"}}},
+		},
+	}) {
+		@questionnaire.Item(questionnaire.ItemProps{Name: "approach", Required: true}) {
+			@questionnaire.Title() {
+				How should the agent approach this refactor?
+			}
+			@questionnaire.Description() {
+				Choose a strategy or write a more specific instruction.
+			}
+			@questionnaire.Choices() {
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "incremental"}) {
+					Make the smallest safe change
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "module"}) {
+					Refactor one module at a time
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "rewrite"}) {
+					Replace the implementation completely
+				}
+				@questionnaire.Input(questionnaire.InputProps{
+					Attributes: templ.Attributes{
+						"aria-label":  "Another refactoring approach",
+						"placeholder": "Describe another approach…",
+					},
+				})
+			}
+			@questionnaire.Error()
+		}
+		@questionnaire.Actions() {
+			@questionnaire.Submit() {
+				Use this approach
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The vanilla pendant of the example's onSubmit toast.
+		(() => {
+			const root = document.currentScript.previousElementSibling;
+			document.addEventListener("submit", (e) => {
+				if (e.target !== root) return;
+				e.preventDefault();
+				const approach = new FormData(e.target).get("approach");
+				window.templ.toast.add({ title: "Approach selected", description: `Approach: ${approach ?? "None"}` });
+			});
+		})();
+	</script>
+}

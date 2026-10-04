@@ -1,0 +1,367 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/dialog"
+	"github.com/axadrn/shadcn-templ/v2/components/example"
+	"github.com/axadrn/shadcn-templ/v2/components/questionnaire"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+var (
+	questionnaireExampleItems = []questionnaire.ItemDefinition{
+		{Name: "direction", Required: true, Choices: []questionnaire.ChoiceDefinition{{Value: "delegation"}, {Value: "questions"}, {Value: "both"}}},
+		{Name: "signals", Choices: []questionnaire.ChoiceDefinition{{Value: "progress"}, {Value: "decisions"}, {Value: "risks"}}},
+		{Name: "timing", Required: true, Choices: []questionnaire.ChoiceDefinition{{Value: "week"}, {Value: "cycle"}, {Value: "later"}}},
+	}
+	questionnaireExampleTaskItems = []questionnaire.ItemDefinition{
+		{Name: "task", Required: true, Choices: []questionnaire.ChoiceDefinition{{Value: "inspect"}, {Value: "implement"}, {Value: "review"}}},
+	}
+	questionnaireExamplePlanItems = []questionnaire.ItemDefinition{
+		{Name: "plan", Required: true, Choices: []questionnaire.ChoiceDefinition{{Value: "plus"}, {Value: "pro"}, {Value: "enterprise", Disabled: true}}},
+	}
+)
+
+// QuestionnaireExample is questionnaire-example.tsx.
+templ QuestionnaireExample() {
+	@example.Wrapper() {
+		@questionnaireExampleStandalone()
+		@questionnaireExampleCard()
+		@questionnaireExampleDialog()
+		@questionnaireExampleNoDescription()
+		@questionnaireExampleDisabled()
+	}
+}
+
+templ questionnaireExampleDisabled() {
+	@example.Example(example.Props{Title: "Disabled", ContainerClass: "md:col-span-2"}) {
+		@questionnaire.Questionnaire(questionnaire.Props{
+			Class:       "mx-auto max-w-lg",
+			DefaultItem: "plan",
+			Items:       questionnaireExamplePlanItems,
+		}) {
+			@questionnaire.Item(questionnaire.ItemProps{Name: "plan", Required: true}) {
+				@questionnaire.Title() {
+					Choose a plan
+				}
+				@questionnaire.Description() {
+					Enterprise is not available on your account.
+				}
+				@questionnaire.Choices() {
+					@questionnaire.Choice(questionnaire.ChoiceProps{Value: "plus"}) {
+						<span class="font-medium">Plus</span>
+						@questionnaire.ChoiceDescription() {
+							For individuals and small teams
+						}
+					}
+					@questionnaire.Choice(questionnaire.ChoiceProps{Value: "pro"}) {
+						<span class="font-medium">Pro</span>
+						@questionnaire.ChoiceDescription() {
+							For growing businesses
+						}
+					}
+					@questionnaire.Choice(questionnaire.ChoiceProps{Value: "enterprise", Disabled: true}) {
+						<span class="font-medium">Enterprise</span>
+						@questionnaire.ChoiceDescription() {
+							For large teams and enterprises
+						}
+					}
+				}
+				@questionnaire.Error()
+			}
+			@questionnaireExampleNavigation()
+		}
+		@questionnaireExampleSubmit()
+	}
+}
+
+templ questionnaireExampleNoDescription() {
+	@example.Example(example.Props{Title: "No description", ContainerClass: "md:col-span-2"}) {
+		@questionnaire.Questionnaire(questionnaire.Props{
+			Class:       "mx-auto max-w-lg",
+			DefaultItem: "task",
+			Items:       questionnaireExampleTaskItems,
+			Shortcuts:   questionnaire.ShortcutsLetters,
+		}) {
+			@questionnaire.Progress()
+			@questionnaire.Item(questionnaire.ItemProps{Name: "task", Required: true}) {
+				@questionnaire.Title() {
+					What should the agent do next?
+				}
+				@questionnaire.Choices() {
+					@questionnaire.Choice(questionnaire.ChoiceProps{Value: "inspect"}) {
+						Inspect the codebase
+					}
+					@questionnaire.Choice(questionnaire.ChoiceProps{Value: "implement"}) {
+						Implement the change
+					}
+					@questionnaire.Choice(questionnaire.ChoiceProps{Value: "review"}) {
+						Review the result
+					}
+				}
+				@questionnaire.Error()
+			}
+			@questionnaireExampleNavigation()
+		}
+		@questionnaireExampleSubmit()
+	}
+}
+
+templ questionnaireExampleStandalone() {
+	@example.Example(example.Props{Title: "Standalone", ContainerClass: "md:col-span-2"}) {
+		@questionnaire.Questionnaire(questionnaire.Props{
+			Class:       "mx-auto max-w-lg",
+			DefaultItem: "direction",
+			Items:       questionnaireExampleItems,
+			Shortcuts:   questionnaire.ShortcutsLetters,
+		}) {
+			@questionnaire.Progress()
+			@questionnaireExampleQuestions()
+			@questionnaireExampleNavigation()
+		}
+		@questionnaireExampleSubmit()
+	}
+}
+
+templ questionnaireExampleCard() {
+	@example.Example(example.Props{Title: "Card", ContainerClass: "md:col-span-2"}) {
+		@questionnaire.Questionnaire(questionnaire.Props{
+			DefaultItem: "direction",
+			Items:       questionnaireExampleItems,
+			Shortcuts:   questionnaire.ShortcutsNumbers,
+		}) {
+			@questionnaireExampleCardQuestions()
+		}
+		@questionnaireExampleSubmit()
+	}
+}
+
+templ questionnaireExampleDialog() {
+	@example.Example(example.Props{Title: "Dialog", Class: "items-center justify-center", ContainerClass: "md:col-span-2"}) {
+		@dialog.Dialog() {
+			@button.Button(button.Props{Variant: button.VariantOutline, Attributes: dialog.Trigger(ctx)}) {
+				Open questionnaire
+			}
+			@dialog.Content() {
+				@questionnaire.Questionnaire(questionnaire.Props{
+					DefaultItem: "direction",
+					Items:       questionnaireExampleItems,
+				}) {
+					@dialog.Header() {
+						@dialog.Title(dialog.TitleProps{Class: "sr-only"}) {
+							Plan an agent interface
+						}
+						@dialog.Description(dialog.DescriptionProps{Class: "sr-only"}) {
+							Answer three questions to shape the next prototype.
+						}
+						// render={(props, state) => <span {...props}>Question
+						// {state.current} of {state.total}</span>}: the default
+						// label, on the part's own element.
+						@questionnaire.Progress(questionnaire.ProgressProps{Class: "font-semibold tracking-widest text-foreground uppercase"})
+					}
+					@questionnaireExampleQuestions()
+					@dialog.Footer() {
+						@questionnaireExampleNavigation()
+					}
+				}
+				@questionnaireExampleSubmit()
+			}
+		}
+	}
+}
+
+templ questionnaireExampleCardQuestions() {
+	// React.useId for the three titles.
+	{{ directionTitleID, signalsTitleID, timingTitleID := utils.RandomID(), utils.RandomID(), utils.RandomID() }}
+	@questionnaire.Item(questionnaire.ItemProps{Name: "direction", Required: true, Attributes: templ.Attributes{"aria-labelledby": directionTitleID}}) {
+		@card.Card(card.Props{Class: "mx-auto w-full max-w-lg"}) {
+			@card.Header() {
+				@questionnaire.Title(questionnaire.TitleProps{ID: directionTitleID, Render: questionnaireCardTitle}) {
+					What should we prototype next?
+				}
+				@questionnaire.Description(questionnaire.DescriptionProps{Render: questionnaireCardDescription}) {
+					Choose one direction or write another answer.
+				}
+				@card.Action() {
+					@questionnaire.Progress()
+				}
+			}
+			@card.Content() {
+				@questionnaireExampleDirectionChoices()
+				@questionnaire.Error()
+			}
+			@card.Footer() {
+				@questionnaireExampleNavigation()
+			}
+		}
+	}
+	@questionnaire.Item(questionnaire.ItemProps{Name: "signals", Multiple: true, Attributes: templ.Attributes{"aria-labelledby": signalsTitleID}}) {
+		@card.Card(card.Props{Class: "mx-auto w-full max-w-lg"}) {
+			@card.Header() {
+				@questionnaire.Title(questionnaire.TitleProps{ID: signalsTitleID, Render: questionnaireCardTitle}) {
+					What should every progress update include?
+				}
+				@questionnaire.Description(questionnaire.DescriptionProps{Render: questionnaireCardDescription}) {
+					Select all that apply, or skip this question.
+				}
+				@card.Action() {
+					@questionnaire.Progress()
+				}
+			}
+			@card.Content() {
+				@questionnaireExampleSignalsChoices()
+				@questionnaire.Error()
+			}
+			@card.Footer() {
+				@questionnaireExampleNavigation()
+			}
+		}
+	}
+	@questionnaire.Item(questionnaire.ItemProps{Name: "timing", Required: true, Attributes: templ.Attributes{"aria-labelledby": timingTitleID}}) {
+		@card.Card(card.Props{Class: "mx-auto w-full max-w-lg"}) {
+			@card.Header() {
+				@questionnaire.Title(questionnaire.TitleProps{ID: timingTitleID, Render: questionnaireCardTitle}) {
+					When should this be revisited?
+				}
+				@questionnaire.Description(questionnaire.DescriptionProps{Render: questionnaireCardDescription}) {
+					Choose when this should be revisited.
+				}
+				@card.Action() {
+					@questionnaire.Progress()
+				}
+			}
+			@card.Content() {
+				@questionnaireExampleTimingChoices()
+				@questionnaire.Error()
+			}
+			@card.Footer() {
+				@questionnaireExampleNavigation()
+			}
+		}
+	}
+}
+
+templ questionnaireExampleQuestions() {
+	@questionnaire.Item(questionnaire.ItemProps{Name: "direction", Required: true}) {
+		@questionnaire.Title() {
+			What should we prototype next?
+		}
+		@questionnaire.Description() {
+			Choose one direction or write another answer.
+		}
+		@questionnaireExampleDirectionChoices()
+		@questionnaire.Error()
+	}
+	@questionnaire.Item(questionnaire.ItemProps{Name: "signals", Multiple: true}) {
+		@questionnaire.Title() {
+			What should every progress update include?
+		}
+		@questionnaire.Description() {
+			Select all that apply, or skip this question.
+		}
+		@questionnaireExampleSignalsChoices()
+		@questionnaire.Error()
+	}
+	@questionnaire.Item(questionnaire.ItemProps{Name: "timing", Required: true}) {
+		@questionnaire.Title() {
+			When should this be revisited?
+		}
+		@questionnaire.Description() {
+			Choose when this should be revisited.
+		}
+		@questionnaireExampleTimingChoices()
+		@questionnaire.Error()
+	}
+}
+
+templ questionnaireExampleDirectionChoices() {
+	@questionnaire.Choices() {
+		@questionnaire.Choice(questionnaire.ChoiceProps{Value: "delegation"}) {
+			<span class="font-medium">Sub-agent delegation</span>
+			@questionnaire.ChoiceDescription() {
+				Show when work is delegated and what comes back.
+			}
+		}
+		@questionnaire.Choice(questionnaire.ChoiceProps{Value: "questions"}) {
+			<span class="font-medium">Question prompts</span>
+			@questionnaire.ChoiceDescription() {
+				Show choices while the agent waits for input.
+			}
+		}
+		@questionnaire.Choice(questionnaire.ChoiceProps{Value: "both"}) {
+			<span class="font-medium">Both together</span>
+			@questionnaire.ChoiceDescription() {
+				Explore one unified interaction pattern.
+			}
+		}
+		@questionnaire.Input(questionnaire.InputProps{
+			Attributes: templ.Attributes{"aria-label": "Another direction", "placeholder": "Type another direction…"},
+		})
+	}
+}
+
+templ questionnaireExampleSignalsChoices() {
+	@questionnaire.Choices() {
+		@questionnaire.Choice(questionnaire.ChoiceProps{Value: "progress"}) {
+			Progress
+		}
+		@questionnaire.Choice(questionnaire.ChoiceProps{Value: "decisions"}) {
+			Decisions
+		}
+		@questionnaire.Choice(questionnaire.ChoiceProps{Value: "risks"}) {
+			Risks
+		}
+	}
+}
+
+templ questionnaireExampleTimingChoices() {
+	@questionnaire.Choices() {
+		@questionnaire.Choice(questionnaire.ChoiceProps{Value: "week"}) {
+			This week
+		}
+		@questionnaire.Choice(questionnaire.ChoiceProps{Value: "cycle"}) {
+			Next cycle
+		}
+		@questionnaire.Choice(questionnaire.ChoiceProps{Value: "later"}) {
+			Revisit later
+		}
+	}
+}
+
+templ questionnaireExampleNavigation() {
+	@questionnaire.Actions(questionnaire.ActionsProps{Class: "w-full"}) {
+		@questionnaire.Previous()
+		@questionnaire.Skip()
+		@questionnaire.Next() {
+			Next
+		}
+		@questionnaire.Submit() {
+			Save answers
+		}
+	}
+}
+
+// questionnaireExampleSubmit is handleSubmit; it sits right after its
+// questionnaire.
+templ questionnaireExampleSubmit() {
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const root = document.currentScript.previousElementSibling;
+			document.addEventListener("submit", (e) => {
+				if (e.target !== root) return;
+				e.preventDefault();
+				const formData = new FormData(root);
+				const values = {
+					direction: formData.get("direction"),
+					signals: formData.getAll("signals"),
+					timing: formData.get("timing"),
+				};
+				window.templ.toast.add({
+					title: "Questionnaire submitted",
+					description: `Direction: ${values.direction ?? "None"} · Progress signals: ${values.signals.join(", ") || "None"} · Timing: ${values.timing ?? "None"}`,
+				});
+			});
+		})();
+	</script>
+}

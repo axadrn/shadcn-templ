@@ -1,0 +1,105 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/questionnaire"
+)
+
+templ QuestionnaireResume() {
+	@questionnaire.Questionnaire(questionnaire.Props{
+		Class:       "mx-auto max-w-md",
+		DefaultItem: "verification",
+		Items: []questionnaire.ItemDefinition{
+			{Name: "change", Required: true},
+			{Name: "verification", Required: true},
+			{Name: "notes"},
+		},
+	}) {
+		@questionnaire.Progress()
+		@questionnaire.Item(questionnaire.ItemProps{Name: "change", Required: true}) {
+			@questionnaire.Title() {
+				What kind of migration is this?
+			}
+			@questionnaire.Description() {
+				This answer was saved during the previous session.
+			}
+			@questionnaire.Choices() {
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "incremental", DefaultChecked: true}) {
+					Incremental migration
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "cutover"}) {
+					Single cutover
+				}
+			}
+			@questionnaire.Error()
+		}
+		@questionnaire.Item(questionnaire.ItemProps{Name: "verification", Multiple: true, Required: true}) {
+			@questionnaire.Title() {
+				How should the migration be verified?
+			}
+			@questionnaire.Description() {
+				These checks were selected during the previous session.
+			}
+			@questionnaire.Choices() {
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "tests", DefaultChecked: true}) {
+					Run migration tests
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "typecheck", DefaultChecked: true}) {
+					Run the typecheck
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "manual"}) {
+					Perform a manual smoke test
+				}
+			}
+			@questionnaire.Error()
+		}
+		@questionnaire.Item(questionnaire.ItemProps{Name: "notes"}) {
+			@questionnaire.Title() {
+				Anything else the agent should remember?
+			}
+			@questionnaire.Description() {
+				This note was saved with the draft.
+			}
+			@questionnaire.Input(questionnaire.InputProps{
+				DefaultValue: "Keep the existing public API stable.",
+				Attributes:   templ.Attributes{"aria-label": "Saved migration note"},
+			})
+		}
+		@questionnaire.Actions() {
+			@button.Button(button.Props{Type: button.TypeReset, Variant: button.VariantOutline}) {
+				Reset changes
+			}
+			@questionnaire.Previous()
+			@questionnaire.Next() {
+				Next
+			}
+			@questionnaire.Submit() {
+				Update draft
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const root = document.currentScript.previousElementSibling;
+			// The vanilla pendants of the example's onReset and onSubmit toasts.
+			document.addEventListener("reset", (e) => {
+				if (e.target !== root) return;
+				window.templ.toast.add({ title: "Saved answers restored" });
+			});
+			document.addEventListener("submit", (e) => {
+				if (e.target !== root) return;
+				e.preventDefault();
+				const formData = new FormData(e.target);
+				const answers = {
+					change: formData.get("change"),
+					verification: formData.getAll("verification"),
+					notes: formData.get("notes"),
+				};
+				window.templ.toast.add({
+					title: "Draft updated",
+					description: `Migration: ${answers.change ?? "None"} · Verification: ${answers.verification.join(", ") || "None"} · Notes: ${answers.notes || "None"}`,
+				});
+			});
+		})();
+	</script>
+}

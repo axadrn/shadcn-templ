@@ -1,0 +1,881 @@
+package questionnaire
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"strings"
+
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+// Shortcuts is the primitive's QuestionnaireShortcutMode.
+type Shortcuts string
+
+const (
+	ShortcutsLetters Shortcuts = "letters"
+	ShortcutsNumbers Shortcuts = "numbers"
+)
+
+// ItemDefinition and ChoiceDefinition are the primitive's
+// QuestionnaireItemDefinition and QuestionnaireChoiceDefinition: the
+// collection passed to Root.items.
+type ItemDefinition struct {
+	Name     string             `json:"name"`
+	Required bool               `json:"required,omitempty"`
+	Disabled bool               `json:"disabled,omitempty"`
+	Choices  []ChoiceDefinition `json:"choices,omitempty"`
+}
+
+type ChoiceDefinition struct {
+	Value    string `json:"value"`
+	Disabled bool   `json:"disabled,omitempty"`
+}
+
+// Render is the pendant of the render prop for a part rendered as another
+// component's element (render={<CardTitle />}): the host's tag, classes and
+// attributes, with the part's own slot, classes and attributes on top, as
+// React merges the part's props over the host element.
+type Render struct {
+	Tag        string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type ctxKey string
+
+const (
+	rootKey ctxKey = "questionnaireRoot"
+	itemKey ctxKey = "questionnaireItem"
+)
+
+type rootState struct {
+	items      []ItemDefinition
+	active     string
+	shortcuts  Shortcuts
+	current    int
+	total      int
+	first      bool
+	last       bool
+	claimFirst bool
+}
+
+type itemState struct {
+	name     string
+	required bool
+	multiple bool
+	disabled bool
+	choices  int
+	byValue  map[string]string
+}
+
+func rootFrom(ctx context.Context) *rootState {
+	if s, ok := ctx.Value(rootKey).(*rootState); ok {
+		return s
+	}
+	return &rootState{}
+}
+
+func itemFrom(ctx context.Context) *itemState {
+	if s, ok := ctx.Value(itemKey).(*itemState); ok {
+		return s
+	}
+	return &itemState{}
+}
+
+func shortcutKeys(mode Shortcuts) []string {
+	switch mode {
+	case ShortcutsLetters:
+		keys := make([]string, 26)
+		for i := range keys {
+			keys[i] = string(rune('A' + i))
+		}
+		return keys
+	case ShortcutsNumbers:
+		keys := make([]string, 9)
+		for i := range keys {
+			keys[i] = fmt.Sprint(i + 1)
+		}
+		return keys
+	}
+	return nil
+}
+
+// Props are the primitive's Root props. Item is the controlled active item:
+// the owner commits a questionnaire-item-change by updating data-templ-item
+// (window.templ.questionnaire.setItem). DefaultItem is the uncontrolled one.
+type Props struct {
+	ID          string
+	Class       string
+	Attributes  templ.Attributes
+	Items       []ItemDefinition
+	Item        *string
+	DefaultItem string
+	Shortcuts   Shortcuts
+}
+
+func newRootState(p Props) *rootState {
+	s := &rootState{items: p.Items, shortcuts: p.Shortcuts}
+	if p.Items == nil {
+		s.active = p.DefaultItem
+		if p.Item != nil {
+			s.active = *p.Item
+		}
+		s.claimFirst = s.active == ""
+		return s
+	}
+	var enabled []string
+	for _, it := range p.Items {
+		if !it.Disabled {
+			enabled = append(enabled, it.Name)
+		}
+	}
+	// getInitialItemName: the default item when it is enabled, else the first.
+	s.active = ""
+	want := p.DefaultItem
+	if p.Item != nil {
+		want = *p.Item
+	}
+	for _, name := range enabled {
+		if name == want {
+			s.active = name
+		}
+	}
+	if s.active == "" && len(enabled) > 0 {
+		s.active = enabled[0]
+	}
+	s.total = len(enabled)
+	for i, name := range enabled {
+		if name == s.active {
+			s.current = i + 1
+		}
+	}
+	s.first = s.total > 0 && s.current == 1
+	s.last = s.total > 0 && s.current == s.total
+	return s
+}
+
+func itemsJSON(items []ItemDefinition) string {
+	b, _ := json.Marshal(items)
+	return string(b)
+}
+
+// Questionnaire is the primitive's Root: a native form (noValidate) that owns
+// the ordered items, the active item, answers, validation and navigation.
+// questionnaire.js ports the behavior; data-current/-first/-last/-total are
+// the Root render state.
+templ Questionnaire(props ...Props) {
+	{{ var p Props }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ s := newRootState(p) }}
+	{{ ctx = context.WithValue(ctx, rootKey, s) }}
+	<form
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="questionnaire"
+		data-current={ fmt.Sprint(s.current) }
+		data-first?={ s.first }
+		data-last?={ s.last }
+		data-total={ fmt.Sprint(s.total) }
+		if p.Shortcuts != "" {
+			data-shortcuts={ string(p.Shortcuts) }
+		}
+		if p.Items != nil {
+			data-templ-items={ itemsJSON(p.Items) }
+		}
+		if p.Item != nil {
+			data-templ-item={ *p.Item }
+		}
+		if p.DefaultItem != "" {
+			data-templ-default-item={ p.DefaultItem }
+		}
+		novalidate
+		class={ utils.CN("cn-questionnaire flex w-full min-w-0 flex-col", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</form>
+}
+
+type ProgressProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+func progressLabel(s *rootState) string {
+	if s.total == 0 {
+		return ""
+	}
+	return fmt.Sprintf("Question %d of %d", s.current, s.total)
+}
+
+// Progress is a progressbar labelled "Question n of total". Children replace
+// the label, like the render prop; questionnaire.js keeps the default label
+// and the state attributes current.
+// childrenOr renders its children, the render prop pendant, or the default
+// label when there are none.
+func childrenOr(label string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		html, err := templ.ToGoHTML(ctx, templ.GetChildren(ctx))
+		if err != nil {
+			return err
+		}
+		if strings.TrimSpace(string(html)) == "" {
+			_, err = io.WriteString(w, templ.EscapeString(label))
+			return err
+		}
+		_, err = io.WriteString(w, string(html))
+		return err
+	})
+}
+
+templ Progress(props ...ProgressProps) {
+	{{ var p ProgressProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ s := rootFrom(ctx) }}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="questionnaire-progress"
+		data-current={ fmt.Sprint(s.current) }
+		data-first?={ s.first }
+		data-last?={ s.last }
+		data-total={ fmt.Sprint(s.total) }
+		role="progressbar"
+		aria-label="Questionnaire progress"
+		aria-live="polite"
+		if s.total > 0 {
+			aria-valuemax={ fmt.Sprint(s.total) }
+			aria-valuemin="1"
+			aria-valuenow={ fmt.Sprint(s.current) }
+			aria-valuetext={ progressLabel(s) }
+		}
+		class={ utils.CN("cn-questionnaire-progress min-h-[1lh] w-fit min-w-[14ch] font-medium text-muted-foreground tabular-nums", p.Class) }
+		{ p.Attributes... }
+	>
+		@childrenOr(progressLabel(s)) {
+			{ children... }
+		}
+	</div>
+}
+
+// ItemProps are the primitive's Item props. Name is the answer's form field
+// name (data-templ-name, the choices lose their name while skipped); Invalid
+// is the externally invalid state (data-templ-invalid).
+type ItemProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Name       string
+	Required   bool
+	Multiple   bool
+	Disabled   bool
+	Invalid    bool
+}
+
+func (s *rootState) definition(name string) *ItemDefinition {
+	for i := range s.items {
+		if s.items[i].Name == name {
+			return &s.items[i]
+		}
+	}
+	return nil
+}
+
+func newItemState(s *rootState, p ItemProps) *itemState {
+	is := &itemState{name: p.Name, required: p.Required, multiple: p.Multiple, disabled: p.Disabled}
+	if s.items != nil {
+		// getShortcutByChoiceValue: shortcuts follow Root.items' enabled choices.
+		is.byValue = map[string]string{}
+		keys := shortcutKeys(s.shortcuts)
+		if def := s.definition(p.Name); def != nil {
+			i := 0
+			for _, c := range def.Choices {
+				if c.Disabled {
+					continue
+				}
+				if i >= len(keys) {
+					break
+				}
+				is.byValue[c.Value] = keys[i]
+				i++
+			}
+		}
+	}
+	return is
+}
+
+func itemActive(s *rootState, p ItemProps) bool {
+	if p.Disabled {
+		return false
+	}
+	if s.claimFirst {
+		s.claimFirst = false
+		s.active = p.Name
+	}
+	return s.active == p.Name
+}
+
+// Item is the primitive's Item: a fieldset that is hidden and inert while
+// another item is active. questionnaire.js keeps its status, validation and
+// ARIA links (aria-describedby, aria-keyshortcuts) current.
+templ Item(props ...ItemProps) {
+	{{ var p ItemProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ s := rootFrom(ctx) }}
+	{{ active := itemActive(s, p) }}
+	{{ ctx = context.WithValue(ctx, itemKey, newItemState(s, p)) }}
+	<fieldset
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="questionnaire-item"
+		data-templ-name={ p.Name }
+		data-active?={ active }
+		data-disabled?={ p.Disabled }
+		data-invalid?={ p.Invalid && !p.Disabled }
+		data-multiple?={ p.Multiple }
+		data-required?={ p.Required }
+		data-status="unanswered"
+		data-templ-invalid?={ p.Invalid }
+		aria-invalid?={ p.Invalid && !p.Disabled }
+		disabled?={ p.Disabled }
+		hidden?={ !active }
+		inert?={ !active }
+		tabindex="-1"
+		class={ utils.CN("cn-questionnaire-item min-w-0 border-0 p-0 outline-none", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</fieldset>
+}
+
+type TitleProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Render     *Render
+}
+
+const titleClasses = "cn-questionnaire-title cn-font-heading text-pretty"
+
+// Title is the item's legend.
+templ Title(props ...TitleProps) {
+	{{ var p TitleProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.Render != nil {
+		@renderAs(*p.Render, "questionnaire-title", p.ID, utils.CN(p.Render.Class, titleClasses, p.Class), p.Attributes) {
+			{ children... }
+		}
+	} else {
+		<legend
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			data-slot="questionnaire-title"
+			class={ utils.CN(titleClasses, p.Class) }
+			{ p.Attributes... }
+		>
+			{ children... }
+		</legend>
+	}
+}
+
+type DescriptionProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Render     *Render
+}
+
+const descriptionClasses = "cn-questionnaire-description text-pretty text-muted-foreground"
+
+// Description describes the item (aria-describedby on the fieldset).
+templ Description(props ...DescriptionProps) {
+	{{ var p DescriptionProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.ID == "" {
+		{{ p.ID = utils.RandomID() }}
+	}
+	if p.Render != nil {
+		@renderAs(*p.Render, "questionnaire-description", p.ID, utils.CN(p.Render.Class, descriptionClasses, p.Class), p.Attributes) {
+			{ children... }
+		}
+	} else {
+		<p
+			id={ p.ID }
+			data-slot="questionnaire-description"
+			class={ utils.CN(descriptionClasses, p.Class) }
+			{ p.Attributes... }
+		>
+			{ children... }
+		</p>
+	}
+}
+
+// renderAs renders a part as the host element of a Render (div, p or h2).
+templ renderAs(r Render, slot string, id string, class string, attrs templ.Attributes) {
+	{{ merged := utils.MergeAttributes(r.Attributes, attrs) }}
+	switch r.Tag {
+		case "h2":
+			<h2
+				if id != "" {
+					id={ id }
+				}
+				data-slot={ slot }
+				class={ class }
+				{ merged... }
+			>
+				{ children... }
+			</h2>
+		case "p":
+			<p
+				if id != "" {
+					id={ id }
+				}
+				data-slot={ slot }
+				class={ class }
+				{ merged... }
+			>
+				{ children... }
+			</p>
+		default:
+			<div
+				if id != "" {
+					id={ id }
+				}
+				data-slot={ slot }
+				class={ class }
+				{ merged... }
+			>
+				{ children... }
+			</div>
+	}
+}
+
+type ChoicesProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+// Choices groups the item's answers; data-shortcuts is its render state.
+templ Choices(props ...ChoicesProps) {
+	{{ var p ChoicesProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ s := rootFrom(ctx) }}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="questionnaire-choices"
+		if s.shortcuts != "" {
+			data-shortcuts={ string(s.shortcuts) }
+		}
+		class={ utils.CN("cn-questionnaire-choices group/questionnaire-choices grid min-w-0", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+// ChoiceProps are the primitive's Choice props. DefaultChecked renders the
+// native checked attribute (the reset target), Disabled the choice's own
+// disabled state (data-templ-disabled, the item can disable it too).
+type ChoiceProps struct {
+	ID             string
+	Class          string
+	Attributes     templ.Attributes
+	Value          string
+	DefaultChecked bool
+	Disabled       bool
+}
+
+func choiceShortcut(s *rootState, is *itemState, p ChoiceProps) string {
+	if is.byValue != nil {
+		return is.byValue[p.Value]
+	}
+	if p.Disabled || is.disabled {
+		return ""
+	}
+	keys := shortcutKeys(s.shortcuts)
+	if is.choices >= len(keys) {
+		return ""
+	}
+	is.choices++
+	return keys[is.choices-1]
+}
+
+// Choice is a label around a native radio (checkbox for a multiple item),
+// the indicator, the label content and the shortcut hint.
+templ Choice(props ...ChoiceProps) {
+	{{ var p ChoiceProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.ID == "" {
+		{{ p.ID = utils.RandomID() }}
+	}
+	{{
+		s := rootFrom(ctx)
+		is := itemFrom(ctx)
+		disabled := p.Disabled || is.disabled
+		shortcut := choiceShortcut(s, is, p)
+		kind := utils.IfElse(is.multiple, "checkbox", "radio")
+		keyShortcuts := strings.TrimSpace(shortcut + utils.IfElse(p.DefaultChecked && !disabled, " Enter", ""))
+	}}
+	<label
+		data-slot="questionnaire-choice"
+		data-checked?={ p.DefaultChecked }
+		data-unchecked?={ !p.DefaultChecked }
+		data-disabled?={ disabled }
+		if shortcut != "" {
+			data-shortcut={ shortcut }
+		}
+		data-type={ kind }
+		data-templ-disabled?={ p.Disabled }
+		class={
+			utils.CN(
+				"cn-questionnaire-choice group/questionnaire-choice relative flex min-h-11 cursor-pointer items-start text-start transition-colors outline-none select-none",
+				"data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50",
+				p.Class,
+			),
+		}
+		{ p.Attributes... }
+	>
+		<input
+			id={ p.ID }
+			data-slot="questionnaire-choice-input"
+			data-checked?={ p.DefaultChecked }
+			data-unchecked?={ !p.DefaultChecked }
+			data-disabled?={ disabled }
+			if shortcut != "" {
+				data-shortcut={ shortcut }
+			}
+			data-type={ kind }
+			if keyShortcuts != "" {
+				aria-keyshortcuts={ keyShortcuts }
+			}
+			type={ kind }
+			name={ is.name }
+			value={ p.Value }
+			checked?={ p.DefaultChecked }
+			disabled?={ disabled }
+			required?={ is.required && !is.multiple }
+			class="cn-questionnaire-choice-input absolute inset-0 z-10 size-full cursor-pointer opacity-0"
+		/>
+		<span
+			aria-hidden="true"
+			data-slot="questionnaire-choice-indicator"
+			class="cn-questionnaire-choice-indicator pointer-events-none relative flex shrink-0 items-center justify-center border group-data-[type=radio]/questionnaire-choice:rounded-full"
+		>
+			<span
+				data-slot="questionnaire-choice-indicator-dot"
+				class="cn-questionnaire-choice-indicator-dot hidden rounded-full group-data-[type=checkbox]/questionnaire-choice:hidden group-data-checked/questionnaire-choice:block"
+			></span>
+			@icon.Check(icon.Props{
+				Class:      "cn-questionnaire-choice-indicator-check hidden group-data-[type=radio]/questionnaire-choice:hidden group-data-checked/questionnaire-choice:block",
+				Attributes: templ.Attributes{"data-slot": "questionnaire-choice-indicator-check"},
+			})
+		</span>
+		<span
+			data-slot="questionnaire-choice-label"
+			class="cn-questionnaire-choice-label cn-questionnaire-choice-content flex min-w-0 flex-1 flex-col leading-snug"
+		>
+			{ children... }
+		</span>
+		<span
+			aria-hidden="true"
+			data-slot="questionnaire-choice-shortcut"
+			if shortcut != "" {
+				data-shortcut={ shortcut }
+			} else {
+				hidden
+			}
+			class="cn-questionnaire-choice-shortcut cn-questionnaire-shortcut pointer-events-none ms-auto hidden shrink-0 group-data-[shortcut]/questionnaire-choice:inline-flex"
+		>{ shortcut }</span>
+	</label>
+}
+
+type ChoiceDescriptionProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+// ChoiceDescription is the secondary line of a choice (shadcn only).
+templ ChoiceDescription(props ...ChoiceDescriptionProps) {
+	{{ var p ChoiceDescriptionProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<span
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="questionnaire-choice-description"
+		class={ utils.CN("cn-questionnaire-choice-description", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</span>
+}
+
+// InputProps are the primitive's Input props. The freeform answer only
+// carries the item's name while it is the selected answer (else form="").
+type InputProps struct {
+	ID           string
+	Class        string
+	Attributes   templ.Attributes
+	Type         string
+	DefaultValue string
+	Disabled     bool
+}
+
+// Input is a freeform answer next to (or instead of) the fixed choices.
+templ Input(props ...InputProps) {
+	{{ var p InputProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.ID == "" {
+		{{ p.ID = utils.RandomID() }}
+	}
+	if p.Type == "" {
+		{{ p.Type = "text" }}
+	}
+	{{
+		is := itemFrom(ctx)
+		disabled := p.Disabled || is.disabled
+		filled := strings.TrimSpace(p.DefaultValue) != ""
+	}}
+	<div
+		data-slot="questionnaire-input-wrapper"
+		class="cn-questionnaire-input-wrapper group/questionnaire-input relative min-w-0"
+	>
+		<input
+			id={ p.ID }
+			data-slot="questionnaire-input"
+			data-disabled?={ disabled }
+			data-empty?={ !filled }
+			data-filled?={ filled }
+			data-templ-disabled?={ p.Disabled }
+			if filled && !disabled {
+				aria-keyshortcuts="Enter"
+			}
+			if filled {
+				name={ is.name }
+			} else {
+				form=""
+			}
+			type={ p.Type }
+			if p.DefaultValue != "" {
+				value={ p.DefaultValue }
+			}
+			disabled?={ disabled }
+			class={
+				utils.CN(
+					"cn-questionnaire-input min-h-11 w-full min-w-0 transition-[color,box-shadow,background-color] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0",
+					"selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground",
+					p.Class,
+				),
+			}
+			{ p.Attributes... }
+		/>
+	</div>
+}
+
+type ErrorProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+// Error is the item's validation message, hidden until the item is invalid.
+// Without children it reads the primitive's default message.
+templ Error(props ...ErrorProps) {
+	{{ var p ErrorProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.ID == "" {
+		{{ p.ID = utils.RandomID() }}
+	}
+	{{ is := itemFrom(ctx) }}
+	<p
+		id={ p.ID }
+		data-slot="questionnaire-error"
+		hidden
+		class={ utils.CN("cn-questionnaire-error text-destructive", p.Class) }
+		{ p.Attributes... }
+	>
+		@childrenOr(utils.IfElse(is.required, "Choose an answer to continue.", "Choose an answer or skip this question.")) {
+			{ children... }
+		}
+	</p>
+}
+
+type ActionsProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+// Actions lays out the navigation buttons (shadcn only).
+templ Actions(props ...ActionsProps) {
+	{{ var p ActionsProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="questionnaire-actions"
+		class={ utils.CN("cn-questionnaire-actions grid min-h-11 w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+// NavigationProps are the props of Previous, Skip, Next and Submit: the
+// primitive's disabled plus shadcn's Button variant and size.
+type NavigationProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Variant    button.Variant
+	Size       button.Size
+	Disabled   bool
+}
+
+type navigation struct {
+	slot     string
+	label    string
+	kind     string
+	variant  button.Variant
+	class    string
+	shortcut bool
+}
+
+func navVisible(s *rootState, n navigation) bool {
+	switch n.slot {
+	case "questionnaire-previous":
+		return s.total > 1 && !s.first
+	case "questionnaire-next":
+		return s.total > 1 && !s.last
+	case "questionnaire-submit":
+		return s.total > 0 && s.last
+	}
+	if def := s.definition(s.active); def != nil {
+		return !def.Required
+	}
+	return false
+}
+
+templ navigationButton(n navigation, p NavigationProps) {
+	{{ s := rootFrom(ctx) }}
+	{{
+		if p.Variant == "" {
+			p.Variant = n.variant
+		}
+		if p.Size == "" {
+			p.Size = button.SizeDefault
+		}
+		visible := navVisible(s, n)
+		shortcut := n.shortcut && visible && !p.Disabled
+	}}
+	<button
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		type={ n.kind }
+		data-slot={ n.slot }
+		data-size={ string(p.Size) }
+		data-variant={ string(p.Variant) }
+		data-disabled?={ p.Disabled }
+		if shortcut {
+			data-shortcut="Enter"
+			aria-keyshortcuts="Enter"
+		}
+		data-status="unanswered"
+		data-visible?={ visible }
+		data-hidden?={ !visible }
+		if !visible {
+			aria-hidden="true"
+			hidden
+			inert
+			tabindex="-1"
+		}
+		disabled?={ p.Disabled }
+		class={ utils.CN(button.Variants(button.Props{Variant: p.Variant, Size: p.Size}), n.class, p.Class) }
+		{ p.Attributes... }
+	>
+		@childrenOr(n.label) {
+			{ children... }
+		}
+	</button>
+}
+
+// Previous returns to the previous item. Hidden on the first item.
+templ Previous(props ...NavigationProps) {
+	{{ var p NavigationProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	@navigationButton(navigation{slot: "questionnaire-previous", label: "Previous", kind: "button", variant: button.VariantOutline, class: "cn-questionnaire-previous col-start-1 row-start-1 min-h-11 justify-self-start sm:min-h-0"}, p) {
+		{ children... }
+	}
+}
+
+// Skip intentionally skips an optional item. Hidden on required items.
+templ Skip(props ...NavigationProps) {
+	{{ var p NavigationProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	@navigationButton(navigation{slot: "questionnaire-skip", label: "Skip", kind: "button", variant: button.VariantOutline, class: "cn-questionnaire-skip col-start-2 row-start-1 min-h-11 justify-self-end sm:min-h-0"}, p) {
+		{ children... }
+	}
+}
+
+// Next validates the active item and moves on. Hidden on the last item.
+templ Next(props ...NavigationProps) {
+	{{ var p NavigationProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	@navigationButton(navigation{slot: "questionnaire-next", label: "Next", kind: "button", variant: button.VariantDefault, class: "cn-questionnaire-next col-start-3 row-start-1 min-h-11 justify-self-end sm:min-h-0", shortcut: true}, p) {
+		{ children... }
+	}
+}
+
+// Submit submits the form. Visible on the last item.
+templ Submit(props ...NavigationProps) {
+	{{ var p NavigationProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	@navigationButton(navigation{slot: "questionnaire-submit", label: "Submit", kind: "submit", variant: button.VariantDefault, class: "cn-questionnaire-submit col-start-3 row-start-1 min-h-11 justify-self-end sm:min-h-0", shortcut: true}, p) {
+		{ children... }
+	}
+}

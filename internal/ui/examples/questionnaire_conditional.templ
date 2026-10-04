@@ -1,0 +1,101 @@
+package examples
+
+import "github.com/axadrn/shadcn-templ/v2/components/questionnaire"
+
+templ QuestionnaireConditional() {
+	@questionnaire.Questionnaire(questionnaire.Props{
+		Class:       "mx-auto max-w-md",
+		DefaultItem: "runtime",
+		Items: []questionnaire.ItemDefinition{
+			{Name: "runtime", Required: true},
+			{Name: "environment", Required: true, Disabled: true},
+			{Name: "approval", Required: true},
+		},
+	}) {
+		@questionnaire.Progress()
+		@questionnaire.Item(questionnaire.ItemProps{Name: "runtime", Required: true}) {
+			@questionnaire.Title() {
+				Where should the agent run?
+			}
+			@questionnaire.Description() {
+				Cloud runs add an environment question to this flow.
+			}
+			@questionnaire.Choices() {
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "local", DefaultChecked: true}) {
+					Local workspace
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "cloud"}) {
+					Cloud workspace
+				}
+			}
+			@questionnaire.Error()
+		}
+		@questionnaire.Item(questionnaire.ItemProps{Name: "environment", Required: true, Disabled: true}) {
+			@questionnaire.Title() {
+				Which cloud environment should it use?
+			}
+			@questionnaire.Choices() {
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "preview"}) {
+					Preview
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "staging"}) {
+					Staging
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "isolated"}) {
+					Isolated sandbox
+				}
+			}
+			@questionnaire.Error()
+		}
+		@questionnaire.Item(questionnaire.ItemProps{Name: "approval", Required: true}) {
+			@questionnaire.Title() {
+				When should the agent request approval?
+			}
+			@questionnaire.Choices() {
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "writes"}) {
+					Before writing files
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "commands"}) {
+					Before running commands
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "sensitive"}) {
+					Only for sensitive actions
+				}
+			}
+			@questionnaire.Error()
+		}
+		@questionnaire.Actions() {
+			@questionnaire.Previous()
+			@questionnaire.Next() {
+				Next
+			}
+			@questionnaire.Submit() {
+				Save execution plan
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const root = document.currentScript.previousElementSibling;
+			// The runtime answer enables the environment item: the pendant of the
+			// example's runtime state, which disables the item and its definition.
+			document.addEventListener("change", (e) => {
+				if (!root.contains(e.target) || e.target.name !== "runtime") return;
+				const cloud = e.target.value === "cloud";
+				const items = JSON.parse(root.getAttribute("data-templ-items"));
+				items.find((item) => item.name === "environment").disabled = !cloud || undefined;
+				root.setAttribute("data-templ-items", JSON.stringify(items));
+				root.querySelector('[data-templ-name="environment"]').toggleAttribute("disabled", !cloud);
+			});
+			document.addEventListener("submit", (e) => {
+				if (e.target !== root) return;
+				e.preventDefault();
+				const formData = new FormData(e.target);
+				window.templ.toast.add({
+					title: "Execution plan saved",
+					description: `Runtime: ${formData.get("runtime") ?? "None"} · Environment: ${formData.get("environment") ?? "Not applicable"} · Approval: ${formData.get("approval") ?? "None"}`,
+				});
+			});
+		})();
+	</script>
+}
