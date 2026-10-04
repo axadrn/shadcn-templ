@@ -49,7 +49,7 @@ Today the CLI assumes one app per module. `utils.ModulePath(cwd)` reads `cwd/go.
 
 ### 3. init and add in an app directory
 
-- [ ] Done
+- [x] Done
 
 `init` in a subdir of a module sets up the app and bundles existing shared component scripts; `add` prints shared files relative to the module root. Done when a commands test runs init and add for two apps under `cmd/` against the in-process registry and both apps share `components/` with their own CSS and bundle. Checks: `go test ./cmd/shadcn-templ/...`.
 
@@ -74,3 +74,7 @@ Build the CLI, scratch module with two apps under `cmd/`, `init`/`add`/`bundle` 
 ### Task 2
 
 `UpdateScripts` now returns every written asset path: config's app first, then each other app sharing the components dir (deduplicated by `scripts.dir`). It checks `scripts.path` of all sharing apps first and fails before writing anything on a mismatch, then writes the asset into every app's `scripts.dir`, then the one manifest, then prunes stale `shadcn-templ-*.js` in every dir. `add` and `bundle` print one `Bundle:` line per app, as a display path (relative to the app, shared files relative to the module root) instead of the absolute path. Walk cost at the repo root of this project: 970 directories after pruning, a few milliseconds per rebuild, so `bundle --watch` rediscovers apps on every build instead of caching them. Test `TestUpdateScriptsSharedComponents`: two apps with different `scripts.dir`, the bundle lands in both, the other app's stale bundle is pruned, bundling from the other app is a no-op, a differing `scripts.path` errors without writing. `go vet` and `go test ./cmd/shadcn-templ/...` green.
+
+### Task 3
+
+`init` needed no change to find the module (it goes through `ModulePath` and `ResolveConfigPaths`); new is the bundle step: when `<components>/*/*.js` exist after the base install, `init` runs `UpdateScripts`, so an app joining a module with installed components gets its own bundle file. A single-app re-init with components now rebuilds the bundle too, which is idempotent. `init --template` refuses inside a module also from a subdirectory now (walk up), scaffolding outside a module is unchanged. File summaries, the CSS line and vendored stylesheets print through `utils.DisplayPath`. Comments in `add.go` and `init.go` updated (`--monorepo` stays dropped: it scaffolds a Turborepo workspace, a Go module needs none). Test `TestMonorepoAppsShareComponents` (in-process registry): template refused in `cmd/servicea`, init nova in servicea, add dialog, init vega in serviceb, both apps with module aliases, own CSS with the theme, own style, shared `components/` and `utils/` only at the root, the same bundle in both `assets/js`, the manifest naming it; add popover from serviceb renews both bundles and the manifest; bundle from servicea passes. `go vet` and `go test ./cmd/shadcn-templ/...` green.
