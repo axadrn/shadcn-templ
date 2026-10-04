@@ -1,0 +1,683 @@
+package menubar
+
+import (
+	"context"
+	"strconv"
+
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+// shadcn's menubar.tsx: Base UI's Menubar around menus that are shadcn's
+// dropdown menu parts with menubar slots and classes. menubar.js wires them
+// on Base UI's Menu (components/baseui/menu.js).
+
+type ItemVariant string
+
+const (
+	ItemVariantDefault     ItemVariant = "default"
+	ItemVariantDestructive ItemVariant = "destructive"
+)
+
+type Side string
+
+const (
+	SideTop    Side = "top"
+	SideRight  Side = "right"
+	SideBottom Side = "bottom"
+	SideLeft   Side = "left"
+	// The logical sides, which follow the direction.
+	SideInlineStart Side = "inline-start"
+	SideInlineEnd   Side = "inline-end"
+)
+
+type Align string
+
+const (
+	AlignStart  Align = "start"
+	AlignCenter Align = "center"
+	AlignEnd    Align = "end"
+)
+
+type ctxKey string
+
+const (
+	menubarKey ctxKey = "menubarState"
+	menuKey    ctxKey = "menubarMenuState"
+	subKey     ctxKey = "menubarSubState"
+	radioKey   ctxKey = "menubarRadioState"
+)
+
+type menubarState struct {
+	id string
+	// next counts the menus, the first trigger is the tab stop.
+	next *int
+}
+
+type menuState struct {
+	id          string
+	open        *bool
+	defaultOpen bool
+	first       bool
+}
+
+type subState struct {
+	id          string
+	open        *bool
+	defaultOpen bool
+}
+
+type radioState struct {
+	value    string
+	disabled bool
+}
+
+func menu(ctx context.Context) menuState {
+	s, _ := ctx.Value(menuKey).(menuState)
+	return s
+}
+
+func sub(ctx context.Context) subState {
+	s, _ := ctx.Value(subKey).(subState)
+	return s
+}
+
+func triggerID(menuID string) string {
+	return menuID + "-trigger"
+}
+
+type Props struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+// MenuProps is MenubarMenu's, shadcn's DropdownMenu: it renders no element.
+type MenuProps struct {
+	ID          string
+	Open        *bool
+	DefaultOpen bool
+}
+
+type TriggerProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Disabled   bool
+}
+
+type ContentProps struct {
+	Class      string
+	Attributes templ.Attributes
+	// Side defaults to bottom.
+	Side Side
+	// Align defaults to start, like MenubarContent.
+	Align Align
+	// SideOffset defaults to 8, like MenubarContent.
+	SideOffset *int
+	// AlignOffset defaults to -4, like MenubarContent.
+	AlignOffset *int
+}
+
+type GroupProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type LabelProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Inset      bool
+}
+
+type ItemProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Variant    ItemVariant
+	Disabled   bool
+	Inset      bool
+	Href       string
+	// CloseOnClick is Base UI's Menu.Item closeOnClick; nil means true.
+	CloseOnClick *bool
+}
+
+type CheckboxItemProps struct {
+	ID             string
+	Class          string
+	Attributes     templ.Attributes
+	Checked        *bool
+	DefaultChecked bool
+	Disabled       bool
+	Inset          bool
+}
+
+type RadioGroupProps struct {
+	ID           string
+	Class        string
+	Attributes   templ.Attributes
+	Value        *string
+	DefaultValue string
+	Disabled     bool
+}
+
+type RadioItemProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Value      string
+	Disabled   bool
+	Inset      bool
+}
+
+type SeparatorProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type ShortcutProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+// SubProps is MenubarSub's, SubmenuRoot: no element, ID names its popup.
+type SubProps struct {
+	ID          string
+	Open        *bool
+	DefaultOpen bool
+}
+
+type SubTriggerProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Inset      bool
+}
+
+type SubContentProps struct {
+	Class      string
+	Attributes templ.Attributes
+}
+
+// The dropdown menu part classes MenubarX merges its own into.
+const (
+	dropdownContentClasses = "cn-dropdown-menu-content cn-dropdown-menu-content-logical cn-menu-target cn-menu-translucent z-50 max-h-(--available-height) w-(--anchor-width) origin-(--transform-origin) overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden"
+	dropdownItemClasses    = "cn-dropdown-menu-item group/dropdown-menu-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0"
+)
+
+func inset(on bool) templ.Attributes {
+	if on {
+		return templ.Attributes{"data-inset": "true"}
+	}
+	return templ.Attributes{}
+}
+
+// Menubar is Base UI's Menubar: a composite of the triggers, modal by
+// default, horizontal.
+templ Menubar(props ...Props) {
+	{{ var p Props }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.ID == "" {
+		{{ p.ID = utils.RandomID() }}
+	}
+	{{ ctx = context.WithValue(ctx, menubarKey, menubarState{id: p.ID, next: new(int)}) }}
+	<div
+		id={ p.ID }
+		data-slot="menubar"
+		role="menubar"
+		aria-orientation="horizontal"
+		data-orientation="horizontal"
+		data-modal
+		class={ utils.CN("cn-menubar flex items-center", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+templ Menu(props ...MenuProps) {
+	{{ var p MenuProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.ID == "" {
+		{{ p.ID = utils.RandomID() }}
+	}
+	{{ first := false }}
+	if bar, ok := ctx.Value(menubarKey).(menubarState); ok && bar.next != nil {
+		{{ first = *bar.next == 0 }}
+		{{ *bar.next++ }}
+	}
+	{{ ctx = context.WithValue(ctx, menuKey, menuState{id: p.ID, open: p.Open, defaultOpen: p.DefaultOpen, first: first}) }}
+	{ children... }
+}
+
+// Trigger is MenubarTrigger, a MenuTrigger in a menubar: a menuitem of the
+// menubar's composite, the first one the tab stop.
+templ Trigger(props ...TriggerProps) {
+	{{ var p TriggerProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ m := menu(ctx) }}
+	<button
+		type="button"
+		id={ triggerID(m.id) }
+		data-slot="menubar-trigger"
+		data-templ-controls={ m.id }
+		role="menuitem"
+		aria-haspopup="menu"
+		aria-expanded="false"
+		aria-disabled={ strconv.FormatBool(p.Disabled) }
+		if p.Disabled {
+			data-disabled
+		}
+		tabindex={ utils.IfElse(m.first, "0", "-1") }
+		class={ utils.CN("cn-menubar-trigger flex items-center outline-hidden select-none", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</button>
+}
+
+// portal is MenuPrimitive.Portal inside the content: a hidden node that holds
+// the content until the script portals it to <body> on open.
+templ portal() {
+	<div data-templ-portal hidden>
+		<div data-base-ui-portal hidden>
+			{ children... }
+		</div>
+	</div>
+}
+
+templ Content(props ...ContentProps) {
+	{{ var p ContentProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.Side == "" {
+		{{ p.Side = SideBottom }}
+	}
+	if p.Align == "" {
+		{{ p.Align = AlignStart }}
+	}
+	{{ sideOffset, alignOffset := 8, -4 }}
+	if p.SideOffset != nil {
+		{{ sideOffset = *p.SideOffset }}
+	}
+	if p.AlignOffset != nil {
+		{{ alignOffset = *p.AlignOffset }}
+	}
+	{{ m := menu(ctx) }}
+	@portal() {
+		<div
+			data-templ-side={ string(p.Side) }
+			data-templ-align={ string(p.Align) }
+			data-templ-side-offset={ strconv.Itoa(sideOffset) }
+			data-templ-align-offset={ strconv.Itoa(alignOffset) }
+			if m.open != nil {
+				data-templ-open={ strconv.FormatBool(*m.open) }
+			}
+			data-templ-default-open?={ m.open == nil && m.defaultOpen }
+			data-closed
+			hidden
+			role="presentation"
+			class="isolate z-50 outline-none"
+		>
+			<div
+				id={ m.id }
+				data-slot="menubar-content"
+				data-closed
+				role="menu"
+				aria-labelledby={ triggerID(m.id) }
+				tabindex="-1"
+				data-base-ui-focusable
+				class={
+					utils.CN(
+						dropdownContentClasses,
+						"cn-menubar-content cn-menubar-content-logical cn-menu-target cn-menu-translucent",
+						// The popup stays mounted after animate-out until it unmounts.
+						"relative isolate data-closed:fill-mode-forwards",
+						p.Class,
+					),
+				}
+				{ p.Attributes... }
+			>
+				{ children... }
+			</div>
+		</div>
+	}
+}
+
+templ Group(props ...GroupProps) {
+	{{ var p GroupProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		role="group"
+		data-slot="menubar-group"
+		class={ utils.CN("", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+templ Label(props ...LabelProps) {
+	{{ var p LabelProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="menubar-label"
+		role="presentation"
+		class={ utils.CN("cn-dropdown-menu-label", "cn-menubar-label", p.Class) }
+		{ inset(p.Inset)... }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+templ Item(props ...ItemProps) {
+	{{ var p ItemProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.Variant == "" {
+		{{ p.Variant = ItemVariantDefault }}
+	}
+	if p.Href != "" {
+		<a
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			href={ templ.SafeURL(p.Href) }
+			data-slot="menubar-item"
+			data-variant={ string(p.Variant) }
+			if p.CloseOnClick != nil && !*p.CloseOnClick {
+				data-templ-close-on-click="false"
+			}
+			if p.Disabled {
+				aria-disabled="true"
+				data-disabled
+			}
+			role="menuitem"
+			tabindex="-1"
+			class={ utils.CN(dropdownItemClasses, "cn-menubar-item group/menubar-item", p.Class) }
+			{ inset(p.Inset)... }
+			{ p.Attributes... }
+		>
+			{ children... }
+		</a>
+	} else {
+		<div
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			data-slot="menubar-item"
+			data-variant={ string(p.Variant) }
+			if p.CloseOnClick != nil && !*p.CloseOnClick {
+				data-templ-close-on-click="false"
+			}
+			if p.Disabled {
+				aria-disabled="true"
+				data-disabled
+			}
+			role="menuitem"
+			tabindex="-1"
+			class={ utils.CN(dropdownItemClasses, "cn-menubar-item group/menubar-item", p.Class) }
+			{ inset(p.Inset)... }
+			{ p.Attributes... }
+		>
+			{ children... }
+		</div>
+	}
+}
+
+templ CheckboxItem(props ...CheckboxItemProps) {
+	{{ var p CheckboxItemProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ checked := p.DefaultChecked }}
+	if p.Checked != nil {
+		{{ checked = *p.Checked }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="menubar-checkbox-item"
+		data-templ-checked?={ p.Checked != nil }
+		role="menuitemcheckbox"
+		tabindex="-1"
+		if checked {
+			data-checked
+			aria-checked="true"
+		} else {
+			data-unchecked
+			aria-checked="false"
+		}
+		if p.Disabled {
+			aria-disabled="true"
+			data-disabled
+		}
+		class={ utils.CN("cn-menubar-checkbox-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0", p.Class) }
+		{ inset(p.Inset)... }
+		{ p.Attributes... }
+	>
+		<span class="cn-menubar-checkbox-item-indicator pointer-events-none absolute flex items-center justify-center">
+			@itemIndicator(checked, p.Disabled)
+		</span>
+		{ children... }
+	</div>
+}
+
+// itemIndicator is CheckboxItemIndicator and RadioItemIndicator: mounted
+// while the item is checked, the script toggles [hidden] for the unmount.
+templ itemIndicator(checked, disabled bool) {
+	<span aria-hidden="true" data-checked data-disabled?={ disabled } hidden?={ !checked }>
+		@icon.Check()
+	</span>
+}
+
+templ RadioGroup(props ...RadioGroupProps) {
+	{{ var p RadioGroupProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ value := p.DefaultValue }}
+	if p.Value != nil {
+		{{ value = *p.Value }}
+	}
+	{{ ctx = context.WithValue(ctx, radioKey, radioState{value: value, disabled: p.Disabled}) }}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		role="group"
+		data-slot="menubar-radio-group"
+		if p.Value != nil {
+			data-templ-value={ *p.Value }
+		}
+		data-disabled?={ p.Disabled }
+		class={ utils.CN("", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+templ RadioItem(props ...RadioItemProps) {
+	{{ var p RadioItemProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ group, _ := ctx.Value(radioKey).(radioState) }}
+	{{ checked := group.value != "" && group.value == p.Value }}
+	{{ disabled := p.Disabled || group.disabled }}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="menubar-radio-item"
+		if p.Value != "" {
+			data-templ-value={ p.Value }
+		}
+		role="menuitemradio"
+		tabindex="-1"
+		if checked {
+			data-checked
+			aria-checked="true"
+		} else {
+			data-unchecked
+			aria-checked="false"
+		}
+		if disabled {
+			aria-disabled="true"
+			data-disabled
+		}
+		class={ utils.CN("cn-menubar-radio-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0", p.Class) }
+		{ inset(p.Inset)... }
+		{ p.Attributes... }
+	>
+		<span class="cn-menubar-radio-item-indicator pointer-events-none absolute flex items-center justify-center">
+			@itemIndicator(checked, disabled)
+		</span>
+		{ children... }
+	</div>
+}
+
+templ Separator(props ...SeparatorProps) {
+	{{ var p SeparatorProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		role="separator"
+		aria-orientation="horizontal"
+		data-orientation="horizontal"
+		data-slot="menubar-separator"
+		class={ utils.CN("cn-dropdown-menu-separator", "cn-menubar-separator -mx-1 my-1 h-px", p.Class) }
+		{ p.Attributes... }
+	></div>
+}
+
+templ Shortcut(props ...ShortcutProps) {
+	{{ var p ShortcutProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<span
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="menubar-shortcut"
+		class={ utils.CN("cn-dropdown-menu-shortcut", "cn-menubar-shortcut ml-auto", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</span>
+}
+
+templ Sub(props ...SubProps) {
+	{{ var p SubProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.ID == "" {
+		{{ p.ID = utils.RandomID() }}
+	}
+	{{ ctx = context.WithValue(ctx, subKey, subState{id: p.ID, open: p.Open, defaultOpen: p.DefaultOpen}) }}
+	{ children... }
+}
+
+templ SubTrigger(props ...SubTriggerProps) {
+	{{ var p SubTriggerProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.ID == "" {
+		{{ p.ID = triggerID(sub(ctx).id) }}
+	}
+	<div
+		id={ p.ID }
+		data-slot="menubar-sub-trigger"
+		data-templ-controls={ sub(ctx).id }
+		role="menuitem"
+		tabindex="-1"
+		aria-haspopup="menu"
+		aria-expanded="false"
+		class={
+			utils.CN(
+				"cn-dropdown-menu-sub-trigger flex cursor-default items-center outline-hidden select-none data-popup-open:bg-accent data-popup-open:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+				"cn-menubar-sub-trigger",
+				p.Class,
+			),
+		}
+		{ inset(p.Inset)... }
+		{ p.Attributes... }
+	>
+		{ children... }
+		@icon.ChevronRight(icon.Props{Class: "cn-rtl-flip ml-auto"})
+	</div>
+}
+
+templ SubContent(props ...SubContentProps) {
+	{{ var p SubContentProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ s := sub(ctx) }}
+	@portal() {
+		<div
+			if s.open != nil {
+				data-templ-open={ strconv.FormatBool(*s.open) }
+			}
+			data-templ-default-open?={ s.open == nil && s.defaultOpen }
+			data-closed
+			data-nested
+			hidden
+			role="presentation"
+			class="isolate z-50 outline-none"
+		>
+			<div
+				id={ s.id }
+				data-slot="menubar-sub-content"
+				data-closed
+				data-nested
+				role="menu"
+				aria-labelledby={ triggerID(s.id) }
+				tabindex="-1"
+				data-base-ui-focusable
+				class={
+					utils.CN(
+						"cn-dropdown-menu-content cn-dropdown-menu-content-logical cn-menu-target cn-menu-translucent z-50 max-h-(--available-height) origin-(--transform-origin) overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden cn-dropdown-menu-sub-content w-auto",
+						"cn-menubar-sub-content cn-menu-target cn-menu-translucent",
+						"data-closed:fill-mode-forwards",
+						p.Class,
+					),
+				}
+				{ p.Attributes... }
+			>
+				{ children... }
+			</div>
+		</div>
+	}
+}

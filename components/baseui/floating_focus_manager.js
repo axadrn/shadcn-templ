@@ -187,7 +187,6 @@
       returnFocus = true,
       restoreFocus = false,
       closeOnFocusOut = true,
-      openInteractionType = "",
       previousFocusableElement = null,
       nextFocusableElement = null,
       getInsideElements,
@@ -196,6 +195,8 @@
       // floating focus element unless the popup holds a focusable list.
       guardsAround = null,
     } = options;
+    // A reopened popup renders the manager again with this open's type.
+    let openInteractionType = options.openInteractionType === undefined ? "" : options.openInteractionType;
     const triggers = [...(options.triggers || [domReference])].filter(Boolean);
     const doc = floating.ownerDocument;
     const floatingFocusElement = getFloatingFocusElement(floating);
@@ -366,7 +367,8 @@
 
     // The effects that run while open. A popup that opens again during its
     // exit animation runs them again on the same manager.
-    function open() {
+    function open(nextOpenInteractionType) {
+      if (nextOpenInteractionType !== undefined) openInteractionType = nextOpenInteractionType;
       self.open = true;
       // The portal's outside guards render first, they count as inside below.
       window.templ.portal.setFocusManagerState(portalNode, { ...portalNode?._templFocusState, open: true });

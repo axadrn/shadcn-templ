@@ -253,6 +253,11 @@ marker-separator
 marker-shimmer
 marker-status
 marker-variants
+menubar-checkbox
+menubar-demo
+menubar-icons
+menubar-radio
+menubar-submenu
 message-actions
 message-attachment
 message-avatar

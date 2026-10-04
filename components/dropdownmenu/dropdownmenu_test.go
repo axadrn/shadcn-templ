@@ -52,17 +52,23 @@ func TestContentCarriesStateAndPlacement(t *testing.T) {
 	}
 }
 
+// The dropdown menu is a root menu of the shared MenuRoot block.
 func TestClientUsesCollisionAvoidance(t *testing.T) {
 	source, err := os.ReadFile("dropdownmenu.js")
 	if err != nil {
 		t.Fatal(err)
 	}
-	js := string(source)
+	root, err := os.ReadFile("../baseui/menu_root.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	js := string(source) + string(root)
 	for _, want := range []string{
+		`window.templ.menuRoot.create(`,
+		`event: "dropdownmenu"`,
 		`collisionAvoidance: { fallbackAxisSide: "none" }`,
 		`window.templ.anchorPositioning.useAnchorPositioning(`,
-		`new CustomEvent("dropdownmenu-open-change"`,
-		`event: "dropdownmenu"`,
+		`new CustomEvent(eventPrefix + "-open-change"`,
 		`cancelable: true`,
 	} {
 		if !strings.Contains(js, want) {

@@ -44,8 +44,12 @@ func TestOnlyTheAnchorPositioningBlockUsesFloatingUI(t *testing.T) {
 			t.Errorf("%s positions with Floating UI itself instead of window.templ.anchorPositioning", path)
 		}
 	}
-	for _, component := range []string{"combobox", "contextmenu", "dropdownmenu", "hovercard", "popover", "select", "tooltip"} {
-		path := "../" + component + "/" + component + ".js"
+	// The dropdown menu and the menubar position through the MenuRoot block.
+	for _, component := range []string{"combobox", "contextmenu", "baseui/menu_root", "hovercard", "popover", "select", "tooltip"} {
+		path := "../" + component + ".js"
+		if !strings.Contains(component, "/") {
+			path = "../" + component + "/" + component + ".js"
+		}
 		if !strings.Contains(read(t, path), "window.templ.anchorPositioning.useAnchorPositioning(") {
 			t.Errorf("%s does not use the anchor positioning block", path)
 		}

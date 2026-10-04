@@ -6,6 +6,7 @@
 //   const composite = window.templ.composite.useCompositeRoot(root, options)
 //   composite.highlight(index)   onHighlightedIndexChange from the component
 //   composite.index()            the highlighted index
+//   composite.relay(event)       relayKeyboardEvent: a key from a detached part
 //   composite.cleanup()
 //
 //   items()                the items in order (elementsRef)
@@ -16,7 +17,7 @@
 //   stopEventPropagation   default true, CompositeRoot's
 //   disabledIndices        an array, a function, or undefined for the DOM
 //   modifierKeys           modifiers that do not cancel the navigation
-//   highlightItemOnHover   default false
+//   highlightItemOnHover   default false, or a function read on every move
 //   onHighlightedIndexChange(index)   after the highlight moved
 //
 // The root sets the default tab stop once on creation (onMapChange): the item
@@ -276,7 +277,7 @@
     }
 
     function onItemMouseMove(event) {
-      if (!highlightItemOnHover) return;
+      if (!(typeof highlightItemOnHover === "function" ? highlightItemOnHover() : highlightItemOnHover)) return;
       const item = itemOf(event.target);
       if (!item) return;
       const disabled = item.hasAttribute("disabled") || item.getAttribute("aria-disabled") === "true";
@@ -291,6 +292,7 @@
     return {
       highlight: (index) => onHighlightedIndexChange(index),
       index: () => highlightedIndex,
+      relay: onKeyDown,
       cleanup() {
         root.removeEventListener("keydown", onKeyDown);
         root.removeEventListener("focusin", onFocus);

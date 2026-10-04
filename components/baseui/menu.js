@@ -82,6 +82,9 @@
     }
 
     function mountPortal(positioner) {
+      // Base UI mounts the popup fresh on every open: no tab order the portal
+      // saved from the previous one (FloatingPortal's disableFocusInside).
+      positioner.querySelectorAll("[data-tabindex]").forEach((el) => el.removeAttribute("data-tabindex"));
       const outer = outerPortalOf(positioner);
       if (outer) {
         window.templ.portal.render(outer);

@@ -521,5 +521,22 @@
     {
       "key": "Escape"
     }
+  ],
+  "family:menubar": [
+    {
+      "click": "[data-slot=menubar-trigger]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "ArrowRight"
+    },
+    {
+      "key": "ArrowRight"
+    },
+    {
+      "key": "Escape"
+    }
   ]
 }

@@ -157,6 +157,10 @@ async function compareExample(name) {
   const pages = [];
   for (const base of [SHADCN, TEMPL]) {
     const p = await browser.newPage({ viewport: { width: 1280, height: 900 }, reducedMotion: "reduce" });
+    // The pointer starts at 0,0, over whatever an example renders first:
+    // whether that counts as a hover depends on when each app attaches its
+    // listeners. Park it in the empty corner.
+    await p.mouse.move(1279, 899);
     // A dev server that is restarting after an edit refuses the connection or
     // answers 502: wait for it (up to 5 minutes) instead of comparing nothing.
     for (let tries = 0; tries < 100; tries++) {
