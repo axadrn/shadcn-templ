@@ -154,11 +154,14 @@ func addComponents(components []string, config *utils.Config, registryURL string
 	}
 	if needsBundle {
 		defaulted := config.ScriptsDefaulted
-		bundlePath, _, err := updaters.UpdateScripts(config)
+		bundlePaths, _, err := updaters.UpdateScripts(config)
 		if err != nil {
 			return err
 		}
-		logf(options.Silent, "Bundle: %s. Render @%s.Scripts() once in your layout <head>.\n", bundlePath, path.Base(config.Aliases.Components))
+		for _, bundlePath := range bundlePaths {
+			logf(options.Silent, "Bundle: %s\n", utils.DisplayPath(config, bundlePath))
+		}
+		logf(options.Silent, "Render @%s.Scripts() once in your layout <head>.\n", path.Base(config.Aliases.Components))
 		if defaulted {
 			logf(options.Silent, "Serve %s at %s.\n", config.Scripts.Dir, config.Scripts.Path)
 		}

@@ -42,12 +42,14 @@ func RunBundle(opts BundleOptions) error {
 	}
 	build := func() error {
 		defaulted := config.ScriptsDefaulted
-		path, written, err := updaters.UpdateScripts(config)
+		paths, written, err := updaters.UpdateScripts(config)
 		if err != nil {
 			return err
 		}
 		if written || !opts.Watch {
-			logf(opts.Silent, "Bundle: %s\n", path)
+			for _, path := range paths {
+				logf(opts.Silent, "Bundle: %s\n", utils.DisplayPath(config, path))
+			}
 		}
 		if defaulted {
 			logf(opts.Silent, "Serve %s at %s.\n", config.Scripts.Dir, config.Scripts.Path)

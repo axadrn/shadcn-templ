@@ -43,7 +43,7 @@ Today the CLI assumes one app per module. `utils.ModulePath(cwd)` reads `cwd/go.
 
 ### 2. Bundle into every sharing app
 
-- [ ] Done
+- [x] Done
 
 `UpdateScripts` returns all written bundle paths, writes the bundle into each sharing app's `scripts.dir`, prunes each, writes one manifest, errors on differing `scripts.path`. `bundle` and `add` print each path. Done when the unit tests for two apps (bundle in both dirs, one manifest, conflict error) pass. Checks: `go test ./cmd/shadcn-templ/...`.
 
@@ -70,3 +70,7 @@ Build the CLI, scratch module with two apps under `cmd/`, `init`/`add`/`bundle` 
 ### Task 1
 
 `FindModule` walks up from cwd to the closest `go.mod`; `ModulePath` wraps it. `ResolveConfigPaths` resolves aliases against `ResolvedPaths.ModuleRoot`, css and scripts against the `components.json` directory. `GetSharedConfigs` walks the module for the other apps sharing the components dir. `DisplayPath` prints app files relative to the app, shared files relative to the module root. Tests in `cmd/shadcn-templ/utils/get_config_test.go`: single app unchanged, app in `cmd/servicea` with go.mod above, shared config discovery (another components package, a foreign shadcn `components.json`, `testdata` and a nested module are excluded). `go test ./cmd/shadcn-templ/...` green.
+
+### Task 2
+
+`UpdateScripts` now returns every written asset path: config's app first, then each other app sharing the components dir (deduplicated by `scripts.dir`). It checks `scripts.path` of all sharing apps first and fails before writing anything on a mismatch, then writes the asset into every app's `scripts.dir`, then the one manifest, then prunes stale `shadcn-templ-*.js` in every dir. `add` and `bundle` print one `Bundle:` line per app, as a display path (relative to the app, shared files relative to the module root) instead of the absolute path. Walk cost at the repo root of this project: 970 directories after pruning, a few milliseconds per rebuild, so `bundle --watch` rediscovers apps on every build instead of caching them. Test `TestUpdateScriptsSharedComponents`: two apps with different `scripts.dir`, the bundle lands in both, the other app's stale bundle is pruned, bundling from the other app is a no-op, a differing `scripts.path` errors without writing. `go vet` and `go test ./cmd/shadcn-templ/...` green.
