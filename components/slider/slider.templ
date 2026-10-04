@@ -18,10 +18,11 @@ type Props struct {
 	ID         string
 	Class      string
 	Attributes templ.Attributes
-	// Value is the controlled thumb value. Use DefaultValue when the browser
-	// should own the value after the initial render.
-	Value        []float64
-	DefaultValue []float64
+	// Value is the controlled value, Base UI's number | number[]: a float64
+	// or a []float64. Use DefaultValue when the browser should own the value
+	// after the initial render.
+	Value        any
+	DefaultValue any
 	Min          float64
 	// Max defaults to 100.
 	Max float64
@@ -64,6 +65,21 @@ func thumbStyle(f float64, vertical bool) string {
 		return fmt.Sprintf("position:absolute;top:calc(%.4f%% - %.2fpx);left:50%%;transform:translateX(-50%%)", g*100, g*thumbSize)
 	}
 	return fmt.Sprintf("position:absolute;left:calc(%.4f%% - %.2fpx);top:50%%;transform:translateY(-50%%)", f*100, f*thumbSize)
+}
+
+// asValues reads a Value or DefaultValue: Base UI wraps a number in an
+// array, isArray tells shadcn's wrapper whether it renders one thumb per
+// value.
+func asValues(v any) (values []float64, isArray bool) {
+	switch v := v.(type) {
+	case []float64:
+		return v, true
+	case float64:
+		return []float64{v}, false
+	case int:
+		return []float64{float64(v)}, false
+	}
+	return nil, false
 }
 
 // valueText is Base UI's default aria-valuetext: a two thumb range names
@@ -136,14 +152,20 @@ templ Slider(props ...Props) {
 	if p.Orientation == "" {
 		{{ p.Orientation = OrientationHorizontal }}
 	}
-	{{ values := p.DefaultValue }}
-	if p.Value != nil {
-		{{ values = p.Value }}
-	}
-	if values == nil {
-		{{ values = []float64{p.Min, p.Max} }}
-	}
 	{{
+		// shadcn renders a thumb per array value, else the two of [min, max];
+		// Base UI shows its own values, a number on every thumb (index 0).
+		values, isArray := asValues(p.DefaultValue)
+		if p.Value != nil {
+			values, isArray = asValues(p.Value)
+		}
+		thumbs := values
+		if !isArray {
+			thumbs = []float64{p.Min, p.Max}
+		}
+		if values == nil {
+			values = thumbs
+		}
 		vertical := p.Orientation == OrientationVertical
 		fs := make([]float64, len(values))
 		for i, v := range values {
@@ -196,7 +218,14 @@ templ Slider(props ...Props) {
 					style={ indicatorStyle(fs, vertical) }
 				></div>
 			</div>
-			for i, v := range values {
+			for t := range thumbs {
+				{{
+					i := 0
+					if len(values) > 1 {
+						i = t
+					}
+					v := values[i]
+				}}
 				// The thumb's disabled:* classes are dead CSS on a div, exactly
 				// like in shadcn's thumb: only the control dims to 50%.
 				<div
@@ -209,7 +238,7 @@ templ Slider(props ...Props) {
 				>
 					<input
 						type="range"
-						id={ p.ID + "-thumb-" + strconv.Itoa(i) }
+						id={ p.ID + "-thumb-" + strconv.Itoa(t) }
 						if p.Name != "" {
 							name={ p.Name }
 						}

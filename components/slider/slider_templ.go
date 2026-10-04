@@ -26,10 +26,11 @@ type Props struct {
 	ID         string
 	Class      string
 	Attributes templ.Attributes
-	// Value is the controlled thumb value. Use DefaultValue when the browser
-	// should own the value after the initial render.
-	Value        []float64
-	DefaultValue []float64
+	// Value is the controlled value, Base UI's number | number[]: a float64
+	// or a []float64. Use DefaultValue when the browser should own the value
+	// after the initial render.
+	Value        any
+	DefaultValue any
 	Min          float64
 	// Max defaults to 100.
 	Max float64
@@ -72,6 +73,21 @@ func thumbStyle(f float64, vertical bool) string {
 		return fmt.Sprintf("position:absolute;top:calc(%.4f%% - %.2fpx);left:50%%;transform:translateX(-50%%)", g*100, g*thumbSize)
 	}
 	return fmt.Sprintf("position:absolute;left:calc(%.4f%% - %.2fpx);top:50%%;transform:translateY(-50%%)", f*100, f*thumbSize)
+}
+
+// asValues reads a Value or DefaultValue: Base UI wraps a number in an
+// array, isArray tells shadcn's wrapper whether it renders one thumb per
+// value.
+func asValues(v any) (values []float64, isArray bool) {
+	switch v := v.(type) {
+	case []float64:
+		return v, true
+	case float64:
+		return []float64{v}, false
+	case int:
+		return []float64{float64(v)}, false
+	}
+	return nil, false
 }
 
 // valueText is Base UI's default aria-valuetext: a two thumb range names
@@ -164,12 +180,18 @@ func Slider(props ...Props) templ.Component {
 		if p.Orientation == "" {
 			p.Orientation = OrientationHorizontal
 		}
-		values := p.DefaultValue
+		// shadcn renders a thumb per array value, else the two of [min, max];
+		// Base UI shows its own values, a number on every thumb (index 0).
+		values, isArray := asValues(p.DefaultValue)
 		if p.Value != nil {
-			values = p.Value
+			values, isArray = asValues(p.Value)
+		}
+		thumbs := values
+		if !isArray {
+			thumbs = []float64{p.Min, p.Max}
 		}
 		if values == nil {
-			values = []float64{p.Min, p.Max}
+			values = thumbs
 		}
 		vertical := p.Orientation == OrientationVertical
 		fs := make([]float64, len(values))
@@ -188,7 +210,7 @@ func Slider(props ...Props) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 159, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 181, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -210,7 +232,7 @@ func Slider(props ...Props) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(p.Value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 164, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 186, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -228,7 +250,7 @@ func Slider(props ...Props) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Orientation))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 166, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 188, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -241,7 +263,7 @@ func Slider(props ...Props) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmtF(p.Min))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 167, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 189, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -254,7 +276,7 @@ func Slider(props ...Props) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmtF(p.Max))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 168, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 190, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -267,7 +289,7 @@ func Slider(props ...Props) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmtF(p.Step))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 169, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 191, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -311,7 +333,7 @@ func Slider(props ...Props) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Orientation))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 177, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 199, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -334,7 +356,7 @@ func Slider(props ...Props) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Orientation))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 186, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 208, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -357,7 +379,7 @@ func Slider(props ...Props) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Orientation))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 193, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 215, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -380,7 +402,7 @@ func Slider(props ...Props) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(indicatorStyle(fs, vertical))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 196, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 218, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -390,7 +412,12 @@ func Slider(props ...Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for i, v := range values {
+		for t := range thumbs {
+			i := 0
+			if len(values) > 1 {
+				i = t
+			}
+			v := values[i]
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "  <div data-slot=\"slider-thumb\" data-index=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -398,7 +425,7 @@ func Slider(props ...Props) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 204, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 233, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -411,7 +438,7 @@ func Slider(props ...Props) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Orientation))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 205, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 234, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -434,7 +461,7 @@ func Slider(props ...Props) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(thumbStyle(fs[i], vertical))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 207, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 236, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -445,9 +472,9 @@ func Slider(props ...Props) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var17 string
-			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID + "-thumb-" + strconv.Itoa(i))
+			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(p.ID + "-thumb-" + strconv.Itoa(t))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 212, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 241, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -465,7 +492,7 @@ func Slider(props ...Props) templ.Component {
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(p.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 214, Col: 20}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 243, Col: 20}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -483,7 +510,7 @@ func Slider(props ...Props) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmtF(p.Min))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 216, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 245, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -496,7 +523,7 @@ func Slider(props ...Props) templ.Component {
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmtF(p.Max))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 217, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 246, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -509,7 +536,7 @@ func Slider(props ...Props) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmtF(p.Step))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 218, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 247, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -522,7 +549,7 @@ func Slider(props ...Props) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmtF(v))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 219, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 248, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -535,7 +562,7 @@ func Slider(props ...Props) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(string(p.Orientation))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 220, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 249, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -548,7 +575,7 @@ func Slider(props ...Props) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmtF(v))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 221, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 250, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -566,7 +593,7 @@ func Slider(props ...Props) templ.Component {
 				var templ_7745c5c3_Var25 string
 				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(valueText(values, i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 223, Col: 44}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 252, Col: 44}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 				if templ_7745c5c3_Err != nil {
@@ -590,7 +617,7 @@ func Slider(props ...Props) templ.Component {
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(inputStyle(vertical))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 226, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slider/slider.templ`, Line: 255, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
