@@ -18,6 +18,12 @@ alert-dialog-small-media
 aspect-ratio-demo
 aspect-ratio-portrait
 aspect-ratio-square
+attachment-demo
+attachment-group
+attachment-image
+attachment-sizes
+attachment-states
+attachment-trigger
 avatar-badge
 avatar-badge-icon
 avatar-basic

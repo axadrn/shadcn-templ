@@ -510,5 +510,16 @@
     {
       "click": "[data-slot=bubble-reactions] button"
     }
+  ],
+  "attachment-trigger": [
+    {
+      "click": "[data-slot=dialog-trigger]"
+    },
+    {
+      "key": "Tab"
+    },
+    {
+      "key": "Escape"
+    }
   ]
 }

@@ -14,8 +14,8 @@ import (
 func TestEveryRegistryItemCompilesWithoutMarkersForEveryStyleAndOption(t *testing.T) {
 	t.Setenv("GO_ENV", "production")
 	reg := registry.Get()
-	if len(reg.Items) != 87 {
-		t.Fatalf("registry item count = %d, want 87", len(reg.Items))
+	if len(reg.Items) != 88 {
+		t.Fatalf("registry item count = %d, want 88", len(reg.Items))
 	}
 	if len(StyleNames()) != 8 {
 		t.Fatalf("style count = %d, want 8", len(StyleNames()))
@@ -26,7 +26,7 @@ func TestEveryRegistryItemCompilesWithoutMarkersForEveryStyleAndOption(t *testin
 		typeCounts[item.Type]++
 	}
 	wantTypeCounts := map[string]int{
-		"registry:ui":      56,
+		"registry:ui":      57,
 		"registry:block":   27,
 		"registry:example": 2,
 		"registry:lib":     2,
@@ -99,8 +99,8 @@ func TestEveryRegistryItemCompilesWithoutMarkersForEveryStyleAndOption(t *testin
 			}
 		}
 	}
-	if builds != 4176 {
-		t.Errorf("compiled build cases = %d, want 4176", builds)
+	if builds != 4224 {
+		t.Errorf("compiled build cases = %d, want 4224", builds)
 	}
 }
 

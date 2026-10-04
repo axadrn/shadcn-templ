@@ -1,0 +1,106 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/attachment"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+)
+
+// lucide-react's FileWarningIcon is an alias of file-exclamation-point.
+templ AttachmentStates() {
+	<div class="mx-auto flex w-full max-w-sm flex-col gap-2 py-12">
+		@attachment.Attachment(attachment.Props{State: attachment.StateIdle, Class: "w-full"}) {
+			@attachment.Media() {
+				@icon.Clock()
+			}
+			@attachment.Content() {
+				@attachment.Title() {
+					selected-file.pdf
+				}
+				@attachment.Description() {
+					Ready to upload
+				}
+			}
+			@attachment.Actions() {
+				@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove selected-file.pdf"}}) {
+					@icon.X()
+				}
+			}
+		}
+		@attachment.Attachment(attachment.Props{State: attachment.StateUploading, Class: "w-full"}) {
+			@attachment.Media() {
+				@spinner.Spinner()
+			}
+			@attachment.Content() {
+				@attachment.Title() {
+					design-system.zip
+				}
+				@attachment.Description() {
+					Uploading · 64%
+				}
+			}
+			@attachment.Actions() {
+				@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Cancel upload"}}) {
+					@icon.X()
+				}
+			}
+		}
+		@attachment.Attachment(attachment.Props{State: attachment.StateProcessing, Class: "w-full"}) {
+			@attachment.Media() {
+				@icon.FileText()
+			}
+			@attachment.Content() {
+				@attachment.Title() {
+					market-research.pdf
+				}
+				@attachment.Description() {
+					Processing document
+				}
+			}
+			@attachment.Actions() {
+				@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove market-research.pdf"}}) {
+					@icon.X()
+				}
+			}
+		}
+		@attachment.Attachment(attachment.Props{State: attachment.StateError, Class: "w-full"}) {
+			@attachment.Media() {
+				@icon.FileExclamationPoint()
+			}
+			@attachment.Content() {
+				@attachment.Title() {
+					financial-model.xlsx
+				}
+				@attachment.Description() {
+					Upload failed. Try again.
+				}
+			}
+			@attachment.Actions() {
+				@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Retry upload"}}) {
+					@icon.RefreshCw()
+				}
+				@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove financial-model.xlsx"}}) {
+					@icon.X()
+				}
+			}
+		}
+		@attachment.Attachment(attachment.Props{State: attachment.StateDone, Class: "w-full"}) {
+			@attachment.Media() {
+				@icon.Check()
+			}
+			@attachment.Content() {
+				@attachment.Title() {
+					uploaded-report.pdf
+				}
+				@attachment.Description() {
+					Uploaded · 1.8 MB
+				}
+			}
+			@attachment.Actions() {
+				@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove uploaded-report.pdf"}}) {
+					@icon.X()
+				}
+			}
+		}
+	</div>
+}

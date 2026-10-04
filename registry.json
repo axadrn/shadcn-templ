@@ -2594,6 +2594,24 @@
       ]
     },
     {
+      "name": "attachment",
+      "type": "registry:ui",
+      "title": "Attachment",
+      "description": "Displays a file or image attachment with media, metadata, upload state, and actions.",
+      "registryDependencies": [
+        "button"
+      ],
+      "files": [
+        {
+          "path": "components/attachment/attachment.templ",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "display-media"
+      ]
+    },
+    {
       "name": "bubble",
       "type": "registry:ui",
       "title": "Bubble",

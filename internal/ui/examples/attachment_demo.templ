@@ -1,0 +1,65 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/attachment"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+)
+
+templ AttachmentDemo() {
+	<div class="mx-auto flex w-full max-w-sm flex-col gap-3 py-12">
+		@attachment.Group() {
+			for _, image := range attachmentImages {
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ image.Src } alt={ image.Alt }/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							{ image.Name }
+						}
+						@attachment.Description() {
+							{ image.Meta }
+						}
+					}
+				}
+			}
+		}
+		@attachment.Attachment(attachment.Props{State: attachment.StateUploading, Class: "w-full"}) {
+			@attachment.Media() {
+				@spinner.Spinner()
+			}
+			@attachment.Content() {
+				@attachment.Title() {
+					sales-dashboard.pdf
+				}
+				@attachment.Description() {
+					Uploading · 64%
+				}
+			}
+			@attachment.Actions() {
+				@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Cancel upload"}}) {
+					@icon.X()
+				}
+			}
+		}
+		@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+			@attachment.Media() {
+				@icon.FileCode()
+			}
+			@attachment.Content() {
+				@attachment.Title() {
+					message-renderer.tsx
+				}
+				@attachment.Description() {
+					TypeScript · 12 KB
+				}
+			}
+			@attachment.Actions() {
+				@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove message-renderer.tsx"}}) {
+					@icon.X()
+				}
+			}
+		}
+	</div>
+}
