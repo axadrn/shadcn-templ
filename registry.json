@@ -353,6 +353,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/direction.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/baseui/portal.js",
           "type": "registry:ui"
         },
@@ -486,6 +490,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/direction.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/baseui/portal.js",
           "type": "registry:ui"
         },
@@ -588,6 +596,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/direction.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/baseui/portal.js",
           "type": "registry:ui"
         },
@@ -687,6 +699,10 @@
         },
         {
           "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/direction.js",
           "type": "registry:ui"
         },
         {
@@ -849,6 +865,21 @@
       ]
     },
     {
+      "name": "direction",
+      "type": "registry:ui",
+      "title": "Direction",
+      "description": "A provider component that sets the text direction for your application.",
+      "files": [
+        {
+          "path": "components/direction/direction.templ",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "misc"
+      ]
+    },
+    {
       "name": "drawer",
       "type": "registry:ui",
       "title": "Drawer",
@@ -1000,6 +1031,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/direction.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/baseui/portal.js",
           "type": "registry:ui"
         },
@@ -1064,6 +1099,10 @@
         },
         {
           "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/direction.js",
           "type": "registry:ui"
         },
         {
@@ -1223,6 +1262,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/direction.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/baseui/tabbable.js",
           "type": "registry:ui"
         },
@@ -1247,6 +1290,10 @@
         {
           "path": "components/togglegroup/togglegroup.templ",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/direction.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -1269,6 +1316,10 @@
         },
         {
           "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/direction.js",
           "type": "registry:ui"
         },
         {
@@ -1386,6 +1437,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "components/baseui/direction.js",
+          "type": "registry:ui"
+        },
+        {
           "path": "components/baseui/tabbable.js",
           "type": "registry:ui"
         },
@@ -1440,6 +1495,10 @@
         },
         {
           "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/direction.js",
           "type": "registry:ui"
         },
         {
@@ -1577,6 +1636,10 @@
         {
           "path": "components/slider/slider.js",
           "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/direction.js",
+          "type": "registry:ui"
         }
       ],
       "categories": [
@@ -1637,6 +1700,10 @@
         },
         {
           "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/direction.js",
           "type": "registry:ui"
         },
         {
@@ -1722,6 +1789,10 @@
         },
         {
           "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/direction.js",
           "type": "registry:ui"
         },
         {
@@ -2760,6 +2831,10 @@
         },
         {
           "path": "components/baseui/lifecycle.js",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/baseui/direction.js",
           "type": "registry:ui"
         }
       ],

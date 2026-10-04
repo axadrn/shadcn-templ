@@ -1,0 +1,67 @@
+package examples
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+	"github.com/axadrn/shadcn-templ/v2/components/label"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ CardRtl() {
+	@card.Card(card.Props{Class: "w-full max-w-sm", Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@card.Header() {
+			@card.Title() {
+				تسجيل الدخول إلى حسابك
+			}
+			@card.Description() {
+				أدخل بريدك الإلكتروني أدناه لتسجيل الدخول إلى حسابك
+			}
+			@card.Action() {
+				@button.Button(button.Props{Variant: button.VariantLink}) {
+					إنشاء حساب
+				}
+			}
+		}
+		@card.Content() {
+			<form>
+				<div class="flex flex-col gap-6">
+					<div class="grid gap-2">
+						@label.Label(label.Props{For: "email-rtl"}) {
+							البريد الإلكتروني
+						}
+						@input.Input(input.Props{
+							ID:          "email-rtl",
+							Type:        "email",
+							Placeholder: "m@example.com",
+							Attributes:  templ.Attributes{"required": true},
+						})
+					</div>
+					<div class="grid gap-2">
+						<div class="flex items-center">
+							@label.Label(label.Props{For: "password-rtl"}) {
+								كلمة المرور
+							}
+							<a href="#" class="ms-auto inline-block text-sm underline-offset-4 hover:underline">
+								نسيت كلمة المرور؟
+							</a>
+						</div>
+						@input.Input(input.Props{
+							ID:         "password-rtl",
+							Type:       "password",
+							Attributes: templ.Attributes{"required": true},
+						})
+					</div>
+				</div>
+			</form>
+		}
+		@card.Footer(card.FooterProps{Class: "flex-col gap-2"}) {
+			@button.Button(button.Props{Type: button.TypeSubmit, Class: "w-full"}) {
+				تسجيل الدخول
+			}
+			@button.Button(button.Props{Variant: button.VariantOutline, Class: "w-full"}) {
+				تسجيل الدخول باستخدام Google
+			}
+		}
+	}
+}

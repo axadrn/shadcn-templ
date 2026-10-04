@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"crypto/rand"
 	"fmt"
 	"regexp"
@@ -199,6 +200,34 @@ func MergeAttributes(attrs ...templ.Attributes) templ.Attributes {
 		}
 	}
 	return merged
+}
+
+type directionKey struct{}
+
+// WithDirection is Base UI's DirectionProvider context: components below it
+// read the text direction from ctx (see components/direction).
+func WithDirection(ctx context.Context, direction string) context.Context {
+	return context.WithValue(ctx, directionKey{}, direction)
+}
+
+// Direction is useDirection: the nearest DirectionProvider's direction,
+// "ltr" without one.
+func Direction(ctx context.Context) string {
+	if direction, ok := ctx.Value(directionKey{}).(string); ok && direction != "" {
+		return direction
+	}
+	return "ltr"
+}
+
+// DirectionAttributes renders a DirectionProvider's direction on a part
+// whose script reads it (window.templ.direction): data-templ-direction, a
+// port marker for the context React keeps in memory. Nothing without a
+// provider.
+func DirectionAttributes(ctx context.Context) templ.Attributes {
+	if direction, ok := ctx.Value(directionKey{}).(string); ok && direction != "" {
+		return templ.Attributes{"data-templ-direction": direction}
+	}
+	return templ.Attributes{}
 }
 
 // RandomID generates a random ID string.

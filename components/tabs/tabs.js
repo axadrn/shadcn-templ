@@ -141,7 +141,7 @@
       items: () => partsOf(root, TAB),
       // The list's, Base UI's orientation, not the root's styling one.
       orientation: list.getAttribute("data-orientation") === "vertical" ? "vertical" : "horizontal",
-      rtl: () => getComputedStyle(list).direction === "rtl",
+      rtl: () => window.templ.direction.useDirection(list) === "rtl",
       enableHomeAndEndKeys: true,
       disabledIndices: [],
     });

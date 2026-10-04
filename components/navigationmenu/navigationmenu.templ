@@ -111,6 +111,7 @@ templ NavigationMenu(props ...Props) {
 			id={ p.ID }
 		}
 		data-slot="navigation-menu"
+		{ utils.DirectionAttributes(ctx)... }
 		if p.Delay != 0 {
 			data-templ-delay={ strconv.Itoa(p.Delay) }
 		}
@@ -242,6 +243,7 @@ templ Positioner(props ...PositionerProps) {
 				data-closed
 				hidden
 				class={ utils.CN("cn-navigation-menu-positioner isolate z-50 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom] duration-[0.35s] data-instant:transition-none", p.Class) }
+				{ utils.DirectionAttributes(ctx)... }
 			>
 				<nav
 					id={ "base-ui-" + utils.RandomID() }

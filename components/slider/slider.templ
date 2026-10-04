@@ -159,6 +159,7 @@ templ Slider(props ...Props) {
 		id={ p.ID }
 		role="group"
 		data-slot="slider"
+		{ utils.DirectionAttributes(ctx)... }
 		if p.Value != nil {
 			data-templ-value={ templ.JSONString(p.Value) }
 		}

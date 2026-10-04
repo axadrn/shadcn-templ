@@ -52,7 +52,7 @@
   // DirectionProvider pendant: the nearest dir attribute.
   function isRtlAt(element) {
     const el = element?.closest ? element : element?.contextElement;
-    return el?.closest?.("[dir]")?.getAttribute("dir") === "rtl";
+    return window.templ.direction.useDirection(el) === "rtl";
   }
 
   // utils/hideMiddleware.ts: an anchor with an empty rect counts as hidden too.
@@ -186,7 +186,8 @@
     const collisionAvoidanceSide = collisionAvoidance.side || "flip";
     const collisionAvoidanceAlign = collisionAvoidance.align || "flip";
     const collisionAvoidanceFallbackAxisSide = collisionAvoidance.fallbackAxisSide || "end";
-    const isRtl = isRtlAt(anchor);
+    // Base UI reads useDirection in the positioner.
+    const isRtl = isRtlAt(positioner);
     let mountSide = null;
 
     // Create a bias to the preferred side. On iOS, when the software keyboard

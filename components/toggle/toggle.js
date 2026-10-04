@@ -88,7 +88,7 @@
         // the styles but does not pass it on to Base UI's ToggleGroup, whose
         // arrows stay horizontal.
         orientation: "horizontal",
-        rtl: () => getComputedStyle(group).direction === "rtl",
+        rtl: () => window.templ.direction.useDirection(group) === "rtl",
         enableHomeAndEndKeys: true,
       });
     },

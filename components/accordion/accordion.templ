@@ -118,7 +118,7 @@ templ Accordion(props ...Props) {
 		}
 		data-slot="accordion"
 		data-orientation="vertical"
-		dir="ltr"
+		dir={ utils.Direction(ctx) }
 		data-templ-multiple?={ p.Multiple }
 		data-disabled?={ p.Disabled }
 		if p.Value != nil {

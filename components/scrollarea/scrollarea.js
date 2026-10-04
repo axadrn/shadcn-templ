@@ -101,7 +101,7 @@
     const corner = cornerEl && mountable(cornerEl);
     const barOf = (orientation) => scrollbars.find((s) => s.el.getAttribute("data-orientation") === orientation);
     const thumbOf = (bar) => bar?.el.querySelector('[data-slot="scroll-area-thumb"]');
-    const direction = () => getComputedStyle(viewport).direction;
+    const direction = () => window.templ.direction.useDirection(viewport);
 
     const s = {
       hovering: false,

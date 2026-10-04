@@ -229,6 +229,7 @@ templ Menubar(props ...Props) {
 	<div
 		id={ p.ID }
 		data-slot="menubar"
+		{ utils.DirectionAttributes(ctx)... }
 		role="menubar"
 		aria-orientation="horizontal"
 		data-orientation="horizontal"
@@ -328,6 +329,7 @@ templ Content(props ...ContentProps) {
 			hidden
 			role="presentation"
 			class="isolate z-50 outline-none"
+			{ utils.DirectionAttributes(ctx)... }
 		>
 			<div
 				id={ m.id }
@@ -656,6 +658,7 @@ templ SubContent(props ...SubContentProps) {
 			hidden
 			role="presentation"
 			class="isolate z-50 outline-none"
+			{ utils.DirectionAttributes(ctx)... }
 		>
 			<div
 				id={ s.id }

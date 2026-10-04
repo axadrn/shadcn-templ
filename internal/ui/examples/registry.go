@@ -10,6 +10,10 @@ type RegistryEntry struct {
 	// Style is the style the reference example imports its ui from
 	// ("base-rhea" for @/styles/base-rhea/ui/*), "" for base-nova.
 	Style string
+	// RTL marks an example that imports the ui-rtl build
+	// (@/styles/base-nova/ui-rtl/*): its components' classes compile with
+	// the RTL transform.
+	RTL bool
 }
 
 // Registry resolves <ComponentPreview name="..."/> shortcodes in the
@@ -283,6 +287,7 @@ var Registry = map[string]RegistryEntry{
 	"button-example":                    {Component: ButtonExample(), File: "button_example.templ"},
 	"button-group-example":              {Component: ButtonGroupExample(), File: "button_group_example.templ"},
 	"calendar-example":                  {Component: CalendarExample(), File: "calendar_example.templ"},
+	"card-rtl":                          {Component: CardRtl(), File: "card_rtl.templ", RTL: true},
 	"card-example":                      {Component: CardExample(), File: "card_example.templ"},
 	"carousel-example":                  {Component: CarouselExample(), File: "carousel_example.templ"},
 	"chart-example-page":                {Component: ChartExamplePage(), File: "chart_example_page.templ"},

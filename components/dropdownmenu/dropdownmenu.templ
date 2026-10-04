@@ -299,6 +299,7 @@ templ Content(props ...ContentProps) {
 			hidden
 			role="presentation"
 			class="isolate z-50 outline-none"
+			{ utils.DirectionAttributes(ctx)... }
 		>
 			<div
 				id={ s.id }
@@ -628,6 +629,7 @@ templ SubContent(props ...SubContentProps) {
 			hidden
 			role="presentation"
 			class="isolate z-50 outline-none"
+			{ utils.DirectionAttributes(ctx)... }
 		>
 		<div
 			id={ sub.id }

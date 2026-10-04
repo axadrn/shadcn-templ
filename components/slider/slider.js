@@ -188,7 +188,7 @@
     const values = valuesOf(root);
     const index = thumbsOf(root).indexOf(thumb);
     const v = snap(values[index], c);
-    const rtl = getComputedStyle(root).direction === "rtl";
+    const rtl = window.templ.direction.useDirection(root) === "rtl";
     const by = e.shiftKey ? LARGE_STEP : c.step;
     let next = null;
     if (e.key === "ArrowUp") next = v + by;

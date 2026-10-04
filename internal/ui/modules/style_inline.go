@@ -65,9 +65,15 @@ func InlineSiteHTML(html string) string {
 // InlinedStyleHTML renders component and compiles its class attributes for
 // the named style ("base-rhea", "rhea", "" for the default).
 func InlinedStyleHTML(ctx context.Context, component templ.Component, styleName string) (string, error) {
+	return InlinedStyleHTMLWith(ctx, component, styleName, inliner.Options{})
+}
+
+// InlinedStyleHTMLWith is InlinedStyleHTML with the install options, e.g.
+// RTL for the -rtl examples, which upstream renders from the ui-rtl build.
+func InlinedStyleHTMLWith(ctx context.Context, component templ.Component, styleName string, opts inliner.Options) (string, error) {
 	var buf strings.Builder
 	if err := component.Render(ctx, &buf); err != nil {
 		return "", err
 	}
-	return inliner.InlineHTML(buf.String(), resolveStyleMap(styleName), inliner.Options{}), nil
+	return inliner.InlineHTML(buf.String(), resolveStyleMap(styleName), opts), nil
 }

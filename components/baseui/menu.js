@@ -214,6 +214,8 @@
         isOpen: isPopupOpen,
         loopFocus: true,
         disabledIndices: [],
+        // MenuRoot's rtl: useDirection.
+        rtl: window.templ.direction.useDirection(popup) === "rtl",
         ...options,
       });
       popup._templTypeahead = window.templ.typeahead.useTypeahead({

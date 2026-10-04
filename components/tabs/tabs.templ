@@ -107,6 +107,7 @@ templ Tabs(props ...Props) {
 		}
 		class={ utils.CN("cn-tabs group/tabs flex data-horizontal:flex-col", p.Class) }
 		data-slot="tabs"
+		{ utils.DirectionAttributes(ctx)... }
 		data-orientation={ string(p.Orientation) }
 		data-activation-direction="none"
 		if p.Value != nil {

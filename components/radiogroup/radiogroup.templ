@@ -76,6 +76,7 @@ templ RadioGroup(props ...Props) {
 			id={ p.ID }
 		}
 		data-slot="radio-group"
+		{ utils.DirectionAttributes(ctx)... }
 		if p.Value != nil {
 			data-templ-value={ *p.Value }
 		}

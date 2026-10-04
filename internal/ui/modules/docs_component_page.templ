@@ -10,6 +10,7 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/internal/ctxkeys"
+	"github.com/axadrn/shadcn-templ/v2/internal/inliner"
 	"github.com/axadrn/shadcn-templ/v2/internal/registry"
 	"github.com/axadrn/shadcn-templ/v2/internal/shared"
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/examples"
@@ -31,7 +32,7 @@ templ ComponentPreviewBlock(entry examples.RegistryEntry, attrs map[string]strin
 		{{ align = "center" }}
 	}
 	{{ _, hideCode := attrs["hideCode"] }}
-	{{ previewHTML, previewErr := InlinedStyleHTML(ctx, entry.Component, attrs["styleName"]) }}
+	{{ previewHTML, previewErr := InlinedStyleHTMLWith(ctx, entry.Component, attrs["styleName"], inliner.Options{RTL: entry.RTL}) }}
 	<div
 		data-slot="component-preview"
 		data-not-typeset

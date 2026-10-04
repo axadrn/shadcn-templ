@@ -52,6 +52,7 @@ templ ScrollArea(props ...Props) {
 		role="presentation"
 		style="position:relative;--scroll-area-corner-height:0px;--scroll-area-corner-width:0px"
 		data-slot="scroll-area"
+		{ utils.DirectionAttributes(ctx)... }
 		class={ utils.CN("cn-scroll-area relative", p.Class) }
 		{ p.Attributes... }
 	>

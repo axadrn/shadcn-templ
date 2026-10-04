@@ -91,6 +91,7 @@ calendar-week-numbers
 card-demo
 card-edge-to-edge
 card-image
+card-rtl
 card-small
 card-spacing
 carousel-api

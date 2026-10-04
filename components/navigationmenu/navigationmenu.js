@@ -853,7 +853,7 @@
       closeReason: undefined,
       prevTrigger: null,
       orientation: "horizontal",
-      rtl: () => root.closest("[dir]")?.getAttribute("dir") === "rtl",
+      rtl: () => window.templ.direction.useDirection(root) === "rtl",
       delay: parseInt(root.getAttribute("data-templ-delay"), 10) || OPEN_DELAY,
       closeDelay: parseInt(root.getAttribute("data-templ-close-delay"), 10) || CLOSE_DELAY,
       autoSizeReset: { token: null, owner: null },

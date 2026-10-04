@@ -100,7 +100,7 @@
     syncGroup(group);
     group._templComposite = window.templ.composite.useCompositeRoot(group, {
       items: () => itemsOf(group),
-      rtl: () => getComputedStyle(group).direction === "rtl",
+      rtl: () => window.templ.direction.useDirection(group) === "rtl",
       modifierKeys: ["Shift"],
     });
     // RadioGroup's onKeyDownCapture: an arrow key marks the group touched,

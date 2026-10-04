@@ -4862,10 +4862,13 @@ func createRegistryNavItems() []createOption {
 		{Value: "marker-example", Label: "Marker"},
 		{Value: "menubar-example", Label: "Menubar"},
 		{Value: "message-example", Label: "Message"},
+		{Value: "message-scroller-example", Label: "Message Scroller"},
 		{Value: "native-select-example", Label: "Native Select"},
+		{Value: "navigation-menu-example", Label: "Navigation Menu"},
 		{Value: "pagination-example", Label: "Pagination"},
 		{Value: "popover-example", Label: "Popover"},
 		{Value: "progress-example", Label: "Progress"},
+		{Value: "questionnaire-example", Label: "Questionnaire"},
 		{Value: "radio-group-example", Label: "Radio Group"},
 		{Value: "scroll-area-example", Label: "Scroll Area"},
 		{Value: "select-example", Label: "Select"},
@@ -5083,7 +5086,7 @@ func createActionMenuItem(name, title, keywords string, checked bool) templ.Comp
 			var templ_7745c5c3_Var224 string
 			templ_7745c5c3_Var224, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 1073, Col: 9}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/create.templ`, Line: 1076, Col: 9}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var224))
 			if templ_7745c5c3_Err != nil {

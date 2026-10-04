@@ -111,6 +111,7 @@ templ Content(props ...ContentProps) {
 			hidden
 			role="presentation"
 			class="isolate z-50"
+			{ utils.DirectionAttributes(ctx)... }
 		>
 			<div
 				id={ s.id }

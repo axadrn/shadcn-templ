@@ -98,7 +98,7 @@
     const composite = window.templ.composite.useCompositeRoot(menubar, {
       items: () => triggersOf(menubar),
       orientation: menubar.getAttribute("data-orientation") === "vertical" ? "vertical" : "horizontal",
-      rtl: () => getComputedStyle(menubar).direction === "rtl",
+      rtl: () => window.templ.direction.useDirection(menubar) === "rtl",
       loopFocus: true,
       enableHomeAndEndKeys: true,
       disabledIndices: [],

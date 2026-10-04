@@ -501,6 +501,7 @@ templ Content(props ...ContentProps) {
 			hidden
 			role="presentation"
 			class="isolate z-50"
+			{ utils.DirectionAttributes(ctx)... }
 		>
 			// ComboboxPopup: role dialog when the input sits inside it, the
 			// script sets that.

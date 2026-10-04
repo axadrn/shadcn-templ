@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"github.com/axadrn/shadcn-templ/v2/internal/inliner"
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/examples"
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/layouts"
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/modules"
@@ -10,7 +11,7 @@ import (
 // of BlockPreview iframes (shadcn's /view/{name} pendant). The example
 // renders as the compiled utility build of the style its reference imports.
 templ ExamplePreview(name string, entry examples.RegistryEntry) {
-	{{ html, err := modules.InlinedStyleHTML(ctx, entry.Component, entry.Style) }}
+	{{ html, err := modules.InlinedStyleHTMLWith(ctx, entry.Component, entry.Style, inliner.Options{RTL: entry.RTL}) }}
 	@layouts.BaseLayout("Preview: "+name, "") {
 		if err != nil {
 			{ err.Error() }
