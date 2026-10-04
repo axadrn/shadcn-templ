@@ -1,0 +1,514 @@
+{
+  "family:button": [
+    {
+      "hover": "[data-slot=button], button"
+    },
+    {
+      "key": "Tab"
+    }
+  ],
+  "family:alert-dialog": [
+    {
+      "click": "[data-slot$=\"-trigger\"]:not([data-slot=tabs-trigger]):not([data-slot=accordion-trigger]):not([data-slot=collapsible-trigger]):not([data-slot=sidebar-trigger]), [aria-haspopup]:not([role=combobox])"
+    },
+    {
+      "key": "Tab"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "family:dialog": [
+    {
+      "click": "[data-slot$=\"-trigger\"]:not([data-slot=tabs-trigger]):not([data-slot=accordion-trigger]):not([data-slot=collapsible-trigger]):not([data-slot=sidebar-trigger]), [aria-haspopup]:not([role=combobox])"
+    },
+    {
+      "key": "Tab"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "family:sheet": [
+    {
+      "click": "[data-slot$=\"-trigger\"]:not([data-slot=tabs-trigger]):not([data-slot=accordion-trigger]):not([data-slot=collapsible-trigger]):not([data-slot=sidebar-trigger]), [aria-haspopup]:not([role=combobox])"
+    },
+    {
+      "key": "Tab"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "family:drawer": [
+    {
+      "click": "[data-slot$=\"-trigger\"]:not([data-slot=tabs-trigger]):not([data-slot=accordion-trigger]):not([data-slot=collapsible-trigger]):not([data-slot=sidebar-trigger]), [aria-haspopup]:not([role=combobox])"
+    },
+    {
+      "key": "Tab"
+    },
+    {
+      "key": "Escape",
+      "wait": 900
+    }
+  ],
+  "family:dropdown-menu": [
+    {
+      "click": "[data-slot$=\"-trigger\"]:not([data-slot=tabs-trigger]):not([data-slot=accordion-trigger]):not([data-slot=collapsible-trigger]):not([data-slot=sidebar-trigger]), [aria-haspopup]:not([role=combobox])"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "family:context-menu": [
+    {
+      "rightclick": "[data-slot=\"context-menu-trigger\"]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "family:select": [
+    {
+      "click": "[data-slot=\"select-trigger\"]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Enter"
+    }
+  ],
+  "family:combobox": [
+    {
+      "click": "input[role=combobox], [role=combobox]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Enter"
+    }
+  ],
+  "family:popover": [
+    {
+      "click": "[data-slot$=\"-trigger\"]:not([data-slot=tabs-trigger]):not([data-slot=accordion-trigger]):not([data-slot=collapsible-trigger]):not([data-slot=sidebar-trigger]), [aria-haspopup]:not([role=combobox])"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "family:tooltip": [
+    {
+      "hover": "[data-base-ui-tooltip-trigger]"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "family:hover-card": [
+    {
+      "hover": "[data-slot=\"hover-card-trigger\"], [data-slot=button], a",
+      "wait": 900
+    }
+  ],
+  "family:accordion": [
+    {
+      "click": "[data-slot=\"accordion-trigger\"]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Home"
+    }
+  ],
+  "family:tabs": [
+    {
+      "click": "[data-slot=\"tabs-trigger\"]"
+    },
+    {
+      "key": "ArrowRight"
+    },
+    {
+      "key": "Enter"
+    }
+  ],
+  "family:radio-group": [
+    {
+      "click": "[data-slot=\"radio-group-item\"]"
+    },
+    {
+      "key": "ArrowDown"
+    }
+  ],
+  "family:toggle-group": [
+    {
+      "click": "[data-slot=\"toggle-group-item\"]"
+    },
+    {
+      "key": "ArrowRight"
+    }
+  ],
+  "family:checkbox": [
+    {
+      "click": "[data-slot=\"checkbox\"]"
+    },
+    {
+      "key": " "
+    }
+  ],
+  "family:switch": [
+    {
+      "click": "[data-slot=\"switch\"]"
+    },
+    {
+      "key": " "
+    }
+  ],
+  "family:toggle": [
+    {
+      "click": "[data-slot=\"toggle\"]"
+    },
+    {
+      "key": " "
+    }
+  ],
+  "family:slider": [
+    {
+      "focus": [
+        "[data-slot=\"slider-thumb\"] input",
+        "[data-slot=\"slider-thumb\"]"
+      ]
+    },
+    {
+      "key": "ArrowRight"
+    },
+    {
+      "key": "End"
+    }
+  ],
+  "family:collapsible": [
+    {
+      "click": "[data-slot=\"collapsible-trigger\"], [aria-expanded]"
+    }
+  ],
+  "dropdown-menu-checkboxes": [
+    {
+      "click": "[aria-haspopup=menu]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": " "
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Enter"
+    },
+    {
+      "key": "Escape",
+      "wait": 600
+    }
+  ],
+  "dropdown-menu-submenu": [
+    {
+      "click": "[aria-haspopup=menu]"
+    },
+    {
+      "moveTo": "[data-slot=dropdown-menu-sub-trigger]",
+      "wait": 600
+    },
+    {
+      "key": "ArrowRight"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "ArrowLeft"
+    },
+    {
+      "key": "Escape",
+      "wait": 600
+    }
+  ],
+  "context-menu-checkboxes": [
+    {
+      "rightclick": "[data-slot=\"context-menu-trigger\"]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": " "
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Enter"
+    },
+    {
+      "key": "Escape",
+      "wait": 600
+    }
+  ],
+  "context-menu-submenu": [
+    {
+      "rightclick": "[data-slot=\"context-menu-trigger\"]"
+    },
+    {
+      "moveTo": "[data-slot=context-menu-sub-trigger]",
+      "wait": 600
+    },
+    {
+      "key": "ArrowRight"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "ArrowLeft"
+    },
+    {
+      "key": "Escape",
+      "wait": 600
+    }
+  ],
+  "dropdown-menu-radio-group": [
+    {
+      "click": "[aria-haspopup=menu]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Enter"
+    },
+    {
+      "key": "Escape",
+      "wait": 600
+    }
+  ],
+  "context-menu-radio": [
+    {
+      "rightclick": "[data-slot=\"context-menu-trigger\"]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": " "
+    },
+    {
+      "key": "Escape",
+      "wait": 600
+    }
+  ],
+  "dropdown-menu-demo": [
+    {
+      "click": "[aria-haspopup=menu]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Enter",
+      "wait": 600
+    },
+    {
+      "click": "[aria-haspopup=menu]"
+    },
+    {
+      "moveTo": "[data-slot=dropdown-menu-sub-trigger]",
+      "wait": 600
+    },
+    {
+      "key": "Escape",
+      "wait": 600
+    }
+  ],
+  "select-demo": [
+    {
+      "click": "[data-slot=\"select-trigger\"]"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Enter",
+      "wait": 600
+    },
+    {
+      "click": "[data-slot=\"select-trigger\"]"
+    },
+    {
+      "key": "Escape",
+      "wait": 600
+    }
+  ],
+  "tooltip-sides": [
+    {
+      "hover": ":nth-match([data-base-ui-tooltip-trigger], 1)"
+    },
+    {
+      "moveTo": ":nth-match([data-base-ui-tooltip-trigger], 2)",
+      "wait": 300
+    },
+    {
+      "key": "Escape",
+      "wait": 600
+    }
+  ],
+  "tooltip-keyboard": [
+    {
+      "focus": "[data-base-ui-tooltip-trigger]"
+    },
+    {
+      "key": "Escape",
+      "wait": 600
+    }
+  ],
+  "hover-card-demo": [
+    {
+      "hover": "[data-slot=\"hover-card-trigger\"], [data-slot=button], a",
+      "wait": 900
+    },
+    {
+      "key": "Escape",
+      "wait": 600
+    },
+    {
+      "focus": "[data-templ-hover-card-trigger], [data-slot=button]",
+      "wait": 900
+    },
+    {
+      "key": "Escape",
+      "wait": 600
+    }
+  ],
+  "family:toast": [
+    {
+      "click": "[data-slot=button]"
+    }
+  ],
+  "family:calendar": [
+    {
+      "click": "[data-slot=calendar] td[data-day$=\"-15\"]:not([data-outside]) > button"
+    },
+    {
+      "key": "ArrowRight"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "PageDown"
+    },
+    {
+      "click": "[data-slot=calendar] nav > button:last-child"
+    },
+    {
+      "click": "[data-slot=calendar] nav > button:first-child"
+    }
+  ],
+  "family:date-picker": [
+    {
+      "click": "[data-slot=popover-trigger]"
+    },
+    {
+      "click": "[data-slot=calendar] td[data-day$=\"-15\"]:not([data-outside]) > button"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "family:scroll-area": [
+    {
+      "hover": "[data-slot=scroll-area-viewport]"
+    },
+    {
+      "wheel": [
+        0,
+        300
+      ],
+      "wait": 100
+    },
+    {
+      "wait": 700
+    },
+    {
+      "key": "Tab"
+    }
+  ],
+  "family:native-select": [
+    {
+      "focus": "[data-slot=native-select]"
+    },
+    {
+      "key": "ArrowDown"
+    }
+  ],
+  "bubble-collapsible": [
+    {
+      "click": "[data-slot=collapsible-trigger]"
+    },
+    {
+      "click": "[data-slot=collapsible-trigger]"
+    }
+  ],
+  "bubble-popover": [
+    {
+      "click": "[aria-haspopup]"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "bubble-tooltip": [
+    {
+      "hover": "[data-base-ui-tooltip-trigger]"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "bubble-link-button": [
+    {
+      "click": "button[data-slot=bubble-content]"
+    }
+  ],
+  "bubble-reactions": [
+    {
+      "click": "[data-slot=bubble-reactions] button"
+    }
+  ]
+}

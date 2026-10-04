@@ -2,6 +2,7 @@
 
 # Ignore internal generated files
 internal/**/*_templ.go
+parity/**/*_templ.go
 **/*_templ.txt
 meta.json
 
@@ -14,6 +15,8 @@ meta.json
 bin
 node_modules
 tmp
+parity/out
+parity/*.log
 
 # Env
 .env
