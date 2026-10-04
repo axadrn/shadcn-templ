@@ -123,6 +123,8 @@ shadcn-templ init -t templ --preset b2D0wqNxT
 shadcn-templ init -t templ --preset vega
 ```
 
+For several apps sharing one components package, scaffold a [monorepo](/docs/monorepo) with `shadcn-templ init --monorepo`.
+
 ### Run the App
 
 The scaffolded project ships the `Taskfile.yml` dev setup. Run everything with:
