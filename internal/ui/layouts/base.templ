@@ -43,7 +43,15 @@ templ BaseLayout(title, description string) {
 			    "inlineScriptNonce": "%s"
 			}`, templ.GetNonce(ctx)) }
 			/>
-			// Theme initialization - must run before body renders to prevent flash
+		</head>
+		// 1:1 their body classes, plus the style-* class that picks the active
+		// style for our cn-* components (shadcn's site scopes that per preview).
+		<body
+			class="group/body style-nova overscroll-none antialiased transition-colors duration-200 [--footer-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]"
+		>
+			// Theme initialization, the first child of <body> like next-themes'
+			// script: it runs before the content renders, and the content
+			// is never the body's first child (upstream's :first-child rules).
 			<script nonce={ templ.GetNonce(ctx) }>
 				(function() {
 					// Get current theme preference (system, light, or dark)
@@ -82,12 +90,6 @@ templ BaseLayout(title, description string) {
 					});
 				})();
 			</script>
-		</head>
-		// 1:1 their body classes, plus the style-* class that picks the active
-		// style for our cn-* components (shadcn's site scopes that per preview).
-		<body
-			class="group/body style-nova overscroll-none antialiased transition-colors duration-200 [--footer-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]"
-		>
 			// shadcn's app/layout.tsx renders its children right in <body>: the
 			// (view) routes (examples, block and chart views) are bare, the
 			// (app) routes wrap themselves in AppLayout.

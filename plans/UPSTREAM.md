@@ -15,7 +15,8 @@ Moving the pin is its own plan.
 - **Sonner's toasts in examples.** Where an upstream example calls sonner's `toast(...)` (`questionnaire-freeform`, `questionnaire-multiple`, `questionnaire-shortcuts`, `sidebar-group-action`), ours adds a Base UI toast: same message, the toast's own place and look (pixels only).
 - **Reference bugs.** Upstream's `command-dialog` crashes on its shortcut (`Cannot read properties of undefined (reading 'subscribe')`); ours opens and closes. Upstream's prebuilt calendar keeps `cn-calendar-dropdown-root` unflattened, so its dropdowns have no border; ours do, within the pixel tolerance. Upstream's RTL headings render Arabic through the Geist stack (no Arabic glyphs, tofu); ours do the same.
 - **Scheduling.** In `select-demo`, upstream's first outside focus guard misses `data-base-ui-inert` for one frame after the click (a render that has not committed yet); ours sets it at once.
-- **Open owner questions** (recorded in `plans/parity-components.md`): `progress-controlled`'s second slider thumb, `pagination-simple`'s fourth link, the examples' own pictures and text (`avatar-demo`, `empty-avatar-group`, `hover-card-demo`, `item-group`, `typography-p`, all under 0.4 % of the pixels), tabler icons rendered as the nearest lucide icon.
+- **Go and templ content.** The examples' people, avatars and texts stay in the Go and templ universe by the owner's decision on 2026-10-04 (`AGENTS.md`): `avatar-demo`, `empty-avatar-group`, `hover-card-demo`, `item-group`, under 0.4 % of the pixels.
+- **Lucide for tabler.** Where upstream renders `@tabler/icons-react` icons, ours renders the nearest lucide icon, by the owner's decision on 2026-10-04 (for now).
 
 ## Final run
 

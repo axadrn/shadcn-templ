@@ -13,3 +13,6 @@ Every component is the 1:1 pendant of shadcn's `bases/base/ui` on Base UI, at th
 3. **A Base UI prop that is never rendered is `data-templ-<prop>`.** The kebab case of the Base UI prop name, on the element of the part that receives it (`data-templ-side-offset`, `data-templ-close-delay`). A name that is not a Base UI prop is not allowed. Port markers React keeps in memory (portal node, owner links) use the same prefix.
 
 The project prefix is `templ` everywhere: `window.templ` for the shared JS API, `_templ*` for element expandos. The scroll lock sets Base UI's own `data-base-ui-scroll-locked`.
+
+## Examples
+Every example is upstream's example 1:1 in structure, classes and DOM. Its people, avatars and texts stay in the Go and templ universe (`@templ`, `a-h`, `axadrn`, `joerdav` and their GitHub avatars) where upstream shows shadcn, Vercel or Next.js ones. Keep them, never swap in upstream's; the parity runs list them as accepted pixel differences (`plans/UPSTREAM.md`).

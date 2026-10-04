@@ -394,6 +394,6 @@ Final run in Chromium against the Next reference: 557 examples, 5729 of 5789 che
 - Fixes the run found: `attachment-trigger` is a server component upstream, its trigger keeps `attachment-trigger`; `item-image` escapes the song titles in its image URLs (the `srcset` was invalid); `date-picker-natural-language` no longer remounts the calendar on its own select, the stale `data-focused` is gone; the Noto Sans Arabic and Hebrew files are the ones the reference's next/font build downloads (Google serves other builds over time, Arabic text wrapped differently).
 - Remaining fails: the accepted differences in `plans/UPSTREAM.md` and Escape steps that pass alone.
 
-Open owner questions: `progress-controlled`'s second thumb (task 15), the examples' own pictures and text (task 8), `pagination-simple`'s fourth link (task 13), sonner's toasts replaced by the Base UI toast (task 16), tabler icons rendered as the nearest lucide icon.
+Owner answers, 2026-10-04: `progress-controlled` and `pagination-simple` fixed (the slider's `Value` takes a number like Base UI's, every thumb index 0; the fourth link renders upstream's `button` slot); the examples' people, avatars and texts stay Go and templ themed (`AGENTS.md`); lucide stays for tabler for now. `typography-p` was the layout: the theme script is the first child of `<body>` like next-themes', so an example is never the body's first child.
 
 ## Planner review
