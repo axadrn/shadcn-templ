@@ -2,7 +2,7 @@
 
 - **Planner**: Claude
 - **Executor**: Claude
-- **Status**: in progress
+- **Status**: review
 - **Branch**: feat/monorepo-623 (from feat/parity-components)
 
 ## Context
@@ -25,7 +25,7 @@ Today the CLI assumes one app per module. `utils.ModulePath(cwd)` reads `cwd/go.
 - **`go.mod` is found by walking up from cwd, like the `go` command.** `utils.FindModule(dir)` returns the module root and the module path. `ModulePath` keeps its signature and uses it. `components.json` stays in cwd, as in shadcn (no walk up for it).
 - **Aliases resolve against the module root, file paths against the `components.json` directory.** `aliases.components` and `aliases.utils` are Go import paths, so `<module>/components` is always `<module root>/components`, whatever directory the app is in. `tailwind.css`, `scripts.dir` and block page targets stay relative to the app's `components.json` directory (`ResolvedPaths.Cwd`). A single-app project has module root equal to cwd and behaves exactly as before. `ResolvedPaths.ModuleRoot` is new.
 - **No `components.json` in the shared package.** shadcn needs one per workspace package because each npm package has its own tsconfig aliases. In Go one module has one import path space, so the app's aliases already name the shared directories; there is nothing a second config would add. The Go pendant of the workspace boundary is the module, and apps share components exactly when their `aliases.components` resolve to the same directory.
-- **Routing stays by type.** ui components, the scripts item, `utils` and blocks go to the shared aliases. Block page `target` files go into the app directory, like shadcn's page targets. Blocks stay in `<components>/blocks/` (they are Go packages, there is no app components alias in shadcn-templ, see scripts-611 point 5); an app that wants a block private can pass `--path`.
+- **Routing stays by type.** ui components, the scripts item, `utils` and blocks go to the shared aliases. A registry file with a `target` would go into the app directory, like shadcn's page targets (no shadcn-templ item uses `target` today). Blocks stay in `<components>/blocks/` (they are Go packages and there is no app components alias in shadcn-templ, see scripts-611 point 5), so every app can render them. `--path` is no way to keep a block private, it redirects the block's component dependencies as well.
 - **CSS is per app.** Each app's `tailwind.css` gets the theme and the vendored stylesheets. This differs from shadcn's monorepo template, where the app points `tailwind.css` into `packages/ui`; in shadcn-templ that layout is still possible by pointing `tailwind.css` at a shared file, the CLI does not care.
 - **One bundle content, one manifest, a copy per app.** The bundle only depends on the shared `*/*.js` files, so every app sharing the components gets the same bytes and the same hash, and one shared `scripts_bundle.go` is correct for all of them. `UpdateScripts` finds the other apps of the module that share the components dir (`utils.GetSharedConfigs`: walk the module root for `components.json`, skipping what the `go` tool skips (`.` and `_` dirs, `testdata`, `vendor`, `node_modules`) and nested modules, keep the configs that resolve to the same components dir) and writes the bundle into each app's `scripts.dir`, pruning stale bundles in each. Running `bundle` or `add` in any one app therefore never leaves another app pointing at a bundle file it does not have.
 - **Different `scripts.path` for one components package is an error.** The manifest holds one URL. When two apps sharing the components configure different `scripts.path` (compared without a trailing slash), `UpdateScripts` fails before writing anything and names both `components.json` files. Different `scripts.dir` are fine and expected. Apps that need different URL prefixes use different components packages (`aliases.components`).
@@ -61,7 +61,7 @@ Today the CLI assumes one app per module. `utils.ModulePath(cwd)` reads `cwd/go.
 
 ### 5. End to end smoke test
 
-- [ ] Done
+- [x] Done
 
 Build the CLI, scratch module with two apps under `cmd/`, `init`/`add`/`bundle` for both against a local registry, `go build ./...` in the scratch module. Done when the commands and results are recorded below.
 
@@ -84,3 +84,38 @@ Build the CLI, scratch module with two apps under `cmd/`, `init`/`add`/`bundle` 
 `internal/service/content/docs/monorepo.md` follows shadcn's monorepo page (Getting started steps, File Structure, Requirements) with Go usage, plus a Scripts section for the shared bundle. Slug `monorepo` in `DocSlugs` and the Get Started sidebar link after CLI, per shadcn's `(root)/meta.json`. `components-json.md`: `tailwind.css` and `scripts.dir` are relative to the directory of `components.json`, aliases resolve against the `go.mod` directory, the shared `scripts.path` constraint. `cli.md`: go.mod in cwd or a parent, bundle covers every sharing app. Requirement 4 mirrors shadcn's "same style, iconLibrary and baseColor", minus baseColor: colors live in each app's CSS. Checked with a throwaway test (deleted) that `DocsService.GetPage("monorepo")` parses with the expected TOC.
 
 Environment note: this worktree has no generated `internal/**/*_templ.go` (gitignored, written by the watchers). For `go build ./...` and `go test ./internal/...` they were copied from the main checkout where the `.templ` source is identical; for `internal/ui/modules/code.templ` and `code_figure.templ`, whose main checkout source carries another session's uncommitted `Value:` line, the copied output minus that line was used. Nothing of it is tracked. `go test` needs `GOTMPDIR` outside any Go module (here `$CLAUDE_JOB_DIR/tmp/gotmp`, since /tmp ran out of quota), because the template scaffold test refuses to scaffold inside a module, which now includes parent directories. `go build ./...`, `go vet ./cmd/shadcn-templ/...`, `go test ./cmd/shadcn-templ/... ./internal/...` green.
+
+### Task 5
+
+Scratch `S=$CLAUDE_JOB_DIR/tmp`, registry `R=http://localhost:8090` (the running docs server, not started or stopped here).
+
+```shell
+go build -o $S/cli ./cmd/shadcn-templ
+cd $S/mono && go mod init example.com/mono && mkdir -p cmd/servicea cmd/serviceb
+cd cmd/servicea && $S/cli init --preset nova --registry $R
+  # Created assets/css/globals.css, utils/shadcn-templ.go, assets/css/{tw-animate,shadcn-tailwind}.css
+$S/cli add button dialog sidebar-07 --registry $R
+  # Created 52 files (components/... and components/blocks/sidebar07 at the module root)
+  # Bundle: assets/js/shadcn-templ-3901e886dc8a068c.js
+cd $S/mono && $S/cli init --cwd cmd/serviceb --preset nova --base-color zinc --registry $R
+  # Skipped utils/shadcn-templ.go (identical), own css
+  # Bundle: assets/js/shadcn-templ-3901e886dc8a068c.js
+  # Bundle: cmd/servicea/assets/js/shadcn-templ-3901e886dc8a068c.js
+$S/cli add popover --cwd cmd/serviceb --registry $R
+  # Created 2, skipped 15 shared files
+  # Bundle: assets/js/shadcn-templ-2d200f4346532c6d.js
+  # Bundle: cmd/servicea/assets/js/shadcn-templ-2d200f4346532c6d.js
+$S/cli bundle --cwd cmd/servicea
+  # Bundle: assets/js/shadcn-templ-2d200f4346532c6d.js
+  # Bundle: cmd/serviceb/assets/js/shadcn-templ-2d200f4346532c6d.js
+  # each app dir holds exactly that one bundle, components/scripts_bundle.go names /assets/js/shadcn-templ-2d200f4346532c6d.js
+# serviceb scripts.path set to /b/assets/js, then bundle --cwd cmd/servicea:
+  # Error: .../cmd/servicea/components.json and .../cmd/serviceb/components.json share the components package
+  # example.com/mono/components but configure different scripts.path ("/assets/js" and "/b/assets/js"); ... exit 1 (reverted after)
+```
+
+Each app then got a `pages/home.templ` (servicea: button, dialog, sidebar07 block, `@components.Scripts()`; serviceb: button, popover) and a `main.go` serving its own `assets`. In the scratch module only (outside this repo, no watcher there): `go get github.com/a-h/templ@v0.3.1001`, `go run github.com/a-h/templ/cmd/templ@v0.3.1001 generate -path $S/mono` (22 of 22 templ files), `go mod tidy`, `go build ./...` OK, `go vet ./...` OK.
+
+Corrected during the smoke test: no registry item uses a file `target`, so the docs no longer promise block pages in the app; blocks install once under `components/blocks/` (Decisions updated).
+
+Open: shadcn's `init --monorepo` scaffolds a Turborepo template; there is no Go pendant scaffold (`init --template` still makes a single-app module). Requirement 4 (same `style` across apps sharing components) is documented, not enforced.

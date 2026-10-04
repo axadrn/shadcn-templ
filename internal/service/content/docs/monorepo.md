@@ -44,7 +44,7 @@ cd cmd/web
 shadcn-templ add dialog
 ```
 
-The CLI installs `dialog` and its dependencies once under `components/` in the module root, rebuilds the script bundle and writes it into the `scripts.dir` of every app that shares these components, so `cmd/admin` keeps working too. Pages of a block (files with a `target`) are written into the app you run `add` in.
+The CLI installs `dialog` and its dependencies once under `components/` in the module root, rebuilds the script bundle and writes it into the `scripts.dir` of every app that shares these components, so `cmd/admin` keeps working too. Blocks install the same way, once under `components/blocks/`, and every app can render them.
 
 ### Import components
 
