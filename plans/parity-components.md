@@ -2,7 +2,7 @@
 
 - **Planner**: Claude
 - **Executor**: Claude, one commit per task
-- **Status**: in progress, `plans/parity-runtime.md` is merged (PR #624)
+- **Status**: done, waiting for the owner's review and the open owner questions
 - **Branch**: `feat/parity-components` from `main` after the parity-runtime merge
 
 
@@ -73,9 +73,7 @@ Everything a new session needs to continue this plan without any other context. 
 
 ### Status (2026-10-04)
 
-- Tasks 1 to 15 done (see the log). Last full run after task 15: chromium 3290 pass, 15 fail; webkit 3283 pass, 22 fail. The remaining fails are owner questions or flakes: avatar-demo, empty-avatar-group, hover-card-demo, dialog-close-button, item-avatar and item-group (pictures and text), pagination-simple (the fourth link), progress-controlled (two thumbs), button-render (hover step), table-actions, typography-p, select-demo, select-groups, select-scrollable (webkit guard markers, out of scope with Chromium only), carousel-plugin and drawer (flakes).
-- Task 16 done so far: scroll-area, native-select, marker, bubble. Open: message, message-scroller, attachment, questionnaire, menubar, navigation-menu, direction, then a full `parity/all.sh` run (the collapsible and transition runtime changed in bubble, only the affected families ran).
-- Then task 17 (missing examples, the 57 `-rtl` variants after direction) and task 18 (final run into `plans/UPSTREAM.md`).
+- Tasks 1 to 18 done, see the log. Final run: 5729 of 5789 checks pass in Chromium against the Next reference, the rest are the accepted differences in `plans/UPSTREAM.md` or parallel run flakes. Waiting for the owner's review and the open owner questions below.
 
 ### Open owner questions
 
@@ -386,6 +384,16 @@ Second part, after the package split, compared against the Next reference (`pari
 
 - Fonts are next/font's now: Geist and Geist Mono as the Google Fonts subsets next/font downloads, Noto Sans Arabic and Hebrew, the `"Geist", "Geist Fallback"` stacks and the metric adjusted `local(Arial)` fallbacks it emits. Our vendored variable Geist rendered text 0.2 to 1.8 % different and Arabic fell back to another font.
 - Fixes the examples found: a mixed checkbox renders neither `data-checked` nor `data-unchecked` (Base UI's useStateAttributesMapping), and a popover opened without a trigger (the open prop, `window.templ.popover.open`) shows its registered trigger as open, its focus guards included, without `data-pressed`.
-- Not ported: `calendar-hijri` (react-day-picker's Persian calendar, a calendar system our calendar does not have). Upstream's `command-dialog` reference crashes on its shortcut (`Cannot read properties of undefined (reading 'subscribe')`); ours opens and closes. `date-picker-natural-language` parses with a small inline parser instead of chrono-node.
+- `calendar-hijri` came after: the calendar's `DateLib` prop takes `persian`, a port of react-day-picker's Jalali date lib with its `fa-IR` locale and Vazirmatn from next/font. Not ported 1:1: upstream's `command-dialog` reference crashes on its shortcut (`Cannot read properties of undefined (reading 'subscribe')`); ours opens and closes. `date-picker-natural-language` parses with a small inline parser instead of chrono-node.
+
+### Task 18
+
+Final run in Chromium against the Next reference: 557 examples, 5729 of 5789 checks pass, `parity/errors.mjs` finds no error on 705 pages. Result and accepted differences in `plans/UPSTREAM.md`.
+
+- `compare.mjs` checks console, page and network errors on every step now (ours fail, the reference's are a note), and parks the pointer again after the navigation commits: Chromium sends a `mouseover` at 0,0 with the first layout, which opened `tooltip-disabled` before any hover.
+- Fixes the run found: `attachment-trigger` is a server component upstream, its trigger keeps `attachment-trigger`; `item-image` escapes the song titles in its image URLs (the `srcset` was invalid); `date-picker-natural-language` no longer remounts the calendar on its own select, the stale `data-focused` is gone; the Noto Sans Arabic and Hebrew files are the ones the reference's next/font build downloads (Google serves other builds over time, Arabic text wrapped differently).
+- Remaining fails: the accepted differences in `plans/UPSTREAM.md` and Escape steps that pass alone.
+
+Open owner questions: `progress-controlled`'s second thumb (task 15), the examples' own pictures and text (task 8), `pagination-simple`'s fourth link (task 13), sonner's toasts replaced by the Base UI toast (task 16), tabler icons rendered as the nearest lucide icon.
 
 ## Planner review
