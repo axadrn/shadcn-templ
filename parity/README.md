@@ -15,11 +15,12 @@ Headless Chromium needs no desktop. On a bare Linux server it needs a few system
     git clone https://github.com/shadcn-ui/ui tmp/parity-runtime/reference
     cd tmp/parity-runtime/reference && git checkout <commit from plans/UPSTREAM.md>
     pnpm install && pnpm --filter=v4 registry:build
-    cd apps/v4 && npx next build && npx next start --port 3100
+    parity/reference-next.sh          # build once, then serve on 3100
+    parity/reference-next.sh start    # serve an existing build
 
-Use the production build: `next dev` grows to tens of GB over a full run. It serves every upstream example alone at `http://localhost:3100/examples/base/<name>`.
+Use the production build: `next dev` grows to tens of GB over a full run. `reference-next.sh` builds `apps/v4` reduced to the root layout and the examples route (the other routes move into a private `app/_off` folder): about 80 s and 4 GB to build, under 200 MB to serve. It serves every upstream example alone at `http://localhost:3100/examples/base/<name>`. On Linux, swap (zram, `install-fedora-server.sh` of the dotfiles) keeps the build and our Go builds from the OOM killer on an 8 GB machine.
 
-Where `next build` does not fit in memory (8 GB without swap), `reference-vite/serve.sh` serves the same route from the same checkout with Vite: the example modules and the providers of `app/layout.tsx` rendered straight into `<body>`, `next/image` and `next/link` as the HTML they render, and examples without `"use client"` treated like server components for render props (a `<Button />` passed as `render` keeps its own slot, as it reaches the client already rendered). It needs only `pnpm install` and `registry:build` in the checkout.
+Where even that does not fit, `reference-vite/serve.sh` serves the same route from the same checkout with Vite: the example modules and the providers of `app/layout.tsx` rendered straight into `<body>`, `next/image` and `next/link` as the HTML they render, and examples without `"use client"` treated like server components for render props (a `<Button />` passed as `render` keeps its own slot, as it reaches the client already rendered). It needs only `pnpm install` and `registry:build` in the checkout.
 
 **Our app.** `task dev` serves `http://localhost:8090/preview/<name>`. Another port works too, set `TEMPL_URL`:
 
