@@ -60,6 +60,7 @@ templ Code(p CodeProps) {
 			<div class="absolute top-3 right-2 z-10">
 				@copybutton.CopyButton(copybutton.Props{
 					TargetID: p.ID,
+					Value:    p.CodeContent,
 					Class:    "size-7 bg-code",
 				})
 			</div>

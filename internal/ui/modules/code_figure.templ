@@ -47,6 +47,7 @@ templ CodeFigure(p CodeFigureProps) {
 		<div class={ utils.CN("absolute right-2 z-10", utils.IfElse(p.Title != "", "top-1.5", "top-3")) }>
 			@copybutton.CopyButton(copybutton.Props{
 				TargetID: id,
+				Value:    p.Code,
 				Class:    "size-7 bg-code",
 			})
 		</div>

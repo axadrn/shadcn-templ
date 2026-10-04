@@ -6,24 +6,23 @@
     const copyButton = e.target.closest("[data-templ-copy-button]");
     if (!copyButton) return;
 
-    const targetId = copyButton.dataset.templTargetId;
-    if (!targetId) {
-      console.error("CopyButton: No target-id specified");
-      return;
-    }
+    // Smart detection: the button's own value first, then value for
+    // inputs/textareas, textContent for everything else.
+    let textToCopy = copyButton.dataset.templValue;
+    if (textToCopy === undefined) {
+      const targetId = copyButton.dataset.templTargetId;
+      if (!targetId) {
+        console.error("CopyButton: No target-id specified");
+        return;
+      }
 
-    const targetElement = document.getElementById(targetId);
-    if (!targetElement) {
-      console.error(`CopyButton: Element with id '${targetId}' not found`);
-      return;
-    }
+      const targetElement = document.getElementById(targetId);
+      if (!targetElement) {
+        console.error(`CopyButton: Element with id '${targetId}' not found`);
+        return;
+      }
 
-    // Smart detection: use value for inputs/textareas, textContent for everything else
-    let textToCopy = "";
-    if (targetElement.value !== undefined) {
-      textToCopy = targetElement.value;
-    } else {
-      textToCopy = targetElement.textContent || "";
+      textToCopy = targetElement.value !== undefined ? targetElement.value : targetElement.textContent || "";
     }
 
     // Get icon elements
