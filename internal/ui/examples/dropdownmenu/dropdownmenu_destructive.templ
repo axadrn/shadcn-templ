@@ -1,0 +1,37 @@
+package dropdownmenu
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ DropdownMenuDestructive() {
+	@dropdownmenu.DropdownMenu() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: dropdownmenu.Trigger(ctx),
+		}) {
+			Actions
+		}
+		@dropdownmenu.Content() {
+			@dropdownmenu.Group() {
+				@dropdownmenu.Item() {
+					@icon.Pencil()
+					Edit
+				}
+				@dropdownmenu.Item() {
+					@icon.Share()
+					Share
+				}
+			}
+			@dropdownmenu.Separator()
+			@dropdownmenu.Group() {
+				@dropdownmenu.Item(dropdownmenu.ItemProps{Variant: dropdownmenu.ItemVariantDestructive}) {
+					@icon.Trash()
+					Delete
+				}
+			}
+		}
+	}
+}

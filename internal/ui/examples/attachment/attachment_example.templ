@@ -1,0 +1,1168 @@
+package attachment
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/attachment"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dialog"
+	"github.com/axadrn/shadcn-templ/v2/components/example"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+const (
+	AttachmentExampleWorkspace = "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=900&auto=format&fit=crop&q=80"
+	AttachmentExampleDesk      = "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=900&auto=format&fit=crop&q=80"
+	AttachmentExampleOffice    = "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=900&auto=format&fit=crop&q=80"
+	attachmentExamplePatio     = "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=900&auto=format&fit=crop&q=80"
+	attachmentExampleHouse     = "https://images.unsplash.com/photo-1494526585095-c41746248156?w=900&auto=format&fit=crop&q=80"
+)
+
+// AttachmentExample is attachment-example.tsx. IconPlaceholder renders its
+// lucide icon; lucide-react's FileWarningIcon is file-exclamation-point.
+templ AttachmentExample() {
+	@example.Wrapper() {
+		@attachmentExampleFiles()
+		@attachmentExampleContentOnly()
+		@attachmentExampleStates()
+		@attachmentExampleImages()
+		@attachmentExampleImageStates()
+		@attachmentExampleSizes()
+		@attachmentExampleScrollableGroup()
+		@attachmentExampleTriggers()
+	}
+}
+
+templ attachmentExampleFiles() {
+	@example.Example(example.Props{Title: "Files", Class: "gap-8"}) {
+		<div class="flex w-full flex-col gap-2">
+			<div class="px-1 text-xs font-medium text-muted-foreground">
+				Horizontal
+			</div>
+			<div class="flex flex-col gap-3">
+				@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+					@attachment.Media() {
+						@icon.FileText()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							sales-dashboard.pdf
+						}
+						@attachment.Description() {
+							PDF · 2.4 MB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove sales-dashboard.pdf"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+					@attachment.Media() {
+						@icon.Table()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							customer-import.csv
+						}
+						@attachment.Description() {
+							CSV · 18 KB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove customer-import.csv"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+					@attachment.Media() {
+						@icon.FileCode()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							message-renderer.tsx
+						}
+						@attachment.Description() {
+							TypeScript · 12 KB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove message-renderer.tsx"}}) {
+							@icon.X()
+						}
+					}
+				}
+			</div>
+		</div>
+		<div class="flex w-full flex-col gap-2">
+			<div class="px-1 text-xs font-medium text-muted-foreground">
+				Vertical
+			</div>
+			@attachment.Group(attachment.GroupProps{Class: "w-full"}) {
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media() {
+						@icon.FileText()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							sales-dashboard.pdf
+						}
+						@attachment.Description() {
+							PDF · 2.4 MB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove sales-dashboard.pdf"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media() {
+						@icon.Table()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							customer-import.csv
+						}
+						@attachment.Description() {
+							CSV · 18 KB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove customer-import.csv"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media() {
+						@icon.FileCode()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							message-renderer.tsx
+						}
+						@attachment.Description() {
+							TypeScript · 12 KB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove message-renderer.tsx"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media() {
+						@icon.FileArchive()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							source-assets.zip
+						}
+						@attachment.Description() {
+							ZIP · 4.2 MB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove source-assets.zip"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media() {
+						@icon.Presentation()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							quarterly-review.key
+						}
+						@attachment.Description() {
+							Keynote · 9 MB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove quarterly-review.key"}}) {
+							@icon.X()
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ attachmentExampleContentOnly() {
+	@example.Example(example.Props{Title: "Content Only", Class: "gap-8"}) {
+		<div class="flex w-full flex-col gap-2">
+			<div class="px-1 text-xs font-medium text-muted-foreground">
+				Title
+			</div>
+			<div class="flex flex-col gap-3">
+				@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+					@attachment.Content() {
+						@attachment.Title() {
+							React Documentation
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove React Documentation"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+					@attachment.Content() {
+						@attachment.Title() {
+							Tailwind CSS
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove Tailwind CSS"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{Size: attachment.SizeSm, Class: "w-48"}) {
+					@attachment.Content() {
+						@attachment.Title() {
+							shadcn/ui
+						}
+					}
+					@attachment.Trigger(attachment.TriggerProps{Href: "https://ui.shadcn.com", Attributes: templ.Attributes{"target": "_blank", "rel": "noopener noreferrer", "aria-label": "Open shadcn/ui"}})
+				}
+			</div>
+		</div>
+		<div class="flex w-full flex-col gap-2">
+			<div class="px-1 text-xs font-medium text-muted-foreground">
+				Title and Description
+			</div>
+			<div class="flex flex-col gap-3">
+				@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+					@attachment.Content() {
+						@attachment.Title() {
+							Building accessible components
+						}
+						@attachment.Description() {
+							react.dev · 8 min read
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove Building accessible components"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+					@attachment.Content() {
+						@attachment.Title() {
+							Utility-first CSS framework
+						}
+						@attachment.Description() {
+							tailwindcss.com
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove Utility-first CSS framework"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{Size: attachment.SizeSm, Class: "w-full max-w-80"}) {
+					@attachment.Content() {
+						@attachment.Title() {
+							Compound components in React
+						}
+						@attachment.Description() {
+							ui.shadcn.com/docs
+						}
+					}
+					@attachment.Trigger(attachment.TriggerProps{Href: "https://ui.shadcn.com/docs", Attributes: templ.Attributes{"target": "_blank", "rel": "noopener noreferrer", "aria-label": "Open Compound components in React"}})
+				}
+			</div>
+		</div>
+	}
+}
+
+templ attachmentExampleStates() {
+	@example.Example(example.Props{Title: "States", Class: "gap-8"}) {
+		<div class="flex w-full flex-col gap-3">
+			<div class="px-1 text-xs font-medium text-muted-foreground">
+				Horizontal
+			</div>
+			<div class="flex flex-col gap-2">
+				@attachment.Attachment(attachment.Props{State: attachment.StateIdle, Class: "w-full"}) {
+					@attachment.Media() {
+						@icon.Clock()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							selected-file.pdf
+						}
+						@attachment.Description() {
+							Ready to upload
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove selected-file.pdf"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateUploading, Class: "w-full"}) {
+					@attachment.Media() {
+						@spinner.Spinner()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							design-system.zip
+						}
+						@attachment.Description() {
+							Uploading · 64%
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove design-system.zip"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateProcessing, Class: "w-full"}) {
+					@attachment.Media() {
+						@icon.FileText()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							market-research.pdf
+						}
+						@attachment.Description() {
+							Processing document
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove market-research.pdf"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateError, Class: "w-full"}) {
+					@attachment.Media() {
+						@icon.FileExclamationPoint()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							financial-model.xlsx
+						}
+						@attachment.Description() {
+							Upload failed. Try again.
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Retry upload"}}) {
+							@icon.RefreshCw()
+						}
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove attachment"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateDone, Class: "w-full"}) {
+					@attachment.Media() {
+						@icon.Check()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							uploaded-report.pdf
+						}
+						@attachment.Description() {
+							Uploaded · 1.8 MB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove uploaded-report.pdf"}}) {
+							@icon.X()
+						}
+					}
+				}
+			</div>
+		</div>
+		<div class="flex w-full flex-col gap-3">
+			<div class="px-1 text-xs font-medium text-muted-foreground">
+				Vertical
+			</div>
+			@attachment.Group(attachment.GroupProps{Class: "w-full"}) {
+				@attachment.Attachment(attachment.Props{State: attachment.StateIdle, Orientation: attachment.OrientationVertical}) {
+					@attachment.Media() {
+						@icon.Clock()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							selected-file.pdf
+						}
+						@attachment.Description() {
+							Ready
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove selected-file.pdf"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateUploading, Orientation: attachment.OrientationVertical}) {
+					@attachment.Media() {
+						@spinner.Spinner()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							design-system.zip
+						}
+						@attachment.Description() {
+							Uploading
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove design-system.zip"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateProcessing, Orientation: attachment.OrientationVertical}) {
+					@attachment.Media() {
+						@icon.FileText()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							market-research.pdf
+						}
+						@attachment.Description() {
+							Processing
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove market-research.pdf"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateError, Orientation: attachment.OrientationVertical}) {
+					@attachment.Media() {
+						@icon.FileExclamationPoint()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							financial-model.xlsx
+						}
+						@attachment.Description() {
+							Failed
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Retry financial-model.xlsx"}}) {
+							@icon.RefreshCw()
+						}
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove financial-model.xlsx"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateDone, Orientation: attachment.OrientationVertical}) {
+					@attachment.Media() {
+						@icon.Check()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							uploaded-report.pdf
+						}
+						@attachment.Description() {
+							Done
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove uploaded-report.pdf"}}) {
+							@icon.X()
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ attachmentExampleImages() {
+	@example.Example(example.Props{Title: "Images", Class: "gap-8"}) {
+		<div class="flex w-full flex-col gap-3">
+			<div class="px-1 text-xs font-medium text-muted-foreground">
+				Horizontal
+			</div>
+			<div class="flex flex-col gap-2">
+				@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleWorkspace } alt="Workspace"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							workspace.png
+						}
+						@attachment.Description() {
+							PNG · 820 KB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove workspace.png"}}) {
+							@icon.X()
+						}
+					}
+					@attachment.Trigger(attachment.TriggerProps{Href: AttachmentExampleWorkspace, Attributes: templ.Attributes{"target": "_blank", "rel": "noreferrer", "aria-label": "Open workspace.png"}})
+				}
+				@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleDesk } alt="Desk"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							desk-reference.jpg
+						}
+						@attachment.Description() {
+							JPG · 1.1 MB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove desk-reference.jpg"}}) {
+							@icon.X()
+						}
+					}
+					@attachment.Trigger(attachment.TriggerProps{Href: AttachmentExampleDesk, Attributes: templ.Attributes{"target": "_blank", "rel": "noreferrer", "aria-label": "Open desk-reference.jpg"}})
+				}
+				@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleOffice } alt="Office"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							office-reference.jpg
+						}
+						@attachment.Description() {
+							JPG · 940 KB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove office-reference.jpg"}}) {
+							@icon.X()
+						}
+					}
+					@attachment.Trigger(attachment.TriggerProps{Href: AttachmentExampleOffice, Attributes: templ.Attributes{"target": "_blank", "rel": "noreferrer", "aria-label": "Open office-reference.jpg"}})
+				}
+			</div>
+		</div>
+		<div class="flex w-full flex-col gap-2">
+			<div class="px-1 text-xs font-medium text-muted-foreground">
+				Vertical
+			</div>
+			@attachment.Group(attachment.GroupProps{Class: "w-full"}) {
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleWorkspace } alt="Workspace"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							workspace.png
+						}
+						@attachment.Description() {
+							PNG · 820 KB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove workspace.png"}}) {
+							@icon.X()
+						}
+					}
+					@attachment.Trigger(attachment.TriggerProps{Href: AttachmentExampleWorkspace, Attributes: templ.Attributes{"target": "_blank", "rel": "noreferrer", "aria-label": "Open workspace.png"}})
+				}
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleDesk } alt="Desk"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							desk-reference.jpg
+						}
+						@attachment.Description() {
+							JPG · 1.1 MB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove desk-reference.jpg"}}) {
+							@icon.X()
+						}
+					}
+					@attachment.Trigger(attachment.TriggerProps{Href: AttachmentExampleDesk, Attributes: templ.Attributes{"target": "_blank", "rel": "noreferrer", "aria-label": "Open desk-reference.jpg"}})
+				}
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleOffice } alt="Office"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							office-reference.jpg
+						}
+						@attachment.Description() {
+							JPG · 940 KB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove office-reference.jpg"}}) {
+							@icon.X()
+						}
+					}
+					@attachment.Trigger(attachment.TriggerProps{Href: AttachmentExampleOffice, Attributes: templ.Attributes{"target": "_blank", "rel": "noreferrer", "aria-label": "Open office-reference.jpg"}})
+				}
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ attachmentExamplePatio } alt="Outdoor patio"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							patio-reference.jpg
+						}
+						@attachment.Description() {
+							JPG · 1.6 MB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove patio-reference.jpg"}}) {
+							@icon.X()
+						}
+					}
+					@attachment.Trigger(attachment.TriggerProps{Href: attachmentExamplePatio, Attributes: templ.Attributes{"target": "_blank", "rel": "noreferrer", "aria-label": "Open patio-reference.jpg"}})
+				}
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ attachmentExampleHouse } alt="House exterior"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							house-exterior.jpg
+						}
+						@attachment.Description() {
+							JPG · 1.4 MB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove house-exterior.jpg"}}) {
+							@icon.X()
+						}
+					}
+					@attachment.Trigger(attachment.TriggerProps{Href: attachmentExampleHouse, Attributes: templ.Attributes{"target": "_blank", "rel": "noreferrer", "aria-label": "Open house-exterior.jpg"}})
+				}
+			}
+		</div>
+	}
+}
+
+templ attachmentExampleImageStates() {
+	@example.Example(example.Props{Title: "Image States", Class: "gap-8"}) {
+		<div class="flex w-full flex-col gap-3">
+			<div class="px-1 text-xs font-medium text-muted-foreground">
+				Horizontal
+			</div>
+			<div class="flex flex-col gap-2">
+				@attachment.Attachment(attachment.Props{State: attachment.StateIdle, Class: "w-full"}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleOffice } alt="Office"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							office-reference.jpg
+						}
+						@attachment.Description() {
+							Ready to upload
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove office-reference.jpg"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateUploading, Class: "w-full"}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleWorkspace } alt="Workspace"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							workspace.png
+						}
+						@attachment.Description() {
+							Uploading · 72%
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove workspace.png"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateProcessing, Class: "w-full"}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleDesk } alt="Desk"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							desk-reference.jpg
+						}
+						@attachment.Description() {
+							Processing image
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove desk-reference.jpg"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateError, Class: "w-full"}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleOffice } alt="Office"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							office-reference.jpg
+						}
+						@attachment.Description() {
+							Upload failed
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Retry image upload"}}) {
+							@icon.RefreshCw()
+						}
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove attachment"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateDone, Class: "w-full"}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleWorkspace } alt="Workspace"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							workspace.png
+						}
+						@attachment.Description() {
+							Uploaded · 1.2 MB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove workspace.png"}}) {
+							@icon.X()
+						}
+					}
+				}
+			</div>
+		</div>
+		<div class="flex w-full flex-col gap-2">
+			<div class="px-1 text-xs font-medium text-muted-foreground">
+				Vertical
+			</div>
+			@attachment.Group(attachment.GroupProps{Class: "w-full"}) {
+				@attachment.Attachment(attachment.Props{State: attachment.StateIdle, Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleOffice } alt="Office"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							office-reference.jpg
+						}
+						@attachment.Description() {
+							Ready
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove office-reference.jpg"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateUploading, Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleWorkspace } alt="Workspace"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							workspace.png
+						}
+						@attachment.Description() {
+							Uploading
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove workspace.png"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateProcessing, Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleDesk } alt="Desk"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							desk-reference.jpg
+						}
+						@attachment.Description() {
+							Processing
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove desk-reference.jpg"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateError, Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleOffice } alt="Office"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							office-reference.jpg
+						}
+						@attachment.Description() {
+							Failed
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Retry office-reference.jpg"}}) {
+							@icon.RefreshCw()
+						}
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove office-reference.jpg"}}) {
+							@icon.X()
+						}
+					}
+				}
+				@attachment.Attachment(attachment.Props{State: attachment.StateDone, Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ AttachmentExampleWorkspace } alt="Workspace"/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							workspace.png
+						}
+						@attachment.Description() {
+							Done
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove workspace.png"}}) {
+							@icon.X()
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ attachmentExampleSizes() {
+	@example.Example(example.Props{Title: "Sizes", Class: "gap-3"}) {
+		@attachment.Attachment(attachment.Props{Size: attachment.SizeDefault, Class: "w-full"}) {
+			@attachment.Media() {
+				@icon.FileText()
+			}
+			@attachment.Content() {
+				@attachment.Title() {
+					Default attachment
+				}
+				@attachment.Description() {
+					PDF · 2.4 MB
+				}
+			}
+		}
+		@attachment.Attachment(attachment.Props{Size: attachment.SizeSm, Class: "w-full"}) {
+			@attachment.Media() {
+				@icon.FileText()
+			}
+			@attachment.Content() {
+				@attachment.Title() {
+					Small attachment
+				}
+				@attachment.Description() {
+					PDF · 2.4 MB
+				}
+			}
+		}
+		@attachment.Attachment(attachment.Props{Size: attachment.SizeXs, Class: "w-full"}) {
+			@attachment.Media() {
+				@icon.FileText()
+			}
+			@attachment.Content() {
+				@attachment.Title() {
+					Extra small attachment
+				}
+			}
+		}
+	}
+}
+
+templ attachmentExampleScrollableGroup() {
+	@example.Example(example.Props{Title: "Scrollable Group", Class: "gap-4"}) {
+		@attachment.Group(attachment.GroupProps{Class: "w-full"}) {
+			@attachment.Attachment(attachment.Props{Class: "w-64"}) {
+				@attachment.Media() {
+					@icon.FileText()
+				}
+				@attachment.Content() {
+					@attachment.Title() {
+						briefing-notes.pdf
+					}
+					@attachment.Description() {
+						PDF · 1.4 MB
+					}
+				}
+				@attachment.Actions() {
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove briefing-notes.pdf"}}) {
+						@icon.X()
+					}
+				}
+			}
+			@attachment.Attachment(attachment.Props{Class: "w-64"}) {
+				@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+					<img src={ AttachmentExampleWorkspace } alt="Workspace"/>
+				}
+				@attachment.Content() {
+					@attachment.Title() {
+						workspace.png
+					}
+					@attachment.Description() {
+						PNG · 820 KB
+					}
+				}
+				@attachment.Actions() {
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove workspace.png"}}) {
+						@icon.X()
+					}
+				}
+			}
+			@attachment.Attachment(attachment.Props{Class: "w-64"}) {
+				@attachment.Media() {
+					@icon.Table()
+				}
+				@attachment.Content() {
+					@attachment.Title() {
+						customers.csv
+					}
+					@attachment.Description() {
+						CSV · 18 KB
+					}
+				}
+				@attachment.Actions() {
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove customers.csv"}}) {
+						@icon.X()
+					}
+				}
+			}
+			@attachment.Attachment(attachment.Props{Class: "w-64"}) {
+				@attachment.Media() {
+					@icon.FileCode()
+				}
+				@attachment.Content() {
+					@attachment.Title() {
+						renderer.tsx
+					}
+					@attachment.Description() {
+						TSX · 12 KB
+					}
+				}
+				@attachment.Actions() {
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove renderer.tsx"}}) {
+						@icon.X()
+					}
+				}
+			}
+		}
+		@attachment.Group(attachment.GroupProps{Class: "w-full"}) {
+			@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+				@attachment.Media() {
+					@icon.FileText()
+				}
+				@attachment.Content() {
+					@attachment.Title() {
+						invoice.pdf
+					}
+					@attachment.Description() {
+						PDF
+					}
+				}
+				@attachment.Actions() {
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove invoice.pdf"}}) {
+						@icon.X()
+					}
+				}
+			}
+			@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+				@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage, Class: "aspect-square w-full"}) {
+					<img src={ AttachmentExampleDesk } alt="Desk"/>
+				}
+				@attachment.Content() {
+					@attachment.Title() {
+						desk.jpg
+					}
+					@attachment.Description() {
+						JPG
+					}
+				}
+				@attachment.Actions() {
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove desk.jpg"}}) {
+						@icon.X()
+					}
+				}
+			}
+			@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+				@attachment.Media() {
+					@icon.FileArchive()
+				}
+				@attachment.Content() {
+					@attachment.Title() {
+						assets.zip
+					}
+					@attachment.Description() {
+						ZIP
+					}
+				}
+				@attachment.Actions() {
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove assets.zip"}}) {
+						@icon.X()
+					}
+				}
+			}
+			@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+				@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage, Class: "aspect-square w-full"}) {
+					<img src={ AttachmentExampleOffice } alt="Office"/>
+				}
+				@attachment.Content() {
+					@attachment.Title() {
+						office.jpg
+					}
+					@attachment.Description() {
+						JPG
+					}
+				}
+				@attachment.Actions() {
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove office.jpg"}}) {
+						@icon.X()
+					}
+				}
+			}
+			@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+				@attachment.Media() {
+					@icon.FileText()
+				}
+				@attachment.Content() {
+					@attachment.Title() {
+						notes.pdf
+					}
+					@attachment.Description() {
+						PDF
+					}
+				}
+				@attachment.Actions() {
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove notes.pdf"}}) {
+						@icon.X()
+					}
+				}
+			}
+		}
+	}
+}
+
+templ attachmentExampleTriggers() {
+	@example.Example(example.Props{Title: "Triggers", Class: "gap-3"}) {
+		@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+			@attachment.Media() {
+				@icon.FileText()
+			}
+			@attachment.Content() {
+				@attachment.Title() {
+					contract-review.pdf
+				}
+				@attachment.Description() {
+					PDF · 820 KB
+				}
+			}
+			@attachment.Actions() {
+				@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Download attachment"}}) {
+					@icon.Download()
+				}
+				@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove attachment"}}) {
+					@icon.X()
+				}
+			}
+			@attachment.Trigger(attachment.TriggerProps{Href: "#", Attributes: templ.Attributes{"target": "_blank", "rel": "noreferrer", "aria-label": "Open contract-review.pdf"}})
+		}
+		@dialog.Dialog() {
+			@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+				@attachment.Media() {
+					@icon.FileSearch()
+				}
+				@attachment.Content() {
+					@attachment.Title() {
+						research-summary.pdf
+					}
+					@attachment.Description() {
+						Open preview dialog
+					}
+				}
+				@attachment.Actions() {
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Copy link"}}) {
+						@icon.Copy()
+					}
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove research-summary.pdf"}}) {
+						@icon.X()
+					}
+				}
+				// DialogTrigger render={<AttachmentTrigger />}: the dialog
+				// trigger's slot wins.
+				@attachment.Trigger(attachment.TriggerProps{
+					Attributes: utils.MergeAttributes(
+						dialog.Trigger(ctx),
+						templ.Attributes{"aria-label": "Preview research-summary.pdf"},
+					),
+				})
+			}
+			@dialog.Content(dialog.ContentProps{Class: "sm:max-w-md"}) {
+				@dialog.Header() {
+					@dialog.Title() {
+						research-summary.pdf
+					}
+					@dialog.Description() {
+						Attachment triggers can open dialogs while actions remain
+						independently reachable.
+					}
+				}
+			}
+		}
+	}
+	// The isVisible state: Remove attachment swaps the first attachment for
+	// the Restore button, which swaps it back.
+	<template>
+		@button.Button(button.Props{Variant: button.VariantOutline}) {
+			Restore attachment
+		}
+	</template>
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const template = document.currentScript.previousElementSibling;
+			const content = template.previousElementSibling.querySelector('[data-slot="example-content"]');
+			const attachment = content.firstElementChild;
+			const restore = template.content.firstElementChild;
+			attachment.querySelector('[aria-label="Remove attachment"]').addEventListener("click", () => attachment.replaceWith(restore));
+			restore.addEventListener("click", () => restore.replaceWith(attachment));
+		})();
+	</script>
+}

@@ -1,0 +1,40 @@
+package alertdialog
+
+import (
+	exshared "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/shared"
+	"github.com/axadrn/shadcn-templ/v2/components/alertdialog"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ AlertDialogDestructive() {
+	@alertdialog.AlertDialog() {
+		@button.Button(button.Props{
+			Variant:    button.VariantDestructive,
+			Attributes: exshared.ServerRendered(alertdialog.Trigger(ctx)),
+		}) {
+			Delete Chat
+		}
+		@alertdialog.Content(alertdialog.ContentProps{Size: alertdialog.SizeSm}) {
+			@alertdialog.Header() {
+				@alertdialog.Media(alertdialog.MediaProps{Class: "bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive"}) {
+					@icon.Trash2()
+				}
+				@alertdialog.Title() {
+					Delete chat?
+				}
+				@alertdialog.Description() {
+					This will permanently delete this chat conversation. View <a href="#">Settings</a> delete any memories saved during this chat.
+				}
+			}
+			@alertdialog.Footer() {
+				@alertdialog.Cancel(alertdialog.CancelProps{Variant: button.VariantOutline}) {
+					Cancel
+				}
+				@alertdialog.Action(alertdialog.ActionProps{Variant: button.VariantDestructive}) {
+					Delete
+				}
+			}
+		}
+	}
+}

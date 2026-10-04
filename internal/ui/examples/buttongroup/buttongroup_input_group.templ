@@ -1,0 +1,61 @@
+package buttongroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/buttongroup"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/tooltip"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ ButtonGroupInputGroup() {
+	@buttongroup.ButtonGroup(buttongroup.Props{Class: "[--radius:9999rem]"}) {
+		@buttongroup.ButtonGroup() {
+			@button.Button(button.Props{
+				Variant: button.VariantOutline,
+				Size:    button.SizeIcon,
+			}) {
+				@icon.Plus()
+			}
+		}
+		@buttongroup.ButtonGroup() {
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "button-group-voice-input", Placeholder: "Send a message..."})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					@tooltip.Tooltip() {
+						@inputgroup.Button(inputgroup.ButtonProps{
+							Size:  inputgroup.ButtonSizeIconXs,
+							Class: "data-[active=true]:bg-orange-100 data-[active=true]:text-orange-700 dark:data-[active=true]:bg-orange-800 dark:data-[active=true]:text-orange-100",
+							Attributes: utils.MergeAttributes(tooltip.Trigger(ctx), templ.Attributes{
+								"id":           "button-group-voice",
+								"data-active":  "false",
+								"aria-pressed": "false",
+							}),
+						}) {
+							@icon.AudioLines()
+						}
+						@tooltip.Content() {
+							Voice Mode
+						}
+					}
+				}
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The voiceEnabled state: the button toggles it, the button and the
+		// input render it.
+		document.addEventListener("click", (e) => {
+			const button = e.target instanceof Element && e.target.closest("#button-group-voice");
+			if (!button) return;
+			const enabled = button.getAttribute("data-active") !== "true";
+			button.setAttribute("data-active", String(enabled));
+			button.setAttribute("aria-pressed", String(enabled));
+			const input = document.getElementById("button-group-voice-input");
+			input.placeholder = enabled ? "Record and send audio..." : "Send a message...";
+			input.disabled = enabled;
+			input.toggleAttribute("data-disabled", enabled);
+		});
+	</script>
+}

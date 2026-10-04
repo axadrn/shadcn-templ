@@ -1,0 +1,53 @@
+package attachment
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/attachment"
+	"github.com/axadrn/shadcn-templ/v2/components/dialog"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ AttachmentTrigger() {
+	<div class="mx-auto w-full max-w-sm py-12">
+		@dialog.Dialog() {
+			@attachment.Attachment(attachment.Props{Class: "w-full"}) {
+				@attachment.Media() {
+					@icon.FileSearch()
+				}
+				@attachment.Content() {
+					@attachment.Title() {
+						research-summary.pdf
+					}
+					@attachment.Description() {
+						Open preview dialog
+					}
+				}
+				@attachment.Actions() {
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Copy link"}}) {
+						@icon.Copy()
+					}
+					@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove research-summary.pdf"}}) {
+						@icon.X()
+					}
+				}
+				@attachment.Trigger(attachment.TriggerProps{
+					Attributes: utils.MergeAttributes(
+						dialog.Trigger(ctx),
+						templ.Attributes{"data-slot": "dialog-trigger", "tabindex": "0", "aria-label": "Preview research-summary.pdf"},
+					),
+				})
+			}
+			@dialog.Content(dialog.ContentProps{Class: "sm:max-w-md"}) {
+				@dialog.Header() {
+					@dialog.Title() {
+						research-summary.pdf
+					}
+					@dialog.Description() {
+						The attachment trigger fills the card and opens the dialog, while
+						the actions stay independently clickable above it.
+					}
+				}
+			}
+		}
+	</div>
+}

@@ -1,0 +1,50 @@
+package menubar
+
+import "github.com/axadrn/shadcn-templ/v2/components/menubar"
+
+templ MenubarCheckbox() {
+	@menubar.Menubar(menubar.Props{Class: "w-72"}) {
+		@menubar.Menu() {
+			@menubar.Trigger() {
+				View
+			}
+			@menubar.Content(menubar.ContentProps{Class: "w-64"}) {
+				@menubar.CheckboxItem() {
+					Always Show Bookmarks Bar
+				}
+				@menubar.CheckboxItem(menubar.CheckboxItemProps{Checked: menubarBool(true)}) {
+					Always Show Full URLs
+				}
+				@menubar.Separator()
+				@menubar.Item(menubar.ItemProps{Inset: true}) {
+					Reload
+					@menubar.Shortcut() {
+						⌘R
+					}
+				}
+				@menubar.Item(menubar.ItemProps{Disabled: true, Inset: true}) {
+					Force Reload
+					@menubar.Shortcut() {
+						⇧⌘R
+					}
+				}
+			}
+		}
+		@menubar.Menu() {
+			@menubar.Trigger() {
+				Format
+			}
+			@menubar.Content() {
+				@menubar.CheckboxItem(menubar.CheckboxItemProps{Checked: menubarBool(true)}) {
+					Strikethrough
+				}
+				@menubar.CheckboxItem() {
+					Code
+				}
+				@menubar.CheckboxItem() {
+					Superscript
+				}
+			}
+		}
+	}
+}

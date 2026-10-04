@@ -1,0 +1,21 @@
+package calendar
+
+import (
+	"time"
+
+	"github.com/axadrn/shadcn-templ/v2/components/calendar"
+)
+
+// The upstream example's Arabic translation, its default language, with
+// react-day-picker's arSA locale.
+templ CalendarRtl() {
+	@calendar.Calendar(calendar.Props{
+		Mode:          calendar.ModeSingle,
+		Selected:      time.Now(),
+		Class:         "rounded-lg border [--cell-size:--spacing(9)]",
+		CaptionLayout: calendar.CaptionLayoutDropdown,
+		Dir:           "rtl",
+		Locale:        "ar-SA",
+	})
+	@calendarSelectState()
+}

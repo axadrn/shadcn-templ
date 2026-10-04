@@ -1,0 +1,24 @@
+package shimmer
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+)
+
+templ ShimmerMarker() {
+	<div class="flex w-full max-w-sm flex-col gap-4">
+		@marker.Marker(marker.Props{Attributes: templ.Attributes{"role": "status"}}) {
+			@marker.Icon() {
+				@spinner.Spinner()
+			}
+			@marker.Content(marker.ContentProps{Class: "shimmer"}) {
+				Thinking...
+			}
+		}
+		@marker.Marker(marker.Props{Variant: marker.VariantSeparator, Attributes: templ.Attributes{"role": "status"}}) {
+			@marker.Content(marker.ContentProps{Class: "shimmer"}) {
+				Reading 4 files
+			}
+		}
+	</div>
+}

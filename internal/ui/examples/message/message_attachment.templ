@@ -1,0 +1,73 @@
+package message
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/attachment"
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/message"
+)
+
+templ MessageAttachment() {
+	<div class="flex w-full max-w-sm flex-col gap-8 py-12">
+		@message.Message(message.Props{Align: message.AlignEnd}) {
+			@message.Content() {
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img
+							src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=900&auto=format&fit=crop&q=80"
+							alt="Workspace"
+						/>
+					}
+				}
+				@bubble.Bubble() {
+					@bubble.Content() {
+						Here's the image. Can you add it to the PDF? Use it for the
+						cover page.
+					}
+				}
+			}
+		}
+		@message.Message() {
+			@message.Content() {
+				@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+					@bubble.Content() {
+						Done. Here's the PDF with the image added as the cover page.
+					}
+				}
+				@attachment.Attachment() {
+					@attachment.Media() {
+						@icon.FileText()
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							sales-dashboard.pdf
+						}
+						@attachment.Description() {
+							PDF · 2.4 MB
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{
+							Type:       button.TypeButton,
+							Size:       button.SizeIconSm,
+							Variant:    button.VariantSecondary,
+							Attributes: templ.Attributes{"title": "Download", "aria-label": "Download"},
+						}) {
+							@icon.Download()
+						}
+					}
+				}
+			}
+		}
+		@message.Message(message.Props{Align: message.AlignEnd}) {
+			@message.Content() {
+				@bubble.Bubble() {
+					@bubble.Content() {
+						Thanks. Looks good.
+					}
+				}
+			}
+		}
+	</div>
+}

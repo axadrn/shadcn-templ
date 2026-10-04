@@ -1,0 +1,32 @@
+package accordion
+
+import "github.com/axadrn/shadcn-templ/v2/components/accordion"
+
+templ AccordionBasic() {
+	@accordion.Accordion(accordion.Props{DefaultValue: []string{"item-3"}, Class: "max-w-lg"}) {
+		@accordion.Item(accordion.ItemProps{Value: "item-3"}) {
+			@accordion.Trigger() {
+				How do I reset my password?
+			}
+			@accordion.Content() {
+				Click on 'Forgot Password' on the login page, enter your email address, and we'll send you a link to reset your password. The link will expire in 24 hours.
+			}
+		}
+		@accordion.Item(accordion.ItemProps{Value: "item-1"}) {
+			@accordion.Trigger() {
+				Can I change my subscription plan?
+			}
+			@accordion.Content() {
+				Yes, you can upgrade or downgrade your plan at any time from your account settings. Changes will be reflected in your next billing cycle.
+			}
+		}
+		@accordion.Item(accordion.ItemProps{Value: "item-2"}) {
+			@accordion.Trigger() {
+				What payment methods do you accept?
+			}
+			@accordion.Content() {
+				We accept all major credit cards, PayPal, and bank transfers. All payments are processed securely through our payment partners.
+			}
+		}
+	}
+}

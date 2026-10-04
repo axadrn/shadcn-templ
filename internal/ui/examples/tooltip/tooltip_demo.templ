@@ -1,0 +1,21 @@
+package tooltip
+
+import (
+	exshared "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/shared"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/tooltip"
+)
+
+templ TooltipDemo() {
+	@tooltip.Tooltip() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: exshared.ServerRendered(tooltip.Trigger(ctx)),
+		}) {
+			Hover
+		}
+		@tooltip.Content() {
+			<p>Add to library</p>
+		}
+	}
+}

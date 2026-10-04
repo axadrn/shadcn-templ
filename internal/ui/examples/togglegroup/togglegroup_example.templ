@@ -1,0 +1,612 @@
+package togglegroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+	"github.com/axadrn/shadcn-templ/v2/components/togglegroup"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ toggleGroupExampleSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ ToggleGroupExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@toggleGroupExampleBasic()
+			@toggleGroupExampleOutline()
+			@toggleGroupExampleOutlineWithIcons()
+			@toggleGroupExampleSizes()
+			@toggleGroupExampleSpacing()
+			@toggleGroupExampleWithIcons()
+			@toggleGroupExampleFilter()
+			@toggleGroupExampleDateRange()
+			@toggleGroupExampleSort()
+			@toggleGroupExampleWithInputAndSelect()
+			@toggleGroupExampleVertical()
+			@toggleGroupExampleVerticalOutline()
+			@toggleGroupExampleVerticalOutlineWithIcons()
+			@toggleGroupExampleVerticalWithSpacing()
+			@toggleGroupExampleFontWeightSelector()
+		</div>
+	</div>
+}
+
+templ toggleGroupExampleBasic() {
+	@toggleGroupExampleSection("Basic") {
+		@togglegroup.ToggleGroup(togglegroup.Props{
+			Multiple: true,
+			Spacing:  utils.Ptr(1),
+		}) {
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "bold",
+				Attributes: templ.Attributes{"aria-label": "Toggle bold"},
+			}) {
+				@icon.Bold()
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "italic",
+				Attributes: templ.Attributes{"aria-label": "Toggle italic"},
+			}) {
+				@icon.Italic()
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "underline",
+				Attributes: templ.Attributes{"aria-label": "Toggle underline"},
+			}) {
+				@icon.Underline()
+			}
+		}
+	}
+}
+
+templ toggleGroupExampleOutline() {
+	@toggleGroupExampleSection("Outline") {
+		@togglegroup.ToggleGroup(togglegroup.Props{
+			Variant:      togglegroup.VariantOutline,
+			DefaultValue: []string{"all"},
+		}) {
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "all",
+				Attributes: templ.Attributes{"aria-label": "Toggle all"},
+			}) {
+				All
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "missed",
+				Attributes: templ.Attributes{"aria-label": "Toggle missed"},
+			}) {
+				Missed
+			}
+		}
+	}
+}
+
+templ toggleGroupExampleOutlineWithIcons() {
+	@toggleGroupExampleSection("Outline With Icons") {
+		@togglegroup.ToggleGroup(togglegroup.Props{
+			Variant:  togglegroup.VariantOutline,
+			Multiple: true,
+			Size:     togglegroup.SizeSm,
+		}) {
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "bold",
+				Attributes: templ.Attributes{"aria-label": "Toggle bold"},
+			}) {
+				@icon.Bold()
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "italic",
+				Attributes: templ.Attributes{"aria-label": "Toggle italic"},
+			}) {
+				@icon.Italic()
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "underline",
+				Attributes: templ.Attributes{"aria-label": "Toggle underline"},
+			}) {
+				@icon.Underline()
+			}
+		}
+	}
+}
+
+templ toggleGroupExampleSizes() {
+	@toggleGroupExampleSection("Sizes") {
+		<div class="flex flex-col gap-4">
+			@togglegroup.ToggleGroup(togglegroup.Props{
+				Size:         togglegroup.SizeSm,
+				Variant:      togglegroup.VariantOutline,
+				DefaultValue: []string{"top"},
+			}) {
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "top",
+					Attributes: templ.Attributes{"aria-label": "Toggle top"},
+				}) {
+					Top
+				}
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "bottom",
+					Attributes: templ.Attributes{"aria-label": "Toggle bottom"},
+				}) {
+					Bottom
+				}
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "left",
+					Attributes: templ.Attributes{"aria-label": "Toggle left"},
+				}) {
+					Left
+				}
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "right",
+					Attributes: templ.Attributes{"aria-label": "Toggle right"},
+				}) {
+					Right
+				}
+			}
+			@togglegroup.ToggleGroup(togglegroup.Props{
+				Variant:      togglegroup.VariantOutline,
+				DefaultValue: []string{"top"},
+			}) {
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "top",
+					Attributes: templ.Attributes{"aria-label": "Toggle top"},
+				}) {
+					Top
+				}
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "bottom",
+					Attributes: templ.Attributes{"aria-label": "Toggle bottom"},
+				}) {
+					Bottom
+				}
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "left",
+					Attributes: templ.Attributes{"aria-label": "Toggle left"},
+				}) {
+					Left
+				}
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "right",
+					Attributes: templ.Attributes{"aria-label": "Toggle right"},
+				}) {
+					Right
+				}
+			}
+		</div>
+	}
+}
+
+templ toggleGroupExampleSpacing() {
+	@toggleGroupExampleSection("With Spacing") {
+		@togglegroup.ToggleGroup(togglegroup.Props{
+			Size:         togglegroup.SizeSm,
+			Spacing:      utils.Ptr(2),
+			DefaultValue: []string{"top"},
+		}) {
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "top",
+				Attributes: templ.Attributes{"aria-label": "Toggle top"},
+			}) {
+				Top
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "bottom",
+				Attributes: templ.Attributes{"aria-label": "Toggle bottom"},
+			}) {
+				Bottom
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "left",
+				Attributes: templ.Attributes{"aria-label": "Toggle left"},
+			}) {
+				Left
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "right",
+				Attributes: templ.Attributes{"aria-label": "Toggle right"},
+			}) {
+				Right
+			}
+		}
+	}
+}
+
+templ toggleGroupExampleWithIcons() {
+	@toggleGroupExampleSection("With Icons") {
+		@togglegroup.ToggleGroup(togglegroup.Props{
+			Multiple: true,
+			Variant:  togglegroup.VariantOutline,
+			Spacing:  utils.Ptr(2),
+			Size:     togglegroup.SizeSm,
+		}) {
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "star",
+				Class:      "aria-pressed:bg-transparent aria-pressed:*:[svg]:fill-foreground aria-pressed:*:[svg]:stroke-foreground",
+				Attributes: templ.Attributes{"aria-label": "Toggle star"},
+			}) {
+				@icon.Star()
+				Star
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "heart",
+				Class:      "aria-pressed:bg-transparent aria-pressed:*:[svg]:fill-foreground aria-pressed:*:[svg]:stroke-foreground",
+				Attributes: templ.Attributes{"aria-label": "Toggle heart"},
+			}) {
+				@icon.Heart()
+				Heart
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "bookmark",
+				Class:      "aria-pressed:bg-transparent aria-pressed:*:[svg]:fill-foreground aria-pressed:*:[svg]:stroke-foreground",
+				Attributes: templ.Attributes{"aria-label": "Toggle bookmark"},
+			}) {
+				@icon.Bookmark()
+				Bookmark
+			}
+		}
+	}
+}
+
+templ toggleGroupExampleFilter() {
+	@toggleGroupExampleSection("Filter") {
+		@togglegroup.ToggleGroup(togglegroup.Props{
+			Variant:      togglegroup.VariantOutline,
+			Size:         togglegroup.SizeSm,
+			DefaultValue: []string{"all"},
+		}) {
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "all",
+				Attributes: templ.Attributes{"aria-label": "All"},
+			}) {
+				All
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "active",
+				Attributes: templ.Attributes{"aria-label": "Active"},
+			}) {
+				Active
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "completed",
+				Attributes: templ.Attributes{"aria-label": "Completed"},
+			}) {
+				Completed
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "archived",
+				Attributes: templ.Attributes{"aria-label": "Archived"},
+			}) {
+				Archived
+			}
+		}
+	}
+}
+
+templ toggleGroupExampleDateRange() {
+	@toggleGroupExampleSection("Date Range") {
+		@togglegroup.ToggleGroup(togglegroup.Props{
+			Variant:      togglegroup.VariantOutline,
+			Size:         togglegroup.SizeSm,
+			Spacing:      utils.Ptr(2),
+			DefaultValue: []string{"today"},
+		}) {
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "today",
+				Attributes: templ.Attributes{"aria-label": "Today"},
+			}) {
+				Today
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "week",
+				Attributes: templ.Attributes{"aria-label": "This Week"},
+			}) {
+				This Week
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "month",
+				Attributes: templ.Attributes{"aria-label": "This Month"},
+			}) {
+				This Month
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "year",
+				Attributes: templ.Attributes{"aria-label": "This Year"},
+			}) {
+				This Year
+			}
+		}
+	}
+}
+
+templ toggleGroupExampleSort() {
+	@toggleGroupExampleSection("Sort") {
+		@togglegroup.ToggleGroup(togglegroup.Props{
+			Variant:      togglegroup.VariantOutline,
+			Size:         togglegroup.SizeSm,
+			DefaultValue: []string{"newest"},
+		}) {
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "newest",
+				Attributes: templ.Attributes{"aria-label": "Newest"},
+			}) {
+				@icon.ArrowDown()
+				Newest
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "oldest",
+				Attributes: templ.Attributes{"aria-label": "Oldest"},
+			}) {
+				@icon.ArrowUp()
+				Oldest
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "popular",
+				Attributes: templ.Attributes{"aria-label": "Popular"},
+			}) {
+				@icon.TrendingUp()
+				Popular
+			}
+		}
+	}
+}
+
+type toggleGroupExampleFilterItem struct {
+	Label string
+	Value string
+}
+
+var toggleGroupExampleFilterItems = []toggleGroupExampleFilterItem{
+	{"All", "all"},
+	{"Active", "active"},
+	{"Archived", "archived"},
+}
+
+templ toggleGroupExampleWithInputAndSelect() {
+	@toggleGroupExampleSection("With Input and Select") {
+		<div class="flex items-center gap-2">
+			@input.Input(input.Props{Type: "search", Placeholder: "Search...", Class: "flex-1"})
+			@selectcomp.Select(selectcomp.Props{
+				Items: utils.Map(toggleGroupExampleFilterItems, func(i toggleGroupExampleFilterItem) selectcomp.ItemData {
+					return selectcomp.ItemData{Value: i.Value, Label: i.Label}
+				}),
+				DefaultValue: "all",
+			}) {
+				@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-32"}) {
+					@selectcomp.Value()
+				}
+				@selectcomp.Content() {
+					@selectcomp.Group() {
+						for _, item := range toggleGroupExampleFilterItems {
+							@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+								{ item.Label }
+							}
+						}
+					}
+				}
+			}
+			@togglegroup.ToggleGroup(togglegroup.Props{
+				Variant:      togglegroup.VariantOutline,
+				DefaultValue: []string{"grid"},
+			}) {
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "grid",
+					Attributes: templ.Attributes{"aria-label": "Grid view"},
+				}) {
+					Grid
+				}
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "list",
+					Attributes: templ.Attributes{"aria-label": "List view"},
+				}) {
+					List
+				}
+			}
+		</div>
+	}
+}
+
+templ toggleGroupExampleVertical() {
+	@toggleGroupExampleSection("Vertical") {
+		@togglegroup.ToggleGroup(togglegroup.Props{
+			Multiple:    true,
+			Orientation: togglegroup.OrientationVertical,
+			Spacing:     utils.Ptr(1),
+		}) {
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "bold",
+				Attributes: templ.Attributes{"aria-label": "Toggle bold"},
+			}) {
+				@icon.Bold()
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "italic",
+				Attributes: templ.Attributes{"aria-label": "Toggle italic"},
+			}) {
+				@icon.Italic()
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "underline",
+				Attributes: templ.Attributes{"aria-label": "Toggle underline"},
+			}) {
+				@icon.Underline()
+			}
+		}
+	}
+}
+
+templ toggleGroupExampleVerticalOutline() {
+	@toggleGroupExampleSection("Vertical Outline") {
+		@togglegroup.ToggleGroup(togglegroup.Props{
+			Variant:      togglegroup.VariantOutline,
+			Orientation:  togglegroup.OrientationVertical,
+			Size:         togglegroup.SizeSm,
+			DefaultValue: []string{"all"},
+		}) {
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "all",
+				Attributes: templ.Attributes{"aria-label": "Toggle all"},
+			}) {
+				All
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "active",
+				Attributes: templ.Attributes{"aria-label": "Toggle active"},
+			}) {
+				Active
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "completed",
+				Attributes: templ.Attributes{"aria-label": "Toggle completed"},
+			}) {
+				Completed
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "archived",
+				Attributes: templ.Attributes{"aria-label": "Toggle archived"},
+			}) {
+				Archived
+			}
+		}
+	}
+}
+
+templ toggleGroupExampleVerticalOutlineWithIcons() {
+	@toggleGroupExampleSection("Vertical Outline With Icons") {
+		@togglegroup.ToggleGroup(togglegroup.Props{
+			Variant:     togglegroup.VariantOutline,
+			Multiple:    true,
+			Orientation: togglegroup.OrientationVertical,
+			Size:        togglegroup.SizeSm,
+		}) {
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "bold",
+				Attributes: templ.Attributes{"aria-label": "Toggle bold"},
+			}) {
+				@icon.Bold()
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "italic",
+				Attributes: templ.Attributes{"aria-label": "Toggle italic"},
+			}) {
+				@icon.Italic()
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "underline",
+				Attributes: templ.Attributes{"aria-label": "Toggle underline"},
+			}) {
+				@icon.Underline()
+			}
+		}
+	}
+}
+
+templ toggleGroupExampleVerticalWithSpacing() {
+	@toggleGroupExampleSection("Vertical With Spacing") {
+		@togglegroup.ToggleGroup(togglegroup.Props{
+			Size:         togglegroup.SizeSm,
+			Orientation:  togglegroup.OrientationVertical,
+			Spacing:      utils.Ptr(1),
+			DefaultValue: []string{"top"},
+		}) {
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "top",
+				Attributes: templ.Attributes{"aria-label": "Toggle top"},
+			}) {
+				Top
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "bottom",
+				Attributes: templ.Attributes{"aria-label": "Toggle bottom"},
+			}) {
+				Bottom
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "left",
+				Attributes: templ.Attributes{"aria-label": "Toggle left"},
+			}) {
+				Left
+			}
+			@togglegroup.Item(togglegroup.ItemProps{
+				Value:      "right",
+				Attributes: templ.Attributes{"aria-label": "Toggle right"},
+			}) {
+				Right
+			}
+		}
+	}
+}
+
+// Keep the selected font weight in sync with the preview.
+templ toggleGroupExampleFontWeightSelector() {
+	@toggleGroupExampleSection("Font Weight Selector") {
+		@field.Field() {
+			@field.Label() {
+				Font Weight
+			}
+			@togglegroup.ToggleGroup(togglegroup.Props{
+				ID:           "toggle-group-example-font-weight",
+				Variant:      togglegroup.VariantOutline,
+				Spacing:      utils.Ptr(2),
+				Size:         togglegroup.SizeLg,
+				DefaultValue: []string{"normal"},
+			}) {
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "light",
+					Class:      "flex size-16 flex-col items-center justify-center rounded-xl",
+					Attributes: templ.Attributes{"aria-label": "Light"},
+				}) {
+					<span class="text-2xl leading-none font-light">Aa</span>
+					<span class="text-xs text-muted-foreground">Light</span>
+				}
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "normal",
+					Class:      "flex size-16 flex-col items-center justify-center rounded-xl",
+					Attributes: templ.Attributes{"aria-label": "Normal"},
+				}) {
+					<span class="text-2xl leading-none font-normal">Aa</span>
+					<span class="text-xs text-muted-foreground">Normal</span>
+				}
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "medium",
+					Class:      "flex size-16 flex-col items-center justify-center rounded-xl",
+					Attributes: templ.Attributes{"aria-label": "Medium"},
+				}) {
+					<span class="text-2xl leading-none font-medium">Aa</span>
+					<span class="text-xs text-muted-foreground">Medium</span>
+				}
+				@togglegroup.Item(togglegroup.ItemProps{
+					Value:      "bold",
+					Class:      "flex size-16 flex-col items-center justify-center rounded-xl",
+					Attributes: templ.Attributes{"aria-label": "Bold"},
+				}) {
+					<span class="text-2xl leading-none font-bold">Aa</span>
+					<span class="text-xs text-muted-foreground">Bold</span>
+				}
+			}
+			@field.Description() {
+				Use <code id="toggle-group-example-font-weight-code" class="rounded-md bg-muted px-1 py-0.5 font-mono">font-normal</code> to set the font weight.
+			}
+		}
+		<script nonce={ templ.GetNonce(ctx) }>
+			(() => {
+				const group = document.getElementById("toggle-group-example-font-weight");
+				const code = document.getElementById("toggle-group-example-font-weight-code");
+				group.addEventListener("toggle-group-value-change", (e) => {
+					const value = e.detail.value[0];
+					if (value) code.textContent = "font-" + value;
+				});
+			})();
+		</script>
+	}
+}

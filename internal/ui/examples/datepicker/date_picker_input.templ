@@ -1,0 +1,86 @@
+package datepicker
+
+import (
+	"time"
+
+	"github.com/axadrn/shadcn-templ/v2/components/calendar"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/popover"
+)
+
+templ DatePickerInput() {
+	{{ date := time.Date(2025, 6, 1, 0, 0, 0, 0, time.Local) }}
+	@field.Field(field.Props{Class: "mx-auto w-48"}) {
+		@field.Label(field.LabelProps{For: "date-required"}) {
+			Subscription Date
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{
+				ID:          "date-required",
+				Value:       "June 01, 2025",
+				Placeholder: "June 01, 2025",
+			})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@popover.Popover(popover.Props{ID: "date-picker-input"}) {
+					{{
+						triggerAttrs := popover.Trigger(ctx)
+						triggerAttrs["id"] = "date-picker"
+						triggerAttrs["aria-label"] = "Select date"
+					}}
+					@inputgroup.Button(inputgroup.ButtonProps{
+						Variant:    "ghost",
+						Size:       inputgroup.ButtonSizeIconXs,
+						Attributes: triggerAttrs,
+					}) {
+						@icon.Calendar()
+						<span class="sr-only">Select date</span>
+					}
+					@popover.Content(popover.ContentProps{
+						Class:       "w-auto overflow-hidden p-0",
+						Align:       popover.AlignEnd,
+						AlignOffset: -8,
+						SideOffset:  10,
+					}) {
+						@calendar.Calendar(calendar.Props{
+							Mode:     calendar.ModeSingle,
+							Selected: date,
+							Month:    date,
+						})
+					}
+				}
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The open, date, month and value state of the example.
+		(() => {
+			const input = document.getElementById("date-required");
+			const popup = () => document.getElementById("date-picker-input");
+			const calendar = () => popup().querySelector('[data-slot="calendar"]');
+			const formatDate = (d) => (d ? d.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" }) : "");
+			document.addEventListener("calendar-month-change", (e) => {
+				if (e.target === calendar()) window.templ.calendar.setMonth(e.target, e.detail.month);
+			});
+			document.addEventListener("calendar-select", (e) => {
+				if (e.target !== calendar()) return;
+				input.value = formatDate(e.detail.selected);
+				window.templ.calendar.setSelected(e.target, e.detail.selected);
+				window.templ.popover.close(popup());
+			});
+			input.addEventListener("input", () => {
+				const date = new Date(input.value);
+				if (isNaN(date.getTime())) return;
+				window.templ.calendar.setSelected(calendar(), date);
+				window.templ.calendar.setMonth(calendar(), date);
+			});
+			input.addEventListener("keydown", (e) => {
+				if (e.key === "ArrowDown") {
+					e.preventDefault();
+					window.templ.popover.open(popup());
+				}
+			});
+		})();
+	</script>
+}

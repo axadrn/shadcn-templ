@@ -1,0 +1,84 @@
+package menubar
+
+import "github.com/axadrn/shadcn-templ/v2/components/menubar"
+
+templ MenubarSubmenu() {
+	@menubar.Menubar(menubar.Props{Class: "w-72"}) {
+		@menubar.Menu() {
+			@menubar.Trigger() {
+				File
+			}
+			@menubar.Content() {
+				@menubar.Sub() {
+					@menubar.SubTrigger() {
+						Share
+					}
+					@menubar.SubContent() {
+						@menubar.Item() {
+							Email link
+						}
+						@menubar.Item() {
+							Messages
+						}
+						@menubar.Item() {
+							Notes
+						}
+					}
+				}
+				@menubar.Separator()
+				@menubar.Item() {
+					Print...
+					@menubar.Shortcut() {
+						⌘P
+					}
+				}
+			}
+		}
+		@menubar.Menu() {
+			@menubar.Trigger() {
+				Edit
+			}
+			@menubar.Content() {
+				@menubar.Item() {
+					Undo
+					@menubar.Shortcut() {
+						⌘Z
+					}
+				}
+				@menubar.Item() {
+					Redo
+					@menubar.Shortcut() {
+						⇧⌘Z
+					}
+				}
+				@menubar.Separator()
+				@menubar.Sub() {
+					@menubar.SubTrigger() {
+						Find
+					}
+					@menubar.SubContent() {
+						@menubar.Item() {
+							Find...
+						}
+						@menubar.Item() {
+							Find Next
+						}
+						@menubar.Item() {
+							Find Previous
+						}
+					}
+				}
+				@menubar.Separator()
+				@menubar.Item() {
+					Cut
+				}
+				@menubar.Item() {
+					Copy
+				}
+				@menubar.Item() {
+					Paste
+				}
+			}
+		}
+	}
+}

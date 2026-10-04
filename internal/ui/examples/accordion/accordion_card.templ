@@ -1,0 +1,47 @@
+package accordion
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/accordion"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+)
+
+templ AccordionCard() {
+	@card.Card(card.Props{Class: "w-full max-w-sm"}) {
+		@card.Header() {
+			@card.Title() {
+				Subscription & Billing
+			}
+			@card.Description() {
+				Common questions about your account, plans, payments and cancellations.
+			}
+		}
+		@card.Content() {
+			@accordion.Accordion(accordion.Props{DefaultValue: []string{"item-3"}}) {
+				@accordion.Item(accordion.ItemProps{Value: "item-3"}) {
+					@accordion.Trigger() {
+						What subscription plans do you offer?
+					}
+					@accordion.Content() {
+						We offer three subscription tiers: Starter ($9/month), Professional ($29/month), and Enterprise ($99/month). Each plan includes increasing storage limits, API access, priority support, and team collaboration features.
+					}
+				}
+				@accordion.Item(accordion.ItemProps{Value: "item-1"}) {
+					@accordion.Trigger() {
+						How does billing work?
+					}
+					@accordion.Content() {
+						Billing occurs automatically at the start of each billing cycle. We accept all major credit cards, PayPal, and ACH transfers for enterprise customers. You'll receive an invoice via email after each payment.
+					}
+				}
+				@accordion.Item(accordion.ItemProps{Value: "item-2"}) {
+					@accordion.Trigger() {
+						How do I cancel my subscription?
+					}
+					@accordion.Content() {
+						You can cancel your subscription anytime from your account settings. There are no cancellation fees or penalties. Your access will continue until the end of your current billing period.
+					}
+				}
+			}
+		}
+	}
+}

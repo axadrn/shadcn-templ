@@ -1,0 +1,35 @@
+package sidebar
+
+import "github.com/axadrn/shadcn-templ/v2/components/sidebar"
+
+templ SidebarMenuBadge() {
+	@sidebar.Provider() {
+		@sidebar.Sidebar() {
+			@sidebar.Content() {
+				@sidebar.Group() {
+					@sidebar.GroupLabel() {
+						Projects
+					}
+					@sidebar.GroupContent() {
+						@sidebar.Menu() {
+							for _, project := range sidebarMenuProjects {
+								@sidebar.MenuItem() {
+									@sidebar.MenuButton(sidebar.MenuButtonProps{
+										Href:  project.URL,
+										Class: "group-has-[[data-state=open]]/menu-item:bg-sidebar-accent",
+									}) {
+										@project.Icon()
+										<span>{ project.Name }</span>
+									}
+									@sidebar.MenuBadge() {
+										{ project.Badge }
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

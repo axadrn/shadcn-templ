@@ -1,0 +1,41 @@
+package hovercard
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/hovercard"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ HoverCardRtl() {
+	<div class="grid gap-4">
+		<div class="flex flex-wrap justify-center gap-2">
+			@hoverCardRtlSide("يسار", hovercard.SideLeft)
+			@hoverCardRtlSide("أعلى", hovercard.SideTop)
+			@hoverCardRtlSide("أسفل", hovercard.SideBottom)
+			@hoverCardRtlSide("يمين", hovercard.SideRight)
+		</div>
+		<div class="flex flex-wrap justify-center gap-2">
+			@hoverCardRtlSide("بداية السطر", hovercard.Side("inline-start"))
+			@hoverCardRtlSide("نهاية السطر", hovercard.Side("inline-end"))
+		</div>
+	</div>
+}
+
+templ hoverCardRtlSide(label string, side hovercard.Side) {
+	@hovercard.HoverCard(hovercard.Props{Delay: 10, CloseDelay: 100}) {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: hovercard.Trigger(ctx),
+		}) {
+			{ label }
+		}
+		@hovercard.Content(hovercard.ContentProps{
+			Side:       side,
+			Class:      "flex w-64 flex-col gap-1",
+			Attributes: templ.Attributes{"dir": "rtl"},
+		}) {
+			<div class="font-semibold">سماعات لاسلكية</div>
+			<div class="text-sm text-muted-foreground">٩٩.٩٩ $</div>
+		}
+	}
+}

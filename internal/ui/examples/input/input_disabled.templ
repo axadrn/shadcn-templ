@@ -1,0 +1,23 @@
+package input
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+)
+
+templ InputDisabled() {
+	@field.Field(field.Props{Attributes: templ.Attributes{"data-disabled": "true"}}) {
+		@field.Label(field.LabelProps{For: "input-demo-disabled"}) {
+			Email
+		}
+		@input.Input(input.Props{
+			ID:          "input-demo-disabled",
+			Type:        "email",
+			Placeholder: "Email",
+			Disabled:    true,
+		})
+		@field.Description() {
+			This field is currently disabled.
+		}
+	}
+}

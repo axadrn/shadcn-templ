@@ -1,0 +1,72 @@
+package table
+
+import "github.com/axadrn/shadcn-templ/v2/components/table"
+
+type tableInvoice struct {
+	Invoice       string
+	PaymentStatus string
+	TotalAmount   string
+	PaymentMethod string
+}
+
+var tableInvoices = []tableInvoice{
+	{"INV001", "Paid", "$250.00", "Credit Card"},
+	{"INV002", "Pending", "$150.00", "PayPal"},
+	{"INV003", "Unpaid", "$350.00", "Bank Transfer"},
+	{"INV004", "Paid", "$450.00", "Credit Card"},
+	{"INV005", "Paid", "$550.00", "PayPal"},
+	{"INV006", "Pending", "$200.00", "Bank Transfer"},
+	{"INV007", "Unpaid", "$300.00", "Credit Card"},
+}
+
+templ TableDemo() {
+	@table.Table() {
+		@table.Caption() {
+			A list of your recent invoices.
+		}
+		@table.Header() {
+			@table.Row() {
+				@table.Head(table.HeadProps{Class: "w-[100px]"}) {
+					Invoice
+				}
+				@table.Head() {
+					Status
+				}
+				@table.Head() {
+					Method
+				}
+				@table.Head(table.HeadProps{Class: "text-right"}) {
+					Amount
+				}
+			}
+		}
+		@table.Body() {
+			for _, invoice := range tableInvoices {
+				@table.Row() {
+					@table.Cell(table.CellProps{Class: "font-medium"}) {
+						{ invoice.Invoice }
+					}
+					@table.Cell() {
+						{ invoice.PaymentStatus }
+					}
+					@table.Cell() {
+						{ invoice.PaymentMethod }
+					}
+					@table.Cell(table.CellProps{Class: "text-right"}) {
+						{ invoice.TotalAmount }
+					}
+				}
+			}
+		}
+		@table.Footer() {
+			@table.Row() {
+				@table.Cell(table.CellProps{Attributes: templ.Attributes{"colspan": "3"}}) {
+					Total
+				}
+				@table.Cell(table.CellProps{Class: "text-right"}) {
+					$2,500.00
+				}
+			}
+		}
+	}
+}

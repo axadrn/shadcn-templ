@@ -1,0 +1,274 @@
+package inputotp
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputotp"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ inputOTPExampleSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ InputOTPExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@inputOTPExampleForm()
+			@inputOTPExampleSimple()
+			@inputOTPExamplePattern()
+			@inputOTPExampleWithSeparator()
+			@inputOTPExampleAlphanumeric()
+			@inputOTPExampleDisabled()
+			@inputOTPExampleFourDigits()
+			@inputOTPExampleInvalid()
+		</div>
+	</div>
+	@InputOTPState("with-separator")
+	@InputOTPState("invalid")
+}
+
+// The value state of a controlled example: onChange sets it, the input
+// renders it.
+templ InputOTPState(id string) {
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const input = document.getElementById({{ id }});
+			input?.addEventListener("input-otp-change", (e) => window.templ.inputOTP.setValue(input, e.detail.value));
+		})();
+	</script>
+}
+
+templ inputOTPExampleSimple() {
+	@inputOTPExampleSection("Simple") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "simple"}) {
+				Simple
+			}
+			@inputotp.InputOTP(inputotp.Props{ID: "simple", MaxLength: 6}) {
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 0})
+					@inputotp.Slot(inputotp.SlotProps{Index: 1})
+					@inputotp.Slot(inputotp.SlotProps{Index: 2})
+				}
+				@inputotp.Separator()
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 3})
+					@inputotp.Slot(inputotp.SlotProps{Index: 4})
+					@inputotp.Slot(inputotp.SlotProps{Index: 5})
+				}
+			}
+		}
+	}
+}
+
+templ inputOTPExamplePattern() {
+	@inputOTPExampleSection("Digits Only") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "digits-only"}) {
+				Digits Only
+			}
+			@inputotp.InputOTP(inputotp.Props{ID: "digits-only", MaxLength: 6, Pattern: inputotp.RegexpOnlyDigits}) {
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 0})
+					@inputotp.Slot(inputotp.SlotProps{Index: 1})
+					@inputotp.Slot(inputotp.SlotProps{Index: 2})
+					@inputotp.Slot(inputotp.SlotProps{Index: 3})
+					@inputotp.Slot(inputotp.SlotProps{Index: 4})
+					@inputotp.Slot(inputotp.SlotProps{Index: 5})
+				}
+			}
+		}
+	}
+}
+
+templ inputOTPExampleWithSeparator() {
+	@inputOTPExampleSection("With Separator") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "with-separator"}) {
+				With Separator
+			}
+			@inputotp.InputOTP(inputotp.Props{ID: "with-separator", MaxLength: 6, Value: utils.Ptr("123456")}) {
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 0})
+					@inputotp.Slot(inputotp.SlotProps{Index: 1})
+				}
+				@inputotp.Separator()
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 2})
+					@inputotp.Slot(inputotp.SlotProps{Index: 3})
+				}
+				@inputotp.Separator()
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 4})
+					@inputotp.Slot(inputotp.SlotProps{Index: 5})
+				}
+			}
+		}
+	}
+}
+
+templ inputOTPExampleAlphanumeric() {
+	@inputOTPExampleSection("Alphanumeric") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "alphanumeric"}) {
+				Alphanumeric
+			}
+			@field.Description() {
+				Accepts both letters and numbers.
+			}
+			@inputotp.InputOTP(inputotp.Props{ID: "alphanumeric", MaxLength: 6, Pattern: inputotp.RegexpOnlyDigitsAndChars}) {
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 0})
+					@inputotp.Slot(inputotp.SlotProps{Index: 1})
+					@inputotp.Slot(inputotp.SlotProps{Index: 2})
+				}
+				@inputotp.Separator()
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 3})
+					@inputotp.Slot(inputotp.SlotProps{Index: 4})
+					@inputotp.Slot(inputotp.SlotProps{Index: 5})
+				}
+			}
+		}
+	}
+}
+
+templ inputOTPExampleDisabled() {
+	@inputOTPExampleSection("Disabled") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "disabled"}) {
+				Disabled
+			}
+			@inputotp.InputOTP(inputotp.Props{ID: "disabled", MaxLength: 6, Disabled: true, Value: utils.Ptr("123456")}) {
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 0})
+					@inputotp.Slot(inputotp.SlotProps{Index: 1})
+					@inputotp.Slot(inputotp.SlotProps{Index: 2})
+				}
+				@inputotp.Separator()
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 3})
+					@inputotp.Slot(inputotp.SlotProps{Index: 4})
+					@inputotp.Slot(inputotp.SlotProps{Index: 5})
+				}
+			}
+		}
+	}
+}
+
+templ inputOTPExampleFourDigits() {
+	@inputOTPExampleSection("4 Digits") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "four-digits"}) {
+				4 Digits
+			}
+			@field.Description() {
+				Common pattern for PIN codes.
+			}
+			@inputotp.InputOTP(inputotp.Props{ID: "four-digits", MaxLength: 4, Pattern: inputotp.RegexpOnlyDigits}) {
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 0})
+					@inputotp.Slot(inputotp.SlotProps{Index: 1})
+					@inputotp.Slot(inputotp.SlotProps{Index: 2})
+					@inputotp.Slot(inputotp.SlotProps{Index: 3})
+				}
+			}
+		}
+	}
+}
+
+templ inputOTPExampleInvalid() {
+	@inputOTPExampleSection("Invalid State") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "invalid"}) {
+				Invalid State
+			}
+			@field.Description() {
+				Example showing the invalid error state.
+			}
+			@inputotp.InputOTP(inputotp.Props{ID: "invalid", MaxLength: 6, Value: utils.Ptr("000000")}) {
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 0, Attributes: templ.Attributes{"aria-invalid": "true"}})
+					@inputotp.Slot(inputotp.SlotProps{Index: 1, Attributes: templ.Attributes{"aria-invalid": "true"}})
+				}
+				@inputotp.Separator()
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 2, Attributes: templ.Attributes{"aria-invalid": "true"}})
+					@inputotp.Slot(inputotp.SlotProps{Index: 3, Attributes: templ.Attributes{"aria-invalid": "true"}})
+				}
+				@inputotp.Separator()
+				@inputotp.Group() {
+					@inputotp.Slot(inputotp.SlotProps{Index: 4, Attributes: templ.Attributes{"aria-invalid": "true"}})
+					@inputotp.Slot(inputotp.SlotProps{Index: 5, Attributes: templ.Attributes{"aria-invalid": "true"}})
+				}
+			}
+			@field.Error() {
+				Invalid code. Please try again.
+			}
+		}
+	}
+}
+
+templ inputOTPExampleForm() {
+	@inputOTPExampleSection("Form") {
+		@card.Card(card.Props{Class: "mx-auto max-w-md"}) {
+			@card.Header() {
+				@card.Title() {
+					Verify your login
+				}
+				@card.Description() {
+					Enter the verification code we sent to your email address: <span class="font-medium">m@example.com</span>.
+				}
+			}
+			@card.Content() {
+				<form>
+					@field.Field() {
+						<div class="flex items-center justify-between">
+							@field.Label(field.LabelProps{For: "otp-verification"}) {
+								Verification code
+							}
+							@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeXs}) {
+								@icon.RefreshCw(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+								Resend Code
+							}
+						</div>
+						@inputotp.InputOTP(inputotp.Props{ID: "otp-verification", MaxLength: 6, Required: true}) {
+							@inputotp.Group(inputotp.GroupProps{Class: "*:data-[slot=input-otp-slot]:text-xl style-vega:*:data-[slot=input-otp-slot]:h-16 style-vega:*:data-[slot=input-otp-slot]:w-12 style-nova:*:data-[slot=input-otp-slot]:h-12 style-nova:*:data-[slot=input-otp-slot]:w-11 style-lyra:*:data-[slot=input-otp-slot]:h-12 style-lyra:*:data-[slot=input-otp-slot]:w-11 style-maia:*:data-[slot=input-otp-slot]:h-16 style-maia:*:data-[slot=input-otp-slot]:w-12 style-mira:*:data-[slot=input-otp-slot]:h-12 style-mira:*:data-[slot=input-otp-slot]:w-11 style-luma:*:data-[slot=input-otp-slot]:h-16 style-luma:*:data-[slot=input-otp-slot]:w-12"}) {
+								@inputotp.Slot(inputotp.SlotProps{Index: 0})
+								@inputotp.Slot(inputotp.SlotProps{Index: 1})
+								@inputotp.Slot(inputotp.SlotProps{Index: 2})
+							}
+							@inputotp.Separator()
+							@inputotp.Group(inputotp.GroupProps{Class: "*:data-[slot=input-otp-slot]:text-xl style-vega:*:data-[slot=input-otp-slot]:h-16 style-vega:*:data-[slot=input-otp-slot]:w-12 style-nova:*:data-[slot=input-otp-slot]:h-12 style-nova:*:data-[slot=input-otp-slot]:w-11 style-lyra:*:data-[slot=input-otp-slot]:h-12 style-lyra:*:data-[slot=input-otp-slot]:w-11 style-maia:*:data-[slot=input-otp-slot]:h-16 style-maia:*:data-[slot=input-otp-slot]:w-12 style-mira:*:data-[slot=input-otp-slot]:h-12 style-mira:*:data-[slot=input-otp-slot]:w-11 style-luma:*:data-[slot=input-otp-slot]:h-16 style-luma:*:data-[slot=input-otp-slot]:w-12"}) {
+								@inputotp.Slot(inputotp.SlotProps{Index: 3})
+								@inputotp.Slot(inputotp.SlotProps{Index: 4})
+								@inputotp.Slot(inputotp.SlotProps{Index: 5})
+							}
+						}
+						@field.Description() {
+							<a href="#">I no longer have access to this email address.</a>
+						}
+					}
+				</form>
+			}
+			@card.Footer(card.FooterProps{Class: "flex-col gap-2"}) {
+				@button.Button(button.Props{Type: button.TypeSubmit, Class: "w-full"}) {
+					Verify
+				}
+				<div class="text-sm text-muted-foreground">
+					Having trouble signing in? <a href="#" class="underline underline-offset-4 transition-colors hover:text-primary">Contact support</a>
+				</div>
+			}
+		}
+	}
+}

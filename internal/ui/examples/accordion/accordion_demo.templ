@@ -1,0 +1,32 @@
+package accordion
+
+import "github.com/axadrn/shadcn-templ/v2/components/accordion"
+
+templ AccordionDemo() {
+	@accordion.Accordion(accordion.Props{DefaultValue: []string{"item-3"}, Class: "max-w-lg"}) {
+		@accordion.Item(accordion.ItemProps{Value: "item-3"}) {
+			@accordion.Trigger() {
+				What are your shipping options?
+			}
+			@accordion.Content() {
+				We offer standard (5-7 days), express (2-3 days), and overnight shipping. Free shipping on international orders.
+			}
+		}
+		@accordion.Item(accordion.ItemProps{Value: "item-1"}) {
+			@accordion.Trigger() {
+				What is your return policy?
+			}
+			@accordion.Content() {
+				Returns accepted within 30 days. Items must be unused and in original packaging. Refunds processed within 5-7 business days.
+			}
+		}
+		@accordion.Item(accordion.ItemProps{Value: "item-2"}) {
+			@accordion.Trigger() {
+				How can I contact customer support?
+			}
+			@accordion.Content() {
+				Reach us via email, live chat, or phone. We respond within 24 hours during business days.
+			}
+		}
+	}
+}

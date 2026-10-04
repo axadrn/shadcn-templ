@@ -1,0 +1,16 @@
+package label
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/checkbox"
+	"github.com/axadrn/shadcn-templ/v2/components/label"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ LabelRtl() {
+	<div class="flex gap-2" dir="rtl">
+		@checkbox.Checkbox(checkbox.Props{ID: "terms-rtl", Attributes: templ.Attributes{"dir": "rtl"}})
+		@label.Label(label.Props{For: "terms-rtl", Attributes: templ.Attributes{"dir": "rtl"}}) {
+			قبول الشروط والأحكام
+		}
+	</div>
+}

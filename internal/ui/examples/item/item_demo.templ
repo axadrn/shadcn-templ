@@ -1,0 +1,47 @@
+package item
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/item"
+)
+
+templ ItemDemo() {
+	<div class="flex w-full max-w-md flex-col gap-6">
+		@item.Item(item.Props{Variant: item.VariantOutline}) {
+			@item.Content() {
+				@item.Title() {
+					Basic Item
+				}
+				@item.Description() {
+					A simple item with title and description.
+				}
+			}
+			@item.Actions() {
+				@button.Button(button.Props{
+					Variant: button.VariantOutline,
+					Size:    button.SizeSm,
+				}) {
+					Action
+				}
+			}
+		}
+		@item.Item(item.Props{
+			Variant: item.VariantOutline,
+			Size:    item.SizeSm,
+			Href:    "#",
+		}) {
+			@item.Media() {
+				@icon.BadgeCheck(icon.Props{Class: "size-5"})
+			}
+			@item.Content() {
+				@item.Title() {
+					Your profile has been verified.
+				}
+			}
+			@item.Actions() {
+				@icon.ChevronRight(icon.Props{Class: "size-4"})
+			}
+		}
+	</div>
+}

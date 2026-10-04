@@ -1,0 +1,26 @@
+package toast
+
+import "github.com/axadrn/shadcn-templ/v2/components/button"
+
+templ ToastPromise() {
+	@button.Button(button.Props{
+		Variant:    button.VariantOutline,
+		Attributes: templ.Attributes{"id": "toast-promise-trigger"},
+	}) {
+		Create Event
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		document.getElementById("toast-promise-trigger").addEventListener("click", () => {
+			window.templ.toast.promise(
+				new Promise((resolve) => {
+					window.setTimeout(() => resolve({ name: "Event" }), 2000);
+				}),
+				{
+					loading: "Creating event…",
+					success: (data) => `${data.name} created.`,
+					error: "Could not create event.",
+				},
+			);
+		});
+	</script>
+}

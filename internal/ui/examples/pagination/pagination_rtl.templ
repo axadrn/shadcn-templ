@@ -1,0 +1,35 @@
+package pagination
+
+import "github.com/axadrn/shadcn-templ/v2/components/pagination"
+
+// The upstream example's Arabic translation, its default language.
+templ PaginationRtl() {
+	@pagination.Pagination(pagination.Props{Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@pagination.Content() {
+			@pagination.Item() {
+				@pagination.Previous(pagination.PreviousProps{Href: "#", Text: "السابق"})
+			}
+			@pagination.Item() {
+				@pagination.Link(pagination.LinkProps{Href: "#"}) {
+					١
+				}
+			}
+			@pagination.Item() {
+				@pagination.Link(pagination.LinkProps{Href: "#", IsActive: true}) {
+					٢
+				}
+			}
+			@pagination.Item() {
+				@pagination.Link(pagination.LinkProps{Href: "#"}) {
+					٣
+				}
+			}
+			@pagination.Item() {
+				@pagination.Ellipsis()
+			}
+			@pagination.Item() {
+				@pagination.Next(pagination.NextProps{Href: "#", Text: "التالي"})
+			}
+		}
+	}
+}

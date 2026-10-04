@@ -1,0 +1,32 @@
+package spinner
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/badge"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+)
+
+templ SpinnerBadge() {
+	<div class="flex items-center gap-4 [--radius:1.2rem]">
+		@badge.Badge() {
+			@spinner.Spinner(spinner.Props{
+				Class:      "size-3",
+				Attributes: templ.Attributes{"data-icon": "inline-start"},
+			})
+			Syncing
+		}
+		@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+			@spinner.Spinner(spinner.Props{
+				Class:      "size-3",
+				Attributes: templ.Attributes{"data-icon": "inline-start"},
+			})
+			Updating
+		}
+		@badge.Badge(badge.Props{Variant: badge.VariantOutline}) {
+			@spinner.Spinner(spinner.Props{
+				Class:      "size-3",
+				Attributes: templ.Attributes{"data-icon": "inline-start"},
+			})
+			Processing
+		}
+	</div>
+}

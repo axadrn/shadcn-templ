@@ -1,0 +1,169 @@
+package messagescroller
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+	"github.com/axadrn/shadcn-templ/v2/components/message"
+	"github.com/axadrn/shadcn-templ/v2/components/messagescroller"
+)
+
+type msGroupItem struct {
+	ID           string
+	Event        bool
+	Sender       string
+	Role         string
+	Text         string
+	ScrollAnchor bool
+}
+
+var msGroupInitialItems = []msGroupItem{
+	{ID: "group-1", Sender: "Grace", Role: "participant", Text: "@mary, the astrophage line keeps matching Venus energy output. Can you check my math?"},
+	{ID: "group-2", Sender: "Mary (Agent)", Role: "assistant", Text: "Yes. Confirmed. The curve points to a microorganism harvesting stellar energy and breeding near carbon dioxide. If @rocky agrees, this is the clue we need."},
+	{ID: "group-3", Sender: "Grace", Role: "participant", Text: "ping @rocky", ScrollAnchor: true},
+}
+
+var msGroupRockyMarker = msGroupItem{ID: "group-4", Event: true, Text: "Rocky has joined the chat", ScrollAnchor: true}
+
+var msGroupRockyMessage = msGroupItem{ID: "group-5", Sender: "Rocky", Role: "participant", Text: "Amaze. Astrophage eats light, makes heat, goes to carbon dioxide. Rocky has fuel model. Grace is smart."}
+
+func msGroupVariant(item msGroupItem) bubble.Variant {
+	switch {
+	case item.Sender == "Grace":
+		return bubble.VariantMuted
+	case item.Role == "assistant":
+		return bubble.VariantGhost
+	default:
+		return bubble.VariantTinted
+	}
+}
+
+func msGroupAlign(item msGroupItem) message.Align {
+	if item.Sender == "Grace" {
+		return message.AlignEnd
+	}
+	return message.AlignStart
+}
+
+templ msGroupChatItem(item msGroupItem) {
+	if item.Event {
+		@messagescroller.Item(messagescroller.ItemProps{ScrollAnchor: item.ScrollAnchor}) {
+			@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+				@marker.Content() {
+					{ item.Text }
+				}
+			}
+		}
+	} else {
+		@messagescroller.Item(messagescroller.ItemProps{MessageID: item.ID, ScrollAnchor: item.ScrollAnchor}) {
+			@message.Message(message.Props{Align: msGroupAlign(item)}) {
+				@message.Content() {
+					if item.Sender != "Grace" {
+						@message.Header() {
+							{ item.Sender }
+						}
+					}
+					@bubble.Bubble(bubble.Props{Variant: msGroupVariant(item)}) {
+						@bubble.Content() {
+							{ item.Text }
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+templ msGroupScroller() {
+	@messagescroller.Provider() {
+		@messagescroller.MessageScroller() {
+			@messagescroller.Viewport() {
+				@messagescroller.Content(messagescroller.ContentProps{Class: "p-(--card-spacing)"}) {
+					for _, item := range msGroupInitialItems {
+						@msGroupChatItem(item)
+					}
+				}
+			}
+			@messagescroller.Button()
+		}
+	}
+}
+
+templ MessageScrollerGroupChat() {
+	@messagescroller.Provider() {
+		<div class="relative flex flex-col gap-4">
+			@card.Card(card.Props{Class: "mx-auto h-140 w-full max-w-sm gap-0"}) {
+				@card.Header(card.HeaderProps{Class: "gap-1 border-b"}) {
+					@card.Title() {
+						Group Chat
+					}
+					@card.Description() {
+						A group chat with several participants and an assistant. The
+						Marker is marked as a turn.
+					}
+					@card.Action() {
+						@msResetButton("Reset conversation", true)
+					}
+				}
+				@card.Content(card.ContentProps{Class: "min-h-0 flex-1 p-0"}) {
+					@msGroupScroller()
+				}
+				@card.Footer(card.FooterProps{Class: "flex flex-col items-center gap-2 border-t"}) {
+					@button.Button(button.Props{
+						Variant: button.VariantSecondary,
+						Class:   "w-full",
+					}) {
+						Add Rocky
+					}
+					<p class="text-xs text-muted-foreground">
+						This will create a marker and make it the anchor
+					</p>
+				}
+			}
+			<div class="mx-auto max-w-sm px-0.5 text-center text-xs text-balance text-muted-foreground">
+				When a user joins, a marker is created. scrollAnchor on the marker
+				marks it as the next turn
+			</div>
+			<template>
+				@msGroupScroller()
+			</template>
+			<template>
+				@msGroupChatItem(msGroupRockyMarker)
+			</template>
+			<template>
+				@msGroupChatItem(msGroupRockyMessage)
+			</template>
+		</div>
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const demo = document.currentScript.previousElementSibling;
+			const [scroller, ...turns] = demo.querySelectorAll(":scope > template");
+			const send = demo.querySelector('[data-slot="card-footer"] > [data-slot="button"]');
+			const reset = demo.querySelector('[aria-label="Reset conversation"]');
+			const hint = demo.querySelector('[data-slot="card-footer"] > p');
+			let step = 0;
+			const sync = () => {
+				send.textContent = step === 0 ? "Add Rocky" : "Send Message as Rocky";
+				send.disabled = step === 2;
+				send.toggleAttribute("data-disabled", send.disabled);
+				reset.disabled = step === 0;
+				reset.toggleAttribute("data-disabled", reset.disabled);
+				hint.textContent = step === 0 ? "This will create a marker and make it the anchor" : "Now send Rocky's reply into the conversation";
+			};
+			send.addEventListener("click", () => {
+				if (step >= turns.length) return;
+				demo.querySelector('[data-slot="message-scroller-content"]').append(turns[step].content.firstElementChild.cloneNode(true));
+				step++;
+				sync();
+			});
+			// A new key remounts the scroller with the opening rows.
+			reset.addEventListener("click", () => {
+				step = 0;
+				demo.querySelector('[data-slot="message-scroller"]').replaceWith(scroller.content.cloneNode(true));
+				sync();
+			});
+		})();
+	</script>
+}

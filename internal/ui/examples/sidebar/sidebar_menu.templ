@@ -1,0 +1,53 @@
+package sidebar
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
+)
+
+type sidebarMenuProject struct {
+	Name  string
+	URL   string
+	Icon  func(...icon.Props) templ.Component
+	Badge string
+}
+
+// sidebarMenuProjects is the projects list the sidebar menu examples share.
+var sidebarMenuProjects = []sidebarMenuProject{
+	{Name: "Design Engineering", URL: "#", Icon: icon.Frame, Badge: "24"},
+	{Name: "Sales & Marketing", URL: "#", Icon: icon.ChartPie, Badge: "12"},
+	{Name: "Travel", URL: "#", Icon: icon.Map, Badge: "3"},
+	{Name: "Support", URL: "#", Icon: icon.LifeBuoy, Badge: "21"},
+	{Name: "Feedback", URL: "#", Icon: icon.Send, Badge: "8"},
+}
+
+templ SidebarMenu() {
+	@sidebar.Provider() {
+		@sidebar.Sidebar() {
+			@sidebar.Content() {
+				@sidebar.Group() {
+					@sidebar.GroupLabel() {
+						Projects
+					}
+					@sidebar.GroupContent() {
+						@sidebarMenuProjectsMenu()
+					}
+				}
+			}
+		}
+	}
+}
+
+// sidebarMenuProjectsMenu is the projects menu with a link per project.
+templ sidebarMenuProjectsMenu() {
+	@sidebar.Menu() {
+		for _, project := range sidebarMenuProjects {
+			@sidebar.MenuItem() {
+				@sidebar.MenuButton(sidebar.MenuButtonProps{Href: project.URL}) {
+					@project.Icon()
+					<span>{ project.Name }</span>
+				}
+			}
+		}
+	}
+}

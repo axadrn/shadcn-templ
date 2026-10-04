@@ -1,0 +1,37 @@
+package empty
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/empty"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/kbd"
+)
+
+templ EmptyInputGroup() {
+	@empty.Empty() {
+		@empty.Header() {
+			@empty.Title() {
+				404 - Not Found
+			}
+			@empty.Description() {
+				The page you're looking for doesn't exist. Try searching for what you need below.
+			}
+		}
+		@empty.Content() {
+			@inputgroup.InputGroup(inputgroup.Props{Class: "sm:w-3/4"}) {
+				@inputgroup.Input(inputgroup.InputProps{Placeholder: "Try searching for pages..."})
+				@inputgroup.Addon() {
+					@icon.Search()
+				}
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					@kbd.Kbd() {
+						/
+					}
+				}
+			}
+			@empty.Description() {
+				Need help? <a href="#">Contact support</a>
+			}
+		}
+	}
+}

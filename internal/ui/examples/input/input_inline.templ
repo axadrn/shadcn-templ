@@ -1,0 +1,19 @@
+package input
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+)
+
+templ InputInline() {
+	@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+		@input.Input(input.Props{
+			Type:        "search",
+			Placeholder: "Search...",
+		})
+		@button.Button() {
+			Search
+		}
+	}
+}

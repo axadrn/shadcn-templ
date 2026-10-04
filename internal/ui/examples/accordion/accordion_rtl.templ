@@ -1,0 +1,33 @@
+package accordion
+
+import "github.com/axadrn/shadcn-templ/v2/components/accordion"
+
+// The upstream example's Arabic translation, its default language.
+templ AccordionRtl() {
+	@accordion.Accordion(accordion.Props{DefaultValue: []string{"item-1"}, Class: "max-w-md"}) {
+		@accordion.Item(accordion.ItemProps{Value: "item-1"}) {
+			@accordion.Trigger() {
+				كيف يمكنني إعادة تعيين كلمة المرور؟
+			}
+			@accordion.Content() {
+				انقر على 'نسيت كلمة المرور' في صفحة تسجيل الدخول، أدخل عنوان بريدك الإلكتروني، وسنرسل لك رابطًا لإعادة تعيين كلمة المرور. سينتهي صلاحية الرابط خلال 24 ساعة.
+			}
+		}
+		@accordion.Item(accordion.ItemProps{Value: "item-2"}) {
+			@accordion.Trigger() {
+				هل يمكنني تغيير خطة الاشتراك الخاصة بي؟
+			}
+			@accordion.Content() {
+				نعم، يمكنك ترقية أو تخفيض خطتك في أي وقت من إعدادات حسابك. ستظهر التغييرات في دورة الفوترة التالية.
+			}
+		}
+		@accordion.Item(accordion.ItemProps{Value: "item-3"}) {
+			@accordion.Trigger() {
+				ما هي طرق الدفع التي تقبلونها؟
+			}
+			@accordion.Content() {
+				نقبل جميع بطاقات الائتمان الرئيسية و PayPal والتحويلات المصرفية. تتم معالجة جميع المدفوعات بأمان من خلال شركاء الدفع لدينا.
+			}
+		}
+	}
+}

@@ -1,0 +1,137 @@
+package breadcrumb
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/breadcrumb"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ breadcrumbExampleSection(title string, class string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class={ utils.CN("flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full", class) }>
+			{ children... }
+		</div>
+	</div>
+}
+
+templ BreadcrumbExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@breadcrumbExampleBasic()
+			@breadcrumbExampleWithDropdown()
+			@breadcrumbExampleWithLink()
+		</div>
+	</div>
+}
+
+templ breadcrumbExampleBasic() {
+	@breadcrumbExampleSection("Basic", "items-center justify-center") {
+		@breadcrumb.Breadcrumb() {
+			@breadcrumb.List() {
+				@breadcrumb.Item() {
+					@breadcrumb.Link(breadcrumb.LinkProps{Href: "#"}) {
+						Home
+					}
+				}
+				@breadcrumb.Separator()
+				@breadcrumb.Item() {
+					@breadcrumb.Link(breadcrumb.LinkProps{Href: "#"}) {
+						Components
+					}
+				}
+				@breadcrumb.Separator()
+				@breadcrumb.Item() {
+					@breadcrumb.Page() {
+						Breadcrumb
+					}
+				}
+			}
+		}
+	}
+}
+
+templ breadcrumbExampleWithDropdown() {
+	@breadcrumbExampleSection("With Dropdown", "items-center justify-center") {
+		@breadcrumb.Breadcrumb() {
+			@breadcrumb.List() {
+				@breadcrumb.Item() {
+					@breadcrumb.Link(breadcrumb.LinkProps{Href: "#"}) {
+						Home
+					}
+				}
+				@breadcrumb.Separator()
+				@breadcrumb.Item() {
+					@dropdownmenu.DropdownMenu() {
+						@button.Button(button.Props{
+							Size:       button.SizeIconSm,
+							Variant:    button.VariantGhost,
+							Attributes: dropdownmenu.Trigger(ctx),
+						}) {
+							@breadcrumb.Ellipsis()
+							<span class="sr-only">Toggle menu</span>
+						}
+						@dropdownmenu.Content(dropdownmenu.ContentProps{Align: dropdownmenu.AlignStart}) {
+							@dropdownmenu.Group() {
+								@dropdownmenu.Item() {
+									Documentation
+								}
+								@dropdownmenu.Item() {
+									Themes
+								}
+								@dropdownmenu.Item() {
+									GitHub
+								}
+							}
+						}
+					}
+				}
+				@breadcrumb.Separator()
+				@breadcrumb.Item() {
+					@breadcrumb.Link(breadcrumb.LinkProps{Href: "#"}) {
+						Components
+					}
+				}
+				@breadcrumb.Separator()
+				@breadcrumb.Item() {
+					@breadcrumb.Page() {
+						Breadcrumb
+					}
+				}
+			}
+		}
+	}
+}
+
+templ breadcrumbExampleWithLink() {
+	@breadcrumbExampleSection("With Link", "items-center justify-center") {
+		@breadcrumb.Breadcrumb() {
+			@breadcrumb.List() {
+				@breadcrumb.Item() {
+					@breadcrumb.Link(breadcrumb.LinkProps{Href: "#"}) {
+						Home
+					}
+				}
+				@breadcrumb.Separator()
+				@breadcrumb.Item() {
+					@breadcrumb.Ellipsis()
+				}
+				@breadcrumb.Separator()
+				@breadcrumb.Item() {
+					@breadcrumb.Link(breadcrumb.LinkProps{Href: "#"}) {
+						Components
+					}
+				}
+				@breadcrumb.Separator()
+				@breadcrumb.Item() {
+					@breadcrumb.Page() {
+						Breadcrumb
+					}
+				}
+			}
+		}
+	}
+}

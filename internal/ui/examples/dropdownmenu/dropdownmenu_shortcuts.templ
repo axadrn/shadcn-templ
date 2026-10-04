@@ -1,0 +1,49 @@
+package dropdownmenu
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+)
+
+templ DropdownMenuShortcuts() {
+	@dropdownmenu.DropdownMenu() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: dropdownmenu.Trigger(ctx),
+		}) {
+			Open
+		}
+		@dropdownmenu.Content() {
+			@dropdownmenu.Group() {
+				@dropdownmenu.Label() {
+					My Account
+				}
+				@dropdownmenu.Item() {
+					Profile
+					@dropdownmenu.Shortcut() {
+						⇧⌘P
+					}
+				}
+				@dropdownmenu.Item() {
+					Billing
+					@dropdownmenu.Shortcut() {
+						⌘B
+					}
+				}
+				@dropdownmenu.Item() {
+					Settings
+					@dropdownmenu.Shortcut() {
+						⌘S
+					}
+				}
+			}
+			@dropdownmenu.Separator()
+			@dropdownmenu.Item() {
+				Log out
+				@dropdownmenu.Shortcut() {
+					⇧⌘Q
+				}
+			}
+		}
+	}
+}

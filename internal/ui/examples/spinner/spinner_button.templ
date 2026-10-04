@@ -1,0 +1,40 @@
+package spinner
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+)
+
+templ SpinnerButton() {
+	<div class="flex flex-col items-center gap-4">
+		@button.Button(button.Props{
+			Disabled: true,
+			Size:     button.SizeSm,
+		}) {
+			@spinner.Spinner(spinner.Props{
+				Attributes: templ.Attributes{"data-icon": "inline-start"},
+			})
+			Loading...
+		}
+		@button.Button(button.Props{
+			Variant:  button.VariantOutline,
+			Disabled: true,
+			Size:     button.SizeSm,
+		}) {
+			@spinner.Spinner(spinner.Props{
+				Attributes: templ.Attributes{"data-icon": "inline-start"},
+			})
+			Please wait
+		}
+		@button.Button(button.Props{
+			Variant:  button.VariantSecondary,
+			Disabled: true,
+			Size:     button.SizeSm,
+		}) {
+			@spinner.Spinner(spinner.Props{
+				Attributes: templ.Attributes{"data-icon": "inline-start"},
+			})
+			Processing
+		}
+	</div>
+}

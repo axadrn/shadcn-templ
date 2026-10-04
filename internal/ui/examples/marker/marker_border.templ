@@ -1,0 +1,35 @@
+package marker
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+)
+
+templ MarkerBorderDemo() {
+	<div class="flex w-full max-w-sm flex-col gap-3 py-12">
+		@marker.Marker(marker.Props{Variant: marker.VariantBorder}) {
+			@marker.Icon() {
+				@icon.GitBranch()
+			}
+			@marker.Content() {
+				Switched to release-candidate
+			}
+		}
+		@marker.Marker(marker.Props{Variant: marker.VariantBorder}) {
+			@marker.Icon() {
+				@icon.Search()
+			}
+			@marker.Content() {
+				Reviewed 8 related files
+			}
+		}
+		@marker.Marker(marker.Props{Variant: marker.VariantBorder}) {
+			@marker.Icon() {
+				@icon.FileText()
+			}
+			@marker.Content() {
+				Opened implementation notes
+			}
+		}
+	</div>
+}

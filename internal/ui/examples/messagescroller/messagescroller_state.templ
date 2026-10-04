@@ -1,0 +1,80 @@
+package messagescroller
+
+import (
+	"fmt"
+
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/message"
+	"github.com/axadrn/shadcn-templ/v2/components/messagescroller"
+)
+
+func msStateMessages() []msMessage {
+	out := make([]msMessage, 12)
+	for i := range out {
+		if i%2 == 0 {
+			out[i] = msMessage{ID: fmt.Sprintf("state-%d", i+1), Role: "user", Text: fmt.Sprintf("Check section %d of the transcript.", i+1)}
+		} else {
+			out[i] = msMessage{ID: fmt.Sprintf("state-%d", i+1), Role: "assistant", Text: fmt.Sprintf("Section %d is ready. Scroll state updates without rerendering the rows.", i+1)}
+		}
+	}
+	return out
+}
+
+templ MessageScrollerState() {
+	@card.Card(card.Props{Class: "mx-auto h-112 w-full max-w-md gap-0"}) {
+		@card.Header(card.HeaderProps{Class: "border-b"}) {
+			@card.Title() {
+				Scroll State
+			}
+			@card.Description() {
+				Read scroll state in JavaScript with the state hook.
+			}
+		}
+		@card.Content(card.ContentProps{Class: "min-h-0 flex-1 p-0"}) {
+			@messagescroller.Provider(messagescroller.ProviderProps{DefaultScrollPosition: messagescroller.DefaultScrollPositionStart}) {
+				@messagescroller.MessageScroller() {
+					<div class="pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap gap-1.5">
+						for _, s := range [][2]string{{"At top", "true"}, {"At bottom", "true"}, {"Older above", "false"}, {"Newer below", "false"}} {
+							<span data-on={ s[1] } class="rounded-full border bg-background px-2 py-0.5 text-xs text-muted-foreground data-[on=true]:border-transparent data-[on=true]:bg-primary data-[on=true]:text-primary-foreground">
+								{ s[0] }
+							</span>
+						}
+					</div>
+					@messagescroller.Viewport() {
+						@messagescroller.Content(messagescroller.ContentProps{Class: "gap-4 p-4 pt-12"}) {
+							for _, m := range msStateMessages() {
+								@messagescroller.Item(messagescroller.ItemProps{MessageID: m.ID, ScrollAnchor: m.Role == "user"}) {
+									@message.Message(message.Props{Align: msAlign(m.Role)}) {
+										@message.Content() {
+											@bubble.Bubble(bubble.Props{Variant: msVariant(m.Role, bubble.VariantDefault, bubble.VariantMuted)}) {
+												@bubble.Content() {
+													{ m.Text }
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					@messagescroller.Button()
+				}
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			// StatusBar: the chips follow useMessageScrollerScrollable.
+			const root = document.currentScript.previousElementSibling.querySelector('[data-slot="message-scroller"]');
+			const init = () => {
+				const chips = root.querySelectorAll("[data-on]");
+				const paint = ({ start, end }) => [!start, !end, start, end].forEach((on, i) => chips[i].setAttribute("data-on", String(on)));
+				paint(window.templ.messageScroller.scrollable(root));
+				window.templ.messageScroller.onScrollableChange(root, paint);
+			};
+			if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+			else init();
+		})();
+	</script>
+}

@@ -204,7 +204,7 @@ func createPreviewContent(item string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		case item == "chart-example":
-			templ_7745c5c3_Err = createRegistryItemPreview(examples.ChartExamplePage()).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = createRegistryItemPreview(examples.Registry["chart-example-page"].Component).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

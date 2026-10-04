@@ -1,0 +1,18 @@
+package alert
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/alert"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ AlertDestructive() {
+	@alert.Alert(alert.Props{Variant: alert.VariantDestructive, Class: "max-w-md"}) {
+		@icon.CircleAlert()
+		@alert.Title() {
+			Payment failed
+		}
+		@alert.Description() {
+			Your payment could not be processed. Please check your payment method and try again.
+		}
+	}
+}

@@ -1,0 +1,16 @@
+package scrollfade
+
+// The upstream example's Arabic translation, its default language.
+var scrollFadeRtlTags = []string{"تصميم", "هندسة", "تسويق", "منتج", "أبحاث", "مبيعات", "دعم", "عمليات", "مالية", "قانوني"}
+
+templ ScrollFadeRtl() {
+	<div class="mx-auto w-full max-w-xs overflow-hidden rounded-2xl border" dir="rtl">
+		<div class="scroll-fade-x scrollbar-none overflow-x-auto">
+			<div class="flex w-max gap-1.5 p-1.5">
+				for _, tag := range scrollFadeRtlTags {
+					<div class="shrink-0 rounded-lg bg-muted px-3 py-2.5 text-sm">{ tag }</div>
+				}
+			</div>
+		</div>
+	</div>
+}

@@ -1,0 +1,97 @@
+package navigationmenu
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/example"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/navigationmenu"
+)
+
+// NavigationMenuExample is navigation-menu-example.tsx; its components list
+// is navigationMenuDemoComponents. IconPlaceholder renders its lucide icon.
+templ NavigationMenuExample() {
+	@example.Wrapper(example.WrapperProps{Class: "lg:grid-cols-1"}) {
+		@navigationMenuExampleBasic()
+	}
+}
+
+templ navigationMenuExampleBasic() {
+	@example.Example(example.Props{Title: "Basic"}) {
+		@navigationmenu.NavigationMenu() {
+			@navigationmenu.List() {
+				@navigationmenu.Item() {
+					@navigationmenu.Trigger() {
+						Getting started
+					}
+					@navigationmenu.Content() {
+						<ul class="w-96">
+							@navigationMenuExampleListItem("/docs", "Introduction") {
+								Re-usable components built with Tailwind CSS.
+							}
+							@navigationMenuExampleListItem("/docs/installation", "Installation") {
+								How to install dependencies and structure your app.
+							}
+							@navigationMenuExampleListItem("/docs/primitives/typography", "Typography") {
+								Styles for headings, paragraphs, lists...etc
+							}
+						</ul>
+					}
+				}
+				@navigationmenu.Item() {
+					@navigationmenu.Trigger() {
+						Components
+					}
+					@navigationmenu.Content() {
+						<ul class="grid w-[400px] gap-2 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+							for _, component := range navigationMenuDemoComponents {
+								@navigationMenuExampleListItem(component.Href, component.Title) {
+									{ component.Description }
+								}
+							}
+						</ul>
+					}
+				}
+				@navigationmenu.Item() {
+					@navigationmenu.Trigger() {
+						With Icon
+					}
+					@navigationmenu.Content() {
+						<ul class="grid w-[200px]">
+							<li>
+								@navigationmenu.Link(navigationmenu.LinkProps{Href: "#", Class: "flex-row items-center gap-2"}) {
+									@icon.CircleAlert()
+									Backlog
+								}
+								@navigationmenu.Link(navigationmenu.LinkProps{Href: "#", Class: "flex-row items-center gap-2"}) {
+									@icon.CircleAlert()
+									To Do
+								}
+								@navigationmenu.Link(navigationmenu.LinkProps{Href: "#", Class: "flex-row items-center gap-2"}) {
+									@icon.CircleAlert()
+									Done
+								}
+							</li>
+						</ul>
+					}
+				}
+				@navigationmenu.Item() {
+					@navigationmenu.Link(navigationmenu.LinkProps{Href: "/docs", Class: navigationmenu.TriggerStyle()}) {
+						Documentation
+					}
+				}
+			}
+		}
+	}
+}
+
+templ navigationMenuExampleListItem(href, title string) {
+	<li>
+		@navigationmenu.Link(navigationmenu.LinkProps{Href: href}) {
+			<div class="flex flex-col gap-1 style-vega:text-sm style-nova:text-sm style-lyra:text-xs style-maia:text-sm style-mira:text-xs style-luma:text-sm">
+				<div class="leading-none font-medium">{ title }</div>
+				<div class="line-clamp-2 text-muted-foreground">
+					{ children... }
+				</div>
+			</div>
+		}
+	</li>
+}

@@ -1,0 +1,32 @@
+package carousel
+
+import (
+	"strconv"
+
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/carousel"
+)
+
+templ CarouselPlugin() {
+	@carousel.Carousel(carousel.Props{
+		Autoplay: true,
+		Interval: 2000,
+		Class:    "w-full max-w-[10rem] sm:max-w-xs",
+	}) {
+		@carousel.Content() {
+			for i := 1; i <= 5; i++ {
+				@carousel.Item() {
+					<div class="p-1">
+						@card.Card() {
+							@card.Content(card.ContentProps{Class: "flex aspect-square items-center justify-center p-6"}) {
+								<span class="text-4xl font-semibold">{ strconv.Itoa(i) }</span>
+							}
+						}
+					</div>
+				}
+			}
+		}
+		@carousel.Previous()
+		@carousel.Next()
+	}
+}

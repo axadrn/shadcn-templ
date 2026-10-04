@@ -1,0 +1,35 @@
+package input
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+)
+
+templ InputFieldgroup() {
+	@field.Group() {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "fieldgroup-name"}) {
+				Name
+			}
+			@input.Input(input.Props{ID: "fieldgroup-name", Placeholder: "Jordan Lee"})
+		}
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "fieldgroup-email"}) {
+				Email
+			}
+			@input.Input(input.Props{ID: "fieldgroup-email", Type: "email", Placeholder: "name@example.com"})
+			@field.Description() {
+				We'll send updates to this address.
+			}
+		}
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@button.Button(button.Props{Type: button.TypeReset, Variant: button.VariantOutline}) {
+				Reset
+			}
+			@button.Button(button.Props{Type: button.TypeSubmit}) {
+				Submit
+			}
+		}
+	}
+}

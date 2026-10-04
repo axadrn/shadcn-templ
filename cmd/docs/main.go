@@ -22,6 +22,7 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/blocks"
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/charts"
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/examples"
+	_ "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/all"
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/modules"
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/pages"
 	"github.com/axadrn/shadcn-templ/v2/static"

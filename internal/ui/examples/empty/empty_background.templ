@@ -1,0 +1,29 @@
+package empty
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/empty"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ EmptyBackground() {
+	@empty.Empty(empty.Props{Class: "h-full bg-muted/30"}) {
+		@empty.Header() {
+			@empty.Media(empty.MediaProps{Variant: empty.MediaVariantIcon}) {
+				@icon.Bell()
+			}
+			@empty.Title() {
+				No Notifications
+			}
+			@empty.Description(empty.DescriptionProps{Class: "max-w-xs text-pretty"}) {
+				You're all caught up. New notifications will appear here.
+			}
+		}
+		@empty.Content() {
+			@button.Button(button.Props{Variant: button.VariantOutline}) {
+				@icon.RefreshCcw(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Refresh
+			}
+		}
+	}
+}

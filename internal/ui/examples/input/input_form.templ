@@ -1,0 +1,99 @@
+package input
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+)
+
+templ InputForm() {
+	<form class="w-full max-w-sm">
+		@field.Group() {
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "form-name"}) {
+					Name
+				}
+				@input.Input(input.Props{
+					ID:          "form-name",
+					Type:        "text",
+					Placeholder: "Axel Adrian",
+					Required:    true,
+				})
+			}
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "form-email"}) {
+					Email
+				}
+				@input.Input(input.Props{
+					ID:          "form-email",
+					Type:        "email",
+					Placeholder: "john@example.com",
+				})
+				@field.Description() {
+					We'll never share your email with anyone.
+				}
+			}
+			<div class="grid grid-cols-2 gap-4">
+				@field.Field() {
+					@field.Label(field.LabelProps{For: "form-phone"}) {
+						Phone
+					}
+					@input.Input(input.Props{
+						ID:          "form-phone",
+						Type:        "tel",
+						Placeholder: "+1 (555) 123-4567",
+					})
+				}
+				@field.Field() {
+					@field.Label(field.LabelProps{For: "form-country"}) {
+						Country
+					}
+					@selectcomp.Select(selectcomp.Props{
+						Items: []selectcomp.ItemData{
+							{Value: "us", Label: "United States"},
+							{Value: "uk", Label: "United Kingdom"},
+							{Value: "ca", Label: "Canada"},
+						},
+						DefaultValue: "us",
+					}) {
+						@selectcomp.Trigger(selectcomp.TriggerProps{ID: "form-country"}) {
+							@selectcomp.Value()
+						}
+						@selectcomp.Content() {
+							@selectcomp.Group() {
+								@selectcomp.Item(selectcomp.ItemProps{Value: "us"}) {
+									United States
+								}
+								@selectcomp.Item(selectcomp.ItemProps{Value: "uk"}) {
+									United Kingdom
+								}
+								@selectcomp.Item(selectcomp.ItemProps{Value: "ca"}) {
+									Canada
+								}
+							}
+						}
+					}
+				}
+			</div>
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "form-address"}) {
+					Address
+				}
+				@input.Input(input.Props{
+					ID:          "form-address",
+					Type:        "text",
+					Placeholder: "123 Main St",
+				})
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@button.Button(button.Props{Type: button.TypeButton, Variant: button.VariantOutline}) {
+					Cancel
+				}
+				@button.Button(button.Props{Type: button.TypeSubmit}) {
+					Submit
+				}
+			}
+		}
+	</form>
+}

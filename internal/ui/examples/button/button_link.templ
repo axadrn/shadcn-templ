@@ -1,0 +1,11 @@
+package button
+
+import "github.com/axadrn/shadcn-templ/v2/components/button"
+
+templ ButtonLink() {
+	@button.Button(button.Props{
+		Variant: button.VariantLink,
+	}) {
+		Link
+	}
+}

@@ -1,0 +1,22 @@
+package calendar
+
+import (
+	"time"
+
+	"github.com/axadrn/shadcn-templ/v2/components/calendar"
+)
+
+templ CalendarRange() {
+	{{
+		from := time.Date(time.Now().Year(), 1, 12, 0, 0, 0, 0, time.Local)
+		to := from.AddDate(0, 0, 30)
+	}}
+	@calendar.Calendar(calendar.Props{
+		Mode:           calendar.ModeRange,
+		DefaultMonth:   from,
+		Selected:       calendar.DateRange{From: from, To: to},
+		NumberOfMonths: 2,
+		Class:          "rounded-lg border",
+	})
+	@calendarSelectState()
+}

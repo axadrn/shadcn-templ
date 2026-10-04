@@ -1,0 +1,218 @@
+package badge
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/badge"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ badgeExampleSection(title string, class string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class={ utils.CN("flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full", class) }>
+			{ children... }
+		</div>
+	</div>
+}
+
+templ BadgeExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class={ utils.CN("mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl", "lg:grid-cols-1") }>
+			@badgeExampleVariants()
+			@badgeExampleWithIconLeft()
+			@badgeExampleWithIconRight()
+			@badgeExampleWithSpinner()
+			@badgeExampleAsLink()
+			@badgeExampleLongText()
+			@badgeExampleCustomColors()
+		</div>
+	</div>
+}
+
+templ badgeExampleVariants() {
+	@badgeExampleSection("Variants", "") {
+		<div class="flex flex-wrap gap-2 style-sera:gap-6">
+			@badge.Badge() {
+				Default
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+				Secondary
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantDestructive}) {
+				Destructive
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantOutline}) {
+				Outline
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantGhost}) {
+				Ghost
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantLink}) {
+				Link
+			}
+		</div>
+	}
+}
+
+templ badgeExampleWithIconLeft() {
+	@badgeExampleSection("Icon Left", "max-w-fit") {
+		<div class="flex flex-wrap gap-2 style-sera:gap-6">
+			@badge.Badge() {
+				@icon.BadgeCheck(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Default
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+				@icon.BadgeCheck(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Secondary
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantDestructive}) {
+				@icon.BadgeCheck(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Destructive
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantOutline}) {
+				@icon.BadgeCheck(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Outline
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantGhost}) {
+				@icon.BadgeCheck(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Ghost
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantLink}) {
+				@icon.BadgeCheck(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Link
+			}
+		</div>
+	}
+}
+
+templ badgeExampleWithIconRight() {
+	@badgeExampleSection("Icon Right", "max-w-fit") {
+		<div class="flex flex-wrap gap-2 style-sera:gap-6">
+			@badge.Badge() {
+				Default
+				@icon.ArrowRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+				Secondary
+				@icon.ArrowRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantDestructive}) {
+				Destructive
+				@icon.ArrowRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantOutline}) {
+				Outline
+				@icon.ArrowRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantGhost}) {
+				Ghost
+				@icon.ArrowRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantLink}) {
+				Link
+				@icon.ArrowRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+			}
+		</div>
+	}
+}
+
+templ badgeExampleWithSpinner() {
+	@badgeExampleSection("With Spinner", "max-w-fit") {
+		<div class="flex flex-wrap gap-2 style-sera:gap-6">
+			@badge.Badge() {
+				@spinner.Spinner(spinner.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Default
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+				@spinner.Spinner(spinner.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Secondary
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantDestructive}) {
+				@spinner.Spinner(spinner.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Destructive
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantOutline}) {
+				@spinner.Spinner(spinner.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Outline
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantGhost}) {
+				@spinner.Spinner(spinner.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Ghost
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantLink}) {
+				@spinner.Spinner(spinner.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				Link
+			}
+		</div>
+	}
+}
+
+templ badgeExampleAsLink() {
+	@badgeExampleSection("asChild", "") {
+		<div class="flex flex-wrap gap-2 style-sera:gap-6">
+			@badge.Badge(badge.Props{Href: "#"}) {
+				Link
+				@icon.ArrowUpRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantSecondary, Href: "#"}) {
+				Link
+				@icon.ArrowUpRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantDestructive, Href: "#"}) {
+				Link
+				@icon.ArrowUpRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantGhost, Href: "#"}) {
+				Link
+				@icon.ArrowUpRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+			}
+		</div>
+	}
+}
+
+templ badgeExampleLongText() {
+	@badgeExampleSection("Long Text", "") {
+		<div class="flex flex-wrap gap-2 style-sera:gap-6">
+			@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+				A badge with a lot of text to see how it wraps
+			}
+		</div>
+	}
+}
+
+templ badgeExampleCustomColors() {
+	@badgeExampleSection("Custom Colors", "max-w-fit") {
+		<div class="flex flex-wrap gap-2 style-sera:gap-6">
+			@badge.Badge(badge.Props{Class: "bg-blue-600 text-blue-50 dark:bg-blue-600 dark:text-blue-50"}) {
+				Blue
+			}
+			@badge.Badge(badge.Props{Class: "bg-green-600 text-green-50 dark:bg-green-600 dark:text-green-50"}) {
+				Green
+			}
+			@badge.Badge(badge.Props{Class: "bg-sky-600 text-sky-50 dark:bg-sky-600 dark:text-sky-50"}) {
+				Sky
+			}
+			@badge.Badge(badge.Props{Class: "bg-purple-600 text-purple-50 dark:bg-purple-600 dark:text-purple-50"}) {
+				Purple
+			}
+			@badge.Badge(badge.Props{Class: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"}) {
+				Blue
+			}
+			@badge.Badge(badge.Props{Class: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"}) {
+				Green
+			}
+			@badge.Badge(badge.Props{Class: "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300"}) {
+				Sky
+			}
+			@badge.Badge(badge.Props{Class: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300"}) {
+				Purple
+			}
+			@badge.Badge(badge.Props{Class: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"}) {
+				Red
+			}
+		</div>
+	}
+}

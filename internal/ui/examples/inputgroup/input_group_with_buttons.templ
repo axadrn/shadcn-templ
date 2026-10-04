@@ -1,0 +1,66 @@
+package inputgroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+)
+
+templ InputGroupWithButtons() {
+	@field.Group() {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "input-button-13"}) {
+				Button
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-button-13"})
+				@inputgroup.Addon() {
+					@inputgroup.Button() {
+						Default
+					}
+				}
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-button-14"})
+				@inputgroup.Addon() {
+					@inputgroup.Button(inputgroup.ButtonProps{Variant: button.VariantOutline}) {
+						Outline
+					}
+				}
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-button-15"})
+				@inputgroup.Addon() {
+					@inputgroup.Button(inputgroup.ButtonProps{Variant: button.VariantSecondary}) {
+						Secondary
+					}
+				}
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-button-16"})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					@inputgroup.Button(inputgroup.ButtonProps{Variant: button.VariantSecondary}) {
+						Button
+					}
+				}
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-button-17"})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					@inputgroup.Button(inputgroup.ButtonProps{Size: inputgroup.ButtonSizeIconXs}) {
+						@icon.Copy()
+					}
+				}
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-button-18"})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					@inputgroup.Button(inputgroup.ButtonProps{Variant: button.VariantSecondary, Size: inputgroup.ButtonSizeIconXs}) {
+						@icon.Trash()
+					}
+				}
+			}
+		}
+	}
+}

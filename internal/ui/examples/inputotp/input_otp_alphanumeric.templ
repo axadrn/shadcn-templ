@@ -1,0 +1,19 @@
+package inputotp
+
+import "github.com/axadrn/shadcn-templ/v2/components/inputotp"
+
+templ InputOTPAlphanumeric() {
+	@inputotp.InputOTP(inputotp.Props{MaxLength: 6, Pattern: inputotp.RegexpOnlyDigitsAndChars}) {
+		@inputotp.Group() {
+			@inputotp.Slot(inputotp.SlotProps{Index: 0})
+			@inputotp.Slot(inputotp.SlotProps{Index: 1})
+			@inputotp.Slot(inputotp.SlotProps{Index: 2})
+		}
+		@inputotp.Separator()
+		@inputotp.Group() {
+			@inputotp.Slot(inputotp.SlotProps{Index: 3})
+			@inputotp.Slot(inputotp.SlotProps{Index: 4})
+			@inputotp.Slot(inputotp.SlotProps{Index: 5})
+		}
+	}
+}

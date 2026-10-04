@@ -1,0 +1,48 @@
+package combobox
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/combobox"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+)
+
+var comboboxTimezoneGroups = []struct {
+	Value string
+	Items []string
+}{
+	{"Americas", []string{"(GMT-5) New York", "(GMT-8) Los Angeles", "(GMT-6) Chicago", "(GMT-5) Toronto", "(GMT-8) Vancouver", "(GMT-3) São Paulo"}},
+	{"Europe", []string{"(GMT+0) London", "(GMT+1) Paris", "(GMT+1) Berlin", "(GMT+1) Rome", "(GMT+1) Madrid", "(GMT+1) Amsterdam"}},
+	{"Asia/Pacific", []string{"(GMT+9) Tokyo", "(GMT+8) Shanghai", "(GMT+8) Singapore", "(GMT+4) Dubai", "(GMT+11) Sydney", "(GMT+9) Seoul"}},
+}
+
+templ ComboboxInputGroup() {
+	@combobox.Combobox() {
+		@combobox.Input(combobox.InputProps{Placeholder: "Select a timezone"}) {
+			@inputgroup.Addon() {
+				@icon.Globe()
+			}
+		}
+		@combobox.Content(combobox.ContentProps{
+			AlignOffset: -28,
+			Class:       "w-60",
+		}) {
+			@combobox.Empty() {
+				No timezones found.
+			}
+			@combobox.List() {
+				for _, group := range comboboxTimezoneGroups {
+					@combobox.Group() {
+						@combobox.Label() {
+							{ group.Value }
+						}
+						for _, item := range group.Items {
+							@combobox.Item(combobox.ItemProps{Value: item}) {
+								{ item }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

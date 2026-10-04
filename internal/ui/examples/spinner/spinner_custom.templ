@@ -1,0 +1,21 @@
+package spinner
+
+import "github.com/axadrn/shadcn-templ/v2/components/icon"
+
+// The demo's own Spinner: the default icon swapped for icon.Loader, the
+// pendant of editing the component like the docs describe.
+templ spinnerCustomSpinner() {
+	@icon.Loader(icon.Props{
+		Class: "size-4 animate-spin",
+		Attributes: templ.Attributes{
+			"role":       "status",
+			"aria-label": "Loading",
+		},
+	})
+}
+
+templ SpinnerCustom() {
+	<div class="flex items-center gap-4">
+		@spinnerCustomSpinner()
+	</div>
+}

@@ -1,0 +1,126 @@
+package navigationmenu
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/navigationmenu"
+)
+
+type navigationMenuDemoComponent struct {
+	Title       string
+	Href        string
+	Description string
+}
+
+var navigationMenuDemoComponents = []navigationMenuDemoComponent{
+	{
+		Title:       "Alert Dialog",
+		Href:        "/docs/primitives/alert-dialog",
+		Description: "A modal dialog that interrupts the user with important content and expects a response.",
+	},
+	{
+		Title:       "Hover Card",
+		Href:        "/docs/primitives/hover-card",
+		Description: "For sighted users to preview content available behind a link.",
+	},
+	{
+		Title:       "Progress",
+		Href:        "/docs/primitives/progress",
+		Description: "Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.",
+	},
+	{
+		Title:       "Scroll-area",
+		Href:        "/docs/primitives/scroll-area",
+		Description: "Visually or semantically separates content.",
+	},
+	{
+		Title:       "Tabs",
+		Href:        "/docs/primitives/tabs",
+		Description: "A set of layered sections of content—known as tab panels—that are displayed one at a time.",
+	},
+	{
+		Title:       "Tooltip",
+		Href:        "/docs/primitives/tooltip",
+		Description: "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
+	},
+}
+
+// NavigationMenuDemo is upstream navigation-menu-demo.
+templ NavigationMenuDemo() {
+	@navigationmenu.NavigationMenu() {
+		@navigationmenu.List() {
+			@navigationmenu.Item() {
+				@navigationmenu.Trigger() {
+					Getting started
+				}
+				@navigationmenu.Content() {
+					<ul class="w-96">
+						@navigationMenuDemoListItem("/docs", "Introduction") {
+							Re-usable components built with Tailwind CSS.
+						}
+						@navigationMenuDemoListItem("/docs/installation", "Installation") {
+							How to install dependencies and structure your app.
+						}
+						@navigationMenuDemoListItem("/docs/primitives/typography", "Typography") {
+							Styles for headings, paragraphs, lists...etc
+						}
+					</ul>
+				}
+			}
+			@navigationmenu.Item(navigationmenu.ItemProps{Class: "hidden md:flex"}) {
+				@navigationmenu.Trigger() {
+					Components
+				}
+				@navigationmenu.Content() {
+					<ul class="grid w-[400px] gap-2 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+						for _, component := range navigationMenuDemoComponents {
+							@navigationMenuDemoListItem(component.Href, component.Title) {
+								{ component.Description }
+							}
+						}
+					</ul>
+				}
+			}
+			@navigationmenu.Item() {
+				@navigationmenu.Trigger() {
+					With Icon
+				}
+				@navigationmenu.Content() {
+					<ul class="grid w-[200px]">
+						<li>
+							@navigationmenu.Link(navigationmenu.LinkProps{Href: "#", Class: "flex-row items-center gap-2"}) {
+								@icon.CircleAlert()
+								Backlog
+							}
+							@navigationmenu.Link(navigationmenu.LinkProps{Href: "#", Class: "flex-row items-center gap-2"}) {
+								@icon.CircleDashed()
+								To Do
+							}
+							@navigationmenu.Link(navigationmenu.LinkProps{Href: "#", Class: "flex-row items-center gap-2"}) {
+								@icon.CircleCheck()
+								Done
+							}
+						</li>
+					</ul>
+				}
+			}
+			@navigationmenu.Item() {
+				@navigationmenu.Link(navigationmenu.LinkProps{Href: "/docs", Class: navigationmenu.TriggerStyle()}) {
+					Docs
+				}
+			}
+		}
+	}
+}
+
+templ navigationMenuDemoListItem(href, title string) {
+	<li>
+		@navigationmenu.Link(navigationmenu.LinkProps{Href: href}) {
+			<div class="flex flex-col gap-1 text-sm">
+				<div class="leading-none font-medium">{ title }</div>
+				<div class="line-clamp-2 text-muted-foreground">
+					{ children... }
+				</div>
+			</div>
+		}
+	</li>
+}

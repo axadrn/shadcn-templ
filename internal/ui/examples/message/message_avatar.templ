@@ -1,0 +1,67 @@
+package message
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/avatar"
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/message"
+)
+
+// messageAvatar is the <Avatar><AvatarImage/><AvatarFallback/></Avatar>
+// the message examples repeat.
+templ messageAvatar(src, alt, fallback string) {
+	@avatar.Avatar() {
+		@avatar.Image(avatar.ImageProps{Src: src, Alt: alt})
+		@avatar.Fallback() {
+			{ fallback }
+		}
+	}
+}
+
+templ MessageAvatar() {
+	<div class="flex w-full max-w-sm flex-col gap-6 py-12">
+		@message.Message() {
+			@message.Avatar() {
+				@messageAvatar("/assets/img/avatars/03.png", "@avatar", "R")
+			}
+			@message.Content() {
+				@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+					@bubble.Content() {
+						The build failed during dependency installation.
+					}
+				}
+			}
+		}
+		@message.Message(message.Props{Align: message.AlignEnd}) {
+			@message.Avatar() {
+				@messageAvatar("/assets/img/avatars/10.png", "@avatar", "R")
+			}
+			@message.Content() {
+				@bubble.Bubble() {
+					@bubble.Content() {
+						Can you share the exact error?
+					}
+				}
+			}
+		}
+		@message.Message() {
+			@message.Avatar() {
+				@messageAvatar("/assets/img/avatars/03.png", "@avatar", "R")
+			}
+			@message.Content() {
+				@bubble.Group() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content() {
+							Here's the error from the logs
+						}
+					}
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content() {
+							Something went wrong with the build. The libraries are not
+							installed correctly. Try running the build again.
+						}
+					}
+				}
+			}
+		}
+	</div>
+}

@@ -1,0 +1,51 @@
+package tabs
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/tabs"
+)
+
+type tabsRtlTab struct {
+	Value       string
+	Label       string
+	Title       string
+	Description string
+	Content     string
+}
+
+// The upstream example's Arabic translation, its default language.
+var tabsRtlTabs = []tabsRtlTab{
+	{"overview", "نظرة عامة", "نظرة عامة", "عرض مقاييسك الرئيسية وأنشطة المشروع الأخيرة. تتبع التقدم عبر جميع مشاريعك النشطة.", "لديك ١٢ مشروعًا نشطًا و٣ مهام معلقة."},
+	{"analytics", "التحليلات", "التحليلات", "تتبع مقاييس الأداء ومشاركة المستخدمين. راقب الاتجاهات وحدد فرص النمو.", "زادت مشاهدات الصفحة بنسبة ٢٥٪ مقارنة بالشهر الماضي."},
+	{"reports", "التقارير", "التقارير", "إنشاء وتنزيل تقاريرك التفصيلية. تصدير البيانات بتنسيقات متعددة للتحليل.", "لديك ٥ تقارير جاهزة ومتاحة للتصدير."},
+	{"settings", "الإعدادات", "الإعدادات", "إدارة تفضيلات حسابك وخياراته. تخصيص تجربتك لتناسب احتياجاتك.", "تكوين الإشعارات والأمان والسمات."},
+}
+
+templ TabsRtl() {
+	@tabs.Tabs(tabs.Props{DefaultValue: "overview", Class: "w-full max-w-sm", Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@tabs.List(tabs.ListProps{Attributes: templ.Attributes{"dir": "rtl"}}) {
+			for _, tab := range tabsRtlTabs {
+				@tabs.Trigger(tabs.TriggerProps{Value: tab.Value}) {
+					{ tab.Label }
+				}
+			}
+		}
+		for _, tab := range tabsRtlTabs {
+			@tabs.Content(tabs.ContentProps{Value: tab.Value}) {
+				@card.Card(card.Props{Attributes: templ.Attributes{"dir": "rtl"}}) {
+					@card.Header() {
+						@card.Title() {
+							{ tab.Title }
+						}
+						@card.Description() {
+							{ tab.Description }
+						}
+					}
+					@card.Content(card.ContentProps{Class: "text-sm text-muted-foreground"}) {
+						{ tab.Content }
+					}
+				}
+			}
+		}
+	}
+}

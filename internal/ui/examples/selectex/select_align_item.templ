@@ -1,0 +1,61 @@
+package selectex
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+	switchcomp "github.com/axadrn/shadcn-templ/v2/components/switch"
+)
+
+templ SelectAlignItem() {
+	@field.Group(field.GroupProps{Class: "w-full max-w-xs"}) {
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@field.Content() {
+				@field.Label(field.LabelProps{For: "align-item"}) {
+					Align Item
+				}
+				@field.Description() {
+					Toggle to align the item with the trigger.
+				}
+			}
+			@switchcomp.Switch(switchcomp.Props{
+				ID:             "align-item",
+				DefaultChecked: true,
+			})
+		}
+		@field.Field() {
+			@selectcomp.Select(selectcomp.Props{
+				ID:           "align-item-select",
+				Items:        selectFruits,
+				DefaultValue: "banana",
+			}) {
+				@selectcomp.Trigger() {
+					@selectcomp.Value()
+				}
+				@selectcomp.Content() {
+					@selectcomp.Group() {
+						for _, item := range selectFruits {
+							@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+								{ item.Label.(string) }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const sw = document.getElementById("align-item");
+			if (!sw) return;
+			sw.addEventListener("change", () => {
+				// The alignItemWithTrigger state: the popup renders it as
+				// data-align-trigger, the positioner reads the prop. The id is
+				// the popup's, the positioner its parent.
+				const popup = document.getElementById("align-item-select");
+				if (!popup) return;
+				popup.setAttribute("data-align-trigger", String(sw.checked));
+				popup.parentElement.setAttribute("data-templ-align-item-with-trigger", String(sw.checked));
+			});
+		})();
+	</script>
+}

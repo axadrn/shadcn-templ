@@ -1,0 +1,12 @@
+package slider
+
+import "github.com/axadrn/shadcn-templ/v2/components/slider"
+
+templ SliderRange() {
+	@slider.Slider(slider.Props{
+		DefaultValue: []float64{25, 50},
+		Max:          100,
+		Step:         5,
+		Class:        "mx-auto w-full max-w-xs",
+	})
+}

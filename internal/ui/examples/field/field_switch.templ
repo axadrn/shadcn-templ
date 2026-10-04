@@ -1,0 +1,18 @@
+package field
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	switchcomp "github.com/axadrn/shadcn-templ/v2/components/switch"
+)
+
+templ FieldSwitch() {
+	@field.Field(field.Props{
+		Orientation: field.OrientationHorizontal,
+		Class:       "w-fit",
+	}) {
+		@field.Label(field.LabelProps{For: "2fa"}) {
+			Multi-factor authentication
+		}
+		@switchcomp.Switch(switchcomp.Props{ID: "2fa"})
+	}
+}

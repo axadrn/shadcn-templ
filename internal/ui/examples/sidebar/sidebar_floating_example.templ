@@ -1,0 +1,171 @@
+package sidebar
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+	"github.com/axadrn/shadcn-templ/v2/components/item"
+	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
+)
+
+// Full-page floating sidebar with dropdown group menus and a newsletter card.
+
+var sidebarFloatingExampleNavMain = []sidebarExampleNavGroup{
+	{
+		Title: "Getting Started", URL: "#",
+		Items: []sidebarExampleNavItem{
+			{Title: "Installation", URL: "#"},
+			{Title: "Project Structure", URL: "#"},
+		},
+	},
+	{
+		Title: "Build Your Application", URL: "#",
+		Items: []sidebarExampleNavItem{
+			{Title: "Routing", URL: "#"},
+			{Title: "Data Fetching", URL: "#", IsActive: true},
+			{Title: "Rendering", URL: "#"},
+			{Title: "Caching", URL: "#"},
+			{Title: "Styling", URL: "#"},
+			{Title: "Optimizing", URL: "#"},
+			{Title: "Configuring", URL: "#"},
+			{Title: "Testing", URL: "#"},
+			{Title: "Authentication", URL: "#"},
+			{Title: "Deploying", URL: "#"},
+			{Title: "Upgrading", URL: "#"},
+			{Title: "Examples", URL: "#"},
+		},
+	},
+	{
+		Title: "API Reference", URL: "#",
+		Items: []sidebarExampleNavItem{
+			{Title: "Components", URL: "#"},
+			{Title: "File Conventions", URL: "#"},
+			{Title: "Functions", URL: "#"},
+			{Title: "next.config.js Options", URL: "#"},
+			{Title: "CLI", URL: "#"},
+			{Title: "Edge Runtime", URL: "#"},
+		},
+	},
+	{
+		Title: "Architecture", URL: "#",
+		Items: []sidebarExampleNavItem{
+			{Title: "Accessibility", URL: "#"},
+			{Title: "Fast Refresh", URL: "#"},
+			{Title: "templ Compiler", URL: "#"},
+			{Title: "Supported Browsers", URL: "#"},
+			{Title: "Turbopack", URL: "#"},
+		},
+	},
+}
+
+templ SidebarFloatingExample() {
+	@sidebar.Provider(sidebar.ProviderProps{Class: "bg-background"}) {
+		@sidebar.Sidebar(sidebar.Props{Variant: sidebar.VariantFloating}) {
+			@sidebar.Header() {
+				@sidebar.Menu() {
+					@sidebar.MenuItem() {
+						@sidebar.MenuButton(sidebar.MenuButtonProps{
+							Size: sidebar.MenuButtonSizeLg,
+							Href: "#",
+						}) {
+							@item.Item(item.Props{Size: item.SizeXs, Class: "p-0"}) {
+								@item.Content() {
+									@item.Title(item.TitleProps{Class: "text-sm"}) {
+										Documentation
+									}
+									@item.Description() {
+										v1.0.0
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			@sidebar.Content() {
+				@sidebar.Group() {
+					@sidebar.Menu() {
+						for _, group := range sidebarFloatingExampleNavMain {
+							@dropdownmenu.DropdownMenu() {
+								@sidebar.MenuItem() {
+									@sidebar.MenuButton(sidebar.MenuButtonProps{
+										Class:      "data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground",
+										Attributes: dropdownmenu.Trigger(ctx),
+									}) {
+										{ group.Title }
+										@icon.Ellipsis(icon.Props{Class: "ml-auto"})
+									}
+									if len(group.Items) > 0 {
+										@dropdownmenu.Content(dropdownmenu.ContentProps{
+											Side:  dropdownmenu.SideRight,
+											Align: dropdownmenu.AlignStart,
+										}) {
+											@dropdownmenu.Group() {
+												for _, subItem := range group.Items {
+													@dropdownmenu.Item(dropdownmenu.ItemProps{Href: subItem.URL}) {
+														{ subItem.Title }
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			@sidebar.Footer() {
+				@sidebar.Group() {
+					@card.Card(card.Props{Size: card.SizeSm, Class: "-mx-2"}) {
+						@card.Header() {
+							@card.Title(card.TitleProps{Class: "text-sm"}) {
+								Subscribe to our newsletter
+							}
+							@card.Description() {
+								Opt-in to receive updates and news about the sidebar.
+							}
+						}
+						@card.Content() {
+							<form>
+								@field.Field() {
+									// sidebar.Input has no Type prop; this is its exact markup
+									// with type="email" like the demo's SidebarInput.
+									@input.Input(input.Props{
+										Type:        "email",
+										Placeholder: "Email",
+										Class:       "cn-sidebar-input",
+										Attributes:  templ.Attributes{"data-slot": "sidebar-input", "data-sidebar": "input"},
+									})
+									@button.Button(button.Props{
+										Size:  button.SizeSm,
+										Class: "w-full bg-sidebar-primary text-sidebar-primary-foreground",
+									}) {
+										Subscribe
+									}
+								}
+							</form>
+						}
+					}
+				}
+			}
+			@sidebar.Rail()
+		}
+		@sidebar.Inset() {
+			<header class="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+				@sidebar.Trigger(sidebar.TriggerProps{Class: "-ml-1"})
+			</header>
+			<div class="flex flex-1 flex-col gap-4 p-4">
+				<div class="grid auto-rows-min gap-4 md:grid-cols-3">
+					<div class="aspect-video rounded-xl bg-muted/50"></div>
+					<div class="aspect-video rounded-xl bg-muted/50"></div>
+					<div class="aspect-video rounded-xl bg-muted/50"></div>
+				</div>
+				<div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min"></div>
+			</div>
+		}
+	}
+}

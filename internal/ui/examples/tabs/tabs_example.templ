@@ -1,0 +1,367 @@
+package tabs
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+	"github.com/axadrn/shadcn-templ/v2/components/tabs"
+)
+
+templ tabsExampleSection(title, containerClass string) {
+	<div data-slot="example" class={ "mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none", containerClass }>
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+// The style-scoped content frame shared by the with-content sections.
+const tabsExampleContentFrame = "border style-vega:rounded-lg style-vega:p-6 style-nova:rounded-lg style-nova:p-4 style-lyra:rounded-none style-lyra:p-4 style-maia:rounded-xl style-maia:p-6 style-mira:rounded-md style-mira:p-4 style-luma:rounded-xl style-luma:p-6 style-rhea:rounded-xl style-rhea:p-6"
+
+templ TabsExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@tabsExampleBasic()
+			@tabsExampleLine()
+			@tabsExampleVariantsComparison()
+			@tabsExampleDisabled()
+			@tabsExampleWithIcons()
+			@tabsExampleIconOnly()
+			@tabsExampleMultiple()
+			@tabsExampleWithContent()
+			@tabsExampleLineWithContent()
+			@tabsExampleLineDisabled()
+			@tabsExampleWithDropdown()
+			@tabsExampleVertical()
+			@tabsExampleWithInputAndButton()
+		</div>
+	</div>
+}
+
+templ tabsExampleBasic() {
+	@tabsExampleSection("Basic", "") {
+		@tabs.Tabs(tabs.Props{DefaultValue: "home"}) {
+			@tabs.List() {
+				@tabs.Trigger(tabs.TriggerProps{Value: "home"}) {
+					Home
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "settings"}) {
+					Settings
+				}
+			}
+		}
+	}
+}
+
+templ tabsExampleLine() {
+	@tabsExampleSection("Line", "") {
+		@tabs.Tabs(tabs.Props{DefaultValue: "overview"}) {
+			@tabs.List(tabs.ListProps{Variant: tabs.VariantLine}) {
+				@tabs.Trigger(tabs.TriggerProps{Value: "overview"}) {
+					Overview
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "analytics"}) {
+					Analytics
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "reports"}) {
+					Reports
+				}
+			}
+		}
+	}
+}
+
+templ tabsExampleVariantsComparison() {
+	@tabsExampleSection("Variants Alignment", "") {
+		<div class="flex gap-4">
+			@tabs.Tabs(tabs.Props{DefaultValue: "overview"}) {
+				@tabs.List() {
+					@tabs.Trigger(tabs.TriggerProps{Value: "overview"}) {
+						Overview
+					}
+					@tabs.Trigger(tabs.TriggerProps{Value: "analytics"}) {
+						Analytics
+					}
+				}
+			}
+			@tabs.Tabs(tabs.Props{DefaultValue: "overview"}) {
+				@tabs.List(tabs.ListProps{Variant: tabs.VariantLine}) {
+					@tabs.Trigger(tabs.TriggerProps{Value: "overview"}) {
+						Overview
+					}
+					@tabs.Trigger(tabs.TriggerProps{Value: "analytics"}) {
+						Analytics
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ tabsExampleDisabled() {
+	@tabsExampleSection("Disabled", "") {
+		@tabs.Tabs(tabs.Props{DefaultValue: "home"}) {
+			@tabs.List() {
+				@tabs.Trigger(tabs.TriggerProps{Value: "home"}) {
+					Home
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "settings", Disabled: true}) {
+					Disabled
+				}
+			}
+		}
+	}
+}
+
+templ tabsExampleWithIcons() {
+	@tabsExampleSection("With Icons", "") {
+		@tabs.Tabs(tabs.Props{DefaultValue: "preview"}) {
+			@tabs.List() {
+				@tabs.Trigger(tabs.TriggerProps{Value: "preview"}) {
+					@icon.AppWindow()
+					Preview
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "code"}) {
+					@icon.Code()
+					Code
+				}
+			}
+		}
+	}
+}
+
+templ tabsExampleIconOnly() {
+	@tabsExampleSection("Icon Only", "") {
+		@tabs.Tabs(tabs.Props{DefaultValue: "home"}) {
+			@tabs.List() {
+				@tabs.Trigger(tabs.TriggerProps{Value: "home"}) {
+					@icon.House()
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "search"}) {
+					@icon.Search()
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "settings"}) {
+					@icon.Settings()
+				}
+			}
+		}
+	}
+}
+
+templ tabsExampleMultiple() {
+	@tabsExampleSection("Multiple", "") {
+		@tabs.Tabs(tabs.Props{DefaultValue: "overview"}) {
+			@tabs.List() {
+				@tabs.Trigger(tabs.TriggerProps{Value: "overview"}) {
+					Overview
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "analytics"}) {
+					Analytics
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "reports"}) {
+					Reports
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "settings"}) {
+					Settings
+				}
+			}
+		}
+	}
+}
+
+templ tabsExampleWithContent() {
+	@tabsExampleSection("With Content", "") {
+		@tabs.Tabs(tabs.Props{DefaultValue: "account"}) {
+			@tabs.List() {
+				@tabs.Trigger(tabs.TriggerProps{Value: "account"}) {
+					Account
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "password"}) {
+					Password
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "notifications"}) {
+					Notifications
+				}
+			}
+			<div class={ tabsExampleContentFrame }>
+				@tabs.Content(tabs.ContentProps{Value: "account"}) {
+					Manage your account preferences and profile information.
+				}
+				@tabs.Content(tabs.ContentProps{Value: "password"}) {
+					Update your password to keep your account secure.
+				}
+				@tabs.Content(tabs.ContentProps{Value: "notifications"}) {
+					Configure how you receive notifications and alerts.
+				}
+			</div>
+		}
+	}
+}
+
+templ tabsExampleLineWithContent() {
+	@tabsExampleSection("Line With Content", "") {
+		@tabs.Tabs(tabs.Props{DefaultValue: "account"}) {
+			@tabs.List(tabs.ListProps{Variant: tabs.VariantLine}) {
+				@tabs.Trigger(tabs.TriggerProps{Value: "account"}) {
+					Account
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "password"}) {
+					Password
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "notifications"}) {
+					Notifications
+				}
+			}
+			<div class={ tabsExampleContentFrame }>
+				@tabs.Content(tabs.ContentProps{Value: "account"}) {
+					Manage your account preferences and profile information.
+				}
+				@tabs.Content(tabs.ContentProps{Value: "password"}) {
+					Update your password to keep your account secure.
+				}
+				@tabs.Content(tabs.ContentProps{Value: "notifications"}) {
+					Configure how you receive notifications and alerts.
+				}
+			</div>
+		}
+	}
+}
+
+templ tabsExampleLineDisabled() {
+	@tabsExampleSection("Line Disabled", "") {
+		@tabs.Tabs(tabs.Props{DefaultValue: "overview"}) {
+			@tabs.List(tabs.ListProps{Variant: tabs.VariantLine}) {
+				@tabs.Trigger(tabs.TriggerProps{Value: "overview"}) {
+					Overview
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "analytics"}) {
+					Analytics
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "reports", Disabled: true}) {
+					Reports
+				}
+			}
+		}
+	}
+}
+
+templ tabsExampleWithDropdown() {
+	@tabsExampleSection("With Dropdown", "") {
+		@tabs.Tabs(tabs.Props{DefaultValue: "overview"}) {
+			<div class="flex items-center justify-between">
+				@tabs.List() {
+					@tabs.Trigger(tabs.TriggerProps{Value: "overview"}) {
+						Overview
+					}
+					@tabs.Trigger(tabs.TriggerProps{Value: "analytics"}) {
+						Analytics
+					}
+					@tabs.Trigger(tabs.TriggerProps{Value: "reports"}) {
+						Reports
+					}
+				}
+				@dropdownmenu.DropdownMenu() {
+					@button.Button(button.Props{
+						Variant:    button.VariantGhost,
+						Size:       button.SizeIcon,
+						Class:      "size-8",
+						Attributes: dropdownmenu.Trigger(ctx),
+					}) {
+						@icon.Ellipsis()
+						<span class="sr-only">More options</span>
+					}
+					@dropdownmenu.Content(dropdownmenu.ContentProps{Align: dropdownmenu.AlignEnd}) {
+						@dropdownmenu.Item() {
+							Settings
+						}
+						@dropdownmenu.Item() {
+							Export
+						}
+						@dropdownmenu.Separator()
+						@dropdownmenu.Item() {
+							Archive
+						}
+					}
+				}
+			</div>
+			<div class={ tabsExampleContentFrame }>
+				@tabs.Content(tabs.ContentProps{Value: "overview"}) {
+					View your dashboard metrics and key performance indicators.
+				}
+				@tabs.Content(tabs.ContentProps{Value: "analytics"}) {
+					Detailed analytics and insights about your data.
+				}
+				@tabs.Content(tabs.ContentProps{Value: "reports"}) {
+					Generate and view custom reports.
+				}
+			</div>
+		}
+	}
+}
+
+templ tabsExampleVertical() {
+	@tabsExampleSection("Vertical", "") {
+		@tabs.Tabs(tabs.Props{DefaultValue: "account", Orientation: tabs.OrientationVertical}) {
+			@tabs.List() {
+				@tabs.Trigger(tabs.TriggerProps{Value: "account"}) {
+					Account
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "password"}) {
+					Password
+				}
+				@tabs.Trigger(tabs.TriggerProps{Value: "notifications"}) {
+					Notifications
+				}
+			}
+			<div class={ tabsExampleContentFrame }>
+				@tabs.Content(tabs.ContentProps{Value: "account"}) {
+					Manage your account preferences and profile information.
+				}
+				@tabs.Content(tabs.ContentProps{Value: "password"}) {
+					Update your password to keep your account secure. Use a strong password with a mix of letters, numbers, and symbols.
+				}
+				@tabs.Content(tabs.ContentProps{Value: "notifications"}) {
+					Configure how you receive notifications and alerts. Choose which types of notifications you want to receive and how you want to receive them.
+				}
+			</div>
+		}
+	}
+}
+
+templ tabsExampleWithInputAndButton() {
+	@tabsExampleSection("With Input and Button", "col-span-full") {
+		@tabs.Tabs(tabs.Props{DefaultValue: "overview", Class: "mx-auto w-full max-w-lg"}) {
+			<div class="flex items-center gap-4">
+				@tabs.List() {
+					@tabs.Trigger(tabs.TriggerProps{Value: "overview"}) {
+						Overview
+					}
+					@tabs.Trigger(tabs.TriggerProps{Value: "analytics"}) {
+						Analytics
+					}
+				}
+				<div class="ml-auto flex items-center gap-2">
+					@input.Input(input.Props{Placeholder: "Search...", Class: "w-44"})
+					@button.Button() {
+						Action
+					}
+				</div>
+			</div>
+			<div class={ tabsExampleContentFrame }>
+				@tabs.Content(tabs.ContentProps{Value: "overview"}) {
+					View your dashboard metrics and key performance indicators.
+				}
+				@tabs.Content(tabs.ContentProps{Value: "analytics"}) {
+					Detailed analytics and insights about your data.
+				}
+				@tabs.Content(tabs.ContentProps{Value: "reports"}) {
+					Generate and view custom reports.
+				}
+			</div>
+		}
+	}
+}

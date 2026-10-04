@@ -1,0 +1,104 @@
+package questionnaire
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/questionnaire"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ QuestionnaireNavigationState() {
+	@questionnaire.Questionnaire(questionnaire.Props{
+		Class: "mx-auto max-w-md",
+		Item:  utils.Ptr("permission"),
+		Items: []questionnaire.ItemDefinition{
+			{Name: "permission", Required: true},
+			{Name: "verification", Required: true},
+		},
+	}) {
+		@questionnaire.Progress()
+		@questionnaire.Item(questionnaire.ItemProps{Name: "permission", Required: true}) {
+			@questionnaire.Title() {
+				What may the agent modify?
+			}
+			@questionnaire.Description() {
+				Next is intentionally disabled until an answer is selected.
+			}
+			@questionnaire.Choices() {
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "files"}) {
+					Project files
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "tests"}) {
+					Project files and tests
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "config"}) {
+					Files, tests, and configuration
+				}
+			}
+			@questionnaire.Error()
+		}
+		@questionnaire.Item(questionnaire.ItemProps{Name: "verification", Required: true}) {
+			@questionnaire.Title() {
+				What must pass before completion?
+			}
+			@questionnaire.Choices() {
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "tests"}) {
+					Tests
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "types"}) {
+					Tests and types
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "all"}) {
+					Tests, types, and visual QA
+				}
+			}
+			@questionnaire.Error()
+		}
+		@questionnaire.Actions() {
+			@questionnaire.Previous()
+			@questionnaire.Next(questionnaire.NavigationProps{
+				Class:    "data-[status=unanswered]:opacity-50",
+				Disabled: true,
+				Variant:  button.VariantSecondary,
+			}) {
+				Next
+			}
+			@questionnaire.Submit(questionnaire.NavigationProps{Disabled: true}) {
+				Save permissions
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const root = document.currentScript.previousElementSibling;
+			// The host owns the active item and each item's status (onStatusChange),
+			// and disables Next and Submit while the active item is unanswered.
+			let item = "permission";
+			const statuses = { permission: "unanswered", verification: "unanswered" };
+			const update = (root) => {
+				const unanswered = statuses[item] === "unanswered";
+				root.querySelector('[data-slot="questionnaire-next"]').disabled = unanswered;
+				root.querySelector('[data-slot="questionnaire-submit"]').disabled = unanswered;
+			};
+			document.addEventListener("questionnaire-item-change", (e) => {
+				if (e.target !== root) return;
+				item = e.detail.item;
+				window.templ.questionnaire.setItem(e.target, item);
+				update(e.target);
+			});
+			document.addEventListener("questionnaire-status-change", (e) => {
+				if (!root.contains(e.target)) return;
+				statuses[e.target.getAttribute("data-templ-name")] = e.detail.status;
+				update(root);
+			});
+			document.addEventListener("submit", (e) => {
+				if (e.target !== root) return;
+				e.preventDefault();
+				const formData = new FormData(e.target);
+				window.templ.toast.add({
+					title: "Permissions saved",
+					description: `Permission: ${formData.get("permission") ?? "None"} · Verification: ${formData.get("verification") ?? "None"}`,
+				});
+			});
+		})();
+	</script>
+}

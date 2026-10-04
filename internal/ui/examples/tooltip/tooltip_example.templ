@@ -1,0 +1,197 @@
+package tooltip
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/kbd"
+	"github.com/axadrn/shadcn-templ/v2/components/tooltip"
+)
+
+templ tooltipExampleSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ TooltipExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@tooltipExampleBasic()
+			@tooltipExampleSidesSection()
+			@tooltipExampleWithIcon()
+			@tooltipExampleLongContent()
+			@tooltipExampleDisabled()
+			@tooltipExampleWithKeyboard()
+			@tooltipExampleOnLink()
+			@tooltipExampleFormatted()
+		</div>
+	</div>
+}
+
+templ tooltipExampleBasic() {
+	@tooltipExampleSection("Basic") {
+		@tooltip.Tooltip() {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Class:      "w-fit",
+				Attributes: tooltip.Trigger(ctx),
+			}) {
+				Show Tooltip
+			}
+			@tooltip.Content() {
+				<p>Add to library</p>
+			}
+		}
+	}
+}
+
+// Our tooltip has no inline-start/inline-end placements; they resolve to
+// left/right in LTR, so those two sides reuse SideLeft/SideRight.
+type tooltipExampleSide struct {
+	Label string
+	Side  tooltip.Side
+}
+
+func tooltipExampleSides() []tooltipExampleSide {
+	return []tooltipExampleSide{
+		{"inline start", tooltip.SideLeft},
+		{"left", tooltip.SideLeft},
+		{"top", tooltip.SideTop},
+		{"bottom", tooltip.SideBottom},
+		{"right", tooltip.SideRight},
+		{"inline end", tooltip.SideRight},
+	}
+}
+
+templ tooltipExampleSidesSection() {
+	@tooltipExampleSection("Sides") {
+		<div class="flex flex-wrap gap-2">
+			for _, side := range tooltipExampleSides() {
+				@tooltip.Tooltip() {
+					@button.Button(button.Props{
+						Variant:    button.VariantOutline,
+						Class:      "w-fit capitalize",
+						Attributes: tooltip.Trigger(ctx),
+					}) {
+						{ side.Label }
+					}
+					@tooltip.Content(tooltip.ContentProps{Side: side.Side}) {
+						<p>Add to library</p>
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ tooltipExampleWithIcon() {
+	@tooltipExampleSection("With Icon") {
+		@tooltip.Tooltip() {
+			@button.Button(button.Props{
+				Variant:    button.VariantGhost,
+				Size:       button.SizeIcon,
+				Attributes: tooltip.Trigger(ctx),
+			}) {
+				@icon.Info()
+				<span class="sr-only">Info</span>
+			}
+			@tooltip.Content() {
+				<p>Additional information</p>
+			}
+		}
+	}
+}
+
+templ tooltipExampleLongContent() {
+	@tooltipExampleSection("Long Content") {
+		@tooltip.Tooltip() {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Class:      "w-fit",
+				Attributes: tooltip.Trigger(ctx),
+			}) {
+				Show Tooltip
+			}
+			@tooltip.Content() {
+				To learn more about how this works, check out the docs. If you have any questions, please reach out to us.
+			}
+		}
+	}
+}
+
+templ tooltipExampleDisabled() {
+	@tooltipExampleSection("Disabled") {
+		@tooltip.Tooltip() {
+			<span class="inline-block w-fit" { tooltip.Trigger(ctx)... }>
+				@button.Button(button.Props{Variant: button.VariantOutline, Disabled: true}) {
+					Disabled
+				}
+			</span>
+			@tooltip.Content() {
+				<p>This feature is currently unavailable</p>
+			}
+		}
+	}
+}
+
+templ tooltipExampleWithKeyboard() {
+	@tooltipExampleSection("With Keyboard Shortcut") {
+		@tooltip.Tooltip() {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Size:       button.SizeIconSm,
+				Attributes: tooltip.Trigger(ctx),
+			}) {
+				@icon.Save()
+			}
+			@tooltip.Content() {
+				Save Changes
+				@kbd.Kbd() {
+					S
+				}
+			}
+		}
+	}
+}
+
+templ tooltipExampleOnLink() {
+	@tooltipExampleSection("On Link") {
+		@tooltip.Tooltip() {
+			<a
+				href="#"
+				class="w-fit text-sm text-primary underline-offset-4 hover:underline"
+				{ tooltip.Trigger(ctx)... }
+			>
+				Learn more
+			</a>
+			@tooltip.Content() {
+				<p>Click to read the documentation</p>
+			}
+		}
+	}
+}
+
+templ tooltipExampleFormatted() {
+	@tooltipExampleSection("Formatted Content") {
+		@tooltip.Tooltip() {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Class:      "w-fit",
+				Attributes: tooltip.Trigger(ctx),
+			}) {
+				Status
+			}
+			@tooltip.Content() {
+				<div class="flex flex-col gap-1">
+					<p class="font-semibold">Active</p>
+					<p class="text-xs opacity-80">Last updated 2 hours ago</p>
+				</div>
+			}
+		}
+	}
+}

@@ -1,0 +1,17 @@
+package checkbox
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/checkbox"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+)
+
+templ CheckboxBasic() {
+	@field.Group(field.GroupProps{Class: "mx-auto w-56"}) {
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@checkbox.Checkbox(checkbox.Props{ID: "terms-checkbox-basic", Name: "terms-checkbox-basic"})
+			@field.Label(field.LabelProps{For: "terms-checkbox-basic"}) {
+				Accept terms and conditions
+			}
+		}
+	}
+}

@@ -1,0 +1,27 @@
+package breadcrumb
+
+import "github.com/axadrn/shadcn-templ/v2/components/breadcrumb"
+
+templ BreadcrumbLink() {
+	@breadcrumb.Breadcrumb() {
+		@breadcrumb.List() {
+			@breadcrumb.Item() {
+				@breadcrumb.Link(breadcrumb.LinkProps{Href: "#link-component"}) {
+					Home
+				}
+			}
+			@breadcrumb.Separator()
+			@breadcrumb.Item() {
+				@breadcrumb.Link(breadcrumb.LinkProps{Href: "#link-component"}) {
+					Components
+				}
+			}
+			@breadcrumb.Separator()
+			@breadcrumb.Item() {
+				@breadcrumb.Page() {
+					Breadcrumb
+				}
+			}
+		}
+	}
+}

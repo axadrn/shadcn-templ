@@ -1,0 +1,20 @@
+package kbd
+
+import "github.com/axadrn/shadcn-templ/v2/components/kbd"
+
+templ KbdGroupExample() {
+	<div class="flex flex-col items-center gap-4">
+		<p class="text-sm text-muted-foreground">
+			Use{ " " }
+			@kbd.Group() {
+				@kbd.Kbd() {
+					Ctrl + B
+				}
+				@kbd.Kbd() {
+					Ctrl + K
+				}
+			}
+			{ " " }to open the command palette
+		</p>
+	</div>
+}

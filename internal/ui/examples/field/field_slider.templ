@@ -1,0 +1,38 @@
+package field
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/slider"
+)
+
+templ FieldSlider() {
+	@field.Field(field.Props{Class: "w-full max-w-xs"}) {
+		@field.Title() {
+			Price Range
+		}
+		@field.Description() {
+			Set your budget range ($<span id="field-slider-min" class="font-medium tabular-nums">200</span> - <span id="field-slider-max" class="font-medium tabular-nums">800</span>).
+		}
+		@slider.Slider(slider.Props{
+			ID:           "field-slider",
+			DefaultValue: []float64{200, 800},
+			Min:          0,
+			Max:          1000,
+			Step:         10,
+			Class:        "mt-2 w-full",
+			Attributes: templ.Attributes{
+				"aria-label": "Price Range",
+			},
+		})
+	}
+	<script>
+		// Keep the displayed value in sync with the slider.
+		(() => {
+			const root = document.getElementById("field-slider");
+			root.addEventListener("slider-change", (e) => {
+				document.getElementById("field-slider-min").textContent = e.detail.values[0];
+				document.getElementById("field-slider-max").textContent = e.detail.values[1];
+			});
+		})();
+	</script>
+}

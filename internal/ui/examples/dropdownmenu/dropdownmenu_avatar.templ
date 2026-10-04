@@ -1,0 +1,50 @@
+package dropdownmenu
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/avatar"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ DropdownMenuAvatar() {
+	@dropdownmenu.DropdownMenu() {
+		@button.Button(button.Props{
+			Variant:    button.VariantGhost,
+			Size:       button.SizeIcon,
+			Class:      "rounded-full",
+			Attributes: dropdownmenu.Trigger(ctx),
+		}) {
+			@avatar.Avatar() {
+				@avatar.Image(avatar.ImageProps{
+					Src: "https://github.com/axadrn.png",
+					Alt: "axadrn",
+				})
+				@avatar.Fallback() {
+					AA
+				}
+			}
+		}
+		@dropdownmenu.Content(dropdownmenu.ContentProps{Align: dropdownmenu.AlignEnd}) {
+			@dropdownmenu.Group() {
+				@dropdownmenu.Item() {
+					@icon.BadgeCheck()
+					Account
+				}
+				@dropdownmenu.Item() {
+					@icon.CreditCard()
+					Billing
+				}
+				@dropdownmenu.Item() {
+					@icon.Bell()
+					Notifications
+				}
+			}
+			@dropdownmenu.Separator()
+			@dropdownmenu.Item() {
+				@icon.LogOut()
+				Sign Out
+			}
+		}
+	}
+}

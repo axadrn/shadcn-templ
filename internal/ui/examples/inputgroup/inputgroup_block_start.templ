@@ -1,0 +1,49 @@
+package inputgroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+)
+
+templ InputGroupBlockStart() {
+	@field.Group(field.GroupProps{Class: "max-w-sm"}) {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "block-start-input"}) {
+				Input
+			}
+			@inputgroup.InputGroup(inputgroup.Props{Class: "h-auto"}) {
+				@inputgroup.Input(inputgroup.InputProps{ID: "block-start-input", Placeholder: "Enter your name"})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockStart}) {
+					@inputgroup.Text() {
+						Full Name
+					}
+				}
+			}
+			@field.Description() {
+				Header positioned above the input.
+			}
+		}
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "block-start-textarea"}) {
+				Textarea
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Textarea(inputgroup.TextareaProps{ID: "block-start-textarea", Placeholder: `fmt.Println("Hello, world!")`, Class: "font-mono text-sm"})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockStart}) {
+					@icon.FileCode(icon.Props{Class: "text-muted-foreground"})
+					@inputgroup.Text(inputgroup.TextProps{Class: "font-mono"}) {
+						main.go
+					}
+					@inputgroup.Button(inputgroup.ButtonProps{Size: inputgroup.ButtonSizeIconXs, Class: "ml-auto"}) {
+						@icon.Copy()
+						<span class="sr-only">Copy</span>
+					}
+				}
+			}
+			@field.Description() {
+				Header positioned above the textarea.
+			}
+		}
+	}
+}

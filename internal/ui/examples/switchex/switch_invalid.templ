@@ -1,0 +1,25 @@
+package switchex
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	switchcomp "github.com/axadrn/shadcn-templ/v2/components/switch"
+)
+
+templ SwitchInvalid() {
+	@field.Field(field.Props{Orientation: field.OrientationHorizontal, Class: "max-w-sm", Attributes: templ.Attributes{"data-invalid": "true"}}) {
+		@field.Content() {
+			@field.Label(field.LabelProps{For: "switch-terms"}) {
+				Accept terms and conditions
+			}
+			@field.Description() {
+				You must accept the terms and conditions to continue.
+			}
+		}
+		@switchcomp.Switch(switchcomp.Props{
+			ID: "switch-terms",
+			Attributes: templ.Attributes{
+				"aria-invalid": "true",
+			},
+		})
+	}
+}

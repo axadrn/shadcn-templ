@@ -1,0 +1,158 @@
+package chart
+
+import (
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/axadrn/shadcn-templ/v2/components/chart"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+// Interactive thirty-day bar chart used by the docs hero.
+
+var chartDemoData = []chart.Datum{
+	{"date": "2024-04-01", "desktop": 222, "mobile": 150},
+	{"date": "2024-04-02", "desktop": 97, "mobile": 180},
+	{"date": "2024-04-03", "desktop": 167, "mobile": 120},
+	{"date": "2024-04-04", "desktop": 242, "mobile": 260},
+	{"date": "2024-04-05", "desktop": 373, "mobile": 290},
+	{"date": "2024-04-06", "desktop": 301, "mobile": 340},
+	{"date": "2024-04-07", "desktop": 245, "mobile": 180},
+	{"date": "2024-04-08", "desktop": 409, "mobile": 320},
+	{"date": "2024-04-09", "desktop": 59, "mobile": 110},
+	{"date": "2024-04-10", "desktop": 261, "mobile": 190},
+	{"date": "2024-04-11", "desktop": 327, "mobile": 350},
+	{"date": "2024-04-12", "desktop": 292, "mobile": 210},
+	{"date": "2024-04-13", "desktop": 342, "mobile": 380},
+	{"date": "2024-04-14", "desktop": 137, "mobile": 220},
+	{"date": "2024-04-15", "desktop": 120, "mobile": 170},
+	{"date": "2024-04-16", "desktop": 138, "mobile": 190},
+	{"date": "2024-04-17", "desktop": 446, "mobile": 360},
+	{"date": "2024-04-18", "desktop": 364, "mobile": 410},
+	{"date": "2024-04-19", "desktop": 243, "mobile": 180},
+	{"date": "2024-04-20", "desktop": 89, "mobile": 150},
+	{"date": "2024-04-21", "desktop": 137, "mobile": 200},
+	{"date": "2024-04-22", "desktop": 224, "mobile": 170},
+	{"date": "2024-04-23", "desktop": 138, "mobile": 230},
+	{"date": "2024-04-24", "desktop": 387, "mobile": 290},
+	{"date": "2024-04-25", "desktop": 215, "mobile": 250},
+	{"date": "2024-04-26", "desktop": 75, "mobile": 130},
+	{"date": "2024-04-27", "desktop": 383, "mobile": 420},
+	{"date": "2024-04-28", "desktop": 122, "mobile": 180},
+	{"date": "2024-04-29", "desktop": 315, "mobile": 240},
+	{"date": "2024-04-30", "desktop": 454, "mobile": 380},
+}
+
+var chartDemoConfig = chart.Config{
+	{Key: "views", Label: "Page Views"},
+	{Key: "desktop", Label: "Desktop", Color: "var(--chart-2)"},
+	{Key: "mobile", Label: "Mobile", Color: "var(--chart-1)"},
+}
+
+func chartDemoShortDate(v any) string {
+	t, _ := time.Parse("2006-01-02", v.(string))
+	return t.Format("Jan 2")
+}
+
+func chartDemoLongDate(v any) string {
+	t, _ := time.Parse("2006-01-02", v.(string))
+	return t.Format("Jan 2, 2006")
+}
+
+func chartDemoTotal(series string) string {
+	sum := 0
+	for _, d := range chartDemoData {
+		sum += d[series].(int)
+	}
+	s := fmt.Sprintf("%d", sum)
+	var sb strings.Builder
+	for i, r := range s {
+		if i > 0 && (len(s)-i)%3 == 0 {
+			sb.WriteRune(',')
+		}
+		sb.WriteRune(r)
+	}
+	return sb.String()
+}
+
+// The example imports the new-york-v4 Card, so its parts render that
+// registry's markup here.
+templ ChartDemo() {
+	<div data-slot="card" class={ utils.CN("flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm", "py-0 pb-4") }>
+		<div data-slot="card-header" class={ utils.CN("@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6", "flex flex-col items-stretch border-b p-0! sm:flex-row") }>
+			<div class="flex flex-1 flex-col justify-center gap-1 px-6 pt-4 pb-3 sm:py-0!">
+				<div data-slot="card-title" class="leading-none font-semibold">Bar Chart - Interactive</div>
+				<div data-slot="card-description" class="text-sm text-muted-foreground">Showing total visitors for the last 3 months</div>
+			</div>
+			<div class="flex">
+				for _, series := range []string{"desktop", "mobile"} {
+					<button
+						data-active={ utils.IfElse(series == "desktop", "true", "false") }
+						class="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
+					>
+						<span class="text-xs text-muted-foreground">
+							{ chartDemoConfig.Label(series) }
+						</span>
+						<span class="text-lg leading-none font-bold sm:text-3xl">
+							{ chartDemoTotal(series) }
+						</span>
+					</button>
+				}
+			</div>
+		</div>
+		<div data-slot="card-content" class={ utils.CN("px-6", "px-2 sm:p-6") }>
+			@chart.Container(chart.ContainerProps{ID: "chart-demo", Config: chartDemoConfig, Class: "aspect-auto h-[250px] w-full"}) {
+				@chartDemoBarChart("desktop")
+				// The chart with dataKey="mobile", the props the button sets.
+				<template>
+					@chartDemoBarChart("mobile")
+				</template>
+			}
+		</div>
+	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The activeChart state: the buttons set it, the chart renders the
+		// Bar with that dataKey.
+		(() => {
+			const card = document.currentScript.previousElementSibling;
+			const buttons = [...card.querySelector('[data-slot="card-header"]').lastElementChild.children];
+			const chartEl = card.querySelector('[data-slot="chart"]');
+			const wrapper = chartEl.querySelector(".recharts-wrapper");
+			const models = [
+				wrapper.querySelector("script[data-templ-chart-model]").textContent,
+				chartEl.querySelector("template").content.querySelector("script[data-templ-chart-model]").textContent,
+			];
+			buttons.forEach((button, i) => {
+				button.addEventListener("click", () => {
+					buttons.forEach((b) => b.setAttribute("data-active", String(b === button)));
+					window.templ.chart.update(wrapper, JSON.parse(models[i]));
+				});
+			});
+		})();
+	</script>
+}
+
+templ chartDemoBarChart(series string) {
+	@chart.BarChart(chart.BarChartProps{
+		Data:               chartDemoData,
+		Margin:             &chart.Margin{Left: 12, Right: 12},
+		AccessibilityLayer: true,
+	}) {
+		@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
+		@chart.XAxis(chart.XAxisProps{
+			DataKey:       "date",
+			TickMargin:    8,
+			MinTickGap:    32,
+			TickFormatter: chartDemoShortDate,
+		})
+		@chart.Tooltip(chart.TooltipProps{
+			Content: chart.TooltipContentProps{
+				Class:          "w-[150px]",
+				NameKey:        "views",
+				LabelFormatter: chartDemoLongDate,
+			},
+		})
+		@chart.Bar(chart.BarProps{DataKey: series, Fill: "var(--color-" + series + ")"})
+	}
+}

@@ -1,0 +1,197 @@
+package menubar
+
+import "github.com/axadrn/shadcn-templ/v2/components/menubar"
+
+// The upstream example's Arabic translation, its default language.
+templ MenubarRtl() {
+	@menubar.Menubar(menubar.Props{Class: "w-72", Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@menubar.Menu() {
+			@menubar.Trigger() {
+				ملف
+			}
+			@menubar.Content(menubar.ContentProps{Align: menubar.AlignEnd, Attributes: templ.Attributes{"dir": "rtl"}}) {
+				@menubar.Group() {
+					@menubar.Item() {
+						علامة تبويب جديدة
+						@menubar.Shortcut() {
+							⌘T
+						}
+					}
+					@menubar.Item() {
+						نافذة جديدة
+						@menubar.Shortcut() {
+							⌘N
+						}
+					}
+					@menubar.Item(menubar.ItemProps{Disabled: true}) {
+						نافذة التصفح المتخفي الجديدة
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Sub() {
+						@menubar.SubTrigger() {
+							مشاركة
+						}
+						@menubar.SubContent(menubar.SubContentProps{Attributes: templ.Attributes{"dir": "rtl", "data-lang": "ar"}}) {
+							@menubar.Group() {
+								@menubar.Item() {
+									رابط البريد الإلكتروني
+								}
+								@menubar.Item() {
+									الرسائل
+								}
+								@menubar.Item() {
+									الملاحظات
+								}
+							}
+						}
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item() {
+						طباعة...
+						@menubar.Shortcut() {
+							⌘P
+						}
+					}
+				}
+			}
+		}
+		@menubar.Menu() {
+			@menubar.Trigger() {
+				تعديل
+			}
+			@menubar.Content(menubar.ContentProps{Align: menubar.AlignEnd, Attributes: templ.Attributes{"dir": "rtl", "data-lang": "ar"}}) {
+				@menubar.Group() {
+					@menubar.Item() {
+						تراجع
+						@menubar.Shortcut() {
+							⌘Z
+						}
+					}
+					@menubar.Item() {
+						إعادة
+						@menubar.Shortcut() {
+							⇧⌘Z
+						}
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Sub() {
+						@menubar.SubTrigger() {
+							بحث
+						}
+						@menubar.SubContent(menubar.SubContentProps{Attributes: templ.Attributes{"dir": "rtl", "data-lang": "ar"}}) {
+							@menubar.Group() {
+								@menubar.Item() {
+									البحث على الويب
+								}
+							}
+							@menubar.Separator()
+							@menubar.Group() {
+								@menubar.Item() {
+									بحث...
+								}
+								@menubar.Item() {
+									البحث التالي
+								}
+								@menubar.Item() {
+									البحث السابق
+								}
+							}
+						}
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item() {
+						قص
+					}
+					@menubar.Item() {
+						نسخ
+					}
+					@menubar.Item() {
+						لصق
+					}
+				}
+			}
+		}
+		@menubar.Menu() {
+			@menubar.Trigger() {
+				عرض
+			}
+			@menubar.Content(menubar.ContentProps{Class: "w-44", Align: menubar.AlignEnd, Attributes: templ.Attributes{"dir": "rtl", "data-lang": "ar"}}) {
+				@menubar.Group() {
+					@menubar.CheckboxItem() {
+						شريط الإشارات المرجعية
+					}
+					@menubar.CheckboxItem(menubar.CheckboxItemProps{Checked: menubarBool(true)}) {
+						عناوين URL الكاملة
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item(menubar.ItemProps{Inset: true}) {
+						إعادة تحميل
+						@menubar.Shortcut() {
+							⌘R
+						}
+					}
+					@menubar.Item(menubar.ItemProps{Disabled: true, Inset: true}) {
+						إعادة تحميل قسري
+						@menubar.Shortcut() {
+							⇧⌘R
+						}
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item(menubar.ItemProps{Inset: true}) {
+						تبديل وضع ملء الشاشة
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item(menubar.ItemProps{Inset: true}) {
+						إخفاء الشريط الجانبي
+					}
+				}
+			}
+		}
+		@menubar.Menu() {
+			@menubar.Trigger() {
+				الملفات الشخصية
+			}
+			@menubar.Content(menubar.ContentProps{Align: menubar.AlignEnd, Attributes: templ.Attributes{"dir": "rtl", "data-lang": "ar"}}) {
+				// Upstream's profile state (value with onValueChange) behaves like
+				// an uncontrolled group: the menubar has no owner setter for it.
+				@menubar.RadioGroup(menubar.RadioGroupProps{DefaultValue: "benoit"}) {
+					@menubar.RadioItem(menubar.RadioItemProps{Value: "andy"}) {
+						Andy
+					}
+					@menubar.RadioItem(menubar.RadioItemProps{Value: "benoit"}) {
+						Benoit
+					}
+					@menubar.RadioItem(menubar.RadioItemProps{Value: "Luis"}) {
+						Luis
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item(menubar.ItemProps{Inset: true}) {
+						تعديل...
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item(menubar.ItemProps{Inset: true}) {
+						إضافة ملف شخصي...
+					}
+				}
+			}
+		}
+	}
+}

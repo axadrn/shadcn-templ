@@ -1,0 +1,37 @@
+package attachment
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/attachment"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ AttachmentImage() {
+	<div class="mx-auto w-full max-w-sm py-12">
+		@attachment.Group(attachment.GroupProps{Class: "w-full"}) {
+			for _, image := range attachmentImages {
+				@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+					@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+						<img src={ image.Src } alt={ image.Alt }/>
+					}
+					@attachment.Content() {
+						@attachment.Title() {
+							{ image.Name }
+						}
+						@attachment.Description() {
+							{ image.Meta }
+						}
+					}
+					@attachment.Actions() {
+						@attachment.Action(attachment.ActionProps{Attributes: templ.Attributes{"aria-label": "Remove " + image.Name}}) {
+							@icon.X()
+						}
+					}
+					@attachment.Trigger(attachment.TriggerProps{
+						Href:       image.Src,
+						Attributes: templ.Attributes{"target": "_blank", "rel": "noreferrer", "aria-label": "Open " + image.Name},
+					})
+				}
+			}
+		}
+	</div>
+}

@@ -1,0 +1,70 @@
+package item
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/avatar"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/item"
+)
+
+type itemPerson struct {
+	Username string
+	Avatar   string
+	Email    string
+}
+
+templ ItemGroupExample() {
+	{{
+		people := []itemPerson{
+			{
+				Username: "axadrn",
+				Avatar:   "https://github.com/axadrn.png",
+				Email:    "axel@example.com",
+			},
+			{
+				Username: "a-h",
+				Avatar:   "https://github.com/a-h.png",
+				Email:    "adrian@example.com",
+			},
+			{
+				Username: "joerdav",
+				Avatar:   "https://github.com/joerdav.png",
+				Email:    "joe@example.com",
+			},
+		}
+	}}
+	@item.Group(item.GroupProps{Class: "max-w-sm"}) {
+		for _, person := range people {
+			@item.Item(item.Props{Variant: item.VariantOutline}) {
+				@item.Media() {
+					@avatar.Avatar() {
+						@avatar.Image(avatar.ImageProps{
+							Src:   person.Avatar,
+							Class: "grayscale",
+						})
+						@avatar.Fallback() {
+							{ person.Username[:1] }
+						}
+					}
+				}
+				@item.Content(item.ContentProps{Class: "gap-1"}) {
+					@item.Title() {
+						{ person.Username }
+					}
+					@item.Description() {
+						{ person.Email }
+					}
+				}
+				@item.Actions() {
+					@button.Button(button.Props{
+						Variant: button.VariantGhost,
+						Size:    button.SizeIcon,
+						Class:   "rounded-full",
+					}) {
+						@icon.Plus()
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,40 @@
+package alertdialog
+
+import (
+	exshared "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/shared"
+	"github.com/axadrn/shadcn-templ/v2/components/alertdialog"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ AlertDialogSmallWithMedia() {
+	@alertdialog.AlertDialog() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: exshared.ServerRendered(alertdialog.Trigger(ctx)),
+		}) {
+			Show Dialog
+		}
+		@alertdialog.Content(alertdialog.ContentProps{Size: alertdialog.SizeSm}) {
+			@alertdialog.Header() {
+				@alertdialog.Media() {
+					@icon.Bluetooth()
+				}
+				@alertdialog.Title() {
+					Allow accessory to connect?
+				}
+				@alertdialog.Description() {
+					Do you want to allow the USB accessory to connect to this device?
+				}
+			}
+			@alertdialog.Footer() {
+				@alertdialog.Cancel() {
+					Don't allow
+				}
+				@alertdialog.Action() {
+					Allow
+				}
+			}
+		}
+	}
+}

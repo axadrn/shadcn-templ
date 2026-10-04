@@ -1,0 +1,26 @@
+package scrollfade
+
+templ ScrollFadeNone() {
+	<div class="mx-auto flex max-w-xs min-w-0 flex-col gap-6">
+		<div class="flex flex-col gap-3">
+			<div class="overflow-hidden rounded-2xl border">
+				<div class="h-48 scroll-fade scrollbar-none overflow-y-auto">
+					@scrollFadeNumberedItems(8)
+				</div>
+			</div>
+			<p class="text-center font-mono text-xs text-muted-foreground">
+				scroll-fade
+			</p>
+		</div>
+		<div class="flex flex-col gap-3">
+			<div class="overflow-hidden rounded-2xl border">
+				<div class="h-48 scroll-fade scrollbar-none overflow-y-auto scroll-fade-none">
+					@scrollFadeNumberedItems(8)
+				</div>
+			</div>
+			<p class="text-center font-mono text-xs text-muted-foreground">
+				scroll-fade scroll-fade-none
+			</p>
+		</div>
+	</div>
+}

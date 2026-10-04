@@ -1,0 +1,37 @@
+package radiogroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/radiogroup"
+)
+
+templ RadioGroupFieldset() {
+	@field.Set(field.SetProps{Class: "w-full max-w-xs"}) {
+		@field.Legend(field.LegendProps{Variant: field.LegendVariantLabel}) {
+			Subscription Plan
+		}
+		@field.Description() {
+			Yearly and lifetime plans offer significant savings.
+		}
+		@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "monthly"}) {
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{ID: "plan-monthly", Value: "monthly"})
+				@field.Label(field.LabelProps{For: "plan-monthly", Class: "font-normal"}) {
+					Monthly ($9.99/month)
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{ID: "plan-yearly", Value: "yearly"})
+				@field.Label(field.LabelProps{For: "plan-yearly", Class: "font-normal"}) {
+					Yearly ($99.99/year)
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{ID: "plan-lifetime", Value: "lifetime"})
+				@field.Label(field.LabelProps{For: "plan-lifetime", Class: "font-normal"}) {
+					Lifetime ($299.99)
+				}
+			}
+		}
+	}
+}

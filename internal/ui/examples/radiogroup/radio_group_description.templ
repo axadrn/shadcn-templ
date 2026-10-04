@@ -1,0 +1,44 @@
+package radiogroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/radiogroup"
+)
+
+templ RadioGroupDescription() {
+	@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "comfortable", Class: "w-fit"}) {
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@radiogroup.Item(radiogroup.ItemProps{ID: "desc-r1", Value: "default"})
+			@field.Content() {
+				@field.Label(field.LabelProps{For: "desc-r1"}) {
+					Default
+				}
+				@field.Description() {
+					Standard spacing for most use cases.
+				}
+			}
+		}
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@radiogroup.Item(radiogroup.ItemProps{ID: "desc-r2", Value: "comfortable"})
+			@field.Content() {
+				@field.Label(field.LabelProps{For: "desc-r2"}) {
+					Comfortable
+				}
+				@field.Description() {
+					More space between elements.
+				}
+			}
+		}
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@radiogroup.Item(radiogroup.ItemProps{ID: "desc-r3", Value: "compact"})
+			@field.Content() {
+				@field.Label(field.LabelProps{For: "desc-r3"}) {
+					Compact
+				}
+				@field.Description() {
+					Minimal spacing for dense layouts.
+				}
+			}
+		}
+	}
+}

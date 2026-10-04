@@ -1,0 +1,674 @@
+package message
+
+import (
+	exattachment "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/attachment"
+	"github.com/axadrn/shadcn-templ/v2/components/attachment"
+	"github.com/axadrn/shadcn-templ/v2/components/avatar"
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/example"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+	"github.com/axadrn/shadcn-templ/v2/components/message"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+)
+
+// messageExampleLogs is the Group Chat log excerpt, whitespace kept.
+const messageExampleLogs = `I found the following error in the logs:
+
+- Error: No users found
+- Stack trace:
+  - at src/users/services/user-service.ts:123
+  - at src/users/services/get-user.ts:230
+
+Can you check if the users are being created?`
+
+// MessageExample is message-example.tsx. Its messagePartsChat and
+// MessageTextPart are declared upstream but never rendered, so only the
+// eight examples are ported. IconPlaceholder renders its lucide icon.
+templ MessageExample() {
+	@example.Wrapper() {
+		@messageExampleDefault()
+		@messageExampleWithAvatar()
+		@messageExampleGroup()
+		@messageExampleGroupChat()
+		@messageExampleHeaderFooter()
+		@messageExampleActions()
+		@messageExampleAttachment()
+		@messageExampleAttachmentGroup()
+	}
+}
+
+// messageExampleAvatar is <Avatar><AvatarImage/><AvatarFallback/></Avatar>,
+// without the image when src is empty.
+templ messageExampleAvatar(src, alt, class, fallback string) {
+	@avatar.Avatar() {
+		if src != "" {
+			@avatar.Image(avatar.ImageProps{Src: src, Alt: alt, Class: class})
+		}
+		@avatar.Fallback() {
+			{ fallback }
+		}
+	}
+}
+
+templ messageExampleDefault() {
+	@example.Example(example.Props{Title: "Message"}) {
+		<div class="flex w-full max-w-md min-w-0 flex-col gap-10">
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Content() {
+					@bubble.Bubble() {
+						@bubble.Content() {
+							Deploying to prod real quick.
+						}
+					}
+				}
+			}
+			@message.Message() {
+				@message.Content() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content() {
+							It's 4:55 PM. On a Friday.
+						}
+					}
+				}
+			}
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Content() {
+					@bubble.Bubble() {
+						@bubble.Content() {
+							It's a one-line change.
+						}
+					}
+				}
+			}
+			@message.Message() {
+				@message.Content() {
+					@bubble.Group() {
+						@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+							@bubble.Content() {
+								It's always a one-line change 😭. Make sure to run the
+								tests this time.
+							}
+						}
+						@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+							@bubble.Content() {
+								Alright, go for it.
+							}
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ messageExampleWithAvatar() {
+	@example.Example(example.Props{Title: "Avatar"}) {
+		<div class="flex w-full max-w-md flex-col gap-10">
+			@message.Message() {
+				@message.Avatar() {
+					@messageExampleAvatar("https://github.com/shadcn.png", "@shadcn", "grayscale", "CN")
+				}
+				@message.Content() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content() {
+							Something went wrong. Any idea?
+						}
+					}
+				}
+			}
+			@message.Message() {
+				@message.Avatar() {
+					@messageExampleAvatar("https://github.com/evilrabbit.png", "@evilrabbit", "", "ER")
+				}
+				@message.Content() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content() {
+							I checked the latest deployment and found the build failed
+							during dependency installation.
+						}
+					}
+				}
+			}
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Avatar() {
+					@messageExampleAvatar("https://github.com/evilrabbit.png", "@evilrabbit", "", "ER")
+				}
+				@message.Content() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content() {
+							Something went wrong. Any idea?
+						}
+					}
+				}
+			}
+			@message.Message() {
+				@message.Avatar() {
+					@messageExampleAvatar("https://avatar.vercel.sh/shadcn", "@shadcn", "", "CN")
+				}
+				@message.Content() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content(bubble.ContentProps{Class: "space-y-2"}) {
+							<div>
+								I checked the latest deployment and found the build failed
+								during dependency installation.
+							</div>
+							<div>Can you share the exact error message from the logs?</div>
+						}
+					}
+				}
+			}
+			@message.Message() {
+				@message.Avatar() {
+					@messageExampleAvatar("", "", "", "CN")
+				}
+				@message.Content() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantDestructive}) {
+						@bubble.Content() {
+							Something went wrong. Any idea?
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ messageExampleGroup() {
+	@example.Example(example.Props{Title: "Group"}) {
+		<div class="flex w-full max-w-md flex-col gap-10">
+			@message.Group() {
+				@message.Message() {
+					@message.Content() {
+						@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+							@bubble.Content() {
+								I checked the registry addresses.
+							}
+						}
+					}
+				}
+				@message.Message() {
+					@message.Content() {
+						@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+							@bubble.Content() {
+								The component and example JSON now live under the UI registry.
+							}
+						}
+					}
+				}
+			}
+			@message.Group() {
+				@message.Message(message.Props{Align: message.AlignEnd}) {
+					@message.Content() {
+						@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+							@bubble.Content() {
+								I checked the registry addresses.
+							}
+						}
+					}
+				}
+				@message.Message(message.Props{Align: message.AlignEnd}) {
+					@message.Content() {
+						@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+							@bubble.Content() {
+								The component and example JSON now live under the UI registry.
+							}
+						}
+					}
+				}
+			}
+			@message.Group() {
+				@message.Message(message.Props{Align: message.AlignEnd}) {
+					@message.Avatar()
+					@message.Content() {
+						@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+							@bubble.Content() {
+								I checked the registry addresses.
+							}
+						}
+					}
+				}
+				@message.Message(message.Props{Align: message.AlignEnd}) {
+					@message.Avatar() {
+						@messageExampleAvatar("https://avatar.vercel.sh/shadcn", "@shadcn", "", "CN")
+					}
+					@message.Content() {
+						@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+							@bubble.Content() {
+								The component and example JSON now live under the UI registry.
+							}
+						}
+					}
+				}
+			}
+			@message.Group() {
+				@message.Message() {
+					@message.Avatar()
+					@message.Content() {
+						@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+							@bubble.Content() {
+								I checked the registry addresses.
+							}
+						}
+					}
+				}
+				@message.Message() {
+					@message.Avatar() {
+						@messageExampleAvatar("https://avatar.vercel.sh/shadcn", "@shadcn", "", "CN")
+					}
+					@message.Content() {
+						@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+							@bubble.Content() {
+								The component and example JSON now live under the UI registry.
+							}
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ messageExampleGroupChat() {
+	@example.Example(example.Props{Title: "Group Chat"}) {
+		<div class="flex w-full max-w-md flex-col gap-10">
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Content() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantTinted}) {
+						@bubble.Content() {
+							Why is the dashboard showing zero users
+						}
+					}
+				}
+			}
+			@message.Group() {
+				@message.Message() {
+					@message.Avatar()
+					@message.Content() {
+						@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+							@bubble.Content() {
+								Define "zero."
+							}
+						}
+					}
+				}
+				@message.Message() {
+					@message.Avatar() {
+						@messageExampleAvatar("https://github.com/evilrabbit.png", "@evilrabbit", "", "ER")
+					}
+					@message.Content() {
+						@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+							@bubble.Content() {
+								What do you mean?
+							}
+						}
+					}
+				}
+			}
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Content() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantTinted}) {
+						@bubble.Content() {
+							<span class="font-medium">{ "@eve" }</span> can you check?
+						}
+					}
+				}
+			}
+			@message.Message() {
+				@marker.Marker(marker.Props{Attributes: templ.Attributes{"role": "status"}}) {
+					@marker.Icon() {
+						@spinner.Spinner()
+					}
+					@marker.Content() {
+						Checking the logs...
+					}
+				}
+			}
+			@message.Message() {
+				@message.Content() {
+					@message.Header() {
+						Eve
+					}
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantGhost}) {
+						@bubble.Content() {
+							<span class="whitespace-pre-wrap">{ messageExampleLogs }</span>
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ messageExampleHeaderFooter() {
+	@example.Example(example.Props{Title: "Header and Footer"}) {
+		<div class="flex w-full max-w-md flex-col gap-12">
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Content() {
+					@message.Header(message.HeaderProps{Class: "justify-end"}) {
+						You
+					}
+					@bubble.Bubble() {
+						@bubble.Content() {
+							Can we keep this style quiet and send the update today?
+						}
+					}
+					@message.Footer(message.FooterProps{Class: "gap-2"}) {
+						<span>Delivered</span>
+						@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeXs}) {
+							Undo
+						}
+					}
+				}
+			}
+			@message.Message(message.Props{Align: message.AlignStart}) {
+				@message.Content() {
+					@message.Header() {
+						<span>Olivia</span>
+						<span class="ml-auto font-normal">1m ago</span>
+					}
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content() {
+							I checked the logs. The retry finished and the missing invoices
+							are included now.
+						}
+						@bubble.Reactions() {
+							@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeXs}) {
+								Thanks
+							}
+						}
+					}
+					@message.Footer(message.FooterProps{Class: "gap-2"}) {
+						<span>From Support queue</span>
+						@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeXs}) {
+							Copy
+						}
+					}
+				}
+			}
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Content() {
+					@message.Header() {
+						Marina
+					}
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantOutline}) {
+						@bubble.Content() {
+							I drafted the reply with the exact filter path and a link to the
+							export history.
+						}
+					}
+					@message.Footer(message.FooterProps{Class: "gap-2"}) {
+						<span>Draft ready</span>
+						@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeXs}) {
+							Review
+						}
+						@button.Button(button.Props{Size: button.SizeXs}) {
+							Send
+						}
+					}
+				}
+			}
+			@message.Message(message.Props{Align: message.AlignStart}) {
+				@message.Content() {
+					@message.Header() {
+						Assistant note
+					}
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantGhost}) {
+						@bubble.Content() {
+							Ghost messages keep long-form assistant notes aligned with the
+							surrounding text instead of adding a frame.
+						}
+					}
+					@message.Footer(message.FooterProps{Class: "gap-2"}) {
+						<span>Internal only</span>
+						@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeXs}) {
+							Pin
+						}
+					}
+				}
+			}
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Content() {
+					@message.Header(message.HeaderProps{Class: "justify-end"}) {
+						Automation warning
+					}
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantDestructive}) {
+						@bubble.Content() {
+							The old export link expires in 10 minutes. Regenerate before
+							sending this transcript externally.
+						}
+					}
+					@message.Footer(message.FooterProps{Class: "gap-2"}) {
+						<span>Needs action</span>
+						@button.Button(button.Props{Variant: button.VariantDestructive, Size: button.SizeXs}) {
+							Regenerate
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ messageExampleActions() {
+	@example.Example(example.Props{Title: "Actions"}) {
+		<div class="flex w-full max-w-md flex-col gap-10">
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Content() {
+					@bubble.Bubble() {
+						@bubble.Content() {
+							What is the status of the deployment?
+						}
+					}
+					@message.Footer() {
+						@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeIcon, Attributes: templ.Attributes{"aria-label": "Copy", "title": "Copy"}}) {
+							@icon.Copy()
+						}
+						@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeIcon, Attributes: templ.Attributes{"aria-label": "Retry", "title": "Retry"}}) {
+							@icon.RefreshCcw()
+						}
+					}
+				}
+			}
+			@message.Message() {
+				@message.Avatar() {
+					@messageExampleAvatar("https://github.com/evilrabbit.png", "@evilrabbit", "", "ER")
+				}
+				@message.Content() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content() {
+							The install failure is coming from the workspace package. I can
+							open the exact log line or retry the deployment.
+						}
+					}
+					@message.Footer() {
+						@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeIcon, Attributes: templ.Attributes{"aria-label": "Copy", "title": "Copy"}}) {
+							@icon.Copy()
+						}
+						@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeIcon, Attributes: templ.Attributes{"aria-label": "Like: thumbs up", "title": "Like: thumbs up"}}) {
+							@icon.ThumbsUp()
+						}
+						@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeIcon, Attributes: templ.Attributes{"aria-label": "Like: thumbs down", "title": "Like: thumbs down"}}) {
+							@icon.ThumbsDown()
+						}
+					}
+				}
+			}
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Content() {
+					@bubble.Bubble() {
+						@bubble.Content() {
+							Okay drop me a link. I'll check it out.
+						}
+					}
+					@message.Footer(message.FooterProps{Class: "gap-2"}) {
+						<span class="font-normal text-destructive">
+							Failed to send
+						</span>
+						@button.Button(button.Props{Variant: button.VariantSecondary, Size: button.SizeXs}) {
+							Retry
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ messageExampleAttachment() {
+	@example.Example(example.Props{Title: "Attachment"}) {
+		<div class="flex w-full max-w-sm flex-col gap-8">
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Content() {
+					@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+						@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+							<img src={ exattachment.AttachmentExampleWorkspace } alt="Workspace"/>
+						}
+					}
+					@bubble.Bubble() {
+						@bubble.Content() {
+							Here's the image. Can you add it to the PDF? Use it for the
+							cover page.
+						}
+					}
+				}
+			}
+			@message.Message() {
+				@message.Content() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content() {
+							Done. Here's the PDF with the image added as the cover
+							page.
+						}
+					}
+					@attachment.Attachment() {
+						@attachment.Media() {
+							@icon.FileText()
+						}
+						@attachment.Content() {
+							@attachment.Title() {
+								sales-dashboard.pdf
+							}
+							@attachment.Description() {
+								PDF · 2.4 MB
+							}
+						}
+						@attachment.Actions() {
+							@attachment.Action(attachment.ActionProps{Type: button.TypeButton, Size: button.SizeIconSm, Variant: button.VariantSecondary, Attributes: templ.Attributes{"title": "Download", "aria-label": "Download"}}) {
+								@icon.Download()
+							}
+						}
+					}
+				}
+			}
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Content() {
+					@bubble.Bubble() {
+						@bubble.Content() {
+							Thanks. Looks good.
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ messageExampleAttachmentGroup() {
+	@example.Example(example.Props{Title: "Attachment Group"}) {
+		<div class="flex w-full max-w-sm flex-col gap-8">
+			@message.Message(message.Props{Align: message.AlignEnd}) {
+				@message.Content() {
+					@attachment.Group(attachment.GroupProps{Class: "w-[80%]"}) {
+						@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+							@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+								<img src={ exattachment.AttachmentExampleWorkspace } alt="Workspace"/>
+							}
+						}
+						@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+							@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+								<img src={ exattachment.AttachmentExampleDesk } alt="Desk"/>
+							}
+						}
+						@attachment.Attachment(attachment.Props{Orientation: attachment.OrientationVertical}) {
+							@attachment.Media(attachment.MediaProps{Variant: attachment.MediaVariantImage}) {
+								<img src={ exattachment.AttachmentExampleOffice } alt="Office"/>
+							}
+						}
+					}
+					@bubble.Bubble() {
+						@bubble.Content() {
+							Here are the brand photos. Can you add them to the deck?
+						}
+					}
+				}
+			}
+			@message.Message() {
+				@message.Content() {
+					@bubble.Bubble(bubble.Props{Variant: bubble.VariantMuted}) {
+						@bubble.Content() {
+							Done. Here's the draft deck and the exported assets.
+						}
+					}
+					@attachment.Group(attachment.GroupProps{Class: "w-full"}) {
+						@attachment.Attachment(attachment.Props{Class: "w-64"}) {
+							@attachment.Media() {
+								@icon.FileText()
+							}
+							@attachment.Content() {
+								@attachment.Title() {
+									brand-deck.pdf
+								}
+								@attachment.Description() {
+									PDF · 3.1 MB
+								}
+							}
+							@attachment.Actions() {
+								@attachment.Action(attachment.ActionProps{Type: button.TypeButton, Size: button.SizeIconSm, Variant: button.VariantSecondary, Attributes: templ.Attributes{"title": "Download", "aria-label": "Download brand-deck.pdf"}}) {
+									@icon.Download()
+								}
+							}
+						}
+						@attachment.Attachment(attachment.Props{Class: "w-64"}) {
+							@attachment.Media() {
+								@icon.Presentation()
+							}
+							@attachment.Content() {
+								@attachment.Title() {
+									brand-deck.key
+								}
+								@attachment.Description() {
+									Keynote · 9 MB
+								}
+							}
+							@attachment.Actions() {
+								@attachment.Action(attachment.ActionProps{Type: button.TypeButton, Size: button.SizeIconSm, Variant: button.VariantSecondary, Attributes: templ.Attributes{"title": "Download", "aria-label": "Download brand-deck.key"}}) {
+									@icon.Download()
+								}
+							}
+						}
+						@attachment.Attachment(attachment.Props{Class: "w-64"}) {
+							@attachment.Media() {
+								@icon.FileArchive()
+							}
+							@attachment.Content() {
+								@attachment.Title() {
+									brand-assets.zip
+								}
+								@attachment.Description() {
+									ZIP · 4.2 MB
+								}
+							}
+							@attachment.Actions() {
+								@attachment.Action(attachment.ActionProps{Type: button.TypeButton, Size: button.SizeIconSm, Variant: button.VariantSecondary, Attributes: templ.Attributes{"title": "Download", "aria-label": "Download brand-assets.zip"}}) {
+									@icon.Download()
+								}
+							}
+						}
+					}
+				}
+			}
+		</div>
+	}
+}

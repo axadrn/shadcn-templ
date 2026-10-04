@@ -1,0 +1,18 @@
+package toggle
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/toggle"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ ToggleRtl() {
+	@toggle.Toggle(toggle.Props{
+		Size:       toggle.SizeSm,
+		Variant:    toggle.VariantOutline,
+		Attributes: templ.Attributes{"aria-label": "Toggle bookmark", "dir": "rtl"},
+	}) {
+		@icon.Bookmark(icon.Props{Class: "group-aria-pressed/toggle:fill-foreground"})
+		إشارة مرجعية
+	}
+}

@@ -1,0 +1,43 @@
+package dropdownmenu
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+)
+
+templ DropdownMenuBasic() {
+	@dropdownmenu.DropdownMenu() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: dropdownmenu.Trigger(ctx),
+		}) {
+			Open
+		}
+		@dropdownmenu.Content() {
+			@dropdownmenu.Group() {
+				@dropdownmenu.Label() {
+					My Account
+				}
+				@dropdownmenu.Item() {
+					Profile
+				}
+				@dropdownmenu.Item() {
+					Billing
+				}
+				@dropdownmenu.Item() {
+					Settings
+				}
+			}
+			@dropdownmenu.Separator()
+			@dropdownmenu.Item() {
+				GitHub
+			}
+			@dropdownmenu.Item() {
+				Support
+			}
+			@dropdownmenu.Item(dropdownmenu.ItemProps{Disabled: true}) {
+				API
+			}
+		}
+	}
+}

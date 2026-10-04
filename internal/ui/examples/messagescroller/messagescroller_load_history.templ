@@ -1,0 +1,133 @@
+package messagescroller
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+	"github.com/axadrn/shadcn-templ/v2/components/message"
+	"github.com/axadrn/shadcn-templ/v2/components/messagescroller"
+)
+
+var msHistory = []msMessage{
+	{ID: "msg-1", Role: "user", Text: "Can you summarize the incident channel?"},
+	{ID: "msg-2", Role: "assistant", Text: "The first alert was a delayed export job. It started backing up around 09:42 UTC and triggered the warning once the retry queue crossed the threshold.\n\nNo customer-facing checkout paths were affected, but exports for larger workspaces were running about 12 minutes behind."},
+	{ID: "msg-3", Role: "user", Text: "Was checkout affected?"},
+	{ID: "msg-4", Role: "assistant", Text: "No checkout errors were reported. Payment authorization, order creation, and confirmation emails stayed inside their normal latency bands.\n\nThe only elevated metric was export queue depth, which maps to analytics downloads instead of checkout."},
+	{ID: "msg-5", Role: "user", Text: "What changed in the last deploy?"},
+	{ID: "msg-6", Role: "assistant", Text: "Only the export queue worker changed. The deploy moved large CSV jobs onto the shared retry policy, which made each failed attempt hold a worker slot longer than before.\n\nThe app deploy did not include checkout, pricing, or billing API changes."},
+	{ID: "msg-7", Role: "user", Text: "Do we need to roll back?"},
+	{ID: "msg-8", Role: "assistant", Text: "Not yet. Queue depth is recovering after we reduced retry concurrency, and the oldest pending job is now under five minutes old.\n\nKeep rollback ready if the queue starts climbing again, but the current trend points toward recovery."},
+	{ID: "msg-9", Role: "user", Text: "Keep watching for customer-visible issues."},
+	{ID: "msg-10", Role: "assistant", Text: "I will watch the queue and support tags for another 15 minutes. I am tracking export failures, delayed download requests, and any support thread that mentions missing reports.\n\nIf those stay quiet through the next batch window, we can close this as an internal degradation."},
+}
+
+const msHistoryInitialVisible = 5
+
+// The rows of load-history have no scrollAnchor.
+templ msHistoryRow(m msMessage) {
+	@messagescroller.Item(messagescroller.ItemProps{MessageID: m.ID}) {
+		@message.Message(message.Props{Align: msAlign(m.Role)}) {
+			@message.Content() {
+				@bubble.Bubble(bubble.Props{Variant: msVariant(m.Role, bubble.VariantMuted, bubble.VariantGhost)}) {
+					@bubble.Content(bubble.ContentProps{Class: "space-y-2"}) {
+						for _, p := range msParagraphs(m.Text) {
+							<p class="whitespace-pre-wrap">{ p }</p>
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+templ msHistoryScroller() {
+	@messagescroller.MessageScroller() {
+		@messagescroller.Viewport() {
+			@messagescroller.Content(messagescroller.ContentProps{Class: "p-(--card-spacing)"}) {
+				for _, m := range msHistory[len(msHistory)-msHistoryInitialVisible:] {
+					@msHistoryRow(m)
+				}
+				@messagescroller.Item() {
+					@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+						@marker.Content() {
+							End of Conversation
+						}
+					}
+				}
+			}
+		}
+		@messagescroller.Button()
+	}
+}
+
+templ MessageScrollerLoadHistory() {
+	@messagescroller.Provider() {
+		<div class="relative flex flex-col gap-4">
+			@card.Card(card.Props{Class: "mx-auto h-140 w-full max-w-sm gap-0"}) {
+				@card.Header(card.HeaderProps{Class: "gap-1 border-b"}) {
+					@card.Title() {
+						Load History
+					}
+					@card.Description() {
+						Prepended messages keep your place.
+					}
+					@card.Action() {
+						@msResetButton("Reset loaded messages", true)
+					}
+				}
+				@card.Content(card.ContentProps{Class: "flex-1 overflow-hidden p-0"}) {
+					@msHistoryScroller()
+				}
+				@card.Footer(card.FooterProps{Class: "flex flex-col items-center gap-2 border-t"}) {
+					@button.Button(button.Props{
+						Variant: button.VariantSecondary,
+						Class:   "w-full",
+					}) {
+						Load History
+					}
+					<p class="text-xs text-muted-foreground">
+						Restore earlier messages while keeping your place.
+					</p>
+				}
+			}
+			<div class="mx-auto max-w-sm px-0.5 text-center text-xs text-balance text-muted-foreground">
+				Click Load History to load the entire conversation
+			</div>
+			<template>
+				@msHistoryScroller()
+			</template>
+			<template>
+				for _, m := range msHistory[:len(msHistory)-msHistoryInitialVisible] {
+					@msHistoryRow(m)
+				}
+			</template>
+		</div>
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const demo = document.currentScript.previousElementSibling;
+			const [scroller, history] = demo.querySelectorAll(":scope > template");
+			const load = demo.querySelector('[data-slot="card-footer"] > [data-slot="button"]');
+			const reset = demo.querySelector('[aria-label="Reset loaded messages"]');
+			const sync = (loaded) => {
+				load.textContent = loaded ? "History Loaded" : "Load History";
+				load.disabled = loaded;
+				load.toggleAttribute("data-disabled", loaded);
+				reset.disabled = !loaded;
+				reset.toggleAttribute("data-disabled", !loaded);
+			};
+			load.addEventListener("click", () => {
+				const content = demo.querySelector('[data-slot="message-scroller-content"]');
+				content.prepend(history.content.cloneNode(true));
+				sync(true);
+				window.templ.toast.add({ title: "History loaded", description: "Scroll up to see earlier messages." });
+			});
+			// A new key remounts the scroller with the last rows.
+			reset.addEventListener("click", () => {
+				demo.querySelector('[data-slot="message-scroller"]').replaceWith(scroller.content.cloneNode(true));
+				sync(false);
+			});
+		})();
+	</script>
+}

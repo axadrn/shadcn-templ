@@ -1,0 +1,34 @@
+package pagination
+
+import "github.com/axadrn/shadcn-templ/v2/components/pagination"
+
+templ PaginationDemo() {
+	@pagination.Pagination() {
+		@pagination.Content() {
+			@pagination.Item() {
+				@pagination.Previous(pagination.PreviousProps{Href: "#"})
+			}
+			@pagination.Item() {
+				@pagination.Link(pagination.LinkProps{Href: "#"}) {
+					1
+				}
+			}
+			@pagination.Item() {
+				@pagination.Link(pagination.LinkProps{Href: "#", IsActive: true}) {
+					2
+				}
+			}
+			@pagination.Item() {
+				@pagination.Link(pagination.LinkProps{Href: "#"}) {
+					3
+				}
+			}
+			@pagination.Item() {
+				@pagination.Ellipsis()
+			}
+			@pagination.Item() {
+				@pagination.Next(pagination.NextProps{Href: "#"})
+			}
+		}
+	}
+}

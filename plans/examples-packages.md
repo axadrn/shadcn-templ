@@ -2,7 +2,7 @@
 
 - **Planner**: Claude
 - **Executor**: Claude
-- **Status**: ready, after `parity-components` task 17 (no example moves while examples are being added)
+- **Status**: done
 - **Branch**: `feat/parity-components`, one commit, owner decision 2026-10-04 ("der richtige Weg")
 
 ## Context
@@ -22,12 +22,20 @@ Upstream keeps every example as its own file under `apps/v4/examples/base/`; how
 
 ### 1. Split the package
 
-- [ ] Done
+- [x] Done
 
 Move every example with `git mv` into its directory, fix package clauses, imports and cross references, rewrite `registry.go` and the embed, move the shared helpers. The `create` list and the docs keep the same names.
 
 Done when: `go build ./...` and `go test ./...` green, `compare.mjs all` unchanged against the run before the move, an edit to one example rebuilds `cmd/docs` in under 30 seconds with less than 1 GB peak for the compile.
 
 ## Executor log
+
+### Task 1
+
+570 files in 67 packages, one per component directory (`select` and `switch` are Go keywords: `selectex`, `switchex`), `internal/ui/examples/shared` for `ServerRendered`. Six helpers were used across packages and are exported now: the attachment example's image URLs (message), `DialogExampleOption` (field), `InputOTPState` (field), `SideRtlLabel`, `SideRtlPhysical`, `SideRtlLogical` (popover). `RegistryEntry.File` is relative to `internal/ui/examples` (`button/button_demo.templ`), the source embed is `*/*.templ`.
+
+Splitting alone took an edit from 3 to 4 minutes to 60 s: `internal/ui/examples` still imported every package, and the docs packages (`modules`, `pages`, `service`) import it, so they rebuilt too. The registry package now holds only `RegistryEntry` and an empty `Registry`; `internal/ui/examples/all` fills it in `init` and only `cmd/docs` imports it. That left `all` at 33 s, because calling 555 constructors in one map literal inlines every template body into its `init`; it registers `lazy(constructor)` function values instead, called on render.
+
+Checks: every one of the 555 previews renders byte for byte the same HTML as before (random ids and asset versions masked), `go test ./...` green. A real edit to one example (`button_demo`) rebuilds `cmd/docs` in 4.2 s: 0.6 s its package, the rest `all`, `cmd/docs` and the link.
 
 ## Planner review

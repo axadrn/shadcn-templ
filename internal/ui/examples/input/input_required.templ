@@ -1,0 +1,22 @@
+package input
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+)
+
+templ InputRequired() {
+	@field.Field() {
+		@field.Label(field.LabelProps{For: "input-required"}) {
+			Required Field <span class="text-destructive">*</span>
+		}
+		@input.Input(input.Props{
+			ID:          "input-required",
+			Placeholder: "This field is required",
+			Required:    true,
+		})
+		@field.Description() {
+			This field must be filled out.
+		}
+	}
+}

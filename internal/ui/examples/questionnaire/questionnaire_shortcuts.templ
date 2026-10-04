@@ -1,0 +1,79 @@
+package questionnaire
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/nativeselect"
+	"github.com/axadrn/shadcn-templ/v2/components/questionnaire"
+)
+
+templ QuestionnaireShortcuts() {
+	<div class="relative mx-auto flex h-full w-full max-w-md flex-col">
+		@nativeselect.NativeSelect(nativeselect.Props{
+			Class:      "absolute end-0 top-0",
+			Attributes: templ.Attributes{"aria-label": "Shortcut style"},
+		}) {
+			@nativeselect.Option(nativeselect.OptionProps{Value: "none"}) {
+				No shortcuts
+			}
+			@nativeselect.Option(nativeselect.OptionProps{Value: "letters", Selected: true}) {
+				Letters
+			}
+			@nativeselect.Option(nativeselect.OptionProps{Value: "numbers"}) {
+				Numbers
+			}
+		}
+		@questionnaire.Questionnaire(questionnaire.Props{
+			Class:     "mt-auto",
+			Shortcuts: questionnaire.ShortcutsLetters,
+			Items: []questionnaire.ItemDefinition{
+				{Name: "action", Required: true, Choices: []questionnaire.ChoiceDefinition{{Value: "inspect"}, {Value: "tests"}, {Value: "patch"}}},
+			},
+		}) {
+			@questionnaire.Item(questionnaire.ItemProps{Name: "action", Required: true}) {
+				@questionnaire.Title() {
+					What should the agent do next?
+				}
+				@questionnaire.Description() {
+					Use the displayed shortcut or navigate with the keyboard.
+				}
+				@questionnaire.Choices() {
+					@questionnaire.Choice(questionnaire.ChoiceProps{Value: "inspect"}) {
+						Inspect the implementation
+					}
+					@questionnaire.Choice(questionnaire.ChoiceProps{Value: "tests"}) {
+						Run the relevant tests
+					}
+					@questionnaire.Choice(questionnaire.ChoiceProps{Value: "patch"}) {
+						Prepare the patch
+					}
+				}
+				@questionnaire.Error()
+			}
+			@questionnaire.Actions() {
+				@questionnaire.Submit() {
+					Confirm action
+				}
+			}
+		}
+	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const example = document.currentScript.previousElementSibling;
+			const select = example.querySelector("select");
+			const root = example.querySelector('[data-slot="questionnaire"]');
+			// The select owns the shortcuts prop.
+			document.addEventListener("change", (e) => {
+				if (e.target !== select) return;
+				const value = e.target.value;
+				if (value === "letters" || value === "numbers") root.setAttribute("data-shortcuts", value);
+				else root.removeAttribute("data-shortcuts");
+			});
+			document.addEventListener("submit", (e) => {
+				if (e.target !== root) return;
+				e.preventDefault();
+				const action = new FormData(e.target).get("action");
+				const shortcuts = e.target.getAttribute("data-shortcuts") ?? "none";
+				window.templ.toast.add({ title: "Next action selected", description: `Action: ${action ?? "None"} · Shortcuts: ${shortcuts}` });
+			});
+		})();
+	</script>
+}

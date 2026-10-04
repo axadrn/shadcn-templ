@@ -1,0 +1,32 @@
+package badge
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/badge"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ BadgeRtl() {
+	<div class="flex w-full flex-wrap justify-center gap-2" dir="rtl">
+		@badge.Badge() {
+			شارة
+		}
+		@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+			ثانوي
+		}
+		@badge.Badge(badge.Props{Variant: badge.VariantDestructive}) {
+			مدمر
+		}
+		@badge.Badge(badge.Props{Variant: badge.VariantOutline}) {
+			مخطط
+		}
+		@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+			@icon.BadgeCheck(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+			متحقق
+		}
+		@badge.Badge(badge.Props{Variant: badge.VariantOutline}) {
+			إشارة مرجعية
+			@icon.Bookmark(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+		}
+	</div>
+}

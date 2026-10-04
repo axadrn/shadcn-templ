@@ -1,0 +1,35 @@
+package marker
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+)
+
+templ MarkerIconDemo() {
+	<div class="flex w-full max-w-sm flex-col gap-12 py-12">
+		@marker.Marker() {
+			@marker.Icon() {
+				@icon.GitBranch()
+			}
+			@marker.Content() {
+				Switched to a new branch
+			}
+		}
+		@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+			@marker.Icon() {
+				@icon.Search()
+			}
+			@marker.Content() {
+				Explored 4 files
+			}
+		}
+		@marker.Marker(marker.Props{Class: "flex-col"}) {
+			@marker.Icon() {
+				@icon.BookOpenCheck()
+			}
+			@marker.Content() {
+				Syncing completed
+			}
+		}
+	</div>
+}

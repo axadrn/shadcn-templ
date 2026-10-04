@@ -1,0 +1,107 @@
+package buttongroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/buttongroup"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ ButtonGroupRtl() {
+	<div dir="rtl">
+		@buttongroup.ButtonGroup() {
+			@buttongroup.ButtonGroup(buttongroup.Props{Class: "hidden sm:flex"}) {
+				@button.Button(button.Props{
+					Variant:    button.VariantOutline,
+					Size:       button.SizeIcon,
+					Attributes: templ.Attributes{"aria-label": "Go Back"},
+				}) {
+					@icon.ArrowLeft(icon.Props{Class: "rtl:rotate-180"})
+				}
+			}
+			@buttongroup.ButtonGroup() {
+				@button.Button(button.Props{Variant: button.VariantOutline}) {
+					أرشفة
+				}
+				@button.Button(button.Props{Variant: button.VariantOutline}) {
+					تقرير
+				}
+			}
+			@buttongroup.ButtonGroup() {
+				@button.Button(button.Props{Variant: button.VariantOutline}) {
+					تأجيل
+				}
+				@dropdownmenu.DropdownMenu() {
+					@button.Button(button.Props{
+						Variant:    button.VariantOutline,
+						Size:       button.SizeIcon,
+						Attributes: utils.MergeAttributes(dropdownmenu.Trigger(ctx), templ.Attributes{"aria-label": "More Options"}),
+					}) {
+						@icon.Ellipsis()
+					}
+					@dropdownmenu.Content(dropdownmenu.ContentProps{
+						Align:      dropdownmenu.AlignStart,
+						Class:      "w-40",
+						Attributes: templ.Attributes{"data-lang": "ar", "dir": "rtl"},
+					}) {
+						@dropdownmenu.Group() {
+							@dropdownmenu.Item() {
+								@icon.MailCheck()
+								وضع علامة كمقروء
+							}
+							@dropdownmenu.Item() {
+								@icon.Archive()
+								أرشفة
+							}
+						}
+						@dropdownmenu.Separator()
+						@dropdownmenu.Group() {
+							@dropdownmenu.Item() {
+								@icon.Clock()
+								تأجيل
+							}
+							@dropdownmenu.Item() {
+								@icon.CalendarPlus()
+								إضافة إلى التقويم
+							}
+							@dropdownmenu.Item() {
+								@icon.ListFilter()
+								إضافة إلى القائمة
+							}
+							@dropdownmenu.Sub() {
+								@dropdownmenu.SubTrigger() {
+									@icon.Tag()
+									تصنيف كـ...
+								}
+								@dropdownmenu.SubContent(dropdownmenu.SubContentProps{Attributes: templ.Attributes{"dir": "rtl", "data-lang": "ar"}}) {
+									@dropdownmenu.RadioGroup(dropdownmenu.RadioGroupProps{DefaultValue: "personal"}) {
+										@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{
+											Value: "personal",
+										}) {
+											شخصي
+										}
+										@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{Value: "work"}) {
+											عمل
+										}
+										@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{Value: "other"}) {
+											آخر
+										}
+									}
+								}
+							}
+						}
+						@dropdownmenu.Separator()
+						@dropdownmenu.Group() {
+							@dropdownmenu.Item(dropdownmenu.ItemProps{Variant: dropdownmenu.ItemVariantDestructive}) {
+								@icon.Trash2()
+								سلة المهملات
+							}
+						}
+					}
+				}
+			}
+		}
+	</div>
+}

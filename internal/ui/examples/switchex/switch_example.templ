@@ -1,0 +1,108 @@
+package switchex
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/label"
+	switchcomp "github.com/axadrn/shadcn-templ/v2/components/switch"
+)
+
+templ switchExampleSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ SwitchExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@switchExampleBasic()
+			@switchExampleWithDescription()
+			@switchExampleWithLabel()
+			@switchExampleDisabled()
+			@switchExampleSizes()
+		</div>
+	</div>
+}
+
+templ switchExampleBasic() {
+	@switchExampleSection("Basic") {
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@switchcomp.Switch(switchcomp.Props{ID: "switch-basic"})
+			@field.Label(field.LabelProps{For: "switch-basic"}) {
+				Airplane Mode
+			}
+		}
+	}
+}
+
+templ switchExampleWithDescription() {
+	@switchExampleSection("With Description") {
+		@field.Label(field.LabelProps{For: "switch-focus-mode"}) {
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@field.Content() {
+					@field.Title() {
+						Share across devices
+					}
+					@field.Description() {
+						Focus is shared across devices, and turns off when you leave the app.
+					}
+				}
+				@switchcomp.Switch(switchcomp.Props{ID: "switch-focus-mode"})
+			}
+		}
+	}
+}
+
+templ switchExampleWithLabel() {
+	@switchExampleSection("With Label") {
+		<div class="flex items-center gap-2">
+			@switchcomp.Switch(switchcomp.Props{ID: "switch-bluetooth", DefaultChecked: true})
+			@label.Label(label.Props{For: "switch-bluetooth"}) {
+				Bluetooth
+			}
+		</div>
+	}
+}
+
+templ switchExampleDisabled() {
+	@switchExampleSection("Disabled") {
+		<div class="flex flex-col gap-12">
+			<div class="flex items-center gap-2">
+				@switchcomp.Switch(switchcomp.Props{ID: "switch-disabled-unchecked", Disabled: true})
+				@label.Label(label.Props{For: "switch-disabled-unchecked"}) {
+					Disabled (Unchecked)
+				}
+			</div>
+			<div class="flex items-center gap-2">
+				@switchcomp.Switch(switchcomp.Props{ID: "switch-disabled-checked", DefaultChecked: true, Disabled: true})
+				@label.Label(label.Props{For: "switch-disabled-checked"}) {
+					Disabled (Checked)
+				}
+			</div>
+		</div>
+	}
+}
+
+templ switchExampleSizes() {
+	@switchExampleSection("Sizes") {
+		<div class="flex flex-col gap-12">
+			<div class="flex items-center gap-2">
+				@switchcomp.Switch(switchcomp.Props{ID: "switch-size-sm", Size: switchcomp.SizeSm})
+				@label.Label(label.Props{For: "switch-size-sm"}) {
+					Small
+				}
+			</div>
+			<div class="flex items-center gap-2">
+				@switchcomp.Switch(switchcomp.Props{ID: "switch-size-default", Size: switchcomp.SizeDefault})
+				@label.Label(label.Props{For: "switch-size-default"}) {
+					Default
+				}
+			</div>
+		</div>
+	}
+}

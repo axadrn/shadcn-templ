@@ -1,0 +1,187 @@
+package command
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/command"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ CommandScrollable() {
+	<div class="flex flex-col gap-4">
+		@button.Button(button.Props{
+			Variant: button.VariantOutline,
+			Class:   "w-fit",
+			ID:      "command-scrollable-open",
+		}) {
+			Open Menu
+		}
+		@command.Dialog(command.DialogProps{ID: "command-scrollable"}) {
+			@command.Command() {
+				@command.Input(command.InputProps{Placeholder: "Type a command or search..."})
+				@command.List() {
+					@command.Empty() {
+						No results found.
+					}
+					@command.Group(command.GroupProps{Heading: "Navigation"}) {
+						@command.Item() {
+							@icon.House()
+							<span>Home</span>
+							@command.Shortcut() {
+								⌘H
+							}
+						}
+						@command.Item() {
+							@icon.Inbox()
+							<span>Inbox</span>
+							@command.Shortcut() {
+								⌘I
+							}
+						}
+						@command.Item() {
+							@icon.FileText()
+							<span>Documents</span>
+							@command.Shortcut() {
+								⌘D
+							}
+						}
+						@command.Item() {
+							@icon.Folder()
+							<span>Folders</span>
+							@command.Shortcut() {
+								⌘F
+							}
+						}
+					}
+					@command.Separator()
+					@command.Group(command.GroupProps{Heading: "Actions"}) {
+						@command.Item() {
+							@icon.Plus()
+							<span>New File</span>
+							@command.Shortcut() {
+								⌘N
+							}
+						}
+						@command.Item() {
+							@icon.FolderPlus()
+							<span>New Folder</span>
+							@command.Shortcut() {
+								⇧⌘N
+							}
+						}
+						@command.Item() {
+							@icon.Copy()
+							<span>Copy</span>
+							@command.Shortcut() {
+								⌘C
+							}
+						}
+						@command.Item() {
+							@icon.Scissors()
+							<span>Cut</span>
+							@command.Shortcut() {
+								⌘X
+							}
+						}
+						@command.Item() {
+							@icon.ClipboardPaste()
+							<span>Paste</span>
+							@command.Shortcut() {
+								⌘V
+							}
+						}
+						@command.Item() {
+							@icon.Trash()
+							<span>Delete</span>
+							@command.Shortcut() {
+								⌫
+							}
+						}
+					}
+					@command.Separator()
+					@command.Group(command.GroupProps{Heading: "View"}) {
+						@command.Item() {
+							@icon.LayoutGrid()
+							<span>Grid View</span>
+						}
+						@command.Item() {
+							@icon.List()
+							<span>List View</span>
+						}
+						@command.Item() {
+							@icon.ZoomIn()
+							<span>Zoom In</span>
+							@command.Shortcut() {
+								⌘+
+							}
+						}
+						@command.Item() {
+							@icon.ZoomOut()
+							<span>Zoom Out</span>
+							@command.Shortcut() {
+								⌘-
+							}
+						}
+					}
+					@command.Separator()
+					@command.Group(command.GroupProps{Heading: "Account"}) {
+						@command.Item() {
+							@icon.User()
+							<span>Profile</span>
+							@command.Shortcut() {
+								⌘P
+							}
+						}
+						@command.Item() {
+							@icon.CreditCard()
+							<span>Billing</span>
+							@command.Shortcut() {
+								⌘B
+							}
+						}
+						@command.Item() {
+							@icon.Settings()
+							<span>Settings</span>
+							@command.Shortcut() {
+								⌘S
+							}
+						}
+						@command.Item() {
+							@icon.Bell()
+							<span>Notifications</span>
+						}
+						@command.Item() {
+							@icon.CircleQuestionMark()
+							<span>Help & Support</span>
+						}
+					}
+					@command.Separator()
+					@command.Group(command.GroupProps{Heading: "Tools"}) {
+						@command.Item() {
+							@icon.Calculator()
+							<span>Calculator</span>
+						}
+						@command.Item() {
+							@icon.Calendar()
+							<span>Calendar</span>
+						}
+						@command.Item() {
+							@icon.Image()
+							<span>Image Editor</span>
+						}
+						@command.Item() {
+							@icon.Code()
+							<span>Code Editor</span>
+						}
+					}
+				}
+			}
+		}
+	</div>
+	// shadcn's example opens the dialog from the button's onClick
+	// (setOpen(true)), the button is no dialog trigger.
+	<script nonce={ templ.GetNonce(ctx) }>
+		document.addEventListener("click", (e) => {
+			if (e.target instanceof Element && e.target.closest("#command-scrollable-open")) window.templ.dialog.open("command-scrollable");
+		});
+	</script>
+}

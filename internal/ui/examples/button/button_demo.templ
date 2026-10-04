@@ -1,0 +1,21 @@
+package button
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ ButtonDemo() {
+	<div class="flex flex-wrap items-center gap-2 md:flex-row">
+		@button.Button(button.Props{Variant: button.VariantOutline}) {
+			Button
+		}
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Size:       button.SizeIcon,
+			Attributes: templ.Attributes{"aria-label": "Submit"},
+		}) {
+			@icon.ArrowUp()
+		}
+	</div>
+}

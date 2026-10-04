@@ -1,0 +1,55 @@
+package buttongroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/buttongroup"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+var buttonGroupCurrencies = []selectcomp.ItemData{
+	{Label: "US Dollar", Value: "$"},
+	{Label: "Euro", Value: "€"},
+	{Label: "British Pound", Value: "£"},
+}
+
+templ ButtonGroupSelect() {
+	@buttongroup.ButtonGroup() {
+		@buttongroup.ButtonGroup() {
+			@selectcomp.Select(selectcomp.Props{ID: "button-group-currency", Items: buttonGroupCurrencies, DefaultValue: "$"}) {
+				@selectcomp.Trigger(selectcomp.TriggerProps{Class: "font-mono"}) {
+					$
+				}
+				@selectcomp.Content(selectcomp.ContentProps{AlignItemWithTrigger: utils.Ptr(false), Align: selectcomp.AlignStart}) {
+					@selectcomp.Group() {
+						for _, item := range buttonGroupCurrencies {
+							@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+								{ item.Value } <span class="text-muted-foreground">{ item.Label.(string) }</span>
+							}
+						}
+					}
+				}
+			}
+			@input.Input(input.Props{Placeholder: "10.00", Attributes: templ.Attributes{"pattern": "[0-9]*"}})
+		}
+		@buttongroup.ButtonGroup() {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Size:       button.SizeIcon,
+				Attributes: templ.Attributes{"aria-label": "Send"},
+			}) {
+				@icon.ArrowRight()
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The trigger shows the currency state, which onValueChange sets.
+		document.addEventListener("select-change", (e) => {
+			const trigger = e.target;
+			if (trigger.getAttribute("data-templ-controls") !== "button-group-currency") return;
+			trigger.firstChild.textContent = e.detail.value;
+		});
+	</script>
+}
