@@ -30,9 +30,15 @@
   // Appends on every open, so paint order follows open order like the
   // portal nodes React creates on mount. A portal declared right inside its
   // container's node (a Portal part around a submenu) comes before its own
-  // outside guards there, as upstream renders it.
-  function render(node) {
+  // outside guards there, as upstream renders it. target is createPortal's
+  // container when it is not the portal node's own (NavigationMenu's
+  // viewport).
+  function render(node, target) {
     if (!node._templPortalOwner) node._templPortalOwner = node.parentElement;
+    if (target) {
+      target.appendChild(node);
+      return;
+    }
     if (!node.id) node.id = "templ-portal-" + ++uid;
     const container = containerFor(node);
     const owner = node._templPortalOwner;

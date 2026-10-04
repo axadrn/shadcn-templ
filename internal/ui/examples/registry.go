@@ -442,6 +442,8 @@ var Registry = map[string]RegistryEntry{
 	"button-spinner":                    {Component: ButtonSpinner(), File: "button_spinner.templ"},
 	"button-group-demo":                 {Component: ButtonGroupDemo(), File: "buttongroup_demo.templ"},
 	"button-render":                     {Component: ButtonRender(), File: "button_render.templ"},
+	"navigation-menu-demo":              {Component: NavigationMenuDemo(), File: "navigationmenu_demo.templ"},
+	"navigation-menu-example":           {Component: NavigationMenuExample(), File: "navigationmenu_example.templ"},
 	"typography-demo":                   {Component: TypographyDemo(), File: "typography_demo.templ"},
 	"typography-h1":                     {Component: TypographyH1(), File: "typography_h1.templ"},
 	"typography-h2":                     {Component: TypographyH2(), File: "typography_h2.templ"},

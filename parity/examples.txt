@@ -269,6 +269,7 @@ native-select-demo
 native-select-disabled
 native-select-groups
 native-select-invalid
+navigation-menu-demo
 pagination-demo
 pagination-icons-only
 pagination-simple

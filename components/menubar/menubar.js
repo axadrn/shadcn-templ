@@ -58,7 +58,7 @@
         const content = event.currentTarget.parentElement;
         const menubar = menubarOfContent(content);
         if (!menubar || event.defaultPrevented) return;
-        menubar._templComposite?.relay(event);
+        menubar._templComposite?.relayKeyboardEvent(event);
       },
       // MenubarContext.rootId, the popup's data-rootownerid.
       rootId: (trigger) => menubarOf(trigger)?.id,
@@ -72,7 +72,7 @@
     const content = root.menu.positionerOf(event.target);
     if (!content || root.menu.popupFor(content).contains(event.target)) return;
     const menubar = menubarOfContent(content);
-    menubar?._templComposite?.relay(event);
+    menubar?._templComposite?.relayKeyboardEvent(event);
   });
 
   function contentOf(trigger) {

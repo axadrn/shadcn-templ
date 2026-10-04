@@ -725,5 +725,7 @@
     useHoverReferenceInteraction,
     useHoverFloatingInteraction,
     safePolygon,
+    applySafePolygonPointerEventsMutation,
+    clearSafePolygonPointerEventsMutation,
   };
 })();

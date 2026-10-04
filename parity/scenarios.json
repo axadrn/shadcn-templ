@@ -538,5 +538,71 @@
     {
       "key": "Escape"
     }
+  ],
+  "family:navigation-menu": [
+    {
+      "hover": "[data-slot=navigation-menu-trigger]"
+    },
+    {
+      "key": "Escape"
+    },
+    {
+      "click": "[data-slot=navigation-menu-trigger] >> nth=1"
+    },
+    {
+      "key": "ArrowRight"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Escape"
+    }
+  ],
+  "family:questionnaire": [
+    {
+      "click": "[data-slot=questionnaire-choice]"
+    },
+    {
+      "key": "Enter"
+    },
+    {
+      "key": "ArrowLeft"
+    },
+    {
+      "key": "b"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Control+Enter"
+    },
+    {
+      "click": "[data-slot=questionnaire-previous]"
+    },
+    {
+      "click": "[data-slot=questionnaire-next]"
+    }
+  ],
+  "questionnaire-dialog": [
+    {
+      "click": "[data-slot=dialog-trigger]"
+    },
+    {
+      "click": "[data-slot=questionnaire-choice]"
+    },
+    {
+      "key": "Enter"
+    },
+    {
+      "key": "ArrowLeft"
+    },
+    {
+      "key": "ArrowDown"
+    },
+    {
+      "key": "Control+Enter"
+    }
   ]
 }
