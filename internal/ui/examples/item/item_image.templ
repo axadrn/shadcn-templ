@@ -1,6 +1,10 @@
 package item
 
-import "github.com/axadrn/shadcn-templ/v2/components/item"
+import (
+	"net/url"
+
+	"github.com/axadrn/shadcn-templ/v2/components/item"
+)
 
 type itemSong struct {
 	Title    string
@@ -51,8 +55,8 @@ templ ItemImage() {
 							data-nimg="1"
 							class="object-cover grayscale"
 							style="color:transparent"
-							srcset={ "https://avatar.vercel.sh/" + song.Title + " 1x" }
-							src={ "https://avatar.vercel.sh/" + song.Title }
+							srcset={ "https://avatar.vercel.sh/" + url.PathEscape(song.Title) + " 1x" }
+							src={ "https://avatar.vercel.sh/" + url.PathEscape(song.Title) }
 						/>
 					}
 					@item.Content() {
