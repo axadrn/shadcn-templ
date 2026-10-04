@@ -1,0 +1,7 @@
+@import "../app/globals.css";
+@source "../examples/base";
+@source "../components";
+@source "../registry/bases/base";
+@font-face { font-family: "Geist"; src: url("/fonts/geist-variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
+@font-face { font-family: "Geist Mono"; src: url("/fonts/geist-mono-variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
+html { --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif; --font-heading: "Geist", ui-sans-serif, system-ui, sans-serif; --font-mono: "Geist Mono", ui-monospace, monospace; }

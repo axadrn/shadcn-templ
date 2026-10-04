@@ -157,7 +157,13 @@ async function compareExample(name) {
   const pages = [];
   for (const base of [SHADCN, TEMPL]) {
     const p = await browser.newPage({ viewport: { width: 1280, height: 900 }, reducedMotion: "reduce" });
-    await p.goto(base + name, { waitUntil: "load", timeout: 60000 }).catch(() => {});
+    // A dev server that is restarting after an edit refuses the connection or
+    // answers 502: wait for it (up to 5 minutes) instead of comparing nothing.
+    for (let tries = 0; tries < 100; tries++) {
+      const res = await p.goto(base + name, { waitUntil: "load", timeout: 60000 }).catch(() => null);
+      if (res && res.status() !== 502 && res.status() !== 503) break;
+      await p.waitForTimeout(3000);
+    }
     await p.waitForTimeout(800);
     // Images come from the network (ours) or Next's local image proxy
     // (shadcn): wait until the visible ones loaded, up to 5 s.
