@@ -5,6 +5,82 @@
 - **Status**: in progress, `plans/parity-runtime.md` is merged (PR #624)
 - **Branch**: `feat/parity-components` from `main` after the parity-runtime merge
 
+
+## Start here
+
+Everything a new session needs to continue this plan without any other context. Read this section, then `AGENTS.md`, `plans/README.md`, the Decisions below, the Executor log of the last task (the open items sit at its end) and `parity/README.md`.
+
+### Who and how
+
+- Claude is Planner and Executor. Axel (the owner) reviews and decides.
+- Continue the next open task without asking: the owner agreed to the plan, so its tasks run one after another, one commit per task (one per component in task 16) with its Executor log entry, pushed to `origin/feat/parity-components`. Anything outside the plan (a new decision, a change to a Decision, deleting anything, another branch) is proposed first and waits for the owner.
+- When the owner asks a question ("warum ist X so?", "was denkst du?"), answer and discuss first, change nothing until he agrees. Numbered questions get one plain answer each. He may ask for "tldr" or "eli5": then short and simple.
+- Answer in German, short. Write plans, code comments and commits in English.
+
+### The owner's rules
+
+- **1:1 pedantic.** Everything is the exact pendant of shadcn `bases/base/ui` on Base UI at the pin, as native, idiomatic, scalable and simple ("grug brain") as possible. No difference is ever left alone on purpose: port the Base UI source for it, or record it in the Executor log as an owner question with the reason it cannot match.
+- **No parity claim without a browser check.** "1:1" or "fixed" only after `parity/compare.mjs` (and the other checks) passed in chromium and webkit against the reference app. Check the surrounding upstream semantics (event timing, state shared between parts), not only the ported lines; a mid transition check is a small Playwright script sampling attributes at 40 ms.
+- **Commits.** Message `parity-components <task>: <what>`, e.g. `parity-components 16: message`. Lowercase, only periods and commas, no dashes, no body or one short sentence, no Co-Authored-By or any other trailer, they read as Axel's own. Same for PR bodies (`Closes #NNN` or nothing).
+- **AGENTS.md.** Never run `templ generate` / `go tool templ generate`, never rebuild `*.min.js` or the bundle by hand, the watchers do that. The three component rules there are binding.
+- **Branches.** Never delete a branch other than the PR branch just merged, never force push. `feat/blocks` is local only and must never be pushed.
+- **Processes.** Other projects run on this machine (their servers and watchers too). Only stop processes you started yourself, never use `task kill-ports`, never `kill -9` by port without checking the command.
+- **One compare at a time.** Check `pgrep -f "node compare.mjs"` first. Run the reference app as a production build (`next build`, `next start`): `next dev` grew to 31 GB over full runs.
+- **Disk.** If the disk fills up (watchers break, temp files vanish), ask the owner before `go clean -cache`.
+
+### Setup on a fresh machine
+
+1. `git checkout feat/parity-components && git pull`.
+2. Our site: `task dev` (templ watcher with the docs server on 8090, the bundle watcher, Tailwind, the Shiki service on port 3000 that the docs pages need). If 8090 is taken by another project, run the same watchers on 8190: `PORT=8190 BASE_URL=http://localhost:8190 go tool templ generate --watch --cmd="go run ./cmd/docs/main.go"`, `go run ./cmd/shadcn-templ bundle --watch`, `tailwindcss -i ./assets/css/globals.css -o ./assets/css/output.css --watch=always`, the Shiki service from `shiki/`, and `export TEMPL_URL=http://localhost:8190`.
+3. The harness: `cd parity && npm install && npx playwright install chromium webkit`.
+4. The reference app on 3100 as in `parity/README.md` (shadcn-ui/ui at the commit in `plans/UPSTREAM.md`, `pnpm install`, `pnpm --filter=v4 registry:build`, `next build`, `next start --port 3100`).
+5. Smoke test: `node parity/compare.mjs chromium family:bubble` and `webkit`, all pass. `go test ./components/... ./internal/... ./blocks/...` green.
+
+### Where things are
+
+- Upstream, inside the reference checkout `apps/v4/`: components `registry/bases/base/ui/<name>.tsx`; docs examples `examples/base/<name>.tsx`; create examples `registry/bases/base/examples/<name>-example.tsx` (deps in its `_registry.ts`); docs `content/docs/components/base/<name>.mdx`; the site's own helpers (e.g. `components/markdown.tsx`); Base UI's compiled source in `node_modules/.pnpm/@base-ui+react@1.6.0*/node_modules/@base-ui/react/`.
+- Ours: `components/<name>/<name>.templ` (+ `.js`), shared runtime `components/baseui/` (`window.templ.transition`, `collapsiblePanel`, `lifecycle`, ...), the `cn-*` style classes in `assets/css/styles/style-*.css` (already there for every upstream component), examples `internal/ui/examples/<name_snake>.templ` registered in `internal/ui/examples/registry.go`, the create list in `internal/ui/pages/create.templ`, docs pages `internal/service/content/docs/components/<name>.md`, `registry.json`.
+- A rendered example: reference `http://localhost:3100/examples/base/<name>`, ours `<TEMPL_URL>/preview/<name>`, a create example `<TEMPL_URL>/preview/<name>-example`, a docs page `<TEMPL_URL>/docs/components/<name>`.
+
+### Recipe for a new component (task 16)
+
+1. Read the upstream `ui/<name>.tsx`, every `examples/base/<name>-*.tsx`, `<name>-example.tsx` and the mdx.
+2. `components/<name>/<name>.templ`: one templ per part, `Props` with `ID`, `Class`, `Attributes` plus the Base UI and shadcn props in Go casing (typed string constants for variants), classes verbatim from upstream including the `cn-*` markers, `data-slot` and state attributes as upstream renders them. A `render` prop used by an example: `Href` renders an `<a>`; for a button the example renders its own element with the part's classes from a function (`marker.Variants`, `bubble.ContentClass`, precedent `button.Variants`) and the part's `data-slot`. Behavior only where Base UI has it, ported from its source, the JS finds parts by `data-slot`.
+3. Examples, one file each, same name in snake case, content verbatim. Register in `registry.go` (the chat set `bubble`, `marker`, `message`, `message-scroller`, `attachment` with `Style: "base-rhea"` like upstream's `styleName`), the create example as `"<name>-example"` without a style, and add it to the create list in `create.templ` in alphabetical order.
+4. The docs page from upstream's mdx with Go usage (see `marker.md`, `bubble.md`); keep `styleName` and `previewClassName="h-auto theme-blue"` where upstream has them.
+5. `registry.json` item (name, type `registry:ui`, title, description from the mdx, files, category like its neighbors). Counts in `internal/registryapi/invariant_test.go`: items +1, `registry:ui` +1, compiled builds +48. A new `.js` file: the JavaScript file count in `internal/inliner/parse-js_test.go` +1.
+6. `parity/examples.txt` gets the new example names (sorted, from `parity/shadcn-examples.txt`); `parity/scenarios.json` gets steps for every interaction (per example or `family:<name>`).
+7. Checks, both engines: `node parity/compare.mjs <engine> family:<name>` (and the families of every component whose JS you touched), `node parity/behavior.mjs <engine>`, `node parity/a11y.mjs <engine>`, `node parity/escape.mjs <engine>`, `go run ./parity/htmx/server` then `node parity/htmx/htmx.mjs <engine>`, `go test ./components/... ./internal/... ./blocks/...`, the docs page and the create example load without page errors.
+8. Executor log line under Task 16, then the commit `parity-components 16: <name>` and push.
+
+### Patterns
+
+- **Example scripts** find their example through `document.currentScript.previousElementSibling`, no ids or markers. Go values go into a script with templ's `{{ value }}` interpolation (`card_spacing.templ`, `bubble_collapsible.templ`).
+- **Controlled examples** keep the owner's state in such a script: listen to the component's change event, call the owner setter, render the rest. Setters: `window.templ.slider.setValues`, `toggleGroup.setValue`, `checkbox.setChecked`, `select.setValue`, `collapsible.setOpen`, `chart.update`, `calendar.setSelected` / `setMonth` / `update`, `inputOTP.setValue`. A component without one gets it under its Base UI prop's name.
+- **Trigger slots.** A part merged onto another element: the part's attributes carry its slot and win. An example without `"use client"` upstream is a server component, there a `<Button />` keeps its own slot: wrap the part's attributes in `serverRendered(...)`.
+- **Things upstream's site renders**: Next `Image` becomes a plain `<img>` with the attributes Next renders and upstream's URLs; the site's `Markdown` (Streamdown) becomes the static HTML it outputs (`bubble_markdown.templ`); `IconPlaceholder` becomes its lucide icon from `components/icon`; sonner's `toast(...)` becomes `window.templ.toast.add({ description })` with a comment.
+- **Upstream quirks are ported**, not fixed (e.g. Radix `onSelect` on a Base UI item never fires, a collapsible without a panel keeps `data-ending-style`).
+
+### Gotchas
+
+- The templ watcher dies after `git checkout` of files or `sed -i` (its temp files vanish): check the log, restart it.
+- A new directory with `.templ` files is only picked up after a watcher restart.
+- The inliner only flattens `cn-*` classes in double quoted JS strings.
+- The blocks tests forbid the word "React" in comments.
+- `go run`/`go build` errors show up as "server not ready" in scripts that wait for the site: read the watcher log.
+- WebKit page timeouts on docs pages: the Shiki service on port 3000 is down.
+- The first differing line is all `compare.mjs` prints for a DOM step; fix it and rerun to see the next.
+
+### Status (2026-10-04)
+
+- Tasks 1 to 15 done (see the log). Last full run after task 15: chromium 3290 pass, 15 fail; webkit 3283 pass, 22 fail. The remaining fails are owner questions or flakes: avatar-demo, empty-avatar-group, hover-card-demo, dialog-close-button, item-avatar and item-group (pictures and text), pagination-simple (the fourth link), progress-controlled (two thumbs), button-render (hover step), table-actions, typography-p, select-demo, select-groups, select-scrollable (webkit guard markers), carousel-plugin and drawer (flakes).
+- Task 16 done so far: scroll-area, native-select, marker, bubble. Open: message, message-scroller, attachment, questionnaire, menubar, navigation-menu, direction, then a full `parity/all.sh` run (the collapsible and transition runtime changed in bubble, only the affected families ran).
+- Then task 17 (missing examples, the 57 `-rtl` variants after direction) and task 18 (final run into `plans/UPSTREAM.md`).
+
+### Open owner questions
+
+Recorded in the log, still unanswered: `progress-controlled`'s scalar slider value (task 15), the examples' own pictures and text versus upstream's (task 8), `pagination-simple`'s fourth link (task 13), the select guard markers in webkit (task 6), sonner's toast in the chat examples replaced by the toast manager (task 16). Not in the log yet: where upstream renders `@tabler/icons-react` icons, ours renders the nearest lucide icon.
+
 ## Context
 
 The target is shadcn's Base UI flavor: `shadcn-ui/ui` `apps/v4/registry/bases/base/` with `ui/` (63 files), `examples/` (67 entries), `blocks/`, `hooks/`, `lib/`. Our `components.json` style is `base-nova`. Latest upstream commit touching that tree on 2026-09-22: `c257f688cf` (2026-09-04). No file in this repo records which upstream commit a component was ported from, so "1:1" has had no fixed reference.
