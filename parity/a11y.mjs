@@ -1,7 +1,7 @@
-// Usage: node a11y.mjs <webkit|chromium>
+// Usage: node a11y.mjs [chromium|webkit]
 import { webkit, chromium } from "playwright";
 
-const [, , engine = "webkit"] = process.argv;
+const [, , engine = "chromium"] = process.argv;
 const base = process.env.TEMPL_URL || "http://localhost:8090";
 const browserType = engine === "webkit" ? webkit : chromium;
 const results = [];

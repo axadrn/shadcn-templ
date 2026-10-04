@@ -1,12 +1,14 @@
 # Parity harness
 
-Checks that shadcn-templ is the 1:1 pendant of shadcn's `bases/base/ui` at the pin in `plans/UPSTREAM.md`. It opens every example on the shadcn reference app and on our preview and compares them in chromium and webkit. The plans in `plans/parity-*.md` say which checks a task runs.
+Checks that shadcn-templ is the 1:1 pendant of shadcn's `bases/base/ui` at the pin in `plans/UPSTREAM.md`. It opens every example on the shadcn reference app and on our preview and compares them in headless Chromium. Chromium only, by the owner's decision on 2026-10-04; every script still takes `webkit` as its engine argument. The plans in `plans/parity-*.md` say which checks a task runs.
 
 ## Setup
 
 **Dependencies.** Once per machine:
 
-    cd parity && npm install && npx playwright install chromium webkit
+    cd parity && npm install && npx playwright install chromium
+
+Headless Chromium needs no desktop. On a bare Linux server it needs a few system libraries, on Fedora `install-fedora-server.sh` from the dotfiles installs them.
 
 **The shadcn reference app** on port 3100. `shadcn-ui/ui` at the pinned commit, outside the repository or in the ignored `tmp/`:
 
@@ -28,12 +30,12 @@ The Tailwind and script watchers of `task dev` must run as well.
 
 | Command | What it checks |
 | --- | --- |
-| `node compare.mjs <engine> <example...\|all\|family:<prefix>> [--quiet] [--jobs=N]` | Per example and step: the rendered DOM tree, the focused element, the scroll lock, a screenshot pixel diff. Failing screenshots land in `out/<engine>/`. |
-| `./all.sh` | `compare.mjs` over every example in `examples.txt`, in chunks. Results in `all-<engine>.log`, `all-<engine>-fails.log`, `all-summary.log` (ends with `done`). `ENGINES=webkit ./all.sh` runs one engine. |
-| `node behavior.mjs <engine> [component...]` | Interaction suites on our docs pages. |
-| `node a11y.mjs <engine>` | Accessibility checks on our docs pages. |
-| `node escape.mjs <engine>` | Escape and focus across nested overlays. |
-| `node htmx/htmx.mjs <engine>` | Overlays inside htmx swaps, against the fixture: `go run ./parity/htmx/server` from the repository root (port 8099, `HTMX_URL` to change). |
+| `node compare.mjs chromium <example...\|all\|family:<prefix>> [--quiet] [--jobs=N]` | Per example and step: the rendered DOM tree, the focused element, the scroll lock, a screenshot pixel diff. Failing screenshots land in `out/<engine>/`. |
+| `./all.sh` | `compare.mjs` over every example in `examples.txt`, in chunks. Results in `all-<engine>.log`, `all-<engine>-fails.log`, `all-summary.log` (ends with `done`). `ENGINES="chromium webkit" ./all.sh` adds WebKit. |
+| `node behavior.mjs [engine] [component...]` | Interaction suites on our docs pages. |
+| `node a11y.mjs [engine]` | Accessibility checks on our docs pages. |
+| `node escape.mjs [engine]` | Escape and focus across nested overlays. |
+| `node htmx/htmx.mjs [engine]` | Overlays inside htmx swaps, against the fixture: `go run ./parity/htmx/server` from the repository root (port 8099, `HTMX_URL` to change). |
 
 Run one compare at a time: two in parallel make the reference app and the pixel checks flaky.
 

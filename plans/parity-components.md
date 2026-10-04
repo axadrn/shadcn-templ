@@ -20,7 +20,7 @@ Everything a new session needs to continue this plan without any other context. 
 ### The owner's rules
 
 - **1:1 pedantic.** Everything is the exact pendant of shadcn `bases/base/ui` on Base UI at the pin, as native, idiomatic, scalable and simple ("grug brain") as possible. No difference is ever left alone on purpose: port the Base UI source for it, or record it in the Executor log as an owner question with the reason it cannot match.
-- **No parity claim without a browser check.** "1:1" or "fixed" only after `parity/compare.mjs` (and the other checks) passed in chromium and webkit against the reference app. Check the surrounding upstream semantics (event timing, state shared between parts), not only the ported lines; a mid transition check is a small Playwright script sampling attributes at 40 ms.
+- **No parity claim without a browser check.** "1:1" or "fixed" only after `parity/compare.mjs` (and the other checks) passed in Chromium against the reference app. Check the surrounding upstream semantics (event timing, state shared between parts), not only the ported lines; a mid transition check is a small Playwright script sampling attributes at 40 ms.
 - **Commits.** Message `parity-components <task>: <what>`, e.g. `parity-components 16: message`. Lowercase, only periods and commas, no dashes, no body or one short sentence, no Co-Authored-By or any other trailer, they read as Axel's own. Same for PR bodies (`Closes #NNN` or nothing).
 - **AGENTS.md.** Never run `templ generate` / `go tool templ generate`, never rebuild `*.min.js` or the bundle by hand, the watchers do that. The three component rules there are binding.
 - **Branches.** Never delete a branch other than the PR branch just merged, never force push. `feat/blocks` is local only and must never be pushed.
@@ -32,9 +32,9 @@ Everything a new session needs to continue this plan without any other context. 
 
 1. `git checkout feat/parity-components && git pull`.
 2. Our site: `task dev` (templ watcher with the docs server on 8090, the bundle watcher, Tailwind, the Shiki service on port 3000 that the docs pages need). If 8090 is taken by another project, run the same watchers on 8190: `PORT=8190 BASE_URL=http://localhost:8190 go tool templ generate --watch --cmd="go run ./cmd/docs/main.go"`, `go run ./cmd/shadcn-templ bundle --watch`, `tailwindcss -i ./assets/css/globals.css -o ./assets/css/output.css --watch=always`, the Shiki service from `shiki/`, and `export TEMPL_URL=http://localhost:8190`.
-3. The harness: `cd parity && npm install && npx playwright install chromium webkit`.
+3. The harness: `cd parity && npm install && npx playwright install chromium`. Headless, no desktop needed; on a bare Fedora server `~/dotfiles/install-fedora-server.sh` (github.com/axadrn/dotfiles) installs the system libraries and pnpm, on a Mac `install-macos.sh` with its Brewfile.
 4. The reference app on 3100 as in `parity/README.md` (shadcn-ui/ui at the commit in `plans/UPSTREAM.md`, `pnpm install`, `pnpm --filter=v4 registry:build`, `next build`, `next start --port 3100`).
-5. Smoke test: `node parity/compare.mjs chromium family:bubble` and `webkit`, all pass. `go test ./components/... ./internal/... ./blocks/...` green.
+5. Smoke test: `node parity/compare.mjs chromium family:bubble`, all pass. `go test ./components/... ./internal/... ./blocks/...` green.
 
 ### Where things are
 
@@ -50,7 +50,7 @@ Everything a new session needs to continue this plan without any other context. 
 4. The docs page from upstream's mdx with Go usage (see `marker.md`, `bubble.md`); keep `styleName` and `previewClassName="h-auto theme-blue"` where upstream has them.
 5. `registry.json` item (name, type `registry:ui`, title, description from the mdx, files, category like its neighbors). Counts in `internal/registryapi/invariant_test.go`: items +1, `registry:ui` +1, compiled builds +48. A new `.js` file: the JavaScript file count in `internal/inliner/parse-js_test.go` +1.
 6. `parity/examples.txt` gets the new example names (sorted, from `parity/shadcn-examples.txt`); `parity/scenarios.json` gets steps for every interaction (per example or `family:<name>`).
-7. Checks, both engines: `node parity/compare.mjs <engine> family:<name>` (and the families of every component whose JS you touched), `node parity/behavior.mjs <engine>`, `node parity/a11y.mjs <engine>`, `node parity/escape.mjs <engine>`, `go run ./parity/htmx/server` then `node parity/htmx/htmx.mjs <engine>`, `go test ./components/... ./internal/... ./blocks/...`, the docs page and the create example load without page errors.
+7. Checks, in Chromium: `node parity/compare.mjs chromium family:<name>` (and the families of every component whose JS you touched), `node parity/behavior.mjs`, `node parity/a11y.mjs`, `node parity/escape.mjs`, `go run ./parity/htmx/server` then `node parity/htmx/htmx.mjs`, `go test ./components/... ./internal/... ./blocks/...`, the docs page and the create example load without page errors.
 8. Executor log line under Task 16, then the commit `parity-components 16: <name>` and push.
 
 ### Patterns
@@ -68,18 +68,18 @@ Everything a new session needs to continue this plan without any other context. 
 - The inliner only flattens `cn-*` classes in double quoted JS strings.
 - The blocks tests forbid the word "React" in comments.
 - `go run`/`go build` errors show up as "server not ready" in scripts that wait for the site: read the watcher log.
-- WebKit page timeouts on docs pages: the Shiki service on port 3000 is down.
+- Page timeouts on docs pages: the Shiki service on port 3000 is down.
 - The first differing line is all `compare.mjs` prints for a DOM step; fix it and rerun to see the next.
 
 ### Status (2026-10-04)
 
-- Tasks 1 to 15 done (see the log). Last full run after task 15: chromium 3290 pass, 15 fail; webkit 3283 pass, 22 fail. The remaining fails are owner questions or flakes: avatar-demo, empty-avatar-group, hover-card-demo, dialog-close-button, item-avatar and item-group (pictures and text), pagination-simple (the fourth link), progress-controlled (two thumbs), button-render (hover step), table-actions, typography-p, select-demo, select-groups, select-scrollable (webkit guard markers), carousel-plugin and drawer (flakes).
+- Tasks 1 to 15 done (see the log). Last full run after task 15: chromium 3290 pass, 15 fail; webkit 3283 pass, 22 fail. The remaining fails are owner questions or flakes: avatar-demo, empty-avatar-group, hover-card-demo, dialog-close-button, item-avatar and item-group (pictures and text), pagination-simple (the fourth link), progress-controlled (two thumbs), button-render (hover step), table-actions, typography-p, select-demo, select-groups, select-scrollable (webkit guard markers, out of scope with Chromium only), carousel-plugin and drawer (flakes).
 - Task 16 done so far: scroll-area, native-select, marker, bubble. Open: message, message-scroller, attachment, questionnaire, menubar, navigation-menu, direction, then a full `parity/all.sh` run (the collapsible and transition runtime changed in bubble, only the affected families ran).
 - Then task 17 (missing examples, the 57 `-rtl` variants after direction) and task 18 (final run into `plans/UPSTREAM.md`).
 
 ### Open owner questions
 
-Recorded in the log, still unanswered: `progress-controlled`'s scalar slider value (task 15), the examples' own pictures and text versus upstream's (task 8), `pagination-simple`'s fourth link (task 13), the select guard markers in webkit (task 6), sonner's toast in the chat examples replaced by the toast manager (task 16). Not in the log yet: where upstream renders `@tabler/icons-react` icons, ours renders the nearest lucide icon.
+Recorded in the log, still unanswered: `progress-controlled`'s scalar slider value (task 15), the examples' own pictures and text versus upstream's (task 8), `pagination-simple`'s fourth link (task 13), sonner's toast in the chat examples replaced by the toast manager (task 16). Not in the log yet: where upstream renders `@tabler/icons-react` icons, ours renders the nearest lucide icon.
 
 ## Context
 
@@ -107,7 +107,7 @@ After `parity-attributes` and `parity-runtime`, every existing component follows
 - **TooltipProvider.** Found by `parity-runtime` task 8b: shadcn exports `TooltipProvider` (Base UI's delay group, `delay` 0 by default, which shadcn's docs wrap the app in). Ours has none and every tooltip behaves as inside a provider with `delay` 0 but without the group: a neighbouring tooltip does not open at once within the group's `timeout`, and no popup renders `data-instant`.
 - **One menu script.** Found by `parity-runtime` task 8b: the submenu code of `dropdownmenu.js` and `contextmenu.js` is the same apart from the event names and the positioning. Base UI has one `Menu` for both, so one shared script is the simpler pendant, done with the menu task.
 - **No sonner.** Decided by Axel on 2026-10-01: upstream ships `sonner.tsx` next to `toast.tsx`, we port only the newer Base UI toast. Sonner and its examples are not missing, they are out of scope.
-- **Both engines.** Every comparison runs in chromium and webkit (Playwright from `parity/package.json`).
+- **Chromium only.** Decided by Axel on 2026-10-04, replacing "both engines": every comparison runs in headless Chromium (Playwright from `parity/package.json`), so it runs on a bare Linux server. What runs 1:1 in Chromium is taken to run elsewhere. WebKit only differences found so far (the select guard markers of task 6, focus details) are no longer checked; the earlier log entries name both engines.
 
 ## Tasks
 
@@ -165,7 +165,7 @@ Written after task 3 from `tmp/parity-components/causes.txt`, the first DOM, foc
 15. **Example markers.** Our examples carry `data-*-demo` attributes their scripts hook on, upstream's carry none; they move to ids.
 16. **Missing components**, one task each: attachment, bubble, direction, marker, menubar, message, message-scroller, native-select, navigation-menu, questionnaire, scroll-area.
 17. **Missing examples**, by component: the 57 `-rtl` variants after `direction`, the chat set with its components, sidebar parts, input group, shimmer, scroll fade and the rest of task 2's list.
-18. **Final run** of `compare.mjs all` in both engines, the result appended to `plans/UPSTREAM.md`.
+18. **Final run** of `compare.mjs all` in Chromium, the result appended to `plans/UPSTREAM.md`.
 
 ## Executor log
 

@@ -1,10 +1,10 @@
 #!/bin/sh
 # Runs compare.mjs over every example in examples.txt, 40 per process (one
-# long process loses its browser), for each engine in ENGINES. Writes
+# long process loses its browser), for each engine in ENGINES (chromium by default). Writes
 # all-<engine>.log, all-<engine>-fails.log and all-summary.log, which ends
 # with "done".
 cd "$(dirname "$0")" || exit 1
-ENGINES=${ENGINES:-"chromium webkit"}
+ENGINES=${ENGINES:-chromium}
 : > all-summary.log
 for e in $ENGINES; do
   : > "all-$e.log"
