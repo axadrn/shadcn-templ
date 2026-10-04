@@ -281,4 +281,6 @@ Each new component gets its templ (and script), its `registry.json` item, its do
 
 Checks so far: `go test ./...` green (the registry and inliner counts include the new items), the `scroll-area`, `native-select`, `marker` and `bubble` families pass every check in both engines (bubble with scenarios for the collapsible, popover, tooltip and toast buttons; collapsible and accordion still pass), a11y and behavior 30 of 30, `escape.mjs` and `htmx.mjs` 0 failures in both, their docs and create pages load without page errors.
 
+Open in task 16: message, message-scroller, attachment, questionnaire, menubar, navigation-menu, direction, then the full `compare.mjs all` run (not run since the collapsible and transition runtime change, only the affected families). Each new component also adds its examples to `tmp/parity-runtime/both.txt` and bumps the counts in `internal/registryapi/invariant_test.go` (+1 item, +1 registry:ui, +48 builds).
+
 ## Planner review
