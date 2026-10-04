@@ -2,7 +2,7 @@
 
 - **Planner**: Claude
 - **Executor**: Claude
-- **Status**: review
+- **Status**: done
 - **Branch**: feat/init-monorepo (from feat/parity-components)
 
 ## Context
@@ -110,3 +110,7 @@ $S/cli init --monorepo --registry $R                          # default name tem
 Not run: `task dev` (its templ proxy defaults to port 7331, off limits here) and the Docker build. `git status` in the repo clean after the smoke test.
 
 Open: the scaffold's `task build` needs a shadcn-templ release that contains monorepo-623; with the current published v2.0.0-beta.10 the `go tool shadcn-templ bundle` step fails in `apps/web` until the next release is tagged (the single-app scaffold is unaffected).
+
+### Review (Claude, 2026-10-04)
+
+Accepted. `--monorepo` resolves the template's monorepo variant like shadcn's `resolveTemplate` and then continues through the monorepo-623 path in `apps/web`, so there is one way configs resolve. The `@source` line for the shared components is the real find of the smoke test (Tailwind only scans the app otherwise) and is now a documented requirement for every app. The scaffold's `task build` needs a CLI release with monorepo-623, which `v2.0.0-beta.11` is; the release smoke test reruns it against the published tag.
