@@ -5,6 +5,10 @@
 // Files whose real name would trigger this repo's toolchain (go.mod, .go,
 // .templ) are stored with a .tmpl suffix; the suffix is stripped on copy and
 // the module placeholder is replaced by the project name.
+//
+// A template's Monorepo variant is the pendant of their monorepo override
+// (create-template.ts resolveTemplate): another directory that holds the
+// shared packages at the module root and the app under AppDir.
 package templates
 
 import (
@@ -18,7 +22,7 @@ import (
 	"strings"
 )
 
-//go:embed all:templ-app
+//go:embed all:templ-app all:templ-monorepo
 var templateFiles embed.FS
 
 // Template is the manifest shape of create-template.ts.
@@ -27,6 +31,12 @@ type Template struct {
 	Title              string
 	DefaultProjectName string
 	TemplateDir        string
+	// AppDir is the app inside the project that init sets up, empty when
+	// the project root is the app.
+	AppDir string
+	// Monorepo is the variant init --monorepo scaffolds, nil when the
+	// template has none.
+	Monorepo *Template
 }
 
 // Templates is the templates map of src/templates/index.ts. shadcn-templ ships
@@ -37,7 +47,30 @@ var Templates = map[string]Template{
 		Title:              "templ",
 		DefaultProjectName: "templ-app",
 		TemplateDir:        "templ-app",
+		Monorepo: &Template{
+			Name:               "templ",
+			Title:              "templ monorepo",
+			DefaultProjectName: "templ-monorepo",
+			TemplateDir:        "templ-monorepo",
+			AppDir:             "apps/web",
+		},
 	},
+}
+
+// Resolve returns the named template, or its monorepo variant when monorepo
+// is set, like resolveTemplate.
+func Resolve(name string, monorepo bool) (Template, error) {
+	template, ok := Templates[name]
+	if !ok {
+		return Template{}, fmt.Errorf("unknown template %q, valid templates: %s", name, strings.Join(Names(), ", "))
+	}
+	if !monorepo {
+		return template, nil
+	}
+	if template.Monorepo == nil {
+		return Template{}, fmt.Errorf("the %s template has no monorepo variant", name)
+	}
+	return *template.Monorepo, nil
 }
 
 // Names lists the valid template names for error messages and usage.

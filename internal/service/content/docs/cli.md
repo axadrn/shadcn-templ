@@ -26,13 +26,28 @@ Pick a design on [shadcn-templ.com/create](/create) and pass its preset code or 
 shadcn-templ init --preset b2D0wqNxT
 ```
 
+To start a new project instead, pass a template and a project name. `--monorepo` scaffolds a [monorepo](/docs/monorepo): one module with the shared components at its root and the app in `apps/web`.
+
+```shell
+shadcn-templ init my-app -t templ
+```
+
+```shell
+shadcn-templ init my-app --monorepo
+```
+
 **Options**
 
 ```shell
 Usage:
-  shadcn-templ init [--preset <code|url|name>] [--base-color <color>] [--css <path>] [--force] [--silent] [--registry <url>]
+  shadcn-templ init [name] [--template <templ>] [--monorepo] [--preset <code|url|name>] [--base-color <color>] [--css <path>] [--force] [--silent] [--registry <url>]
+
+Arguments:
+  name                          the project name for --template and --monorepo (default templ-app, templ-monorepo)
 
 Options:
+  -t, --template <templ>        scaffold a new project from a template (templ)
+  --monorepo                    scaffold a monorepo project (implies --template templ)
   -p, --preset <code|url|name>  use a preset configuration (code, URL or name)
   --base-color <color>          override the base color
   --css <path>                  path to your Tailwind CSS entry file

@@ -1,0 +1,47 @@
+version: "3"
+
+# The web app. Run its tasks here, or from the module root through the root
+# Taskfile (task dev, task build, task web:dev, ...).
+
+vars:
+  # The app port: an explicit 'task dev PORT=8091' wins, otherwise the next
+  # free port from 8090 up. The templ proxy and the app share the result,
+  # so hot reload never points at a foreign app.
+  FREE_PORT:
+    sh: port=8090; while nc -z localhost $port >/dev/null 2>&1; do port=$((port+1)); done; echo $port
+  PORT: '{{.PORT | default .FREE_PORT}}'
+
+tasks:
+  templ:
+    desc: Run templ with integrated server and hot reload
+    cmds:
+      # -path ../.. generates the whole module, the shared components are
+      # templ files at the module root. The app itself runs from here.
+      - go tool templ generate -path ../.. --watch --proxy="http://localhost:{{.PORT}}" --cmd="go run ." --open-browser=false
+    env:
+      PORT: "{{.PORT}}"
+
+  tailwind:
+    desc: Watch Tailwind CSS changes
+    cmds:
+      - "tailwindcss -i ./assets/css/globals.css -o ./assets/css/output.css --watch"
+
+  scripts-watch:
+    desc: Watch component scripts
+    cmds:
+      - go tool shadcn-templ bundle --watch
+
+  build:
+    desc: Build the application with production assets
+    cmds:
+      - tailwindcss -i ./assets/css/globals.css -o ./assets/css/output.css --minify
+      - go tool shadcn-templ bundle
+      - go tool templ generate -path ../..
+      - go build -o bin/app .
+
+  dev:
+    env:
+      SHADCN_TEMPL_DEV: "true"
+    desc: Start development server with hot reload
+    cmds:
+      - task --parallel tailwind scripts-watch templ

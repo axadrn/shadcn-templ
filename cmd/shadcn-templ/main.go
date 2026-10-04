@@ -52,7 +52,7 @@ func version() string {
 const usage = `shadcn-templ - add components and dependencies to your project
 
 Usage:
-  shadcn-templ init [name] [--template <templ>] [--preset <code|url|name>] [--base-color <color>] [--css <path>] [--force] [--silent] [--registry <url>]
+  shadcn-templ init [name] [--template <templ>] [--monorepo] [--preset <code|url|name>] [--base-color <color>] [--css <path>] [--force] [--silent] [--registry <url>]
   shadcn-templ add <components...|url> [--all] [--overwrite] [--path <path>] [--silent] [--registry <url>]
   shadcn-templ bundle [--cwd <path>] [--silent] [--watch]
   shadcn-templ apply <preset> [--only theme|font] [--yes] [--silent] [--registry <url>]

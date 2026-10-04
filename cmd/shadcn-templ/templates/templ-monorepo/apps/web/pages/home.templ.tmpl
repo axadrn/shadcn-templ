@@ -1,0 +1,12 @@
+package pages
+
+import (
+	"templ-app/apps/web/layouts"
+	"templ-app/components/componentexample"
+)
+
+templ Home() {
+	@layouts.Base("templ-app") {
+		@componentexample.ComponentExample()
+	}
+}
