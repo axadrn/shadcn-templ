@@ -7,8 +7,9 @@
 // the module placeholder is replaced by the project name.
 //
 // A template's Monorepo variant is the pendant of their monorepo override
-// (create-template.ts resolveTemplate): another directory that holds the
-// shared packages at the module root and the app under AppDir.
+// (create-template.ts resolveTemplate): another directory with the
+// workspaces of their next-monorepo, the ui package under packages/ui and
+// the app under AppDir.
 package templates
 
 import (

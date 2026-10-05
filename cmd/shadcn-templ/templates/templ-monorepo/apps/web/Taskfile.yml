@@ -16,7 +16,7 @@ tasks:
     desc: Run templ with integrated server and hot reload
     cmds:
       # -path ../.. generates the whole module, the shared components are
-      # templ files at the module root. The app itself runs from here.
+      # templ files in packages/ui. The app itself runs from here.
       - go tool templ generate -path ../.. --watch --proxy="http://localhost:{{.PORT}}" --cmd="go run ." --open-browser=false
     env:
       PORT: "{{.PORT}}"
@@ -24,7 +24,7 @@ tasks:
   tailwind:
     desc: Watch Tailwind CSS changes
     cmds:
-      - "tailwindcss -i ./assets/css/globals.css -o ./assets/css/output.css --watch"
+      - "tailwindcss -i ../../packages/ui/styles/globals.css -o ./assets/css/output.css --watch"
 
   scripts-watch:
     desc: Watch component scripts
@@ -34,7 +34,7 @@ tasks:
   build:
     desc: Build the application with production assets
     cmds:
-      - tailwindcss -i ./assets/css/globals.css -o ./assets/css/output.css --minify
+      - tailwindcss -i ../../packages/ui/styles/globals.css -o ./assets/css/output.css --minify
       - go tool shadcn-templ bundle
       - go tool templ generate -path ../..
       - go build -o bin/app .

@@ -3,10 +3,12 @@
 // defaults), write components.json, merge the theme CSS into the user's
 // Tailwind entry file and install the utils lib item. --template scaffolds a
 // new project from an embedded template first, like their init -t next.
-// --monorepo scaffolds the template's monorepo variant instead (one module,
-// the shared components at its root, the app in apps/web) and continues init
-// in the app. Run in an app directory below go.mod (apps/<app>), init sets
-// up that app and installs into the module's shared packages, see
+// --monorepo scaffolds the template's monorepo variant instead (one module
+// with the workspaces apps/web and packages/ui, like next-monorepo), writes
+// both components.json and continues init in the app. Run in an app below a
+// module with packages/ui/components.json, init joins that ui workspace:
+// the app's ui and utils aliases and its tailwind.css point into it, and
+// menuColor, menuAccent, rtl and iconLibrary propagate to it. See
 // /docs/monorepo.
 //
 // Dropped npm-only options, all without a Go pendant: --base (component
@@ -106,10 +108,14 @@ func RunInit(opts InitOptions) error {
 	}
 
 	// Preflight: a Go module is the shadcn-templ pendant of a framework project.
-	module, err := utils.ModulePath(cwd)
+	moduleRoot, module, err := utils.FindModule(cwd)
 	if err != nil {
 		return err
 	}
+	// The ui workspace of a monorepo, shadcn's packages/ui. An app below a
+	// module that has one joins it.
+	uiDir := filepath.Join(moduleRoot, "packages", "ui")
+	monorepo := scaffolded && opts.Monorepo
 
 	existing, err := utils.GetRawConfig(cwd)
 	if err != nil {
@@ -144,38 +150,84 @@ func RunInit(opts InitOptions) error {
 		return fmt.Errorf("the registry did not return a base configuration for %s", initURL)
 	}
 
-	raw := &utils.RawConfig{
-		Schema:  utils.SchemaURL,
-		Scripts: utils.DefaultScripts(),
-		Style:   baseItem.Config.Style,
-		Tailwind: utils.Tailwind{
-			CSS:          resolveTailwindCSSPath(cwd, opts.CSS, existing),
-			BaseColor:    baseItem.Config.Tailwind.BaseColor,
-			CSSVariables: true,
-		},
-		RTL:         baseItem.Config.RTL,
-		IconLibrary: baseItem.Config.IconLibrary,
-		MenuColor:   baseItem.Config.MenuColor,
-		MenuAccent:  baseItem.Config.MenuAccent,
-		Aliases: utils.Aliases{
-			Components: module + "/components",
-			Utils:      module + "/utils",
-		},
+	newConfig := func(css string, aliases utils.Aliases) *utils.RawConfig {
+		raw := &utils.RawConfig{
+			Schema:  utils.SchemaURL,
+			Scripts: utils.DefaultScripts(),
+			Style:   baseItem.Config.Style,
+			Tailwind: utils.Tailwind{
+				CSS:          css,
+				BaseColor:    baseItem.Config.Tailwind.BaseColor,
+				CSSVariables: true,
+			},
+			RTL:         baseItem.Config.RTL,
+			IconLibrary: baseItem.Config.IconLibrary,
+			MenuColor:   baseItem.Config.MenuColor,
+			MenuAccent:  baseItem.Config.MenuAccent,
+			Aliases:     aliases,
+		}
+		if opts.BaseColor != "" {
+			raw.Tailwind.BaseColor = opts.BaseColor
+		}
+		return raw
 	}
+
+	// init --monorepo writes the ui workspace's config first, from the same
+	// preset (the template's packages/ui/components.json in shadcn). It is
+	// a library workspace: aliases into itself, no scripts.
+	if monorepo {
+		uiRaw := newConfig("styles/globals.css", utils.Aliases{
+			Components: module + "/packages/ui/components",
+			Utils:      module + "/packages/ui/utils",
+			UI:         module + "/packages/ui/components",
+		})
+		uiRaw.Scripts = nil
+		logf(opts.Silent, "Writing packages/ui/%s.\n", utils.ConfigFileName)
+		if err := utils.WriteConfig(uiDir, uiRaw); err != nil {
+			return err
+		}
+	}
+
+	aliases := utils.Aliases{
+		Components: module + "/components",
+		Utils:      module + "/utils",
+	}
+	uiCSS := ""
+	if ui, err := joinUIWorkspace(cwd, uiDir); err != nil {
+		return err
+	} else if ui != nil {
+		// An app joining the ui workspace: its own components (blocks), the
+		// ui components and utils from the ui package, the ui package's CSS.
+		rel, err := filepath.Rel(moduleRoot, cwd)
+		if err != nil {
+			return err
+		}
+		aliases = utils.Aliases{
+			Components: module + "/" + filepath.ToSlash(rel) + "/components",
+			Utils:      ui.Aliases.Utils,
+			UI:         ui.UIAlias(),
+		}
+		if uiCSS, err = filepath.Rel(cwd, ui.ResolvedPaths.TailwindCSS); err != nil {
+			return err
+		}
+		uiCSS = filepath.ToSlash(uiCSS)
+	}
+
+	raw := newConfig(resolveTailwindCSSPath(cwd, opts.CSS, existing, uiCSS), aliases)
 	if existing != nil {
 		// Keep the user's paths on re-init.
 		if existing.Scripts != nil {
 			raw.Scripts = existing.Scripts
 		}
 		if existing.Aliases.Components != "" {
+			// The ui alias belongs to the components alias: unset, the
+			// ui components live there.
 			raw.Aliases.Components = existing.Aliases.Components
+			raw.Aliases.UI = existing.Aliases.UI
 		}
 		if existing.Aliases.Utils != "" {
 			raw.Aliases.Utils = existing.Aliases.Utils
 		}
-	}
-	if opts.BaseColor != "" {
-		raw.Tailwind.BaseColor = opts.BaseColor
 	}
 
 	// Make sure the Tailwind entry file exists before the CSS updater runs.
@@ -200,6 +252,26 @@ func RunInit(opts InitOptions) error {
 		return err
 	}
 
+	// Propagate design settings to the other workspaces' components.json,
+	// exactly init.ts' set. The style is not propagated: every workspace
+	// needs the same one, see /docs/monorepo.
+	if err := syncWorkspaceConfigs(config, func(other *utils.RawConfig) {
+		if raw.MenuColor != "" {
+			other.MenuColor = raw.MenuColor
+		}
+		if raw.MenuAccent != "" {
+			other.MenuAccent = raw.MenuAccent
+		}
+		if raw.RTL != nil {
+			other.RTL = raw.RTL
+		}
+		if raw.IconLibrary != "" {
+			other.IconLibrary = raw.IconLibrary
+		}
+	}); err != nil {
+		return err
+	}
+
 	// Install the base item and its registry dependencies (utils lib item).
 	if err := addComponents([]string{initURL}, config, registryURL, addComponentsOptions{
 		// Init always overwrites files and CSS variables.
@@ -213,7 +285,7 @@ func RunInit(opts InitOptions) error {
 	// An app joining a module whose shared components already carry
 	// scripts needs its own copy of the bundle in its scripts.dir; add
 	// bundles only when it writes scripts.
-	if scripts, _ := filepath.Glob(filepath.Join(config.ResolvedPaths.Components, "*", "*.js")); len(scripts) > 0 {
+	if scripts, _ := filepath.Glob(filepath.Join(config.ResolvedPaths.UI, "*", "*.js")); len(scripts) > 0 {
 		bundlePaths, _, err := updaters.UpdateScripts(config)
 		if err != nil {
 			return err
@@ -240,14 +312,66 @@ func RunInit(opts InitOptions) error {
 	return nil
 }
 
+// joinUIWorkspace returns the config of the module's ui workspace
+// (packages/ui with a components.json) for an app that joins it, or nil:
+// no ui workspace, or cwd is the ui workspace itself.
+func joinUIWorkspace(cwd, uiDir string) (*utils.Config, error) {
+	if cwd == uiDir {
+		return nil, nil
+	}
+	if _, err := os.Stat(filepath.Join(uiDir, utils.ConfigFileName)); err != nil {
+		return nil, nil
+	}
+	ui, err := utils.GetConfig(uiDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not load the workspace config in %s: %w", uiDir, err)
+	}
+	return ui, nil
+}
+
+// syncWorkspaceConfigs patches the components.json of every other
+// workspace config's aliases resolve to: init's design settings
+// propagation and apply's syncApplyWorkspaceConfigs. A single app has no
+// other workspace.
+func syncWorkspaceConfigs(config *utils.Config, patch func(raw *utils.RawConfig)) error {
+	workspace, err := utils.GetWorkspaceConfig(config)
+	if err != nil {
+		return err
+	}
+	seen := map[string]bool{config.ResolvedPaths.Cwd: true}
+	for _, other := range []*utils.Config{workspace.Components, workspace.UI, workspace.Utils} {
+		dir := other.ResolvedPaths.Cwd
+		if seen[dir] {
+			continue
+		}
+		seen[dir] = true
+		raw, err := utils.GetRawConfig(dir)
+		if err != nil {
+			return err
+		}
+		if raw == nil {
+			continue
+		}
+		patch(raw)
+		if err := utils.WriteConfig(dir, raw); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // resolveTailwindCSSPath picks the Tailwind entry file: --css flag, existing
-// config, detection, then the default location.
-func resolveTailwindCSSPath(cwd, cssFlag string, existing *utils.RawConfig) string {
+// config, the ui workspace's CSS for an app joining one, detection, then the
+// default location.
+func resolveTailwindCSSPath(cwd, cssFlag string, existing *utils.RawConfig, uiCSS string) string {
 	if cssFlag != "" {
 		return filepath.ToSlash(cssFlag)
 	}
 	if existing != nil && existing.Tailwind.CSS != "" {
 		return existing.Tailwind.CSS
+	}
+	if uiCSS != "" {
+		return uiCSS
 	}
 	if found := utils.FindTailwindCSS(cwd); found != "" && !strings.Contains(found, "output") {
 		return found
