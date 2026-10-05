@@ -1,4 +1,0 @@
-@import "tailwindcss";
-
-/* The shared components live at the module root, outside this app. */
-@source "../../../../components";

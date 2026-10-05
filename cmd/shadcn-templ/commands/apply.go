@@ -3,8 +3,11 @@
 // new CSS variables and a re-install of every installed component; with
 // --only theme|font just the selected parts.
 //
-// Dropped npm-only behavior: monorepo workspace config syncing and the
-// browser-opening preset builder prompt (the URL is printed instead).
+// In a monorepo the linked workspaces' components.json are synced like
+// syncApplyWorkspaceConfigs.
+//
+// Dropped npm-only behavior: the browser-opening preset builder prompt (the
+// URL is printed instead).
 package commands
 
 import (
@@ -13,6 +16,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -223,6 +227,31 @@ func RunApply(positional []string, opts ApplyOptions) error {
 		}
 	}
 
+	// syncApplyWorkspaceConfigs: the linked workspaces take the preset's
+	// config. shadcn syncs after the install; here the ui workspace
+	// resolves the registry tree, so it syncs first.
+	if only == nil || slices.Contains(only, "theme") {
+		if err := syncWorkspaceConfigs(config, func(other *utils.RawConfig) {
+			other.Style = config.Style
+			other.Tailwind.BaseColor = config.Tailwind.BaseColor
+			other.Tailwind.CSSVariables = config.Tailwind.CSSVariables
+			if config.IconLibrary != "" {
+				other.IconLibrary = config.IconLibrary
+			}
+			if config.RTL != nil {
+				other.RTL = config.RTL
+			}
+			if config.MenuColor != "" {
+				other.MenuColor = config.MenuColor
+			}
+			if config.MenuAccent != "" {
+				other.MenuAccent = config.MenuAccent
+			}
+		}); err != nil {
+			return err
+		}
+	}
+
 	components := append([]string{initURL}, reinstallComponents...)
 	if err := addComponents(components, config, registryURL, addComponentsOptions{
 		Overwrite:        true,
@@ -260,10 +289,10 @@ func presetURLOnly(presetArg string) string {
 }
 
 // installedComponents is the getProjectComponents pendant: the component
-// directories under the components dir, translated to registry item names
+// directories under the ui components dir, translated to registry item names
 // (the directory is flat "alertdialog", the item name "alert-dialog").
 func installedComponents(config *utils.Config, registryURL string) ([]string, error) {
-	entries, err := os.ReadDir(config.ResolvedPaths.Components)
+	entries, err := os.ReadDir(config.ResolvedPaths.UI)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil

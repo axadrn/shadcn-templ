@@ -22,7 +22,12 @@
 //	                       ("<module>/components"); shadcn stores a tsconfig
 //	                       alias ("@/components")
 //	aliases.utils:         Go pendant: "<module>/utils"
-//	aliases.ui/lib/hooks:  dropped; shadcn-templ has no separate ui/lib/hooks dirs
+//	aliases.ui:            Go pendant: the import path of the ui components
+//	                       ("<module>/packages/ui/components" in a monorepo
+//	                       app); unset means aliases.components, so a single
+//	                       app needs none
+//	aliases.lib/hooks:     dropped; shadcn-templ has no separate lib/hooks
+//	                       dirs (utils is the lib)
 //	registries:            dropped; there are no third-party shadcn-templ
 //	                       registries (the --registry flag and
 //	                       SHADCN_TEMPL_REGISTRY env cover local dev)
@@ -60,6 +65,10 @@ func DefaultScripts() *Scripts { return &Scripts{Dir: "assets/js", Path: "/asset
 type Aliases struct {
 	Components string `json:"components"`
 	Utils      string `json:"utils"`
+	// UI is shadcn's ui alias, the import path of the ui components. A
+	// monorepo app points it into the ui workspace (packages/ui); unset, the
+	// ui components live in Components, the single-app layout.
+	UI string `json:"ui,omitempty"`
 }
 
 // RawConfig is the rawConfigSchema pendant: components.json as written.
@@ -87,15 +96,28 @@ type ResolvedPaths struct {
 	ModuleRoot  string
 	TailwindCSS string
 	Components  string
+	UI          string
 	Utils       string
 }
 
 // Config is the configSchema pendant: RawConfig plus resolved paths.
+// Scripts is nil for a library workspace (shadcn's packages/ui): a config
+// with aliases.ui and no scripts block serves no bundle, the apps that use
+// it do.
 type Config struct {
 	RawConfig
 	Module           string
 	ScriptsDefaulted bool
 	ResolvedPaths    ResolvedPaths
+}
+
+// UIAlias is the import path of the ui components: aliases.ui, or
+// aliases.components when unset.
+func (c *RawConfig) UIAlias() string {
+	if c.Aliases.UI != "" {
+		return c.Aliases.UI
+	}
+	return c.Aliases.Components
 }
 
 // ConfigFileName is the components.json file name.
@@ -140,6 +162,10 @@ func ResolveConfigPaths(cwd string, raw *RawConfig) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	uiDir, err := aliasDir(root, module, raw.UIAlias(), "ui")
+	if err != nil {
+		return nil, err
+	}
 	utilsDir, err := aliasDir(root, module, raw.Aliases.Utils, "utils")
 	if err != nil {
 		return nil, err
@@ -149,27 +175,92 @@ func ResolveConfigPaths(cwd string, raw *RawConfig) (*Config, error) {
 		return nil, fmt.Errorf("no tailwind.css path in %s", ConfigFileName)
 	}
 
-	defaulted := raw.Scripts == nil
+	// A config without scripts predates the scripts block and gets the
+	// defaults, unless it is a library workspace (aliases.ui set), which
+	// has no scripts of its own.
+	library := raw.Scripts == nil && raw.Aliases.UI != ""
+	defaulted := raw.Scripts == nil && !library
 	resolved := *raw
 	if defaulted {
 		resolved.Scripts = DefaultScripts()
 	}
-	if resolved.Scripts.Dir == "" || resolved.Scripts.Path == "" {
-		return nil, fmt.Errorf("scripts.dir and scripts.path must not be empty")
+	scriptsDir := ""
+	if !library {
+		if resolved.Scripts.Dir == "" || resolved.Scripts.Path == "" {
+			return nil, fmt.Errorf("scripts.dir and scripts.path must not be empty")
+		}
+		scriptsDir = filepath.Join(cwd, filepath.FromSlash(resolved.Scripts.Dir))
 	}
 	return &Config{
 		RawConfig:        resolved,
 		ScriptsDefaulted: defaulted,
 		Module:           module,
 		ResolvedPaths: ResolvedPaths{
-			Scripts:     filepath.Join(cwd, filepath.FromSlash(resolved.Scripts.Dir)),
+			Scripts:     scriptsDir,
 			Cwd:         cwd,
 			ModuleRoot:  root,
 			TailwindCSS: filepath.Join(cwd, filepath.FromSlash(raw.Tailwind.CSS)),
 			Components:  componentsDir,
+			UI:          uiDir,
 			Utils:       utilsDir,
 		},
 	}, nil
+}
+
+// WorkspaceConfig is the workspaceConfigSchema pendant: for each alias the
+// config of the workspace that holds its directory. In a single app all
+// three are the app's own config.
+type WorkspaceConfig struct {
+	Components *Config
+	UI         *Config
+	Utils      *Config
+}
+
+// GetWorkspaceConfig is the getWorkspaceConfig pendant. For each alias it
+// finds the closest directory with a components.json at or above the
+// alias' directory, up to the module root (shadcn's findPackageRoot looks
+// for package.json, the Go pendant is the workspace's components.json).
+// That workspace's config is loaded; none, or config's own directory,
+// means config itself.
+func GetWorkspaceConfig(config *Config) (*WorkspaceConfig, error) {
+	load := func(dir string) (*Config, error) {
+		root := findWorkspaceRoot(config.ResolvedPaths.ModuleRoot, dir)
+		if root == "" || root == config.ResolvedPaths.Cwd {
+			return config, nil
+		}
+		workspace, err := GetConfig(root)
+		if err != nil {
+			return nil, fmt.Errorf("could not load the workspace config in %s: %w", root, err)
+		}
+		return workspace, nil
+	}
+	var ws WorkspaceConfig
+	var err error
+	if ws.Components, err = load(config.ResolvedPaths.Components); err != nil {
+		return nil, err
+	}
+	if ws.UI, err = load(config.ResolvedPaths.UI); err != nil {
+		return nil, err
+	}
+	if ws.Utils, err = load(config.ResolvedPaths.Utils); err != nil {
+		return nil, err
+	}
+	return &ws, nil
+}
+
+// findWorkspaceRoot returns the closest directory at or above dir that
+// holds a components.json, stopping at the module root, or "".
+func findWorkspaceRoot(moduleRoot, dir string) string {
+	for {
+		if _, err := os.Stat(filepath.Join(dir, ConfigFileName)); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if dir == moduleRoot || parent == dir {
+			return ""
+		}
+		dir = parent
+	}
 }
 
 // aliasDir maps an import path alias under the module to a directory below
@@ -221,12 +312,13 @@ func FindModule(dir string) (root, module string, err error) {
 }
 
 // GetSharedConfigs returns the configs of the other apps in config's module
-// whose aliases.components resolve to the same directory: the apps that
-// share one installed components package and its scripts_bundle.go. It
-// walks the module root for components.json, skipping what the go command
-// skips (dot and underscore directories, testdata), vendor, node_modules
-// and nested modules. A components.json that does not load or resolve
-// belongs to something else and is ignored.
+// whose ui alias resolves to the same directory: the apps that share one
+// installed ui components package and its scripts_bundle.go. Library
+// workspaces (no scripts) serve no bundle and are left out. It walks the
+// module root for components.json, skipping what the go command skips (dot
+// and underscore directories, testdata), vendor, node_modules and nested
+// modules. A components.json that does not load or resolve belongs to
+// something else and is ignored.
 func GetSharedConfigs(config *Config) ([]*Config, error) {
 	root := config.ResolvedPaths.ModuleRoot
 	var shared []*Config
@@ -256,7 +348,7 @@ func GetSharedConfigs(config *Config) ([]*Config, error) {
 			return nil
 		}
 		other, err := GetConfig(path)
-		if err != nil || other == nil || other.ResolvedPaths.Components != config.ResolvedPaths.Components {
+		if err != nil || other == nil || other.Scripts == nil || other.ResolvedPaths.UI != config.ResolvedPaths.UI {
 			return nil
 		}
 		shared = append(shared, other)

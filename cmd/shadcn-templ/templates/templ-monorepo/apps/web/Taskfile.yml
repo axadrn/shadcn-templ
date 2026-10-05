@@ -10,21 +10,27 @@ vars:
   FREE_PORT:
     sh: port=8090; while nc -z localhost $port >/dev/null 2>&1; do port=$((port+1)); done; echo $port
   PORT: '{{.PORT | default .FREE_PORT}}'
+  # The templ proxy port the same way, from 7331 up, so several apps run
+  # side by side ('task dev PROXY_PORT=7340' wins).
+  FREE_PROXY_PORT:
+    sh: port=7331; while nc -z localhost $port >/dev/null 2>&1; do port=$((port+1)); done; echo $port
+  PROXY_PORT: '{{.PROXY_PORT | default .FREE_PROXY_PORT}}'
 
 tasks:
   templ:
     desc: Run templ with integrated server and hot reload
     cmds:
       # -path ../.. generates the whole module, the shared components are
-      # templ files at the module root. The app itself runs from here.
-      - go tool templ generate -path ../.. --watch --proxy="http://localhost:{{.PORT}}" --cmd="go run ." --open-browser=false
+      # templ files in packages/ui. templ runs --cmd in that path, so the
+      # app changes back into its own directory, where ./assets resolves.
+      - go tool templ generate -path ../.. --watch --proxy="http://localhost:{{.PORT}}" --proxyport={{.PROXY_PORT}} --cmd="cd '{{.TASKFILE_DIR}}' && go run ." --open-browser=false
     env:
       PORT: "{{.PORT}}"
 
   tailwind:
     desc: Watch Tailwind CSS changes
     cmds:
-      - "tailwindcss -i ./assets/css/globals.css -o ./assets/css/output.css --watch"
+      - "tailwindcss -i ../../packages/ui/styles/globals.css -o ./assets/css/output.css --watch"
 
   scripts-watch:
     desc: Watch component scripts
@@ -34,7 +40,7 @@ tasks:
   build:
     desc: Build the application with production assets
     cmds:
-      - tailwindcss -i ./assets/css/globals.css -o ./assets/css/output.css --minify
+      - tailwindcss -i ../../packages/ui/styles/globals.css -o ./assets/css/output.css --minify
       - go tool shadcn-templ bundle
       - go tool templ generate -path ../..
       - go build -o bin/app .
@@ -44,4 +50,6 @@ tasks:
       SHADCN_TEMPL_DEV: "true"
     desc: Start development server with hot reload
     cmds:
-      - task --parallel tailwind scripts-watch templ
+      # The ports are picked once here and passed on, so the parallel run
+      # and an explicit 'task dev PORT=... PROXY_PORT=...' agree.
+      - task --parallel tailwind scripts-watch templ PORT={{.PORT}} PROXY_PORT={{.PROXY_PORT}}

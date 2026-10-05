@@ -61,7 +61,7 @@ func RunBundle(opts BundleOptions) error {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
-	return watchScripts(ctx, config.ResolvedPaths.Components, build)
+	return watchScripts(ctx, config.ResolvedPaths.UI, build)
 }
 
 func watchScripts(ctx context.Context, dir string, build func() error) error {

@@ -158,6 +158,20 @@ Import path for your components.
 }
 ```
 
+### aliases.ui
+
+Import path for `ui` components.
+
+The CLI will use the `aliases.ui` value to determine where to place your `ui` components, their scripts and `scripts_bundle.go`. Without it, `ui` components live in `aliases.components`. A [monorepo](/docs/monorepo) app points it at its ui package.
+
+```json title="components.json"
+{
+  "aliases": {
+    "ui": "your-app/packages/ui/components"
+  }
+}
+```
+
 ## scripts
 
 Configure where the CLI writes the component JavaScript bundle and where your server exposes it:
@@ -179,6 +193,6 @@ The output directory, relative to the directory of `components.json`. `bundle` w
 
 ### scripts.path
 
-The public URL prefix for the output directory. Use `/assets/js`, an application prefix such as `/my-app/assets/js`, or a CDN URL such as `https://cdn.example.com/js`. The CLI writes the complete URL into `components/scripts_bundle.go`; `@components.Scripts()` renders it. Apps of a [monorepo](/docs/monorepo) that share components share this file, so they must use the same `scripts.path`.
+The public URL prefix for the output directory. Use `/assets/js`, an application prefix such as `/my-app/assets/js`, or a CDN URL such as `https://cdn.example.com/js`. The CLI writes the complete URL into `components/scripts_bundle.go`; `@components.Scripts()` renders it. Apps of a [monorepo](/docs/monorepo) that share a ui package share this file, so they must use the same `scripts.path`.
 
 After changing either setting, run `shadcn-templ bundle` and configure your server or upload step to expose `scripts.dir` at `scripts.path`.

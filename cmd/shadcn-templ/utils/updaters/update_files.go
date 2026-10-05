@@ -1,8 +1,14 @@
 // update_files.go ports update-files.ts: resolve target paths, transform
 // content and write files with created/updated/skipped accounting. The
 // transformer pendant is the import rewrite the old shadcn-templ CLI already had:
-// github.com/axadrn/shadcn-templ/v2/{components,utils}/... imports become the user's
-// own module paths.
+// github.com/axadrn/shadcn-templ/v2/{components,blocks,utils}/... imports become
+// the user's own module paths.
+//
+// In a monorepo each file is written with the config of the workspace that
+// holds it, like addWorkspaceComponents: registry components/ (ui
+// components, their scripts, the scripts item) go to the ui workspace,
+// utils/ and registry:lib to the utils workspace, blocks and everything
+// else to the app.
 package updaters
 
 import (
@@ -22,6 +28,9 @@ type UpdateFilesOptions struct {
 	Silent    bool
 	// Path overrides the components target directory (--path).
 	Path string
+	// Workspace holds the config of each alias' workspace
+	// (utils.GetWorkspaceConfig); nil writes every file with config.
+	Workspace *utils.WorkspaceConfig
 }
 
 // UpdateFilesResult is the files summary of update-files.ts.
@@ -55,18 +64,27 @@ func UpdateFiles(files []registry.ItemFile, config *utils.Config, options Update
 		fmt.Println("Updating files.")
 	}
 
+	// A workspace install prints paths relative to the module root, like
+	// shadcn prints them relative to the workspace root.
+	workspace := options.Workspace != nil && options.Workspace.UI.ResolvedPaths.Cwd != config.ResolvedPaths.Cwd
 	for _, file := range files {
 		if file.Content == "" {
 			continue
 		}
 
-		targetPath, err := resolveFilePath(file, config, options.Path)
+		target := targetConfig(file, config, options.Workspace)
+		targetPath, err := resolveFilePath(file, target, options.Path)
 		if err != nil {
 			return result, err
 		}
 		relPath := utils.DisplayPath(config, targetPath)
+		if workspace {
+			if rel, err := filepath.Rel(config.ResolvedPaths.ModuleRoot, targetPath); err == nil {
+				relPath = rel
+			}
+		}
 
-		content := transformContent(file, config)
+		content := transformContent(file, target)
 
 		existing, err := os.ReadFile(targetPath)
 		fileExists := err == nil
@@ -117,10 +135,31 @@ func printFileSummary(verb string, files []string, suffix string) {
 	}
 }
 
+// targetConfig is the getTargetConfigKeyForFile pendant of
+// addWorkspaceComponents: the config of the workspace a file is written to.
+// Registry paths decide, not file types: everything under components/ is
+// one tree of Go packages that import each other, so it stays together in
+// the ui workspace.
+func targetConfig(file registry.ItemFile, config *utils.Config, ws *utils.WorkspaceConfig) *utils.Config {
+	if ws == nil {
+		return config
+	}
+	switch {
+	case file.Target != "":
+		return ws.Components
+	case strings.HasPrefix(file.Path, "components/"):
+		return ws.UI
+	case strings.HasPrefix(file.Path, "utils/"), file.Type == "registry:lib":
+		return ws.Utils
+	}
+	return ws.Components
+}
+
 // resolveFilePath is the resolveFilePath pendant: an explicit target wins
 // (shadcn resolves block pages onto their target path), then registry paths
 // map onto the configured directories by type
-// ("components/button/button.templ" -> <components dir>/button/button.templ,
+// ("components/button/button.templ" -> <ui dir>/button/button.templ,
+// "blocks/sidebar07/page.templ" -> <components dir>/blocks/sidebar07/page.templ,
 // "utils/shadcn-templ.go" -> <utils dir>/shadcn-templ.go).
 func resolveFilePath(file registry.ItemFile, config *utils.Config, pathOverride string) (string, error) {
 	switch {
@@ -131,7 +170,7 @@ func resolveFilePath(file registry.ItemFile, config *utils.Config, pathOverride 
 		}
 		return filepath.Join(base, filepath.FromSlash(file.Target)), nil
 	case strings.HasPrefix(file.Path, "components/"):
-		base := config.ResolvedPaths.Components
+		base := config.ResolvedPaths.UI
 		if pathOverride != "" {
 			base = filepath.Join(config.ResolvedPaths.Cwd, filepath.FromSlash(pathOverride))
 		}
@@ -160,7 +199,9 @@ func resolveFilePath(file registry.ItemFile, config *utils.Config, pathOverride 
 var moduleImportRe = regexp.MustCompile(`"github\.com/axadrn/shadcn-templ/([^"]+)"`)
 
 // transformContent rewrites module imports and the package clause for Go and
-// templ sources; other files (component .js) ship verbatim.
+// templ sources; other files (component .js) ship verbatim. Imports follow
+// transform-import.ts: ui components to aliases.ui, block packages to
+// aliases.components, utils to aliases.utils.
 func transformContent(file registry.ItemFile, config *utils.Config) string {
 	if !strings.HasSuffix(file.Path, ".go") && !strings.HasSuffix(file.Path, ".templ") {
 		return file.Content
@@ -170,7 +211,7 @@ func transformContent(file registry.ItemFile, config *utils.Config) string {
 		repoPath := strings.Trim(strings.TrimPrefix(match, `"github.com/axadrn/shadcn-templ/v2/`), `"`)
 		switch {
 		case strings.HasPrefix(repoPath, "components/"):
-			return `"` + config.Aliases.Components + `/` + strings.TrimPrefix(repoPath, "components/") + `"`
+			return `"` + config.UIAlias() + `/` + strings.TrimPrefix(repoPath, "components/") + `"`
 		case strings.HasPrefix(repoPath, "blocks/"):
 			return `"` + config.Aliases.Components + `/blocks/` + strings.TrimPrefix(repoPath, "blocks/") + `"`
 		case repoPath == "utils":
@@ -181,11 +222,11 @@ func transformContent(file registry.ItemFile, config *utils.Config) string {
 		return match
 	})
 
-	// Files installed at the components root form the package imported by the
-	// app for Scripts. Keep its package name aligned with aliases.components.
+	// Files installed at the ui components root form the package imported
+	// by the app for Scripts. Keep its package name aligned with aliases.ui.
 	componentsRootFile := isComponentsRootFile(file.Path)
 	if componentsRootFile {
-		if pkg := lastSegment(config.Aliases.Components); pkg != "" && pkg != "components" {
+		if pkg := lastSegment(config.UIAlias()); pkg != "" && pkg != "components" {
 			content = strings.Replace(content, "package components", "package "+pkg, 1)
 		}
 	}
