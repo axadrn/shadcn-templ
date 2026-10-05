@@ -1,0 +1,39 @@
+package field
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+)
+
+templ FieldInput() {
+	@field.Set(field.SetProps{Class: "w-full max-w-xs"}) {
+		@field.Group() {
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "username"}) {
+					Username
+				}
+				@input.Input(input.Props{
+					ID:          "username",
+					Type:        "text",
+					Placeholder: "axadrn",
+				})
+				@field.Description() {
+					Choose a unique username for your account.
+				}
+			}
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "password"}) {
+					Password
+				}
+				@field.Description() {
+					Must be at least 8 characters long.
+				}
+				@input.Input(input.Props{
+					ID:          "password",
+					Type:        "password",
+					Placeholder: "••••••••",
+				})
+			}
+		}
+	}
+}

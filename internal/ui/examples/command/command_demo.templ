@@ -1,0 +1,55 @@
+package command
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/command"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ CommandDemo() {
+	@command.Command(command.Props{Class: "max-w-sm rounded-lg border"}) {
+		@command.Input(command.InputProps{Placeholder: "Type a command or search..."})
+		@command.List() {
+			@command.Empty() {
+				No results found.
+			}
+			@command.Group(command.GroupProps{Heading: "Suggestions"}) {
+				@command.Item() {
+					@icon.Calendar()
+					<span>Calendar</span>
+				}
+				@command.Item() {
+					@icon.Smile()
+					<span>Search Emoji</span>
+				}
+				@command.Item(command.ItemProps{Disabled: true}) {
+					@icon.Calculator()
+					<span>Calculator</span>
+				}
+			}
+			@command.Separator()
+			@command.Group(command.GroupProps{Heading: "Settings"}) {
+				@command.Item() {
+					@icon.User()
+					<span>Profile</span>
+					@command.Shortcut() {
+						⌘P
+					}
+				}
+				@command.Item() {
+					@icon.CreditCard()
+					<span>Billing</span>
+					@command.Shortcut() {
+						⌘B
+					}
+				}
+				@command.Item() {
+					@icon.Settings()
+					<span>Settings</span>
+					@command.Shortcut() {
+						⌘S
+					}
+				}
+			}
+		}
+	}
+}

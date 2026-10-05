@@ -1,0 +1,49 @@
+package kbd
+
+import (
+	exshared "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/shared"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/buttongroup"
+	"github.com/axadrn/shadcn-templ/v2/components/kbd"
+	"github.com/axadrn/shadcn-templ/v2/components/tooltip"
+)
+
+templ KbdTooltip() {
+	<div class="flex flex-wrap gap-4">
+		@buttongroup.ButtonGroup() {
+			@tooltip.Tooltip() {
+				@button.Button(button.Props{
+					Variant:    button.VariantOutline,
+					Attributes: exshared.ServerRendered(tooltip.Trigger(ctx)),
+				}) {
+					Save
+				}
+				@tooltip.Content() {
+					Save Changes
+					@kbd.Kbd() {
+						S
+					}
+				}
+			}
+			@tooltip.Tooltip() {
+				@button.Button(button.Props{
+					Variant:    button.VariantOutline,
+					Attributes: exshared.ServerRendered(tooltip.Trigger(ctx)),
+				}) {
+					Print
+				}
+				@tooltip.Content() {
+					Print Document
+					@kbd.Group() {
+						@kbd.Kbd() {
+							Ctrl
+						}
+						@kbd.Kbd() {
+							P
+						}
+					}
+				}
+			}
+		}
+	</div>
+}

@@ -1,0 +1,31 @@
+package combobox
+
+import "github.com/axadrn/shadcn-templ/v2/components/combobox"
+
+templ ComboboxBasic() {
+	@combobox.Combobox() {
+		@combobox.Input(combobox.InputProps{Placeholder: "Select a framework"})
+		@combobox.Content() {
+			@combobox.Empty() {
+				No items found.
+			}
+			@combobox.List() {
+				@combobox.Item(combobox.ItemProps{Value: "templ"}) {
+					templ
+				}
+				@combobox.Item(combobox.ItemProps{Value: "htmx"}) {
+					htmx
+				}
+				@combobox.Item(combobox.ItemProps{Value: "gin"}) {
+					Gin
+				}
+				@combobox.Item(combobox.ItemProps{Value: "echo"}) {
+					Echo
+				}
+				@combobox.Item(combobox.ItemProps{Value: "chi"}) {
+					Chi
+				}
+			}
+		}
+	}
+}

@@ -64,6 +64,8 @@ templ Button(props ...Props) {
 		{{ p.Size = SizeDefault }}
 	}
 	if p.Href != "" && !p.Disabled {
+		// Base UI's Button with nativeButton false (shadcn renders the link
+		// through it): useButton makes the element a button.
 		<a
 			if _, ok := p.Attributes["id"]; !ok && p.ID != "" {
 				id={ p.ID }
@@ -74,6 +76,12 @@ templ Button(props ...Props) {
 			}
 			if _, ok := p.Attributes["data-slot"]; !ok {
 				data-slot="button"
+			}
+			if _, ok := p.Attributes["role"]; !ok {
+				role="button"
+			}
+			if _, ok := p.Attributes["tabindex"]; !ok {
+				tabindex="0"
 			}
 			class={ utils.CN(baseClasses, p.variantClasses(), p.sizeClasses(), p.Class) }
 			{ p.Attributes... }
@@ -92,7 +100,7 @@ templ Button(props ...Props) {
 				tabindex="0"
 			}
 			class={ utils.CN(baseClasses, p.variantClasses(), p.sizeClasses(), p.Class) }
-			if p.Type != "" {
+			if _, ok := p.Attributes["type"]; !ok && p.Type != "" {
 				type={ string(p.Type) }
 			}
 			if p.Form != "" {
@@ -105,6 +113,12 @@ templ Button(props ...Props) {
 			{ children... }
 		</button>
 	}
+}
+
+// Variants is shadcn's buttonVariants: the classes of a button with these
+// props, for an element that is no Button.
+func Variants(p Props) string {
+	return utils.CN(baseClasses, p.variantClasses(), p.sizeClasses(), p.Class)
 }
 
 func (b Props) variantClasses() string {

@@ -1,0 +1,25 @@
+package contextmenu
+
+import "github.com/axadrn/shadcn-templ/v2/components/contextmenu"
+
+templ ContextMenuCheckboxes() {
+	@contextmenu.ContextMenu() {
+		@contextmenu.Trigger(contextmenu.TriggerProps{Class: "flex aspect-video w-full max-w-xs items-center justify-center rounded-xl border border-dashed text-sm"}) {
+			<span class="hidden pointer-fine:inline-block">Right click here</span>
+			<span class="hidden pointer-coarse:inline-block">Long press here</span>
+		}
+		@contextmenu.Content() {
+			@contextmenu.Group() {
+				@contextmenu.CheckboxItem(contextmenu.CheckboxItemProps{DefaultChecked: true}) {
+					Show Bookmarks Bar
+				}
+				@contextmenu.CheckboxItem() {
+					Show Full URLs
+				}
+				@contextmenu.CheckboxItem(contextmenu.CheckboxItemProps{DefaultChecked: true}) {
+					Show Developer Tools
+				}
+			}
+		}
+	}
+}

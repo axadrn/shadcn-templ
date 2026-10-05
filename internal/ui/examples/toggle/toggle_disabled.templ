@@ -1,0 +1,21 @@
+package toggle
+
+import "github.com/axadrn/shadcn-templ/v2/components/toggle"
+
+templ ToggleDisabled() {
+	<div class="flex flex-wrap items-center gap-2">
+		@toggle.Toggle(toggle.Props{
+			Disabled:   true,
+			Attributes: templ.Attributes{"aria-label": "Toggle disabled"},
+		}) {
+			Disabled
+		}
+		@toggle.Toggle(toggle.Props{
+			Variant:    toggle.VariantOutline,
+			Disabled:   true,
+			Attributes: templ.Attributes{"aria-label": "Toggle disabled outline"},
+		}) {
+			Disabled
+		}
+	</div>
+}

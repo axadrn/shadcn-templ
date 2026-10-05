@@ -1,0 +1,228 @@
+package command
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/command"
+	"github.com/axadrn/shadcn-templ/v2/components/dialog"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ commandExampleSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ CommandExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@commandExampleInline()
+			@commandExampleBasic()
+			@commandExampleWithShortcuts()
+			@commandExampleWithGroups()
+			@commandExampleManyItems()
+		</div>
+	</div>
+}
+
+templ commandExampleItem(iconComponent templ.Component, label, shortcut string) {
+	@command.Item() {
+		@iconComponent
+		<span>{ label }</span>
+		if shortcut != "" {
+			@command.Shortcut() {
+				{ shortcut }
+			}
+		}
+	}
+}
+
+templ commandExampleSuggestionsGroup() {
+	@command.Group(command.GroupProps{Heading: "Suggestions"}) {
+		@commandExampleItem(icon.Calendar(), "Calendar", "")
+		@commandExampleItem(icon.Smile(), "Search Emoji", "")
+		@commandExampleItem(icon.Calculator(), "Calculator", "")
+	}
+}
+
+templ commandExampleSettingsGroup() {
+	@command.Group(command.GroupProps{Heading: "Settings"}) {
+		@commandExampleItem(icon.User(), "Profile", "⌘P")
+		@commandExampleItem(icon.CreditCard(), "Billing", "⌘B")
+		@commandExampleItem(icon.Settings(), "Settings", "⌘S")
+	}
+}
+
+templ commandExampleInline() {
+	@commandExampleSection("Inline") {
+		@card.Card(card.Props{Class: "w-full p-0"}) {
+			@card.Content(card.ContentProps{Class: "p-0"}) {
+				@command.Command() {
+					@command.Input(command.InputProps{Placeholder: "Type a command or search..."})
+					@command.List() {
+						@command.Empty() {
+							No results found.
+						}
+						@commandExampleSuggestionsGroup()
+						@command.Separator()
+						@commandExampleSettingsGroup()
+					}
+				}
+			}
+		}
+	}
+}
+
+templ commandExampleBasic() {
+	@commandExampleSection("Basic") {
+		<div class="flex flex-col gap-4">
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Class:      "w-fit",
+				Attributes: dialog.TriggerFor("command-example-basic"),
+			}) {
+				Open Menu
+			}
+			@command.Dialog(command.DialogProps{ID: "command-example-basic"}) {
+				@command.Command() {
+					@command.Input(command.InputProps{Placeholder: "Type a command or search..."})
+					@command.List() {
+						@command.Empty() {
+							No results found.
+						}
+						@command.Group(command.GroupProps{Heading: "Suggestions"}) {
+							@command.Item() {
+								Calendar
+							}
+							@command.Item() {
+								Search Emoji
+							}
+							@command.Item() {
+								Calculator
+							}
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ commandExampleWithShortcuts() {
+	@commandExampleSection("With Shortcuts") {
+		<div class="flex flex-col gap-4">
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Class:      "w-fit",
+				Attributes: dialog.TriggerFor("command-example-shortcuts"),
+			}) {
+				Open Menu
+			}
+			@command.Dialog(command.DialogProps{ID: "command-example-shortcuts"}) {
+				@command.Command() {
+					@command.Input(command.InputProps{Placeholder: "Type a command or search..."})
+					@command.List() {
+						@command.Empty() {
+							No results found.
+						}
+						@commandExampleSettingsGroup()
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ commandExampleWithGroups() {
+	@commandExampleSection("With Groups") {
+		<div class="flex flex-col gap-4">
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Class:      "w-fit",
+				Attributes: dialog.TriggerFor("command-example-groups"),
+			}) {
+				Open Menu
+			}
+			@command.Dialog(command.DialogProps{ID: "command-example-groups"}) {
+				@command.Command() {
+					@command.Input(command.InputProps{Placeholder: "Type a command or search..."})
+					@command.List() {
+						@command.Empty() {
+							No results found.
+						}
+						@commandExampleSuggestionsGroup()
+						@command.Separator()
+						@commandExampleSettingsGroup()
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ commandExampleManyItems() {
+	@commandExampleSection("Many Groups & Items") {
+		<div class="flex flex-col gap-4">
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Class:      "w-fit",
+				Attributes: dialog.TriggerFor("command-example-many-items"),
+			}) {
+				Open Menu
+			}
+			@command.Dialog(command.DialogProps{ID: "command-example-many-items"}) {
+				@command.Command() {
+					@command.Input(command.InputProps{Placeholder: "Type a command or search..."})
+					@command.List() {
+						@command.Empty() {
+							No results found.
+						}
+						@command.Group(command.GroupProps{Heading: "Navigation"}) {
+							@commandExampleItem(icon.House(), "Home", "⌘H")
+							@commandExampleItem(icon.Inbox(), "Inbox", "⌘I")
+							@commandExampleItem(icon.FileText(), "Documents", "⌘D")
+							@commandExampleItem(icon.Folder(), "Folders", "⌘F")
+						}
+						@command.Separator()
+						@command.Group(command.GroupProps{Heading: "Actions"}) {
+							@commandExampleItem(icon.Plus(), "New File", "⌘N")
+							@commandExampleItem(icon.FolderPlus(), "New Folder", "⇧⌘N")
+							@commandExampleItem(icon.Copy(), "Copy", "⌘C")
+							@commandExampleItem(icon.Scissors(), "Cut", "⌘X")
+							@commandExampleItem(icon.ClipboardPaste(), "Paste", "⌘V")
+							@commandExampleItem(icon.Trash(), "Delete", "⌫")
+						}
+						@command.Separator()
+						@command.Group(command.GroupProps{Heading: "View"}) {
+							@commandExampleItem(icon.LayoutGrid(), "Grid View", "")
+							@commandExampleItem(icon.List(), "List View", "")
+							@commandExampleItem(icon.ZoomIn(), "Zoom In", "⌘+")
+							@commandExampleItem(icon.ZoomOut(), "Zoom Out", "⌘-")
+						}
+						@command.Separator()
+						@command.Group(command.GroupProps{Heading: "Account"}) {
+							@commandExampleItem(icon.User(), "Profile", "⌘P")
+							@commandExampleItem(icon.CreditCard(), "Billing", "⌘B")
+							@commandExampleItem(icon.Settings(), "Settings", "⌘S")
+							@commandExampleItem(icon.Bell(), "Notifications", "")
+							@commandExampleItem(icon.CircleQuestionMark(), "Help & Support", "")
+						}
+						@command.Separator()
+						@command.Group(command.GroupProps{Heading: "Tools"}) {
+							@commandExampleItem(icon.Calculator(), "Calculator", "")
+							@commandExampleItem(icon.Calendar(), "Calendar", "")
+							@commandExampleItem(icon.Image(), "Image Editor", "")
+							@commandExampleItem(icon.Code(), "Code Editor", "")
+						}
+					}
+				}
+			}
+		</div>
+	}
+}

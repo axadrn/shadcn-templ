@@ -1,0 +1,40 @@
+package carousel
+
+import (
+	"strconv"
+
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/carousel"
+)
+
+// The carousel exposes its selection as a bubbling carousel-select event,
+// the vanilla pendant of embla's select event.
+templ CarouselApi() {
+	<div class="mx-auto max-w-[10rem] sm:max-w-xs">
+		@carousel.Carousel(carousel.Props{Class: "w-full max-w-xs"}) {
+			@carousel.Content() {
+				for i := 1; i <= 5; i++ {
+					@carousel.Item() {
+						@card.Card(card.Props{Class: "m-px"}) {
+							@card.Content(card.ContentProps{Class: "flex aspect-square items-center justify-center p-6"}) {
+								<span class="text-4xl font-semibold">{ strconv.Itoa(i) }</span>
+							}
+						}
+					}
+				}
+			}
+			@carousel.Previous()
+			@carousel.Next()
+		}
+		<div class="py-2 text-center text-sm text-muted-foreground">Slide 0 of 0</div>
+	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The current and count state: the api's select event sets them.
+		(() => {
+			const demo = document.currentScript.previousElementSibling;
+			demo.addEventListener("carousel-select", (e) => {
+				demo.lastElementChild.textContent = "Slide " + e.detail.selected + " of " + e.detail.count;
+			});
+		})();
+	</script>
+}

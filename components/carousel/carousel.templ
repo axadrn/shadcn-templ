@@ -46,6 +46,9 @@ type Props struct {
 	Align Align
 	// Loop wraps from the last slide back to the first.
 	Loop bool
+	// Direction of the scroll (embla's direction option), "ltr" or "rtl".
+	// Defaults to ltr, like embla.
+	Direction string
 	// Autoplay advances the slides automatically (the embla autoplay
 	// plugin pendant); pauses while hovered.
 	Autoplay bool
@@ -100,6 +103,9 @@ templ Carousel(props ...Props) {
 			data-templ-align={ string(p.Align) }
 		}
 		data-templ-loop={ strconv.FormatBool(p.Loop) }
+		if p.Direction != "" {
+			data-templ-direction={ p.Direction }
+		}
 		data-templ-autoplay={ strconv.FormatBool(p.Autoplay) }
 		data-templ-interval={ strconv.Itoa(p.Interval) }
 		class={ utils.CN("relative", p.Class) }

@@ -57,6 +57,10 @@ shadcn-templ add context-menu
 
 <ComponentSource name="context-menu" title="components/baseui/use_hover.js" />
 
+<ComponentSource name="context-menu" title="components/baseui/internal_backdrop.js" />
+
+<ComponentSource name="context-menu" title="components/baseui/menu.js" />
+
 <ComponentSource name="context-menu" title="components/baseui/use_click.js" />
 
 <ComponentSource name="context-menu" title="components/floatingui/floating_ui_core.js" />
@@ -185,6 +189,12 @@ Use `Variant: contextmenu.ItemVariantDestructive` to style the menu item as dest
 Control submenu placement with `Side` and `Align` props.
 
 <ComponentPreview name="context-menu-sides" />
+
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="context-menu-rtl" direction="rtl" />
 
 ## API Reference
 

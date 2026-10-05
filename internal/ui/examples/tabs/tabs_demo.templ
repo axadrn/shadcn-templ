@@ -1,0 +1,49 @@
+package tabs
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/tabs"
+)
+
+type tabsDemoTab struct {
+	Value       string
+	Title       string
+	Description string
+	Content     string
+}
+
+var tabsDemoTabs = []tabsDemoTab{
+	{"overview", "Overview", "View your key metrics and recent project activity. Track progress across all your active projects.", "You have 12 active projects and 3 pending tasks."},
+	{"analytics", "Analytics", "Track performance and user engagement metrics. Monitor trends and identify growth opportunities.", "Page views are up 25% compared to last month."},
+	{"reports", "Reports", "Generate and download your detailed reports. Export data in multiple formats for analysis.", "You have 5 reports ready and available to export."},
+	{"settings", "Settings", "Manage your account preferences and options. Customize your experience to fit your needs.", "Configure notifications, security, and themes."},
+}
+
+templ TabsDemo() {
+	@tabs.Tabs(tabs.Props{DefaultValue: "overview", Class: "w-[400px]"}) {
+		@tabs.List() {
+			for _, tab := range tabsDemoTabs {
+				@tabs.Trigger(tabs.TriggerProps{Value: tab.Value}) {
+					{ tab.Title }
+				}
+			}
+		}
+		for _, tab := range tabsDemoTabs {
+			@tabs.Content(tabs.ContentProps{Value: tab.Value}) {
+				@card.Card() {
+					@card.Header() {
+						@card.Title() {
+							{ tab.Title }
+						}
+						@card.Description() {
+							{ tab.Description }
+						}
+					}
+					@card.Content(card.ContentProps{Class: "text-sm text-muted-foreground"}) {
+						{ tab.Content }
+					}
+				}
+			}
+		}
+	}
+}

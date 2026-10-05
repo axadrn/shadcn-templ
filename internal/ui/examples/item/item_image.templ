@@ -1,0 +1,80 @@
+package item
+
+import (
+	"net/url"
+
+	"github.com/axadrn/shadcn-templ/v2/components/item"
+)
+
+type itemSong struct {
+	Title    string
+	Artist   string
+	Album    string
+	Duration string
+}
+
+templ ItemImage() {
+	{{
+		music := []itemSong{
+			{
+				Title:    "Midnight City Lights",
+				Artist:   "Neon Dreams",
+				Album:    "Electric Nights",
+				Duration: "3:45",
+			},
+			{
+				Title:    "Coffee Shop Conversations",
+				Artist:   "The Morning Brew",
+				Album:    "Urban Stories",
+				Duration: "4:05",
+			},
+			{
+				Title:    "Digital Rain",
+				Artist:   "Cyber Symphony",
+				Album:    "Binary Beats",
+				Duration: "3:30",
+			},
+		}
+	}}
+	<div class="flex w-full max-w-md flex-col gap-6">
+		@item.Group(item.GroupProps{Class: "gap-4"}) {
+			for _, song := range music {
+				@item.Item(item.Props{
+					Variant:    item.VariantOutline,
+					Href:       "#",
+					Attributes: templ.Attributes{"role": "listitem"},
+				}) {
+					@item.Media(item.MediaProps{Variant: item.MediaVariantImage}) {
+						// next/image width={32} height={32}: the img it renders.
+						<img
+							alt={ song.Title }
+							loading="lazy"
+							width="32"
+							height="32"
+							decoding="async"
+							data-nimg="1"
+							class="object-cover grayscale"
+							style="color:transparent"
+							srcset={ "https://avatar.vercel.sh/" + url.PathEscape(song.Title) + " 1x" }
+							src={ "https://avatar.vercel.sh/" + url.PathEscape(song.Title) }
+						/>
+					}
+					@item.Content() {
+						@item.Title(item.TitleProps{Class: "line-clamp-1"}) {
+							{ song.Title } -
+							<span class="text-muted-foreground">{ song.Album }</span>
+						}
+						@item.Description() {
+							{ song.Artist }
+						}
+					}
+					@item.Content(item.ContentProps{Class: "flex-none text-center"}) {
+						@item.Description() {
+							{ song.Duration }
+						}
+					}
+				}
+			}
+		}
+	</div>
+}

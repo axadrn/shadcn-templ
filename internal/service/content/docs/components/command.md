@@ -127,6 +127,12 @@ Scrollable command menu with multiple items.
 
 <ComponentPreview name="command-scrollable" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="command-rtl" direction="rtl" align="start" previewClassName="h-[24.5rem]" />
+
 ## API Reference
 
 ### Command

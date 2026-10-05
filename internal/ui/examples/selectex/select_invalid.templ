@@ -1,0 +1,31 @@
+package selectex
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+)
+
+templ SelectInvalid() {
+	@field.Field(field.Props{Class: "w-full max-w-48", Attributes: templ.Attributes{"data-invalid": "true"}}) {
+		@field.Label() {
+			Fruit
+		}
+		@selectcomp.Select(selectcomp.Props{Items: selectFruits[:4]}) {
+			@selectcomp.Trigger(selectcomp.TriggerProps{Attributes: templ.Attributes{"aria-invalid": "true"}}) {
+				@selectcomp.Value()
+			}
+			@selectcomp.Content() {
+				@selectcomp.Group() {
+					for _, item := range selectFruits[:4] {
+						@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+							{ item.Label.(string) }
+						}
+					}
+				}
+			}
+		}
+		@field.Error() {
+			Please select a fruit.
+		}
+	}
+}

@@ -49,8 +49,8 @@ templ ChartRadialLabel() {
 						Content: chart.TooltipContentProps{HideLabel: true, NameKey: "browser"},
 					})
 					@chart.RadialBar(chart.RadialBarProps{
-						DataKey:      "visitors",
-						Background:   true,
+						DataKey:    "visitors",
+						Background: true,
 					}) {
 						@chart.LabelList(chart.LabelListProps{Position: "insideStart", DataKey: "browser", Class: "fill-white capitalize mix-blend-luminosity", FontSize: 11})
 					}

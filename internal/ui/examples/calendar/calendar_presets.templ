@@ -1,0 +1,65 @@
+package calendar
+
+import (
+	"time"
+
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/calendar"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+)
+
+var calendarPresets = []struct {
+	Label string
+	Value int
+}{
+	{"Today", 0},
+	{"Tomorrow", 1},
+	{"In 3 days", 3},
+	{"In a week", 7},
+	{"In 2 weeks", 14},
+}
+
+templ CalendarPresets() {
+	{{
+		now := time.Now()
+		selected := time.Date(now.Year(), 2, 12, 0, 0, 0, 0, time.Local)
+		currentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+	}}
+	@card.Card(card.Props{Class: "mx-auto w-fit max-w-[300px]", Size: card.SizeSm}) {
+		@card.Content() {
+			@calendar.Calendar(calendar.Props{
+				Mode:       calendar.ModeSingle,
+				Selected:   selected,
+				Month:      currentMonth,
+				FixedWeeks: true,
+				Class:      "p-0 [--cell-size:--spacing(9.5)]",
+			})
+		}
+		@card.Footer(card.FooterProps{Class: "flex flex-wrap gap-2 border-t"}) {
+			for _, preset := range calendarPresets {
+				@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeSm, Class: "flex-1"}) {
+					{ preset.Label }
+				}
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The date and currentMonth state: onMonthChange and the presets'
+		// onClick set them, the calendar renders them.
+		(() => {
+			const card = document.currentScript.previousElementSibling;
+			const calendar = card.querySelector('[data-slot="calendar"]');
+			const presets = {{ calendarPresets }};
+			calendar.addEventListener("calendar-select", (e) => window.templ.calendar.setSelected(calendar, e.detail.selected));
+			calendar.addEventListener("calendar-month-change", (e) => window.templ.calendar.setMonth(calendar, e.detail.month));
+			[...card.querySelector('[data-slot="card-footer"]').children].forEach((button, i) => {
+				button.addEventListener("click", () => {
+					const newDate = new Date();
+					newDate.setDate(newDate.getDate() + presets[i].Value);
+					window.templ.calendar.setSelected(calendar, newDate);
+					window.templ.calendar.setMonth(calendar, new Date(newDate.getFullYear(), newDate.getMonth(), 1));
+				});
+			});
+		})();
+	</script>
+}

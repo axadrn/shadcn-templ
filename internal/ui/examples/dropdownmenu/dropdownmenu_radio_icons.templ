@@ -1,0 +1,41 @@
+package dropdownmenu
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ DropdownMenuRadioIcons() {
+	@dropdownmenu.DropdownMenu() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: dropdownmenu.Trigger(ctx),
+		}) {
+			Payment Method
+		}
+		@dropdownmenu.Content(dropdownmenu.ContentProps{Class: "min-w-56"}) {
+			@dropdownmenu.Group() {
+				@dropdownmenu.Label() {
+					Select Payment Method
+				}
+				@dropdownmenu.RadioGroup(dropdownmenu.RadioGroupProps{DefaultValue: "card"}) {
+					@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{
+						Value: "card",
+					}) {
+						@icon.CreditCard()
+						Credit Card
+					}
+					@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{Value: "paypal"}) {
+						@icon.Wallet()
+						PayPal
+					}
+					@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{Value: "bank"}) {
+						@icon.Building2()
+						Bank Transfer
+					}
+				}
+			}
+		}
+	}
+}

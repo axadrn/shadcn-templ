@@ -1,0 +1,22 @@
+package slider
+
+import "github.com/axadrn/shadcn-templ/v2/components/slider"
+
+templ SliderVertical() {
+	<div class="mx-auto flex w-full max-w-xs items-center justify-center gap-6">
+		@slider.Slider(slider.Props{
+			DefaultValue: []float64{50},
+			Max:          100,
+			Step:         1,
+			Orientation:  slider.OrientationVertical,
+			Class:        "h-40",
+		})
+		@slider.Slider(slider.Props{
+			DefaultValue: []float64{25},
+			Max:          100,
+			Step:         1,
+			Orientation:  slider.OrientationVertical,
+			Class:        "h-40",
+		})
+	</div>
+}

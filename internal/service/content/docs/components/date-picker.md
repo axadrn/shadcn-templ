@@ -35,12 +35,12 @@ See installation instructions for the [Popover](/docs/components/popover#install
 		Side:  popover.SideBottom,
 		Align: popover.AlignStart,
 	}) {
-		@calendar.Calendar()
+		@calendar.Calendar(calendar.Props{Mode: calendar.ModeSingle})
 	}
 }
 ```
 
-Listen for the calendar's `calendar-change` event to show the selected date in the trigger, see the demo above for the full wiring.
+Listen for the calendar's `calendar-select` event to show the selected date in the trigger, see the demo above for the full wiring.
 
 ## Composition
 
@@ -82,3 +82,15 @@ A date picker component with an input field for selecting a date.
 A date picker component with a time input field for selecting a time.
 
 <ComponentPreview name="date-picker-time" />
+
+## Natural Language Picker
+
+This example parses natural language dates in a small inline script: today, tomorrow, yesterday, `in N days`, `in N weeks`, `in N months`, next week, next month and anything `Date` parses.
+
+<ComponentPreview name="date-picker-natural-language" />
+
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="date-picker-rtl" direction="rtl" />

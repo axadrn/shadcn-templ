@@ -50,19 +50,14 @@ templ Checkbox(props ...Props) {
 		if p.Indeterminate {
 			aria-checked="mixed"
 			data-indeterminate
+		} else {
 			if checked {
+				aria-checked="true"
 				data-checked
 			} else {
+				aria-checked="false"
 				data-unchecked
 			}
-		}
-		else
-		if checked {
-			aria-checked="true"
-			data-checked
-		} else {
-			aria-checked="false"
-			data-unchecked
 		}
 		if p.Disabled {
 			data-disabled
@@ -89,14 +84,10 @@ templ Checkbox(props ...Props) {
 		// indicator), checkbox.js keeps it in sync.
 		<span
 			data-slot="checkbox-indicator"
-			if p.Indeterminate {
-				data-indeterminate
-			}
-			if checked {
-				data-checked
-			} else {
-				data-unchecked
-			}
+			data-indeterminate?={ p.Indeterminate }
+			data-checked?={ checked && !p.Indeterminate }
+			data-unchecked?={ !checked && !p.Indeterminate }
+			data-disabled?={ p.Disabled }
 			if !checked && !p.Indeterminate {
 				hidden
 			}

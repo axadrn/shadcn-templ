@@ -1,0 +1,24 @@
+package inputotp
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/inputotp"
+)
+
+templ InputOTPPattern() {
+	@field.Field(field.Props{Class: "w-fit"}) {
+		@field.Label(field.LabelProps{For: "digits-only"}) {
+			Digits Only
+		}
+		@inputotp.InputOTP(inputotp.Props{ID: "digits-only", MaxLength: 6, Pattern: inputotp.RegexpOnlyDigits}) {
+			@inputotp.Group() {
+				@inputotp.Slot(inputotp.SlotProps{Index: 0})
+				@inputotp.Slot(inputotp.SlotProps{Index: 1})
+				@inputotp.Slot(inputotp.SlotProps{Index: 2})
+				@inputotp.Slot(inputotp.SlotProps{Index: 3})
+				@inputotp.Slot(inputotp.SlotProps{Index: 4})
+				@inputotp.Slot(inputotp.SlotProps{Index: 5})
+			}
+		}
+	}
+}

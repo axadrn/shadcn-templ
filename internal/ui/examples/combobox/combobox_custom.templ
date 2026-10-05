@@ -1,0 +1,62 @@
+package combobox
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/combobox"
+	"github.com/axadrn/shadcn-templ/v2/components/item"
+)
+
+type comboboxCountry struct {
+	Code      string
+	Value     string
+	Label     string
+	Continent string
+}
+
+var comboboxCountries = []comboboxCountry{
+	{Code: "ar", Value: "argentina", Label: "Argentina", Continent: "South America"},
+	{Code: "au", Value: "australia", Label: "Australia", Continent: "Oceania"},
+	{Code: "br", Value: "brazil", Label: "Brazil", Continent: "South America"},
+	{Code: "ca", Value: "canada", Label: "Canada", Continent: "North America"},
+	{Code: "cn", Value: "china", Label: "China", Continent: "Asia"},
+	{Code: "co", Value: "colombia", Label: "Colombia", Continent: "South America"},
+	{Code: "eg", Value: "egypt", Label: "Egypt", Continent: "Africa"},
+	{Code: "fr", Value: "france", Label: "France", Continent: "Europe"},
+	{Code: "de", Value: "germany", Label: "Germany", Continent: "Europe"},
+	{Code: "it", Value: "italy", Label: "Italy", Continent: "Europe"},
+	{Code: "jp", Value: "japan", Label: "Japan", Continent: "Asia"},
+	{Code: "ke", Value: "kenya", Label: "Kenya", Continent: "Africa"},
+	{Code: "mx", Value: "mexico", Label: "Mexico", Continent: "North America"},
+	{Code: "nz", Value: "new-zealand", Label: "New Zealand", Continent: "Oceania"},
+	{Code: "ng", Value: "nigeria", Label: "Nigeria", Continent: "Africa"},
+	{Code: "za", Value: "south-africa", Label: "South Africa", Continent: "Africa"},
+	{Code: "kr", Value: "south-korea", Label: "South Korea", Continent: "Asia"},
+	{Code: "gb", Value: "united-kingdom", Label: "United Kingdom", Continent: "Europe"},
+	{Code: "us", Value: "united-states", Label: "United States", Continent: "North America"},
+}
+
+templ ComboboxCustom() {
+	@combobox.Combobox() {
+		@combobox.Input(combobox.InputProps{Placeholder: "Search countries..."})
+		@combobox.Content() {
+			@combobox.Empty() {
+				No countries found.
+			}
+			@combobox.List() {
+				for _, country := range comboboxCountries {
+					@combobox.Item(combobox.ItemProps{Value: country.Value, Label: country.Label}) {
+						@item.Item(item.Props{Size: item.SizeXs, Class: "p-0"}) {
+							@item.Content() {
+								@item.Title(item.TitleProps{Class: "whitespace-nowrap"}) {
+									{ country.Label }
+								}
+								@item.Description() {
+									{ country.Continent } ({ country.Code })
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,37 @@
+package dropdownmenu
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+)
+
+templ DropdownMenuRadioGroupExample() {
+	@dropdownmenu.DropdownMenu() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: dropdownmenu.Trigger(ctx),
+		}) {
+			Open
+		}
+		@dropdownmenu.Content(dropdownmenu.ContentProps{Class: "w-32"}) {
+			@dropdownmenu.Group() {
+				@dropdownmenu.Label() {
+					Panel Position
+				}
+				@dropdownmenu.RadioGroup(dropdownmenu.RadioGroupProps{DefaultValue: "bottom"}) {
+					@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{Value: "top"}) {
+						Top
+					}
+					@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{
+						Value: "bottom",
+					}) {
+						Bottom
+					}
+					@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{Value: "right"}) {
+						Right
+					}
+				}
+			}
+		}
+	}
+}

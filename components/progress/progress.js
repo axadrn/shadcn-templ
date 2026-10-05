@@ -26,7 +26,8 @@
       .forEach((part) => setStatus(part, complete));
 
     const valueEl = progressBar.querySelector('[data-slot="progress-value"]');
-    if (valueEl) valueEl.textContent = Math.round(percentage) + '%';
+    // Children of their own are the caller's render function: theirs to update.
+    if (valueEl && valueEl.childElementCount === 0) valueEl.textContent = Math.round(percentage) + '%';
   }
 
   // One shared observer translates aria-valuenow/aria-valuemax changes into

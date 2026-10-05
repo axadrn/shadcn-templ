@@ -1,0 +1,42 @@
+package empty
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/empty"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ EmptyInCard() {
+	@empty.Empty() {
+		@empty.Header() {
+			@empty.Media(empty.MediaProps{Variant: empty.MediaVariantIcon}) {
+				@icon.Folder()
+			}
+			@empty.Title() {
+				No projects yet
+			}
+			@empty.Description() {
+				You haven&apos;t created any projects yet. Get started by creating
+				your first project.
+			}
+		}
+		@empty.Content() {
+			<div class="flex gap-2">
+				@button.Button(button.Props{Href: "#"}) {
+					Create project
+				}
+				@button.Button(button.Props{Variant: button.VariantOutline}) {
+					Import project
+				}
+			</div>
+			@button.Button(button.Props{
+				Variant: button.VariantLink,
+				Href:    "#",
+				Class:   "text-muted-foreground",
+			}) {
+				Learn more
+				@icon.ArrowUpRight()
+			}
+		}
+	}
+}

@@ -75,6 +75,12 @@ Use the `Size` prop to change the size of the switch.
 
 <ComponentPreview name="switch-sizes" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="switch-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Switch

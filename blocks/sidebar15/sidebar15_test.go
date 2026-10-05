@@ -15,16 +15,15 @@ func TestDatePickerMatchesUpstreamCalendarConfiguration(t *testing.T) {
 	}
 	html := output.String()
 	for _, want := range []string{
-		`data-templ-mode="single"`,
+		`data-mode="single"`,
 		`bg-transparent [--cell-size:2.1rem]`,
-		`aria-label="Choose the month"`,
-		`aria-label="Choose the year"`,
+		`data-templ-caption-layout="dropdown"`,
 	} {
 		if !strings.Contains(html, want) {
 			t.Fatalf("rendered date picker is missing %q: %s", want, html)
 		}
 	}
-	if !regexp.MustCompile(`data-templ-selected="[0-9]{4}-[0-9]{2}-12"`).MatchString(html) {
+	if !regexp.MustCompile(`data-templ-selected="&#34;[0-9]{4}-[0-9]{2}-12&#34;"`).MatchString(html) {
 		t.Fatalf("date picker must select day 12: %s", html)
 	}
 }

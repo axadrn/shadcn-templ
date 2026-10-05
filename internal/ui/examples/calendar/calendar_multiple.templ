@@ -1,0 +1,14 @@
+package calendar
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/calendar"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+)
+
+templ CalendarMultiple() {
+	@card.Card(card.Props{Class: "mx-auto w-fit p-0"}) {
+		@card.Content(card.ContentProps{Class: "p-0"}) {
+			@calendar.Calendar(calendar.Props{Mode: calendar.ModeMultiple})
+		}
+	}
+}

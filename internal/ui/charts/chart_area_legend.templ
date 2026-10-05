@@ -40,8 +40,8 @@ templ ChartAreaLegend() {
 			@chart.Container(chart.ContainerProps{ID: "area-legend", Config: chartAreaLegendConfig}) {
 				@chart.AreaChart(chart.AreaChartProps{
 					AccessibilityLayer: true,
-					Data:   chartAreaLegendData,
-					Margin: &chart.Margin{Left: 12, Right: 12},
+					Data:               chartAreaLegendData,
+					Margin:             &chart.Margin{Left: 12, Right: 12},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.XAxis(chart.XAxisProps{

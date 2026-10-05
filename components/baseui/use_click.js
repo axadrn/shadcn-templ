@@ -4,9 +4,11 @@
 //   const cleanup = window.templ.click.useClick(trigger, options)
 //
 //   event           "click" (default), "mousedown", or "mousedown-only"
-//   toggle          a repeated press closes (default true)
+//   toggle          a repeated press closes (default true), or a function
+//                   read on every press
 //   ignoreMouse     mouse presses do nothing (default false)
-//   stickIfOpen     a popup opened by hover or focus stays on a click (default true)
+//   stickIfOpen     a popup opened by hover or focus stays on a click (default
+//                   true), or a function read on every press
 //   touchOpenDelay  ms before a touch opens (default 0)
 //   isOpen()        whether the popup is open
 //   isActiveTrigger()  whether this trigger opened it, default true
@@ -33,6 +35,7 @@
       openEventType = () => null,
       onOpenChange,
     } = options;
+    const read = (value) => (typeof value === "function" ? value() : value);
     let pointerType;
     let frame = 0;
     let touchOpenTimer = 0;
@@ -53,10 +56,10 @@
       // A closed popup opens on the next press.
       if (!open) return true;
       // Non toggle mode never closes on a repeated press.
-      if (!toggle) return true;
+      if (!read(toggle)) return true;
       // A popup opened by hover or focus stays until a click like event closes it.
       const openType = openEventType();
-      if (openType && stickIfOpen) return !isClickLikeOpenEvent(openType);
+      if (openType && read(stickIfOpen)) return !isClickLikeOpenEvent(openType);
       return false;
     }
 

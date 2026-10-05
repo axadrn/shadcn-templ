@@ -1,0 +1,37 @@
+package radiogroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/radiogroup"
+)
+
+templ RadioGroupInvalid() {
+	@field.Set(field.SetProps{Class: "w-full max-w-xs"}) {
+		@field.Legend(field.LegendProps{Variant: field.LegendVariantLabel}) {
+			Notification Preferences
+		}
+		@field.Description() {
+			Choose how you want to receive notifications.
+		}
+		@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "email"}) {
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-invalid": true}}) {
+				@radiogroup.Item(radiogroup.ItemProps{ID: "invalid-email", Value: "email", Attributes: templ.Attributes{"aria-invalid": "true"}})
+				@field.Label(field.LabelProps{For: "invalid-email", Class: "font-normal"}) {
+					Email only
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-invalid": true}}) {
+				@radiogroup.Item(radiogroup.ItemProps{ID: "invalid-sms", Value: "sms", Attributes: templ.Attributes{"aria-invalid": "true"}})
+				@field.Label(field.LabelProps{For: "invalid-sms", Class: "font-normal"}) {
+					SMS only
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-invalid": true}}) {
+				@radiogroup.Item(radiogroup.ItemProps{ID: "invalid-both", Value: "both", Attributes: templ.Attributes{"aria-invalid": "true"}})
+				@field.Label(field.LabelProps{For: "invalid-both", Class: "font-normal"}) {
+					Both Email & SMS
+				}
+			}
+		}
+	}
+}

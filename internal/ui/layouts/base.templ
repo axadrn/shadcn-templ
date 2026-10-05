@@ -22,8 +22,8 @@ templ BaseLayout(title, description string) {
 			// SEO
 			@modules.SEO(title, description, ctx.Value(ctxkeys.URLPathValue).(string))
 			// Preload fonts to prevent flickering
-			<link rel="preload" href="/assets/fonts/geist/geist-variable.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
-			<link rel="preload" href="/assets/fonts/geist/geist-mono-variable.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
+			<link rel="preload" href="/assets/fonts/geist/geist-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
+			<link rel="preload" href="/assets/fonts/geist/geist-mono-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
 			// Component JS bundle
 			@components.Scripts()
 			// Umami Analytics
@@ -43,7 +43,15 @@ templ BaseLayout(title, description string) {
 			    "inlineScriptNonce": "%s"
 			}`, templ.GetNonce(ctx)) }
 			/>
-			// Theme initialization - must run before body renders to prevent flash
+		</head>
+		// 1:1 their body classes, plus the style-* class that picks the active
+		// style for our cn-* components (shadcn's site scopes that per preview).
+		<body
+			class="group/body style-nova overscroll-none antialiased transition-colors duration-200 [--footer-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]"
+		>
+			// Theme initialization, the first child of <body> like next-themes'
+			// script: it runs before the content renders, and the content
+			// is never the body's first child (upstream's :first-child rules).
 			<script nonce={ templ.GetNonce(ctx) }>
 				(function() {
 					// Get current theme preference (system, light, or dark)
@@ -82,20 +90,11 @@ templ BaseLayout(title, description string) {
 					});
 				})();
 			</script>
-		</head>
-		// 1:1 their body classes, plus the style-* class that picks the active
-		// style for our cn-* components (shadcn's site scopes that per preview).
-		<body
-			class="group/body style-nova overscroll-none antialiased transition-colors duration-200 [--footer-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]"
-		>
-			// group/layout + the designer gates are the pendant of shadcn's
-		// app/(app)/layout.tsx: designer pages (data-slot="designer") pin the
-		// layout to the viewport, and the navbar's designer actions show via
-		// group-has-data-[slot=designer]/layout.
-		<div data-slot="layout" class="group/layout relative z-10 flex min-h-svh flex-col bg-background has-data-[slot=designer]:h-svh has-data-[slot=designer]:overflow-hidden">
-				{ children... }
-			</div>
-			@toast.Toaster(toast.ToasterProps{ID: "toaster"})
+			// shadcn's app/layout.tsx renders its children right in <body>: the
+			// (view) routes (examples, block and chart views) are bare, the
+			// (app) routes wrap themselves in AppLayout.
+			{ children... }
+			@toast.Toaster()
 		</body>
 		// HTMX
 		<script nonce={ templ.GetNonce(ctx) }>
@@ -127,4 +126,16 @@ templ BaseLayout(title, description string) {
 			});
 		</script>
 	</html>
+}
+
+// AppLayout is shadcn's app/(app)/layout.tsx inside the root layout: the
+// group/layout wrapper with the designer gates. Designer pages
+// (data-slot="designer") pin the layout to the viewport, and the navbar's
+// designer actions show via group-has-data-[slot=designer]/layout.
+templ AppLayout(title, description string) {
+	@BaseLayout(title, description) {
+		<div data-slot="layout" class="group/layout relative z-10 flex min-h-svh flex-col bg-background has-data-[slot=designer]:h-svh has-data-[slot=designer]:overflow-hidden">
+			{ children... }
+		</div>
+	}
 }

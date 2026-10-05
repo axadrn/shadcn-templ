@@ -3,12 +3,18 @@
 // defaults), write components.json, merge the theme CSS into the user's
 // Tailwind entry file and install the utils lib item. --template scaffolds a
 // new project from an embedded template first, like their init -t next.
+// --monorepo scaffolds the template's monorepo variant instead (one module,
+// the shared components at its root, the app in apps/web) and continues init
+// in the app. Run in an app directory below go.mod (apps/<app>), init sets
+// up that app and installs into the module's shared packages, see
+// /docs/monorepo.
 //
 // Dropped npm-only options, all without a Go pendant: --base (component
-// library selection; shadcn-templ ships one implementation), --monorepo,
-// --cssVariables/--rtl/--pointer toggles beyond what a preset encodes,
-// --defaults/-y prompt shortcuts (this init does not prompt for design
-// choices), and the interactive preset picker.
+// library selection; shadcn-templ ships one implementation), --no-monorepo
+// and the template and monorepo prompts (one template, and this init does
+// not prompt for design choices), --cssVariables/--rtl/--pointer toggles
+// beyond what a preset encodes, --defaults/-y prompt shortcuts, and the
+// interactive preset picker.
 package commands
 
 import (
@@ -21,6 +27,7 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/cmd/shadcn-templ/registry"
 	"github.com/axadrn/shadcn-templ/v2/cmd/shadcn-templ/templates"
 	"github.com/axadrn/shadcn-templ/v2/cmd/shadcn-templ/utils"
+	"github.com/axadrn/shadcn-templ/v2/cmd/shadcn-templ/utils/updaters"
 )
 
 // InitOptions are the flags of shadcn-templ init.
@@ -30,6 +37,7 @@ type InitOptions struct {
 	BaseColor   string
 	CSS         string
 	Template    string
+	Monorepo    bool
 	ProjectName string
 	Force       bool
 	Silent      bool
@@ -43,6 +51,7 @@ func NewInitFlagSet(opts *InitOptions) *flag.FlagSet {
 	fs.StringVar(&opts.Preset, "p", "", "shorthand for --preset")
 	fs.StringVar(&opts.Template, "template", "", "scaffold a new project from a template ("+strings.Join(templates.Names(), ", ")+")")
 	fs.StringVar(&opts.Template, "t", "", "shorthand for --template")
+	fs.BoolVar(&opts.Monorepo, "monorepo", false, "scaffold a monorepo project (implies --template templ)")
 	fs.StringVar(&opts.BaseColor, "base-color", "", "override the base color")
 	fs.StringVar(&opts.CSS, "css", "", "path to your Tailwind CSS entry file")
 	fs.BoolVar(&opts.Force, "force", false, "force overwrite of existing configuration")
@@ -65,14 +74,20 @@ func RunInit(opts InitOptions) error {
 
 	// --template scaffolds a new project first (create-template.ts): copy
 	// the embedded template into <cwd>/<name> and continue init in there.
+	// --monorepo implies templ, the only template; shadcn prompts for one.
+	if opts.Monorepo && opts.Template == "" {
+		opts.Template = "templ"
+	}
 	scaffolded := false
+	projectPath := ""
 	if opts.Template != "" {
-		template, ok := templates.Templates[opts.Template]
-		if !ok {
-			return fmt.Errorf("unknown template %q, valid templates: %s", opts.Template, strings.Join(templates.Names(), ", "))
+		template, err := templates.Resolve(opts.Template, opts.Monorepo)
+		if err != nil {
+			return err
 		}
-		// Scaffolding nests a fresh module; inside an existing one that
-		// pollutes the parent repo (and its embeds/builds).
+		// Scaffolding nests a fresh module; inside an existing one (cwd or
+		// any parent holds go.mod) that pollutes the parent repo (and its
+		// embeds/builds).
 		if module, err := utils.ModulePath(cwd); err == nil {
 			return fmt.Errorf("refusing to scaffold inside the Go module %s; run this outside a module or pass a target with --cwd", module)
 		}
@@ -80,12 +95,13 @@ func RunInit(opts InitOptions) error {
 		if projectName == "" {
 			projectName = template.DefaultProjectName
 		}
-		projectPath := filepath.Join(cwd, projectName)
+		projectPath = filepath.Join(cwd, projectName)
 		logf(opts.Silent, "Creating a new %s project in %s.\n", template.Title, projectName)
 		if err := templates.Create(template, projectPath, projectName); err != nil {
 			return err
 		}
-		cwd = projectPath
+		// A monorepo continues in its app, below the module root.
+		cwd = filepath.Join(projectPath, filepath.FromSlash(template.AppDir))
 		scaffolded = true
 	}
 
@@ -194,6 +210,19 @@ func RunInit(opts InitOptions) error {
 		return err
 	}
 
+	// An app joining a module whose shared components already carry
+	// scripts needs its own copy of the bundle in its scripts.dir; add
+	// bundles only when it writes scripts.
+	if scripts, _ := filepath.Glob(filepath.Join(config.ResolvedPaths.Components, "*", "*.js")); len(scripts) > 0 {
+		bundlePaths, _, err := updaters.UpdateScripts(config)
+		if err != nil {
+			return err
+		}
+		for _, bundlePath := range bundlePaths {
+			logf(opts.Silent, "Bundle: %s\n", utils.DisplayPath(config, bundlePath))
+		}
+	}
+
 	if scaffolded {
 		// The template's home page renders component-example, like their
 		// templates install it for the scaffolded page.
@@ -203,7 +232,7 @@ func RunInit(opts InitOptions) error {
 		}); err != nil {
 			return err
 		}
-		logf(opts.Silent, "\nProject initialization completed.\nNext steps:\n\n  cd %s\n  go mod tidy\n  task dev\n", filepath.Base(cwd))
+		logf(opts.Silent, "\nProject initialization completed.\nNext steps:\n\n  cd %s\n  go mod tidy\n  task dev\n", filepath.Base(projectPath))
 		return nil
 	}
 

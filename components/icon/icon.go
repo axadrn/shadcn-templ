@@ -25,6 +25,8 @@ type Props struct {
 	// e.g. data-icon="inline-start" for the icon spacing inside buttons
 	// and badges.
 	Attributes templ.Attributes
+	// Size is lucide's size prop, the width and height. Defaults to 24.
+	Size int
 }
 
 // Icon returns a function that generates a templ.Component for the specified icon name.
@@ -37,7 +39,7 @@ func Icon(name string) func(...Props) templ.Component {
 
 		// Cache by icon name, class and attributes so repeated renders
 		// reuse the generated SVG.
-		cacheKey := fmt.Sprintf("%s|cl:%s|at:%s", name, p.Class, attrString(p.Attributes))
+		cacheKey := fmt.Sprintf("%s|cl:%s|at:%s|sz:%d", name, p.Class, attrString(p.Attributes), p.Size)
 
 		return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 			iconMutex.RLock()
@@ -76,10 +78,15 @@ func generateSVG(name string, props Props) (string, error) {
 		return "", err // Error from getIconContent already includes icon name
 	}
 
-	// Construct the final SVG string.
-	// The data-lucide attribute helps identify these as Lucide icons if needed.
-	return fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"%s\" data-lucide=\"icon\"%s>%s</svg>",
-		props.Class, attrString(props.Attributes), content), nil
+	// Construct the final SVG string, the attributes lucide-react renders,
+	// with its "lucide lucide-<name>" classes before the given ones.
+	class := strings.TrimSpace("lucide lucide-" + name + " " + props.Class)
+	size := props.Size
+	if size == 0 {
+		size = 24
+	}
+	return fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"%s\"%s>%s</svg>",
+		size, size, templ.EscapeString(class), attrString(props.Attributes), content), nil
 }
 
 // attrString renders extra attributes deterministically (sorted by key) so

@@ -16,22 +16,30 @@ templ ComponentsOverview(prev, next PagerLink) {
 	@layouts.DocsLayout(
 		service.ComponentsIndexTitle,
 		service.ComponentsIndexDescription,
-		[]modules.TableOfContentsItem{
-			{ID: "new-components", Text: "New Components"},
-			{ID: "all-components", Text: "All Components"},
-		},
+		componentsTOC(),
 	) {
 		<div class="flex w-full flex-1 flex-col gap-6">
 			@modules.DocsPageHeader(service.ComponentsIndexTitle, service.ComponentsIndexDescription, prev.Href, next.Href)
 			<div class="typeset w-full flex-1 pb-16 sm:pb-0">
-				<h2 id="new-components">New Components</h2>
-				@componentsGrid(true, false)
+				if shared.HasNewComponents() {
+					<h2 id="new-components">New Components</h2>
+					@componentsGrid(true, false)
+				}
 				<h2 id="all-components">All Components</h2>
 				@componentsGrid(false, true)
 			</div>
 			@modules.DocsPager(prev.Title, prev.Href, next.Title, next.Href)
 		</div>
 	}
+}
+
+// componentsTOC lists the sections the page renders.
+func componentsTOC() []modules.TableOfContentsItem {
+	var items []modules.TableOfContentsItem
+	if shared.HasNewComponents() {
+		items = append(items, modules.TableOfContentsItem{ID: "new-components", Text: "New Components"})
+	}
+	return append(items, modules.TableOfContentsItem{ID: "all-components", Text: "All Components"})
 }
 
 templ componentsGrid(onlyNew bool, showNewIndicator bool) {

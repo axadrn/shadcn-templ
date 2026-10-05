@@ -1,0 +1,43 @@
+package checkbox
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/checkbox"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+)
+
+templ CheckboxGroup() {
+	@field.Set() {
+		@field.Legend(field.LegendProps{Variant: field.LegendVariantLabel}) {
+			Show these items on the desktop:
+		}
+		@field.Description() {
+			Select the items you want to show on the desktop.
+		}
+		@field.Group(field.GroupProps{Class: "gap-3"}) {
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@checkbox.Checkbox(checkbox.Props{ID: "finder-pref-hard-disks-checkbox", Name: "finder-pref-hard-disks-checkbox", DefaultChecked: true})
+				@field.Label(field.LabelProps{For: "finder-pref-hard-disks-checkbox", Class: "font-normal"}) {
+					Hard disks
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@checkbox.Checkbox(checkbox.Props{ID: "finder-pref-external-disks-checkbox", Name: "finder-pref-external-disks-checkbox", DefaultChecked: true})
+				@field.Label(field.LabelProps{For: "finder-pref-external-disks-checkbox", Class: "font-normal"}) {
+					External disks
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@checkbox.Checkbox(checkbox.Props{ID: "finder-pref-cds-dvds-checkbox", Name: "finder-pref-cds-dvds-checkbox"})
+				@field.Label(field.LabelProps{For: "finder-pref-cds-dvds-checkbox", Class: "font-normal"}) {
+					CDs, DVDs, and iPods
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@checkbox.Checkbox(checkbox.Props{ID: "finder-pref-connected-servers-checkbox", Name: "finder-pref-connected-servers-checkbox"})
+				@field.Label(field.LabelProps{For: "finder-pref-connected-servers-checkbox", Class: "font-normal"}) {
+					Connected servers
+				}
+			}
+		}
+	}
+}

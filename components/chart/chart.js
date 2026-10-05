@@ -366,21 +366,40 @@ function areaPathBetween(curve, xs, ysTop, ysBase) {
   return curvePath(curve, xs, ysTop) + "L" + base.slice(1) + "Z";
 }
 
-/* preserveEnd tick culling with real text measurement, like Recharts. */
-let measureCtx = null;
-function measureLabel(label, refEl) {
-  if (!measureCtx) {
-    measureCtx = document.createElement("canvas").getContext("2d");
+/* preserveEnd tick culling with real text measurement: Recharts'
+ * getStringSize measures the label in a hidden span in <body>. */
+const SPAN_STYLE = {
+  position: "absolute",
+  top: "-20000px",
+  left: 0,
+  padding: 0,
+  margin: 0,
+  border: "none",
+  whiteSpace: "pre",
+};
+const MEASUREMENT_SPAN_ID = "recharts_measurement_span";
+function getStringSize(label, refEl) {
+  let measurementSpan = document.getElementById(MEASUREMENT_SPAN_ID);
+  if (!measurementSpan) {
+    measurementSpan = document.createElement("span");
+    measurementSpan.setAttribute("id", MEASUREMENT_SPAN_ID);
+    measurementSpan.setAttribute("aria-hidden", "true");
+    document.body.appendChild(measurementSpan);
   }
   const cs = getComputedStyle(refEl);
-  measureCtx.font = `${cs.fontSize} ${cs.fontFamily}`;
-  return measureCtx.measureText(label).width;
+  Object.assign(measurementSpan.style, SPAN_STYLE, { fontSize: cs.fontSize, letterSpacing: cs.letterSpacing });
+  measurementSpan.textContent = `${label}`;
+  const rect = measurementSpan.getBoundingClientRect();
+  return { width: rect.width, height: rect.height };
 }
 
-/* The label height Recharts reads from the DOM: 1.5 times the font size,
- * matching the measured 18px at 12px text. */
-function measureLabelHeight(refEl) {
-  return parseFloat(getComputedStyle(refEl).fontSize) * 1.5;
+function measureLabel(label, refEl) {
+  return getStringSize(label, refEl).width;
+}
+
+/* The label height Recharts reads from the DOM, the same measurement. */
+function measureLabelHeight(label, refEl) {
+  return getStringSize(label, refEl).height;
 }
 
 function preserveEndTicks(coords, sizes, start, end, minTickGap) {
@@ -412,6 +431,23 @@ const TICK_SIZE = 6;
 /* ---------------------------------------------------------------- */
 
 let uid = 0;
+
+/* The panel is the chart's recharts-wrapper: ResponsiveContainer measures
+ * its container and the chart renders at that size. */
+function responsiveContainerOf(panel) {
+  return panel.closest(".recharts-responsive-container");
+}
+
+function wrapperSize(panel) {
+  const box = responsiveContainerOf(panel);
+  const W = box.clientWidth;
+  const H = box.clientHeight;
+  panel.setAttribute("width", String(W));
+  panel.setAttribute("height", String(H));
+  panel.style.width = `${W}px`;
+  panel.style.height = `${H}px`;
+  return { W, H };
+}
 
 /* swapSVG applies a newly built SVG to the panel. While the structure is
  * unchanged (animation frames) it only syncs attributes and text in
@@ -575,8 +611,7 @@ function morphPoints(morph, si, coords, key) {
 }
 
 function renderCartesian(panel, m, state, alpha = 1) {
-  const W = panel.clientWidth;
-  const H = panel.clientHeight;
+  const { W, H } = wrapperSize(panel);
   if (!W || !H) return;
   const legendHeight = legendSize(panel, m);
 
@@ -602,9 +637,13 @@ function renderCartesian(panel, m, state, alpha = 1) {
   const catStart = vertical ? plotY : plotX;
   const catLength = vertical ? plotH : plotW;
   const bandSize = m.kind === "bar" ? catLength / n : 0;
+  // XAxis reversed: the range runs from the right, category i sits at the
+  // position of n - 1 - i.
+  const reversed = !!m.xReversed && !vertical;
+  const catSlot = (i) => (reversed ? n - 1 - i : i);
   const cats = [];
   for (let i = 0; i < n; i++) {
-    cats.push(m.kind === "bar" ? catStart + i * bandSize + bandSize / 2 : plotX + (i * plotW) / (n - 1));
+    cats.push(m.kind === "bar" ? catStart + catSlot(i) * bandSize + bandSize / 2 : plotX + (catSlot(i) * plotW) / (n - 1));
   }
 
   // Explicit pixel size like Recharts' Surface: the svg never stretches
@@ -612,7 +651,7 @@ function renderCartesian(panel, m, state, alpha = 1) {
   // layer puts Recharts' role and tabIndex on the surface; it is on unless
   // the chart opted out, Recharts' accessibilityLayer !== false.
   const a11y = m.accessibilityLayer !== false ? ` role="application" tabindex="0"` : "";
-  let svg = `<svg class="recharts-surface"${a11y} width="${fmtF(W)}" height="${fmtF(H)}" viewBox="0 0 ${fmtF(W)} ${fmtF(H)}">`;
+  let svg = `<svg class="recharts-surface"${a11y} width="${fmtF(W)}" height="${fmtF(H)}" viewBox="0 0 ${fmtF(W)} ${fmtF(H)}" style="width: 100%; height: 100%; display: block;">`;
 
   if (m.defs && m.defs.length) {
     svg += "<defs>";
@@ -626,7 +665,7 @@ function renderCartesian(panel, m, state, alpha = 1) {
 
   if (yAxisW > 0 && vertical) {
     // Vertical layout: the y axis carries the category labels.
-    const ySizes = cats.map(() => measureLabelHeight(panel));
+    const ySizes = cats.map((_, i) => measureLabelHeight(m.labels[i], panel));
     const labelX = plotX - TICK_SIZE - (m.yAxisMargin || 0);
     svg += `<g class="recharts-layer recharts-cartesian-axis recharts-yAxis yAxis"><g class="recharts-cartesian-axis-ticks">`;
     // The category coordinates ascend downwards, so the bounds run from
@@ -637,7 +676,7 @@ function renderCartesian(panel, m, state, alpha = 1) {
     svg += "</g></g>";
   } else if (yAxisW > 0) {
     const yCoords = ticks.map((tv) => linearY(tv - domainMin, domainMax - domainMin, plotY, plotH));
-    const ySizes = ticks.map(() => measureLabelHeight(panel));
+    const ySizes = ticks.map((_, i) => measureLabelHeight(m.tickLabels[i], panel));
     const labelX = plotX - TICK_SIZE - (m.yAxisMargin || 0);
     svg += `<g class="recharts-layer recharts-cartesian-axis recharts-yAxis yAxis">`;
     if (m.yAxisLine) {
@@ -656,7 +695,9 @@ function renderCartesian(panel, m, state, alpha = 1) {
 
   if (m.grid) {
     // Recharts draws a line per tick of the value axis and per category of
-    // the other one; both directions default to on.
+    // the other one; both directions default to on. Without a visible value
+    // axis its implicit one still measures the tick labels.
+    if (!(yAxisW > 0)) ticks.forEach((tv, i) => measureLabelHeight(m.tickLabels?.[i] ?? tv, panel));
     const valueCoords = ticks.map((tv) => {
       const p = linearY(tv - domainMin, domainMax - domainMin, vertical ? plotX : plotY, vertical ? plotW : plotH);
       return vertical ? plotX + plotW - (p - plotX) : p;
@@ -730,7 +771,7 @@ function renderCartesian(panel, m, state, alpha = 1) {
         const to = m.stacked ? stackBase[i] + raw : raw;
         const base = valuePos(from);
         const end = valuePos(to);
-        const cat = catStart + i * band + offsets[slot];
+        const cat = catStart + catSlot(i) * band + offsets[slot];
         // The signed rectangle like Recharts computes it: the origin sits
         // at the value end and the size runs back to the baseline.
         let rect = vertical
@@ -797,7 +838,7 @@ function renderCartesian(panel, m, state, alpha = 1) {
         for (const ll of s.labelLists) {
           svg += `<g class="recharts-layer recharts-label-list">`;
           for (let i = 0; i < n; i++) {
-            const catCenter = catStart + i * band + offsets[slot] + barSize / 2;
+            const catCenter = catStart + catSlot(i) * band + offsets[slot] + barSize / 2;
             const offset = ll.offset || 5;
             // getAttrsOfCartesianLabel: the sign of the rectangle flips the
             // offset and the anchor, so a negative bar labels below its end.
@@ -962,7 +1003,9 @@ function renderCartesian(panel, m, state, alpha = 1) {
     svg += `<line orientation="bottom" class="recharts-cartesian-axis-line" stroke="#666" fill="none" x1="${fmtF(plotX)}" y1="${fmtF(plotBottom)}" x2="${fmtF(plotX + plotW)}" y2="${fmtF(plotBottom)}"/>`;
   }
   svg += `<g class="recharts-cartesian-axis-ticks">`;
-  for (const tk of preserveEndTicks(coords, widths, 0, W, m.minTickGap || 5)) {
+  // getTickBoundaries: descending coordinates (reversed) swap the bounds.
+  const [tickStart, tickEnd] = coords.length >= 2 && coords[1] < coords[0] ? [W, 0] : [0, W];
+  for (const tk of preserveEndTicks(coords, widths, tickStart, tickEnd, m.minTickGap || 5)) {
     svg += `<g class="recharts-layer recharts-cartesian-axis-tick">`;
     if (m.xTickLine) {
       svg += `<line orientation="bottom" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="${fmtF(coords[tk.index])}" y1="${fmtF(plotBottom + TICK_SIZE)}" x2="${fmtF(coords[tk.index])}" y2="${fmtF(plotBottom)}"/>`;
@@ -976,7 +1019,7 @@ function renderCartesian(panel, m, state, alpha = 1) {
   swapSVG(panel, svg);
 
   state.points.tops = state.tops || [];
-  state.geom = { W, H, plotX, plotY, plotW, plotH, plotBottom, band, xs, cats, n, vertical };
+  state.geom = { W, H, plotX, plotY, plotW, plotH, plotBottom, band, xs, cats, n, vertical, reversed };
 }
 
 /* Pie sector path, the port of the Go SectorPath (degrees, 0 at three
@@ -1138,8 +1181,7 @@ function centerLabelSVG(cx, cy, label) {
  * one polygon per series. The geometry follows RadarChart's defaults, a
  * start angle of 90 running to -270 and an outer radius of 80%. */
 function renderRadar(panel, m, state, alpha = 1) {
-  const W = panel.clientWidth;
-  const H = panel.clientHeight;
+  const { W, H } = wrapperSize(panel);
   if (!W || !H) return;
   const legendHeight = legendSize(panel, m);
   const offsetW = Math.max(W - m.marginLeft - m.marginRight, 0);
@@ -1159,7 +1201,7 @@ function renderRadar(panel, m, state, alpha = 1) {
   const polar = m.polar || {};
   const radii = polar.polarRadius && polar.polarRadius.length ? polar.polarRadius : ticks.map((t) => (t / domainMax) * outerRadius);
 
-  let svg = `<svg class="recharts-surface" width="${fmtF(W)}" height="${fmtF(H)}" viewBox="0 0 ${fmtF(W)} ${fmtF(H)}">`;
+  let svg = `<svg class="recharts-surface" width="${fmtF(W)}" height="${fmtF(H)}" viewBox="0 0 ${fmtF(W)} ${fmtF(H)}" style="width: 100%; height: 100%; display: block;">`;
 
   if (polar.hasGrid) {
     svg += polarGridSVG(polar, cx, cy, 0, outerRadius, radii, angles);
@@ -1421,8 +1463,7 @@ function pieTextAnchor(x, cx) {
 const PIE_LABEL_OFFSET = 20;
 
 function renderPie(panel, m, state, alpha = 1) {
-  const W = panel.clientWidth;
-  const H = panel.clientHeight;
+  const { W, H } = wrapperSize(panel);
   if (!W || !H) return;
   // The Pie defaults: centered in the offset box, 80% of its radius. The
   // legend adds to the bottom offset, so it shrinks the pie instead of
@@ -1434,7 +1475,7 @@ function renderPie(panel, m, state, alpha = 1) {
   const cy = margin + offsetH / 2;
   const maxR = Math.min(offsetW, offsetH) / 2;
 
-  let svg = `<svg class="recharts-surface" width="${fmtF(W)}" height="${fmtF(H)}" viewBox="0 0 ${fmtF(W)} ${fmtF(H)}">`;
+  let svg = `<svg class="recharts-surface" width="${fmtF(W)}" height="${fmtF(H)}" viewBox="0 0 ${fmtF(W)} ${fmtF(H)}" style="width: 100%; height: 100%; display: block;">`;
   state.points = { sectors: [] };
 
   (m.pies || []).forEach((pie, pi) => {
@@ -1541,8 +1582,7 @@ function radialLabelSVG(id, text, ll, fill, cx, cy, sc) {
 /* renderRadial draws a RadialBarChart: the radius axis is a band scale over
  * the rings, the angle axis a linear scale over the values. */
 function renderRadial(panel, m, state, alpha = 1) {
-  const W = panel.clientWidth;
-  const H = panel.clientHeight;
+  const { W, H } = wrapperSize(panel);
   if (!W || !H) return;
   const legendHeight = legendSize(panel, m);
   const offsetW = Math.max(W - m.marginLeft - m.marginRight, 0);
@@ -1560,14 +1600,22 @@ function renderRadial(panel, m, state, alpha = 1) {
   const n = m.series.length ? m.series[0].values.length : 0;
   if (!n) return;
 
-  // The angle axis is a number axis with the [0, 'auto'] default domain, so
-  // it spans zero to the largest raw value.
+  // The angle axis is a number axis with the [0, 'auto'] default domain, so it
+  // spans zero to the tallest stack, like getDomainOfStackGroups. Chaining the
+  // totals in the same order as the ranges below keeps every range inside it.
   let domainMin = 0;
   let domainMax = 0;
-  for (const s of m.series) {
-    for (const v of s.values) {
-      if (v > domainMax) domainMax = v;
-      if (v < domainMin) domainMin = v;
+  for (let i = 0; i < n; i++) {
+    const stackTops = {};
+    for (const s of m.series) {
+      const v = s.values[i];
+      let top = v;
+      if (s.stackId) {
+        top = (stackTops[s.stackId] || 0) + v;
+        stackTops[s.stackId] = top;
+      }
+      if (top > domainMax) domainMax = top;
+      if (top < domainMin) domainMin = top;
     }
   }
   const span = domainMax - domainMin || 1;
@@ -1609,7 +1657,7 @@ function renderRadial(panel, m, state, alpha = 1) {
     return out;
   });
 
-  let svg = `<svg class="recharts-surface" width="${fmtF(W)}" height="${fmtF(H)}" viewBox="0 0 ${fmtF(W)} ${fmtF(H)}">`;
+  let svg = `<svg class="recharts-surface" width="${fmtF(W)}" height="${fmtF(H)}" viewBox="0 0 ${fmtF(W)} ${fmtF(H)}" style="width: 100%; height: 100%; display: block;">`;
 
   const polar = m.polar || {};
   if (polar.hasGrid) {
@@ -1678,15 +1726,15 @@ function renderRadial(panel, m, state, alpha = 1) {
 /* Tooltip + cursor                                                 */
 /* ---------------------------------------------------------------- */
 
-function tooltipWrapper(container) {
-  let wrapper = container.querySelector(":scope > .recharts-tooltip-wrapper");
+function tooltipWrapper(panel) {
+  let wrapper = panel.querySelector(":scope > .recharts-tooltip-wrapper");
   if (!wrapper) {
     wrapper = document.createElement("div");
+    wrapper.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+    wrapper.setAttribute("tabindex", "-1");
     wrapper.className = "recharts-tooltip-wrapper";
-    wrapper.style.cssText =
-      "position:absolute;top:0;left:0;pointer-events:none;visibility:hidden;z-index:30;transition:transform 400ms ease";
-    container.style.position = "relative";
-    container.appendChild(wrapper);
+    wrapper.style.cssText = "visibility:hidden;pointer-events:none;position:absolute;top:0;left:0;z-index:30;transition:transform 400ms ease";
+    panel.prepend(wrapper);
   }
   return wrapper;
 }
@@ -1796,7 +1844,7 @@ function showCursor(panel, m, state, i) {
   if (m.kind === "bar") {
     const d = g.vertical
       ? `M ${fmtF(g.plotX)},${fmtF(g.plotY + i * g.band)} h ${fmtF(g.plotW)} v ${fmtF(g.band)} h ${fmtF(-g.plotW)} Z`
-      : `M ${fmtF(g.plotX + i * g.band)},${fmtF(g.plotY)} h ${fmtF(g.band)} v ${fmtF(g.plotH)} h ${fmtF(-g.band)} Z`;
+      : `M ${fmtF(g.plotX + (g.reversed ? g.n - 1 - i : i) * g.band)},${fmtF(g.plotY)} h ${fmtF(g.band)} v ${fmtF(g.plotH)} h ${fmtF(-g.band)} Z`;
     if (!cursor) {
       seriesLayer.insertAdjacentHTML(
         "beforebegin",
@@ -1924,12 +1972,13 @@ function initPanel(script) {
       animateChart(panel, m, state, render);
     }
   };
-  if (panel.clientWidth) {
+  const box = responsiveContainerOf(panel);
+  if (box.clientWidth) {
     state.mounted = true;
     enter();
   }
   const ro = new ResizeObserver(() => {
-    const w = panel.clientWidth;
+    const w = box.clientWidth;
     if (!w) {
       state.mounted = false;
       return;
@@ -1944,13 +1993,25 @@ function initPanel(script) {
       render(1);
     }
   });
-  ro.observe(panel);
+  ro.observe(box);
+
+  // A re-render with new props: the chart takes the next model and morphs
+  // from what it shows, like Recharts animates a changed dataKey.
+  panel._templChartUpdate = (next) => {
+    const prevPoints = state.points;
+    Object.keys(m).forEach((k) => delete m[k]);
+    Object.assign(m, next);
+    container._templActive = m;
+    if (!state.mounted) return;
+    if (prevPoints) morphChart(panel, m, state, render, prevPoints);
+    else render(1);
+  };
 
   // Without a declared Tooltip child Recharts renders no tooltip, no
   // active dots and no cursor, so none of the hover wiring applies.
   if (!m.hasTooltip) return;
 
-  const wrapper = tooltipWrapper(container);
+  const wrapper = tooltipWrapper(panel);
 
   // TooltipBoundingBox: Escape dismisses the tooltip box at its current
   // coordinate; the cursor and the active dots stay up, and the box comes
@@ -1992,10 +2053,12 @@ function initPanel(script) {
     if (m.kind === "bar") {
       // The category runs down the y axis in a vertical layout.
       const along = g.vertical ? chartY - g.plotY : chartX - g.plotX;
-      return Math.max(0, Math.min(g.n - 1, Math.floor(along / g.band)));
+      const at = Math.max(0, Math.min(g.n - 1, Math.floor(along / g.band)));
+      return g.reversed ? g.n - 1 - at : at;
     }
     const step = g.plotW / (g.n - 1);
-    return Math.max(0, Math.min(g.n - 1, Math.round((chartX - g.plotX) / step)));
+    const at = Math.max(0, Math.min(g.n - 1, Math.round((chartX - g.plotX) / step)));
+    return g.reversed ? g.n - 1 - at : at;
   };
 
   // parseEventsOfWrapper: the tooltip listens to mouse events, and an axis
@@ -2051,12 +2114,11 @@ function initPanel(script) {
     const wasHidden = wrapper.style.visibility !== "visible";
     wrapper.innerHTML = tooltipHTML(m, i, pieIndex);
     wrapper.style.visibility = wrapper.innerHTML ? "visible" : "hidden";
-    const crect = container.getBoundingClientRect();
+    const crect = panel.getBoundingClientRect();
     const tw = wrapper.offsetWidth;
     const th = wrapper.offsetHeight;
-    const prect = panel.getBoundingClientRect();
-    const px = snapX != null ? snapX + (prect.left - crect.left) : e.clientX - crect.left;
-    const py = snapY != null ? snapY + (prect.top - crect.top) : e.clientY - crect.top;
+    const px = snapX != null ? snapX : e.clientX - crect.left;
+    const py = snapY != null ? snapY : e.clientY - crect.top;
     // A dismissed tooltip stays hidden until its coordinate changes.
     if (state.dismissed) {
       if (px === state.dismissedAt.x && py === state.dismissedAt.y) {
@@ -2176,34 +2238,12 @@ function initPanel(script) {
   }
 }
 
-/* Interactive demo wiring: selects and header buttons toggle the SSR
- * rendered variants of a chart. */
-document.addEventListener("select-change", (e) => {
-  const trigger = e.target instanceof Element && e.target.closest("[data-templ-chart-range-select], [data-templ-chart-month-select]");
-  if (!trigger) return;
-  const value = e.detail && e.detail.value;
-  if (!value) return;
-  const chart = trigger.closest("[data-slot=card]");
-  if (!chart) return;
-  const attr = trigger.hasAttribute("data-templ-chart-range-select") ? "data-templ-chart-range" : "data-templ-chart-month";
-  chart.querySelectorAll(`[${attr}]`).forEach((el) => {
-    el.hidden = el.getAttribute(attr) !== value;
-  });
-});
-
-document.addEventListener("click", (e) => {
-  if (!(e.target instanceof Element)) return;
-  const btn = e.target.closest("[data-templ-chart-series]");
-  if (!btn) return;
-  const chart = btn.closest("[data-slot=card]");
-  if (!chart) return;
-  const series = btn.getAttribute("data-templ-chart-series");
-  chart.querySelectorAll("[data-templ-chart-series]").forEach((b) => {
-    b.setAttribute("data-active", b === btn ? "true" : "false");
-  });
-  chart.querySelectorAll("[data-templ-chart-series-panel]").forEach((el) => {
-    el.hidden = el.getAttribute("data-templ-chart-series-panel") !== series;
-  });
-});
-
 window.templ.lifecycle.register("script[data-templ-chart-model]", { init: initPanel });
+
+// update(wrapper, model): renders the chart in a recharts-wrapper with
+// another model, the server rendered pendant of new chart props.
+window.templ.chart = {
+  update(wrapper, model) {
+    wrapper._templChartUpdate?.(model);
+  },
+};

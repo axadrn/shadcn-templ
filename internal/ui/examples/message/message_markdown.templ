@@ -1,0 +1,37 @@
+package message
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/message"
+)
+
+templ MessageMarkdownDemo() {
+	<div class="flex w-full max-w-sm flex-col gap-8 py-12">
+		@message.Message(message.Props{Align: message.AlignEnd}) {
+			@message.Content() {
+				@bubble.Bubble() {
+					@bubble.Content() {
+						How do I render markdown in a message?
+					}
+				}
+			}
+		}
+		@message.Message() {
+			@message.Content() {
+				@bubble.Bubble(bubble.Props{Variant: bubble.VariantGhost}) {
+					@bubble.Content() {
+						// The site's Markdown (Streamdown) renders the response as this HTML.
+						<div class="space-y-4 whitespace-normal [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 cn-markdown w-full min-w-0 overflow-hidden">
+							<p>Here's how to render markdown in a message:</p>
+							<ol class="list-inside list-decimal whitespace-normal [li_&]:pl-6" data-streamdown="ordered-list">
+								<li class="py-1 [&>p]:inline" data-streamdown="list-item">Render assistant text through <span class="font-semibold" data-streamdown="strong">Markdown</span>.</li>
+								<li class="py-1 [&>p]:inline" data-streamdown="list-item">Keep user messages as plain text.</li>
+								<li class="py-1 [&>p]:inline" data-streamdown="list-item">Use a <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-sm" data-streamdown="inline-code">ghost</code> bubble so the response is unframed.</li>
+							</ol>
+						</div>
+					}
+				}
+			}
+		}
+	</div>
+}

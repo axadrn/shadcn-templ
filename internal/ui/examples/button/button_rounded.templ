@@ -1,0 +1,21 @@
+package button
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ ButtonRounded() {
+	<div class="flex gap-2">
+		@button.Button(button.Props{Class: "rounded-full"}) {
+			Get Started
+		}
+		@button.Button(button.Props{
+			Variant: button.VariantOutline,
+			Size:    button.SizeIcon,
+			Class:   "rounded-full",
+		}) {
+			@icon.ArrowUp()
+		}
+	</div>
+}

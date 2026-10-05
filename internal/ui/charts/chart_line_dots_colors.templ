@@ -39,8 +39,8 @@ templ ChartLineDotsColors() {
 			@chart.Container(chart.ContainerProps{ID: "line-dots-colors", Config: chartLineDotsColorsConfig}) {
 				@chart.LineChart(chart.LineChartProps{
 					AccessibilityLayer: true,
-					Data:   chartLineDotsColorsData,
-					Margin: &chart.Margin{Top: 24, Left: 24, Right: 24},
+					Data:               chartLineDotsColorsData,
+					Margin:             &chart.Margin{Top: 24, Left: 24, Right: 24},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.Tooltip(chart.TooltipProps{

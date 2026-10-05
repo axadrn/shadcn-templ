@@ -208,6 +208,9 @@ type XAxisProps struct {
 	// AllowDataOverflow keeps numeric domain bounds instead of extending
 	// them to contain the data, like Recharts' allowDataOverflow.
 	AllowDataOverflow bool
+	// Reversed runs the categories from right to left, like Recharts'
+	// reversed.
+	Reversed bool
 }
 
 // YAxisProps is the pendant of Recharts' YAxis.
@@ -725,10 +728,10 @@ templ AreaChart(props ...AreaChartProps) {
 	st := &chartState{kind: "area", data: p.Data, margin: p.Margin, stackOffset: p.StackOffset, accessibilityLayer: p.AccessibilityLayer}
 	ctx = context.WithValue(ctx, stateCtxKey, st)
 	}}
-	<div style="position:relative;width:100%;height:100%">
+	@responsiveContainer() {
 		{ children... }
 		@chartOutput(st)
-	</div>
+	}
 }
 
 // BarChart is the Recharts BarChart root.
@@ -741,10 +744,10 @@ templ BarChart(props ...BarChartProps) {
 	st := &chartState{kind: "bar", data: p.Data, margin: p.Margin, layout: p.Layout, accessibilityLayer: p.AccessibilityLayer}
 	ctx = context.WithValue(ctx, stateCtxKey, st)
 	}}
-	<div style="position:relative;width:100%;height:100%">
+	@responsiveContainer() {
 		{ children... }
 		@chartOutput(st)
-	</div>
+	}
 }
 
 // LineChart is the Recharts LineChart root.
@@ -757,10 +760,10 @@ templ LineChart(props ...LineChartProps) {
 	st := &chartState{kind: "line", data: p.Data, margin: p.Margin, accessibilityLayer: p.AccessibilityLayer}
 	ctx = context.WithValue(ctx, stateCtxKey, st)
 	}}
-	<div style="position:relative;width:100%;height:100%">
+	@responsiveContainer() {
 		{ children... }
 		@chartOutput(st)
-	</div>
+	}
 }
 
 // RadarChart is the Recharts RadarChart root.
@@ -773,10 +776,10 @@ templ RadarChart(props ...RadarChartProps) {
 	st := &chartState{kind: "radar", data: p.Data, margin: p.Margin}
 	ctx = context.WithValue(ctx, stateCtxKey, st)
 	}}
-	<div style="position:relative;width:100%;height:100%">
+	@responsiveContainer() {
 		{ children... }
 		@chartOutput(st)
-	</div>
+	}
 }
 
 // PolarGrid registers the polar grid.
@@ -832,10 +835,10 @@ templ RadialBarChart(props ...RadialBarChartProps) {
 	}
 	ctx = context.WithValue(ctx, stateCtxKey, st)
 	}}
-	<div style="position:relative;width:100%;height:100%">
+	@responsiveContainer() {
 		{ children... }
 		@chartOutput(st)
-	</div>
+	}
 }
 
 // RadialBar registers one radial bar series.
@@ -871,9 +874,21 @@ templ PolarRadiusAxis(props ...PolarRadiusAxisProps) {
 templ PieChart(props ...PieChartProps) {
 	{{ st := &chartState{kind: "pie"} }}
 	{{ ctx = context.WithValue(ctx, stateCtxKey, st) }}
-	<div style="position:relative;width:100%;height:100%">
+	@responsiveContainer() {
 		{ children... }
 		@chartOutput(st)
+	}
+}
+
+// responsiveContainer is Recharts' ResponsiveContainer around the chart's
+// wrapper div, which chart.js sizes to the container like Recharts does.
+templ responsiveContainer() {
+	<div class="recharts-responsive-container" style="width:100%;height:100%;min-width:0">
+		<div style="width:0;height:0;overflow:visible">
+			<div class="recharts-wrapper" style="position:relative;cursor:default">
+				{ children... }
+			</div>
+		</div>
 	</div>
 }
 
@@ -1194,6 +1209,7 @@ func buildModel(ctx context.Context, st *chartState) Model {
 		m.XTickLine = x.TickLine
 		m.XAxisLine = x.AxisLine
 		m.XAxisHide = x.Hide
+		m.XReversed = x.Reversed
 		if x.Hide {
 			m.XAxisHeight = 0
 		}
@@ -1714,6 +1730,7 @@ type Model struct {
 	// Layout "vertical" swaps the axes and draws the bars horizontally.
 	Layout      string                `json:"layout,omitempty"`
 	XAxisHide   bool                  `json:"xAxisHide,omitempty"`
+	XReversed   bool                  `json:"xReversed,omitempty"`
 	YAxisHide   bool                  `json:"yAxisHide,omitempty"`
 	Stacked     bool                  `json:"stacked,omitempty"`
 	StackOffset string                `json:"stackOffset,omitempty"` // "expand" normalizes each stack to 1

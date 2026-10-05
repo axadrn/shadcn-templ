@@ -1,0 +1,311 @@
+package messagescroller
+
+import (
+	"bytes"
+	"context"
+	"strconv"
+	"strings"
+
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+// DefaultScrollPosition is where a saved transcript opens on the first
+// non-empty render.
+type DefaultScrollPosition string
+
+const (
+	DefaultScrollPositionStart      DefaultScrollPosition = "start"
+	DefaultScrollPositionEnd        DefaultScrollPosition = "end"
+	DefaultScrollPositionLastAnchor DefaultScrollPosition = "last-anchor"
+)
+
+// Direction is the transcript edge a Button scrolls toward.
+type Direction string
+
+const (
+	DirectionStart Direction = "start"
+	DirectionEnd   Direction = "end"
+)
+
+type ctxKey string
+
+const providerKey ctxKey = "messageScrollerProvider"
+
+// ProviderProps are the props of @shadcn/react's MessageScroller.Provider.
+type ProviderProps struct {
+	// AutoScroll follows new content at the bottom while the viewport is
+	// already at the end.
+	AutoScroll bool
+	// DefaultScrollPosition is applied once on the first non-empty render.
+	// Defaults to "end".
+	DefaultScrollPosition DefaultScrollPosition
+	// ScrollEdgeThreshold is the distance from an edge that still counts as
+	// at the edge. Nil means 8.
+	ScrollEdgeThreshold *int
+	// ScrollPreviousItemPeek is the extra top margin for a newly anchored
+	// row. Nil means 64.
+	ScrollPreviousItemPeek *int
+	// ScrollMargin is the margin on the aligned edge for commands and
+	// visibility. Defaults to 0.
+	ScrollMargin int
+}
+
+type Props struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type ViewportProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	// PreserveScrollOnPrepend keeps the first visible row in place when rows
+	// are prepended. Nil means true.
+	PreserveScrollOnPrepend *bool
+}
+
+type ContentProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	// SpacerClass is the className of the internal tail spacer.
+	SpacerClass string
+}
+
+type ItemProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	// MessageID is the stable row id for scrollToMessage, visibility and
+	// prepend preservation.
+	MessageID string
+	// ScrollAnchor marks a turn boundary that newly appended anchors and
+	// last-anchor restore use.
+	ScrollAnchor bool
+}
+
+type ButtonProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	// Direction is the transcript edge to scroll toward. Defaults to "end".
+	Direction Direction
+	// Behavior is the native scroll behavior on click. Defaults to "smooth".
+	Behavior string
+	Variant  button.Variant
+	Size     button.Size
+}
+
+// hasChildren reports whether the caller passed children (React's
+// children ?? default).
+func hasChildren(ctx context.Context) bool {
+	var b bytes.Buffer
+	if err := templ.GetChildren(ctx).Render(ctx, &b); err != nil {
+		return true
+	}
+	return strings.TrimSpace(b.String()) != ""
+}
+
+func provider(ctx context.Context) ProviderProps {
+	if p, ok := ctx.Value(providerKey).(ProviderProps); ok {
+		return p
+	}
+	return ProviderProps{}
+}
+
+func (p ProviderProps) position() DefaultScrollPosition {
+	if p.DefaultScrollPosition == "" {
+		return DefaultScrollPositionEnd
+	}
+	return p.DefaultScrollPosition
+}
+
+// The opening position hides the viewport until it is applied
+// (pendingDefaultScrollStore starts true for "end" and "last-anchor").
+func (p ProviderProps) pendingScroll() bool {
+	pos := p.position()
+	return pos == DefaultScrollPositionEnd || pos == DefaultScrollPositionLastAnchor
+}
+
+// The provider renders no element; its props travel to the root element as
+// data-templ-* markers, where messagescroller.js reads them.
+func (p ProviderProps) attributes() templ.Attributes {
+	attrs := templ.Attributes{}
+	if p.AutoScroll {
+		attrs["data-templ-auto-scroll"] = true
+	}
+	if p.DefaultScrollPosition != "" {
+		attrs["data-templ-default-scroll-position"] = string(p.DefaultScrollPosition)
+	}
+	if p.ScrollEdgeThreshold != nil {
+		attrs["data-templ-scroll-edge-threshold"] = strconv.Itoa(*p.ScrollEdgeThreshold)
+	}
+	if p.ScrollPreviousItemPeek != nil {
+		attrs["data-templ-scroll-previous-item-peek"] = strconv.Itoa(*p.ScrollPreviousItemPeek)
+	}
+	if p.ScrollMargin != 0 {
+		attrs["data-templ-scroll-margin"] = strconv.Itoa(p.ScrollMargin)
+	}
+	return attrs
+}
+
+// Provider is the headless MessageScroller.Provider: it renders only its
+// children and hands its props to the MessageScroller inside it.
+templ Provider(props ...ProviderProps) {
+	{{ var p ProviderProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ ctx = context.WithValue(ctx, providerKey, p) }}
+	{ children... }
+}
+
+templ MessageScroller(props ...Props) {
+	{{ var p Props }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ pr := provider(ctx) }}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="message-scroller"
+		class={ utils.CN("cn-message-scroller group/message-scroller relative flex size-full min-h-0 flex-col overflow-hidden", p.Class) }
+		{ pr.attributes()... }
+		{ p.Attributes... }
+		data-pending-scroll?={ pr.pendingScroll() }
+	>
+		{ children... }
+	</div>
+}
+
+templ Viewport(props ...ViewportProps) {
+	{{ var p ViewportProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		role="region"
+		aria-label="Messages"
+		tabindex="0"
+		data-slot="message-scroller-viewport"
+		class={ utils.CN("cn-message-scroller-viewport size-full min-h-0 min-w-0 scroll-fade-b scrollbar-thin scrollbar-gutter-stable overflow-y-auto overscroll-contain contain-content data-autoscrolling:scrollbar-thumb-transparent data-autoscrolling:scrollbar-track-transparent data-pending-scroll:invisible", p.Class) }
+		if p.PreserveScrollOnPrepend != nil && !*p.PreserveScrollOnPrepend {
+			data-templ-preserve-scroll-on-prepend="false"
+		}
+		{ p.Attributes... }
+		data-pending-scroll?={ provider(ctx).pendingScroll() }
+	>
+		{ children... }
+	</div>
+}
+
+// Content is the message list (role="log"). Its last child is the tail
+// spacer the scroller grows to hold an anchored turn at the top.
+templ Content(props ...ContentProps) {
+	{{ var p ContentProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		role="log"
+		aria-relevant="additions"
+		data-slot="message-scroller-content"
+		class={ utils.CN("cn-message-scroller-content flex h-max min-h-full flex-col", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+		<div
+			aria-hidden="true"
+			data-message-scroller-spacer=""
+			hidden
+			if p.SpacerClass != "" {
+				class={ p.SpacerClass }
+			}
+		></div>
+	</div>
+}
+
+templ Item(props ...ItemProps) {
+	{{ var p ItemProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		if p.MessageID != "" {
+			data-message-id={ p.MessageID }
+		}
+		data-scroll-anchor={ strconv.FormatBool(p.ScrollAnchor) }
+		data-slot="message-scroller-item"
+		class={ utils.CN("cn-message-scroller-item min-w-0 shrink-0 [contain-intrinsic-size:auto_10rem] [content-visibility:auto]", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+// Button scrolls to the start or end of the transcript, rendered as a
+// shadcn Button. It starts inactive (nothing measured yet) and
+// messagescroller.js activates it while there is content toward its
+// direction. Without children it renders the arrow and an sr-only label.
+templ Button(props ...ButtonProps) {
+	{{ var p ButtonProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.Direction == "" {
+		{{ p.Direction = DirectionEnd }}
+	}
+	if p.Variant == "" {
+		{{ p.Variant = button.VariantSecondary }}
+	}
+	if p.Size == "" {
+		{{ p.Size = button.SizeIconSm }}
+	}
+	{{ attrs := templ.Attributes{
+	"data-slot":      "message-scroller-button",
+	"data-direction": string(p.Direction),
+	"data-variant":   string(p.Variant),
+	"data-size":      string(p.Size),
+	"data-active":    "false",
+	"inert":          true,
+	"tabindex":       "-1",
+} }}
+	{{ custom := hasChildren(ctx) }}
+	if p.Behavior != "" && p.Behavior != "smooth" {
+		{{ attrs["data-templ-behavior"] = p.Behavior }}
+	}
+	@button.Button(button.Props{
+		ID:         p.ID,
+		Variant:    p.Variant,
+		Size:       p.Size,
+		Class:      utils.CN("cn-message-scroller-button absolute inset-s-1/2 -translate-x-1/2 border-border bg-background text-foreground transition-[translate,scale,opacity] duration-200 hover:bg-muted hover:text-foreground data-[active=false]:pointer-events-none data-[active=false]:scale-95 data-[active=false]:opacity-0 data-[active=false]:duration-400 data-[active=false]:ease-[cubic-bezier(0.7,0,0.84,0)] data-[active=true]:translate-y-0 data-[active=true]:scale-100 data-[active=true]:opacity-100 data-[active=true]:ease-[cubic-bezier(0.23,1,0.32,1)] data-[direction=end]:bottom-4 data-[direction=end]:data-[active=false]:translate-y-full data-[direction=start]:top-4 data-[direction=start]:data-[active=false]:-translate-y-full rtl:translate-x-1/2 data-[direction=start]:[&_svg]:rotate-180", p.Class),
+		Attributes: utils.MergeAttributes(attrs, p.Attributes),
+	}) {
+		if custom {
+			{ children... }
+		} else {
+			@icon.ArrowDown()
+			<span class="sr-only">
+				if p.Direction == DirectionStart {
+					Scroll to start
+				} else {
+					Scroll to end
+				}
+			</span>
+		}
+	}
+}

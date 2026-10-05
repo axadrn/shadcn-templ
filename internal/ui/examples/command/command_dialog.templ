@@ -1,0 +1,82 @@
+package command
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/command"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ CommandDialogDemo() {
+	<p class="text-sm text-muted-foreground">
+		Press{ " " }
+		<kbd class="pointer-events-none inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 select-none">
+			<span class="text-xs">⌘</span>J
+		</kbd>
+	</p>
+	@command.Dialog(command.DialogProps{Open: new(bool)}) {
+		@command.Command() {
+			@command.Input(command.InputProps{Placeholder: "Type a command or search..."})
+			@command.List() {
+				@command.Empty() {
+					No results found.
+				}
+				@command.Group(command.GroupProps{Heading: "Suggestions"}) {
+					@command.Item() {
+						@icon.Calendar()
+						<span>Calendar</span>
+					}
+					@command.Item() {
+						@icon.Smile()
+						<span>Search Emoji</span>
+					}
+					@command.Item() {
+						@icon.Calculator()
+						<span>Calculator</span>
+					}
+				}
+				@command.Separator()
+				@command.Group(command.GroupProps{Heading: "Settings"}) {
+					@command.Item() {
+						@icon.User()
+						<span>Profile</span>
+						@command.Shortcut() {
+							⌘P
+						}
+					}
+					@command.Item() {
+						@icon.CreditCard()
+						<span>Billing</span>
+						@command.Shortcut() {
+							⌘B
+						}
+					}
+					@command.Item() {
+						@icon.Settings()
+						<span>Settings</span>
+						@command.Shortcut() {
+							⌘S
+						}
+					}
+				}
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			// The open state: ⌘J or Ctrl+J toggles it (setOpen), the dialog
+			// renders it.
+			let el = document.currentScript.previousElementSibling;
+			while (el && !el.matches('[data-slot="dialog-content"]') && !el.querySelector('[data-slot="dialog-content"]')) el = el.previousElementSibling;
+			const popup = el.matches('[data-slot="dialog-content"]') ? el : el.querySelector('[data-slot="dialog-content"]');
+			const setOpen = (open) => (open ? window.templ.dialog.open(popup) : window.templ.dialog.close(popup));
+			// onOpenChange={setOpen}
+			popup.addEventListener("dialog-open-change", (e) => setOpen(e.detail.open));
+			document.addEventListener("keydown", (e) => {
+				if (!popup.isConnected) return;
+				if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
+					e.preventDefault();
+					setOpen(!window.templ.dialog.isOpen(popup));
+				}
+			});
+		})();
+	</script>
+}

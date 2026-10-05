@@ -1,0 +1,19 @@
+package badge
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/badge"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ BadgeIcon() {
+	<div class="flex flex-wrap gap-2">
+		@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+			@icon.BadgeCheck(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+			Verified
+		}
+		@badge.Badge(badge.Props{Variant: badge.VariantOutline}) {
+			Bookmark
+			@icon.Bookmark(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+		}
+	</div>
+}

@@ -1,0 +1,29 @@
+package radiogroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/radiogroup"
+)
+
+templ RadioGroupDisabled() {
+	@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "option2", Class: "w-fit"}) {
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-disabled": "true"}}) {
+			@radiogroup.Item(radiogroup.ItemProps{ID: "disabled-1", Value: "option1", Disabled: true})
+			@field.Label(field.LabelProps{For: "disabled-1", Class: "font-normal"}) {
+				Disabled
+			}
+		}
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@radiogroup.Item(radiogroup.ItemProps{ID: "disabled-2", Value: "option2"})
+			@field.Label(field.LabelProps{For: "disabled-2", Class: "font-normal"}) {
+				Option 2
+			}
+		}
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@radiogroup.Item(radiogroup.ItemProps{ID: "disabled-3", Value: "option3"})
+			@field.Label(field.LabelProps{For: "disabled-3", Class: "font-normal"}) {
+				Option 3
+			}
+		}
+	}
+}

@@ -20,10 +20,30 @@
     return tab ? tab.getAttribute("data-templ-value") : null;
   }
 
+  // TabsRoot's computeActivationDirection: where the new tab sits from the
+  // previous one along Base UI's orientation, "none" when level or until the
+  // first change. Root, list, tabs and panels render it.
+  function activationDirection(root, previous, next) {
+    if (!previous || !next) return "none";
+    const a = previous.getBoundingClientRect();
+    const b = next.getBoundingClientRect();
+    if (partsOf(root, LIST)[0]?.getAttribute("data-orientation") === "vertical") {
+      return b.top < a.top ? "up" : b.top > a.top ? "down" : "none";
+    }
+    return b.left < a.left ? "left" : b.left > a.left ? "right" : "none";
+  }
+
   // Update tab state
   function setActiveTab(root, value) {
     if (!root) return;
     const tabs = partsOf(root, TAB);
+    const previous = tabs.find((t) => t.hasAttribute("data-active"));
+    const next = tabs.find((t) => t.getAttribute("data-templ-value") === value);
+    if (previous && next && previous !== next) {
+      const direction = activationDirection(root, previous, next);
+      [root, ...partsOf(root, LIST), ...tabs, ...partsOf(root, PANEL)].forEach((el) =>
+        el.setAttribute("data-activation-direction", direction));
+    }
     tabs.forEach((trigger) => {
       const isActive = trigger.getAttribute("data-templ-value") === value;
       // Base UI marks the selected tab with a bare data-active attribute;
@@ -31,6 +51,10 @@
       trigger.toggleAttribute("data-active", isActive);
       trigger.toggleAttribute("data-composite-item-active", isActive);
       trigger.setAttribute("aria-selected", isActive ? "true" : "false");
+      // TabsTab names its panel while that is mounted, the active one.
+      const panel = isActive && partsOf(root, PANEL).find((p) => p.getAttribute("data-templ-value") === value);
+      if (panel) trigger.setAttribute("aria-controls", panel.id);
+      else trigger.removeAttribute("aria-controls");
     });
     partsOf(root, PANEL).forEach((content) => {
       const isActive = content.getAttribute("data-templ-value") === value;
@@ -115,8 +139,9 @@
     if (!list) return;
     list._templComposite = window.templ.composite.useCompositeRoot(list, {
       items: () => partsOf(root, TAB),
-      orientation: root.getAttribute("data-orientation") === "vertical" ? "vertical" : "horizontal",
-      rtl: () => getComputedStyle(list).direction === "rtl",
+      // The list's, Base UI's orientation, not the root's styling one.
+      orientation: list.getAttribute("data-orientation") === "vertical" ? "vertical" : "horizontal",
+      rtl: () => window.templ.direction.useDirection(list) === "rtl",
       enableHomeAndEndKeys: true,
       disabledIndices: [],
     });

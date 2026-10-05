@@ -79,6 +79,12 @@ You can customize the colors of a badge by adding custom classes such as `bg-gre
 
 <ComponentPreview name="badge-colors" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="badge-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Badge

@@ -1,0 +1,68 @@
+package selectex
+
+import (
+	"slices"
+
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+// The upstream example's Arabic translation, its default language.
+var selectRtlFruits = []selectcomp.ItemData{
+	{Label: "تفاح", Value: "apple"},
+	{Label: "موز", Value: "banana"},
+	{Label: "توت أزرق", Value: "blueberry"},
+	{Label: "عنب", Value: "grapes"},
+	{Label: "أناناس", Value: "pineapple"},
+}
+
+var selectRtlVegetables = []selectcomp.ItemData{
+	{Label: "جزر", Value: "carrot"},
+	{Label: "بروكلي", Value: "broccoli"},
+	{Label: "سبانخ", Value: "spinach"},
+}
+
+var selectRtlItems = slices.Concat(
+	[]selectcomp.ItemData{{Label: "اختر فاكهة", Value: ""}},
+	selectRtlFruits,
+	selectRtlVegetables,
+)
+
+templ SelectRtl() {
+	@selectcomp.Select(selectcomp.Props{Items: selectRtlItems, Value: utils.Ptr("")}) {
+		@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-32", Attributes: templ.Attributes{"dir": "rtl"}}) {
+			@selectcomp.Value()
+		}
+		@selectcomp.Content(selectcomp.ContentProps{Attributes: templ.Attributes{"dir": "rtl", "data-lang": "ar"}}) {
+			@selectcomp.Group() {
+				@selectcomp.Label() {
+					الفواكه
+				}
+				for _, item := range selectRtlFruits {
+					@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+						{ item.Label.(string) }
+					}
+				}
+			}
+			@selectcomp.Separator()
+			@selectcomp.Group() {
+				@selectcomp.Label() {
+					الخضروات
+				}
+				for _, item := range selectRtlVegetables {
+					@selectcomp.Item(selectcomp.ItemProps{Value: item.Value}) {
+						{ item.Label.(string) }
+					}
+				}
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			// The selectedFruit state: onValueChange sets it, the value prop renders it.
+			let trigger = document.currentScript;
+			while ((trigger = trigger.previousElementSibling) && trigger.dataset.slot !== "select-trigger");
+			trigger.addEventListener("select-change", (e) => window.templ.select.setValue(trigger, e.detail.value));
+		})();
+	</script>
+}

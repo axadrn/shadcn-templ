@@ -103,6 +103,12 @@ A custom toggle group example.
 
 <ComponentPreview name="toggle-group-font-weight-selector" previewClassName="*:data-[slot=field]:max-w-xs" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="toggle-group-rtl" direction="rtl" />
+
 ## API Reference
 
 ### ToggleGroup

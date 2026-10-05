@@ -39,8 +39,8 @@ templ ChartAreaDefault() {
 			@chart.Container(chart.ContainerProps{ID: "area-default", Config: chartAreaDefaultConfig}) {
 				@chart.AreaChart(chart.AreaChartProps{
 					AccessibilityLayer: true,
-					Data:   chartAreaDefaultData,
-					Margin: &chart.Margin{Left: 12, Right: 12},
+					Data:               chartAreaDefaultData,
+					Margin:             &chart.Margin{Left: 12, Right: 12},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.XAxis(chart.XAxisProps{

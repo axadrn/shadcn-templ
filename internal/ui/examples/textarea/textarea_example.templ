@@ -1,0 +1,92 @@
+package textarea
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/textarea"
+)
+
+templ textareaExampleSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ TextareaExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@textareaExampleBasic()
+			@textareaExampleInvalid()
+			@textareaExampleWithLabel()
+			@textareaExampleWithDescription()
+			@textareaExampleDisabled()
+		</div>
+	</div>
+}
+
+templ textareaExampleBasic() {
+	@textareaExampleSection("Basic") {
+		@textarea.Textarea(textarea.Props{Placeholder: "Type your message here."})
+	}
+}
+
+templ textareaExampleInvalid() {
+	@textareaExampleSection("Invalid") {
+		@textarea.Textarea(textarea.Props{
+			Placeholder: "Type your message here.",
+			Attributes:  templ.Attributes{"aria-invalid": "true"},
+		})
+	}
+}
+
+templ textareaExampleWithLabel() {
+	@textareaExampleSection("With Label") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "textarea-demo-message"}) {
+				Message
+			}
+			@textarea.Textarea(textarea.Props{
+				ID:          "textarea-demo-message",
+				Placeholder: "Type your message here.",
+				Rows:        6,
+			})
+		}
+	}
+}
+
+templ textareaExampleWithDescription() {
+	@textareaExampleSection("With Description") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "textarea-demo-message-2"}) {
+				Message
+			}
+			@textarea.Textarea(textarea.Props{
+				ID:          "textarea-demo-message-2",
+				Placeholder: "Type your message here.",
+				Rows:        6,
+			})
+			@field.Description() {
+				Type your message and press enter to send.
+			}
+		}
+	}
+}
+
+templ textareaExampleDisabled() {
+	@textareaExampleSection("Disabled") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "textarea-demo-disabled"}) {
+				Message
+			}
+			@textarea.Textarea(textarea.Props{
+				ID:          "textarea-demo-disabled",
+				Placeholder: "Type your message here.",
+				Disabled:    true,
+			})
+		}
+	}
+}

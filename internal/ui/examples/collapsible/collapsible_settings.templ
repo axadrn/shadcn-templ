@@ -1,0 +1,63 @@
+package collapsible
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/collapsible"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+)
+
+templ CollapsibleSettings() {
+	@card.Card(card.Props{Class: "mx-auto w-full max-w-xs", Size: card.SizeSm}) {
+		@card.Header() {
+			@card.Title() {
+				Radius
+			}
+			@card.Description() {
+				Set the corner radius of the element.
+			}
+		}
+		@card.Content() {
+			@collapsible.Collapsible(collapsible.Props{Class: "flex items-start gap-2"}) {
+				@field.Group(field.GroupProps{Class: "grid w-full grid-cols-2 gap-2"}) {
+					@field.Field() {
+						@field.Label(field.LabelProps{For: "radius-x", Class: "sr-only"}) {
+							Radius X
+						}
+						@input.Input(input.Props{ID: "radius-x", Placeholder: "0", Value: "0"})
+					}
+					@field.Field() {
+						@field.Label(field.LabelProps{For: "radius-y", Class: "sr-only"}) {
+							Radius Y
+						}
+						@input.Input(input.Props{ID: "radius-y", Placeholder: "0", Value: "0"})
+					}
+					@collapsible.Content(collapsible.ContentProps{Class: "col-span-full grid grid-cols-subgrid gap-2"}) {
+						@field.Field() {
+							@field.Label(field.LabelProps{For: "radius-top", Class: "sr-only"}) {
+								Radius Top
+							}
+							@input.Input(input.Props{ID: "radius-top", Placeholder: "0", Value: "0"})
+						}
+						@field.Field() {
+							@field.Label(field.LabelProps{For: "radius-bottom", Class: "sr-only"}) {
+								Radius Bottom
+							}
+							@input.Input(input.Props{ID: "radius-bottom", Placeholder: "0", Value: "0"})
+						}
+					}
+				}
+				@button.Button(button.Props{
+					Variant:    button.VariantOutline,
+					Size:       button.SizeIcon,
+					Attributes: collapsible.Trigger(ctx),
+				}) {
+					@icon.Maximize(icon.Props{Class: "group-data-panel-open/button:hidden"})
+					@icon.Minimize(icon.Props{Class: "hidden group-data-panel-open/button:inline"})
+				}
+			}
+		}
+	}
+}

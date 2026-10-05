@@ -1,0 +1,35 @@
+package avatar
+
+import "github.com/axadrn/shadcn-templ/v2/components/avatar"
+
+templ AvatarGroup() {
+	@avatar.Group(avatar.GroupProps{Class: "grayscale"}) {
+		@avatar.Avatar() {
+			@avatar.Image(avatar.ImageProps{
+				Src: "https://github.com/axadrn.png",
+				Alt: "@axadrn",
+			})
+			@avatar.Fallback() {
+				AA
+			}
+		}
+		@avatar.Avatar() {
+			@avatar.Image(avatar.ImageProps{
+				Src: "https://github.com/a-h.png",
+				Alt: "@a-h",
+			})
+			@avatar.Fallback() {
+				AH
+			}
+		}
+		@avatar.Avatar() {
+			@avatar.Image(avatar.ImageProps{
+				Src: "https://github.com/joerdav.png",
+				Alt: "@joerdav",
+			})
+			@avatar.Fallback() {
+				JD
+			}
+		}
+	}
+}

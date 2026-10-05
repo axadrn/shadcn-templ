@@ -1,0 +1,24 @@
+package nativeselect
+
+import "github.com/axadrn/shadcn-templ/v2/components/nativeselect"
+
+// The upstream example's Arabic translation, its default language.
+templ NativeSelectRtl() {
+	@nativeselect.NativeSelect(nativeselect.Props{Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@nativeselect.Option(nativeselect.OptionProps{Value: ""}) {
+			اختر الحالة
+		}
+		@nativeselect.Option(nativeselect.OptionProps{Value: "todo"}) {
+			مهام
+		}
+		@nativeselect.Option(nativeselect.OptionProps{Value: "in-progress"}) {
+			قيد التنفيذ
+		}
+		@nativeselect.Option(nativeselect.OptionProps{Value: "done"}) {
+			منجز
+		}
+		@nativeselect.Option(nativeselect.OptionProps{Value: "cancelled"}) {
+			ملغي
+		}
+	}
+}

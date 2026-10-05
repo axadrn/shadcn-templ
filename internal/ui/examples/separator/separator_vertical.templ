@@ -1,0 +1,13 @@
+package separator
+
+import "github.com/axadrn/shadcn-templ/v2/components/separator"
+
+templ SeparatorVertical() {
+	<div class="flex h-5 items-center gap-4 text-sm">
+		<div>Blog</div>
+		@separator.Separator(separator.Props{Orientation: separator.OrientationVertical})
+		<div>Docs</div>
+		@separator.Separator(separator.Props{Orientation: separator.OrientationVertical})
+		<div>Source</div>
+	</div>
+}

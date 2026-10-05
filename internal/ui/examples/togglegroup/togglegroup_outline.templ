@@ -1,0 +1,23 @@
+package togglegroup
+
+import "github.com/axadrn/shadcn-templ/v2/components/togglegroup"
+
+templ ToggleGroupOutline() {
+	@togglegroup.ToggleGroup(togglegroup.Props{
+		Variant:      togglegroup.VariantOutline,
+		DefaultValue: []string{"all"},
+	}) {
+		@togglegroup.Item(togglegroup.ItemProps{
+			Value:      "all",
+			Attributes: templ.Attributes{"aria-label": "Toggle all"},
+		}) {
+			All
+		}
+		@togglegroup.Item(togglegroup.ItemProps{
+			Value:      "missed",
+			Attributes: templ.Attributes{"aria-label": "Toggle missed"},
+		}) {
+			Missed
+		}
+	}
+}

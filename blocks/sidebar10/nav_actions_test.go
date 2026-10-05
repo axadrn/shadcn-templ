@@ -15,7 +15,7 @@ func TestActionsPopoverIsLinkedAndInitiallyOpen(t *testing.T) {
 
 	html := output.String()
 	for _, want := range []string{
-		`aria-controls="sidebar10-actions-popover"`,
+		`data-templ-controls="sidebar10-actions-popover"`,
 		`id="sidebar10-actions-popover"`,
 		`data-templ-default-open`,
 	} {

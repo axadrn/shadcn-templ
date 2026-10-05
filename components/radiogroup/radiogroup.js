@@ -100,7 +100,7 @@
     syncGroup(group);
     group._templComposite = window.templ.composite.useCompositeRoot(group, {
       items: () => itemsOf(group),
-      rtl: () => getComputedStyle(group).direction === "rtl",
+      rtl: () => window.templ.direction.useDirection(group) === "rtl",
       modifierKeys: ["Shift"],
     });
     // RadioGroup's onKeyDownCapture: an arrow key marks the group touched,
@@ -118,10 +118,17 @@
   }
 
   function syncByInput(input) {
-    // The browser already unchecked the same-name siblings without firing
-    // change events on them, so the whole group resyncs.
+    // RadioGroup holds one value: checking a radio unchecks the others of
+    // the group (they share no name unless the group has one, so the browser
+    // does not), and the whole group resyncs.
     const group = groupOf(input);
     if (group) {
+      if (input.checked) {
+        itemsOf(group).forEach((item) => {
+          const other = inputOf(item);
+          if (other && other !== input) other.checked = false;
+        });
+      }
       syncGroup(group);
     } else {
       const item = itemOf(input);

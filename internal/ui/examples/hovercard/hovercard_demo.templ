@@ -1,0 +1,26 @@
+package hovercard
+
+import (
+	exshared "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/shared"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/hovercard"
+)
+
+templ HoverCardDemo() {
+	@hovercard.HoverCard(hovercard.Props{
+		Delay:      10,
+		CloseDelay: 100,
+	}) {
+		@button.Button(button.Props{
+			Variant:    button.VariantLink,
+			Attributes: exshared.ServerRendered(hovercard.Trigger(ctx)),
+		}) {
+			Hover Here
+		}
+		@hovercard.Content(hovercard.ContentProps{Class: "flex w-64 flex-col gap-0.5"}) {
+			<div class="font-semibold">{ "@templ" }</div>
+			<div>The HTML templating language for Go – created and maintained by { "@a-h" }.</div>
+			<div class="mt-1 text-xs text-muted-foreground">Joined December 2021</div>
+		}
+	}
+}

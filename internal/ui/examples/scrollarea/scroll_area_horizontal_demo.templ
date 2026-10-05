@@ -1,0 +1,51 @@
+package scrollarea
+
+import "github.com/axadrn/shadcn-templ/v2/components/scrollarea"
+
+type scrollAreaArtwork struct {
+	Artist string
+	Art    string
+}
+
+var scrollAreaWorks = []scrollAreaArtwork{
+	{Artist: "Ornella Binni", Art: "https://images.unsplash.com/photo-1465869185982-5a1a7522cbcb?auto=format&fit=crop&w=300&q=80"},
+	{Artist: "Tom Byrom", Art: "https://images.unsplash.com/photo-1548516173-3cabfa4607e9?auto=format&fit=crop&w=300&q=80"},
+	{Artist: "Vladimir Malyavko", Art: "https://images.unsplash.com/photo-1494337480532-3725c85fd2ab?auto=format&fit=crop&w=300&q=80"},
+}
+
+templ ScrollAreaHorizontalDemo() {
+	@scrollarea.ScrollArea(scrollarea.Props{Class: "w-96 rounded-md border whitespace-nowrap"}) {
+		<div class="flex w-max space-x-4 p-4">
+			for _, artwork := range scrollAreaWorks {
+				@scrollAreaFigure(artwork)
+			}
+		</div>
+		@scrollarea.ScrollBar(scrollarea.ScrollBarProps{Orientation: scrollarea.OrientationHorizontal})
+	}
+}
+
+templ scrollAreaFigure(artwork scrollAreaArtwork) {
+	<figure class="shrink-0">
+		<div class="overflow-hidden rounded-md">
+			// next/image width={300} height={400}: the img it renders.
+			<img
+				alt={ "Photo by " + artwork.Artist }
+				loading="lazy"
+				width="300"
+				height="400"
+				decoding="async"
+				data-nimg="1"
+				class="aspect-[3/4] h-fit w-fit object-cover"
+				style="color:transparent"
+				srcset={ artwork.Art + " 1x" }
+				src={ artwork.Art }
+			/>
+		</div>
+		<figcaption class="pt-2 text-xs text-muted-foreground">
+			Photo by{ " " }
+			<span class="font-semibold text-foreground">
+				{ artwork.Artist }
+			</span>
+		</figcaption>
+	</figure>
+}

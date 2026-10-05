@@ -513,3 +513,9 @@ Here are some tips for styling the sidebar based on different states.
 	@sidebar.MenuAction(sidebar.MenuActionProps{Class: "peer-data-[active=true]/menu-button:opacity-100"})
 }
 ```
+
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+[View RTL Sidebar](/preview/sidebar-rtl)

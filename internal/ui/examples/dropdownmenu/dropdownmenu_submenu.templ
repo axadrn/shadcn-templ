@@ -1,0 +1,68 @@
+package dropdownmenu
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+)
+
+templ DropdownMenuSubmenu() {
+	@dropdownmenu.DropdownMenu() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: dropdownmenu.Trigger(ctx),
+		}) {
+			Open
+		}
+		@dropdownmenu.Content() {
+			@dropdownmenu.Group() {
+				@dropdownmenu.Item() {
+					Team
+				}
+				@dropdownmenu.Sub() {
+					@dropdownmenu.SubTrigger() {
+						Invite users
+					}
+					@dropdownmenu.Portal() {
+						@dropdownmenu.SubContent() {
+							@dropdownmenu.Item() {
+								Email
+							}
+							@dropdownmenu.Item() {
+								Message
+							}
+							@dropdownmenu.Sub() {
+								@dropdownmenu.SubTrigger() {
+									More options
+								}
+								@dropdownmenu.Portal() {
+									@dropdownmenu.SubContent() {
+										@dropdownmenu.Item() {
+											Calendly
+										}
+										@dropdownmenu.Item() {
+											Slack
+										}
+										@dropdownmenu.Separator()
+										@dropdownmenu.Item() {
+											Webhook
+										}
+									}
+								}
+							}
+							@dropdownmenu.Separator()
+							@dropdownmenu.Item() {
+								Advanced...
+							}
+						}
+					}
+				}
+				@dropdownmenu.Item() {
+					New Team
+					@dropdownmenu.Shortcut() {
+						⌘+T
+					}
+				}
+			}
+		}
+	}
+}

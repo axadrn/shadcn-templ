@@ -51,12 +51,16 @@ func triggerID(popoverID string) string {
 // Trigger returns the attributes that turn any element (usually a button)
 // into the popover trigger — the asChild equivalent: no wrapper element.
 // The element keeps its own data-slot; data-base-ui-click-trigger is the
-// identifier Base UI's PopoverTrigger renders, aria-controls names the popover.
+// identifier Base UI's PopoverTrigger renders, data-templ-controls names the popover.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
+		// useButton: tabIndex 0 and the native type.
+		"tabindex":                   "0",
+		"type":                       "button",
+		"data-slot":                  "popover-trigger",
 		"data-base-ui-click-trigger": true,
 		"id":                         triggerID(state(ctx).id),
-		"aria-controls":              state(ctx).id,
+		"data-templ-controls":        state(ctx).id,
 		"aria-haspopup":              "dialog",
 		"aria-expanded":              "false",
 	}
@@ -139,9 +143,8 @@ templ Content(props ...ContentProps) {
 	// content never participates in layout or sibling CSS. Inside the portal
 	// node Base UI's positioner around the popup.
 	<div data-templ-portal hidden>
-		<div data-base-ui-portal>
+		<div data-base-ui-portal hidden>
 		<div
-			id={ s.id }
 			data-templ-side={ string(p.Side) }
 			data-templ-align={ string(p.Align) }
 			data-templ-side-offset={ strconv.Itoa(sideOffset) }
@@ -155,9 +158,11 @@ templ Content(props ...ContentProps) {
 			data-closed
 			hidden
 			role="presentation"
-			class="isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
+			class="isolate z-50"
+			{ utils.DirectionAttributes(ctx)... }
 		>
 			<div
+				id={ s.id }
 				data-slot="popover-content"
 				data-closed
 				role="dialog"

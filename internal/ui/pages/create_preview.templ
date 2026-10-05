@@ -35,7 +35,7 @@ templ createPreviewContent(item string) {
 		// namespaces like shadcn's registry vs ExamplesIndex; chart-example
 		// exists in both, the registry item wins here.
 		case item == "chart-example":
-			@createRegistryItemPreview(examples.ChartExamplePage())
+			@createRegistryItemPreview(examples.Registry["chart-example-page"].Component)
 		default:
 			if entry, ok := examples.Registry[item]; ok {
 				@createRegistryItemPreview(entry.Component)

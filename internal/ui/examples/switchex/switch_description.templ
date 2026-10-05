@@ -1,0 +1,20 @@
+package switchex
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	switchcomp "github.com/axadrn/shadcn-templ/v2/components/switch"
+)
+
+templ SwitchDescription() {
+	@field.Field(field.Props{Orientation: field.OrientationHorizontal, Class: "max-w-sm"}) {
+		@field.Content() {
+			@field.Label(field.LabelProps{For: "switch-focus-mode"}) {
+				Share across devices
+			}
+			@field.Description() {
+				Focus is shared across devices, and turns off when you leave the app.
+			}
+		}
+		@switchcomp.Switch(switchcomp.Props{ID: "switch-focus-mode"})
+	}
+}

@@ -1,0 +1,187 @@
+package collapsible
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/collapsible"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+	"github.com/axadrn/shadcn-templ/v2/components/tabs"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ collapsibleExampleSection(title string, class string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class={ utils.CN("flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full", class) }>
+			{ children... }
+		</div>
+	</div>
+}
+
+templ CollapsibleExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@collapsibleExampleFileTree()
+			@collapsibleExampleSettings()
+		</div>
+	</div>
+}
+
+var collapsibleExampleTree = []fileTreeItem{
+	{Name: "components", Items: []fileTreeItem{
+		{Name: "ui", Items: []fileTreeItem{
+			{Name: "button.templ"},
+			{Name: "card.templ"},
+			{Name: "dialog.templ"},
+			{Name: "input.templ"},
+			{Name: "select.templ"},
+			{Name: "table.templ"},
+		}},
+		{Name: "login_form.templ"},
+		{Name: "register_form.templ"},
+	}},
+	{Name: "utils", Items: []fileTreeItem{
+		{Name: "utils.go"},
+		{Name: "cn.go"},
+		{Name: "api.go"},
+	}},
+	{Name: "internal", Items: []fileTreeItem{
+		{Name: "middleware.go"},
+		{Name: "session.go"},
+		{Name: "storage.go"},
+	}},
+	{Name: "types", Items: []fileTreeItem{
+		{Name: "types.go"},
+		{Name: "api.go"},
+	}},
+	{Name: "public", Items: []fileTreeItem{
+		{Name: "favicon.ico"},
+		{Name: "logo.svg"},
+		{Name: "images"},
+	}},
+	{Name: "main.go"},
+	{Name: "layout.templ"},
+	{Name: "globals.css"},
+	{Name: "go.mod"},
+	{Name: "go.sum"},
+	{Name: "README.md"},
+	{Name: ".gitignore"},
+}
+
+templ collapsibleExampleTreeEntry(item fileTreeItem) {
+	if len(item.Items) > 0 {
+		@collapsible.Collapsible() {
+			@button.Button(button.Props{
+				Variant:    button.VariantGhost,
+				Size:       button.SizeSm,
+				Class:      "w-full justify-start transition-none hover:bg-accent hover:text-accent-foreground",
+				Attributes: collapsible.Trigger(ctx),
+			}) {
+				@icon.ChevronRight(icon.Props{Class: "transition-transform group-data-panel-open/button:rotate-90"})
+				@icon.Folder()
+				{ item.Name }
+			}
+			@collapsible.Content(collapsible.ContentProps{Class: "mt-1 ml-5 style-lyra:ml-4"}) {
+				<div class="flex flex-col gap-1">
+					for _, child := range item.Items {
+						@collapsibleExampleTreeEntry(child)
+					}
+				</div>
+			}
+		}
+	} else {
+		@button.Button(button.Props{
+			Variant: button.VariantLink,
+			Size:    button.SizeSm,
+			Class:   "w-full justify-start gap-2 text-foreground",
+		}) {
+			@icon.File()
+			<span>{ item.Name }</span>
+		}
+	}
+}
+
+templ collapsibleExampleFileTree() {
+	@collapsibleExampleSection("File Tree", "items-center") {
+		@card.Card(card.Props{Class: "mx-auto w-full max-w-[16rem] gap-2", Size: card.SizeSm}) {
+			@card.Header() {
+				@tabs.Tabs(tabs.Props{DefaultValue: "explorer", ID: "collapsible-example-file-tree-tabs"}) {
+					@tabs.List(tabs.ListProps{Class: "w-full"}) {
+						@tabs.Trigger(tabs.TriggerProps{Value: "explorer"}) {
+							Explorer
+						}
+						@tabs.Trigger(tabs.TriggerProps{Value: "outline"}) {
+							Outline
+						}
+					}
+				}
+			}
+			@card.Content() {
+				<div class="flex flex-col gap-1">
+					for _, item := range collapsibleExampleTree {
+						@collapsibleExampleTreeEntry(item)
+					}
+				</div>
+			}
+		}
+	}
+}
+
+templ collapsibleExampleSettings() {
+	@collapsibleExampleSection("Settings", "items-center") {
+		@card.Card(card.Props{Class: "mx-auto w-full max-w-xs", Size: card.SizeSm}) {
+			@card.Header() {
+				@card.Title() {
+					Radius
+				}
+				@card.Description() {
+					Set the corner radius of the element.
+				}
+			}
+			@card.Content() {
+				@collapsible.Collapsible(collapsible.Props{Class: "flex items-start gap-2"}) {
+					@field.Group(field.GroupProps{Class: "grid w-full grid-cols-2 gap-2"}) {
+						@field.Field() {
+							@field.Label(field.LabelProps{For: "collapsible-example-radius-x", Class: "sr-only"}) {
+								Radius X
+							}
+							@input.Input(input.Props{ID: "collapsible-example-radius-x", Placeholder: "0", Value: "0"})
+						}
+						@field.Field() {
+							@field.Label(field.LabelProps{For: "collapsible-example-radius-y", Class: "sr-only"}) {
+								Radius Y
+							}
+							@input.Input(input.Props{ID: "collapsible-example-radius-y", Placeholder: "0", Value: "0"})
+						}
+						@collapsible.Content(collapsible.ContentProps{Class: "col-span-full grid grid-cols-subgrid gap-2"}) {
+							@field.Field() {
+								@field.Label(field.LabelProps{For: "collapsible-example-radius-top", Class: "sr-only"}) {
+									Radius Top
+								}
+								@input.Input(input.Props{ID: "collapsible-example-radius-top", Placeholder: "0", Value: "0"})
+							}
+							@field.Field() {
+								@field.Label(field.LabelProps{For: "collapsible-example-radius-bottom", Class: "sr-only"}) {
+									Radius Bottom
+								}
+								@input.Input(input.Props{ID: "collapsible-example-radius-bottom", Placeholder: "0", Value: "0"})
+							}
+						}
+					}
+					@button.Button(button.Props{
+						Variant:    button.VariantOutline,
+						Size:       button.SizeIcon,
+						Attributes: collapsible.Trigger(ctx),
+					}) {
+						@icon.Maximize(icon.Props{Class: "group-data-panel-open/button:hidden"})
+						@icon.Minimize(icon.Props{Class: "hidden group-data-panel-open/button:inline"})
+					}
+				}
+			}
+		}
+	}
+}

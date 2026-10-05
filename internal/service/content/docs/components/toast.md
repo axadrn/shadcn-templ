@@ -107,7 +107,6 @@ The `toast.Toaster` component hosts the toasts, mount it once in your layout.
 | --------- | -------- | ------- |
 | `Timeout` | `int`    | `5000`  |
 | `Limit`   | `int`    | `3`     |
-| `Class`   | `string` | -       |
 
 ### toast
 
@@ -115,9 +114,10 @@ The `window.templ.toast` object is the toast manager pendant.
 
 | Function  | Signature                                    | Description                                              |
 | --------- | -------------------------------------------- | -------------------------------------------------------- |
-| `add`     | `(options) => id`                            | Shows a toast, options carry `title`, `description`, `type`, `timeout` and `actionProps`. |
-| `close`   | `(id) => void`                               | Closes a toast.                                          |
-| `promise` | `(promise, { loading, success, error }) => id` | Shows a loading toast that morphs with the promise.      |
+| `add`     | `(options) => id`                            | Shows a toast, options carry `title`, `description`, `type`, `priority`, `timeout` and `actionProps`. |
+| `close`   | `(id?) => void`                              | Closes a toast, or all toasts without an id.             |
+| `update`  | `(id, options) => void`                      | Updates a toast.                                         |
+| `promise` | `(promise, { loading, success, error }) => promise` | Shows a loading toast that morphs with the promise.  |
 
 ### Toast
 

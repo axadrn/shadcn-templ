@@ -253,6 +253,12 @@ You can add an addon to the combobox by using the `inputgroup.Addon` component i
 
 <ComponentPreview name="combobox-input-group" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="combobox-rtl" direction="rtl" align="start" />
+
 ## API Reference
 
 ### Combobox
@@ -262,6 +268,7 @@ The `Combobox` component is the root that manages filtering, selection and the f
 | Prop            | Type       | Default |
 | --------------- | ---------- | ------- |
 | `Name`          | `string`   | -       |
+| `Items`         | `[]ItemData` | -     |
 | `Value`         | `string`   | -       |
 | `Values`        | `[]string` | -       |
 | `Multiple`      | `bool`     | `false` |
@@ -277,6 +284,7 @@ The `combobox.Input` component is the text input that filters the list.
 | `Placeholder` | `string` | -       |
 | `HideTrigger` | `bool`   | `false` |
 | `ShowClear`   | `bool`   | `false` |
+| `Disabled`    | `bool`   | `false` |
 | `Class`       | `string` | -       |
 
 ### Content
@@ -376,4 +384,3 @@ The `combobox.Value` component renders the current selection: the selected chips
 | Prop          | Type     | Default |
 | ------------- | -------- | ------- |
 | `Placeholder` | `string` | -       |
-| `Class`       | `string` | -       |

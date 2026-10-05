@@ -54,7 +54,9 @@ func state(ctx context.Context) ctxState {
 // subState carries the id a Sub shares with its trigger and its content, the
 // pendant of the root's ctxState one level down.
 type ctxSubState struct {
-	id string
+	id          string
+	open        *bool
+	defaultOpen bool
 }
 
 func subState(ctx context.Context) ctxSubState {
@@ -72,15 +74,20 @@ func triggerID(menuID string) string {
 
 // Trigger returns the attributes that turn any element (usually a button)
 // into the menu trigger — the asChild equivalent: no wrapper element, so the
-// trigger composes cleanly inside ButtonGroup and friends. The element keeps
-// its own data-slot; dropdownmenu.js finds it by aria-haspopup="menu" and the
-// aria-controls link to the menu, as Base UI's MenuTrigger renders them.
+// trigger composes cleanly inside ButtonGroup and friends. dropdownmenu.js
+// finds it by aria-haspopup="menu" and the data-templ-controls link to the
+// menu popup. aria-controls follows the open popup, as Base UI's MenuTrigger
+// renders it.
 func Trigger(ctx context.Context) templ.Attributes {
 	return templ.Attributes{
-		"id":            triggerID(state(ctx).id),
-		"aria-controls": state(ctx).id,
-		"aria-haspopup": "menu",
-		"aria-expanded": "false",
+		// useButton: tabIndex 0 and the native type.
+		"tabindex":            "0",
+		"type":                "button",
+		"data-slot":           "dropdown-menu-trigger",
+		"id":                  triggerID(state(ctx).id),
+		"data-templ-controls": state(ctx).id,
+		"aria-haspopup":       "menu",
+		"aria-expanded":       "false",
 	}
 }
 
@@ -187,15 +194,13 @@ type ShortcutProps struct {
 	Attributes templ.Attributes
 }
 
+// SubProps is SubmenuRoot's: it renders no element, ID names the submenu's
+// popup, the open state lands on its positioner like the root's.
 type SubProps struct {
-	ID         string
-	Class      string
-	Attributes templ.Attributes
+	ID          string
 	Open        *bool
 	DefaultOpen bool
 }
-
-
 
 type SubTriggerProps struct {
 	ID         string
@@ -205,7 +210,6 @@ type SubTriggerProps struct {
 }
 
 type SubContentProps struct {
-	ID         string
 	Class      string
 	Attributes templ.Attributes
 }
@@ -214,24 +218,12 @@ type SubContentProps struct {
 // the pointer and with the arrow keys), so there are no hover: styles here.
 // 1:1 base/ui/dropdown-menu.tsx DropdownMenuItem, the look comes from
 // cn-dropdown-menu-item; the inset padding keys on the data-inset attribute.
-func itemClasses() string {
-	return utils.CN(
-		"cn-dropdown-menu-item group/dropdown-menu-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-		// Base UI's item primitive fills the menu row. Native buttons and links
-		// need that layout semantics explicitly.
-		"w-full text-left",
-	)
-}
+const itemClasses = "cn-dropdown-menu-item group/dropdown-menu-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0"
 
 // 1:1 base/ui/dropdown-menu.tsx DropdownMenuCheckboxItem/RadioItem, cnClass is
 // cn-dropdown-menu-checkbox-item or cn-dropdown-menu-radio-item.
 func checkItemClasses(cnClass string) string {
-	return utils.CN(
-		cnClass+" relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-		// Base UI unmounts the indicator when unchecked; our indicator toggles
-		// on the checked state via the group instead.
-		"group/dmitem w-full text-left",
-	)
+	return cnClass + " relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0"
 }
 
 // Root renders no element: it only generates the id that links Trigger and
@@ -254,15 +246,23 @@ type PortalProps struct {
 	Attributes templ.Attributes
 }
 
-// Portal is 1:1 the reference Portal slot: a hidden node that holds the
-// content until the script portals it to <body> on open.
+// Portal is shadcn's DropdownMenuPortal, which an example puts around a
+// submenu's content: a portal node of its own, mounted with the submenu.
 templ Portal(props ...PortalProps) {
 	{{ var p PortalProps }}
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
+	@portal(templ.Attributes{"data-slot": "dropdown-menu-portal"}, p.Attributes) {
+		{ children... }
+	}
+}
+
+// portal is MenuPrimitive.Portal inside the content: a hidden node that holds
+// the content until the script portals it to <body> on open.
+templ portal(attrs ...templ.Attributes) {
 	<div data-templ-portal hidden>
-		<div data-base-ui-portal { p.Attributes... }>
+		<div data-base-ui-portal hidden { utils.MergeAttributes(attrs...)... }>
 			{ children... }
 		</div>
 	</div>
@@ -285,9 +285,8 @@ templ Content(props ...ContentProps) {
 	{{ s := state(ctx) }}
 	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
-	@Portal() {
+	@portal() {
 		<div
-			id={ s.id }
 			data-templ-side={ string(p.Side) }
 			data-templ-align={ string(p.Align) }
 			data-templ-side-offset={ strconv.Itoa(p.SideOffset) }
@@ -299,9 +298,11 @@ templ Content(props ...ContentProps) {
 			data-closed
 			hidden
 			role="presentation"
-			class="isolate absolute inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
+			class="isolate z-50 outline-none"
+			{ utils.DirectionAttributes(ctx)... }
 		>
 			<div
+				id={ s.id }
 				data-slot="dropdown-menu-content"
 				data-closed
 				role="menu"
@@ -356,6 +357,7 @@ templ Label(props ...LabelProps) {
 		}
 		data-slot="dropdown-menu-label"
 		data-inset?={ p.Inset }
+		role="presentation"
 		class={ utils.CN("cn-dropdown-menu-label", p.Class) }
 		{ p.Attributes... }
 	>
@@ -392,17 +394,16 @@ templ Item(props ...ItemProps) {
 			}
 			role="menuitem"
 			tabindex="-1"
-			class={ utils.CN(itemClasses(), p.Class) }
+			class={ utils.CN(itemClasses, p.Class) }
 			{ p.Attributes... }
 		>
 			{ children... }
 		</a>
 	} else {
-		<button
+		<div
 			if p.ID != "" {
 				id={ p.ID }
 			}
-			type="button"
 			data-slot="dropdown-menu-item"
 			data-variant={ string(p.Variant) }
 			data-inset?={ p.Inset }
@@ -415,11 +416,11 @@ templ Item(props ...ItemProps) {
 			}
 			role="menuitem"
 			tabindex="-1"
-			class={ utils.CN(itemClasses(), p.Class) }
+			class={ utils.CN(itemClasses, p.Class) }
 			{ p.Attributes... }
 		>
 			{ children... }
-		</button>
+		</div>
 	}
 }
 
@@ -429,11 +430,10 @@ templ CheckboxItem(props ...CheckboxItemProps) {
 		{{ p = props[0] }}
 	}
 	{{ checked := initialChecked(p) }}
-	<button
+	<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
-		type="button"
 		data-slot="dropdown-menu-checkbox-item"
 		data-templ-checked?={ p.Checked != nil }
 		role="menuitemcheckbox"
@@ -452,14 +452,19 @@ templ CheckboxItem(props ...CheckboxItemProps) {
 		class={ utils.CN(checkItemClasses("cn-dropdown-menu-checkbox-item"), p.Class) }
 		{ p.Attributes... }
 	>
-		<span
-			data-slot="dropdown-menu-checkbox-item-indicator"
-			class="cn-dropdown-menu-item-indicator pointer-events-none opacity-0 group-data-checked/dmitem:opacity-100"
-		>
-			@icon.Check()
+		<span class="cn-dropdown-menu-item-indicator pointer-events-none" data-slot="dropdown-menu-checkbox-item-indicator">
+			@itemIndicator(checked, p.Disabled)
 		</span>
 		{ children... }
-	</button>
+	</div>
+}
+
+// itemIndicator is CheckboxItemIndicator and RadioItemIndicator: mounted
+// while the item is checked, the script toggles [hidden] for the unmount.
+templ itemIndicator(checked, disabled bool) {
+	<span aria-hidden="true" data-checked data-disabled?={ disabled } hidden?={ !checked }>
+		@icon.Check()
+	</span>
 }
 
 templ RadioGroup(props ...RadioGroupProps) {
@@ -494,11 +499,10 @@ templ RadioItem(props ...RadioItemProps) {
 	{{ group, _ := ctx.Value(radioStateKey).(radioState) }}
 	{{ checked := group.value != "" && group.value == p.Value }}
 	{{ disabled := p.Disabled || group.disabled }}
-	<button
+	<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
-		type="button"
 		data-slot="dropdown-menu-radio-item"
 		if p.Value != "" {
 			data-templ-value={ p.Value }
@@ -519,14 +523,11 @@ templ RadioItem(props ...RadioItemProps) {
 		class={ utils.CN(checkItemClasses("cn-dropdown-menu-radio-item"), p.Class) }
 		{ p.Attributes... }
 	>
-		<span
-			data-slot="dropdown-menu-radio-item-indicator"
-			class="cn-dropdown-menu-item-indicator pointer-events-none opacity-0 group-data-checked/dmitem:opacity-100"
-		>
-			@icon.Check()
+		<span class="cn-dropdown-menu-item-indicator pointer-events-none" data-slot="dropdown-menu-radio-item-indicator">
+			@itemIndicator(checked, disabled)
 		</span>
 		{ children... }
-	</button>
+	</div>
 }
 
 templ Separator(props ...SeparatorProps) {
@@ -539,6 +540,8 @@ templ Separator(props ...SeparatorProps) {
 			id={ p.ID }
 		}
 		role="separator"
+		aria-orientation="horizontal"
+		data-orientation="horizontal"
 		data-slot="dropdown-menu-separator"
 		class={ utils.CN("cn-dropdown-menu-separator", p.Class) }
 		{ p.Attributes... }
@@ -567,25 +570,11 @@ templ Sub(props ...SubProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	{{ subID := p.ID }}
-	if subID == "" {
-		{{ subID = utils.RandomID() }}
+	if p.ID == "" {
+		{{ p.ID = utils.RandomID() }}
 	}
-	{{ ctx = context.WithValue(ctx, subStateKey, ctxSubState{id: subID}) }}
-	<div
-		if p.ID != "" {
-			id={ p.ID }
-		}
-		data-slot="dropdown-menu-sub"
-		if p.Open != nil {
-			data-templ-open={ strconv.FormatBool(*p.Open) }
-		}
-		data-templ-default-open?={ p.Open == nil && p.DefaultOpen }
-		class={ utils.CN("", p.Class) }
-		{ p.Attributes... }
-	>
-		{ children... }
-	</div>
+	{{ ctx = context.WithValue(ctx, subStateKey, ctxSubState{id: p.ID, open: p.Open, defaultOpen: p.DefaultOpen}) }}
+	{ children... }
 }
 
 templ SubTrigger(props ...SubTriggerProps) {
@@ -596,11 +585,11 @@ templ SubTrigger(props ...SubTriggerProps) {
 	if p.ID == "" {
 		{{ p.ID = triggerID(subState(ctx).id) }}
 	}
-	<button
+	<div
 		id={ p.ID }
-		type="button"
 		data-slot="dropdown-menu-sub-trigger"
 		data-inset?={ p.Inset }
+		data-templ-controls={ subState(ctx).id }
 		role="menuitem"
 		tabindex="-1"
 		aria-haspopup="menu"
@@ -611,7 +600,6 @@ templ SubTrigger(props ...SubTriggerProps) {
 				// from cn-dropdown-menu-sub-trigger. Base UI keys the open highlight on
 				// data-popup-open.
 				"cn-dropdown-menu-sub-trigger flex cursor-default items-center outline-hidden select-none data-popup-open:bg-accent data-popup-open:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
-				"w-full text-left",
 				p.Class,
 			),
 		}
@@ -619,7 +607,7 @@ templ SubTrigger(props ...SubTriggerProps) {
 	>
 		{ children... }
 		@icon.ChevronRight(icon.Props{Class: "cn-rtl-flip ml-auto"})
-	</button>
+	</div>
 }
 
 templ SubContent(props ...SubContentProps) {
@@ -629,23 +617,27 @@ templ SubContent(props ...SubContentProps) {
 	}
 	// shadcn's DropdownMenuSubContent is a DropdownMenuContent: it portals on
 	// open like the root menu, into the root's portal node.
-	@Portal() {
+	{{ sub := subState(ctx) }}
+	@portal() {
 		<div
+			if sub.open != nil {
+				data-templ-open={ strconv.FormatBool(*sub.open) }
+			}
+			data-templ-default-open?={ sub.open == nil && sub.defaultOpen }
 			data-closed
 			data-nested
 			hidden
 			role="presentation"
-			class="isolate z-50 outline-none absolute inset-auto left-0 top-0"
+			class="isolate z-50 outline-none"
+			{ utils.DirectionAttributes(ctx)... }
 		>
 		<div
-			if p.ID != "" {
-				id={ p.ID }
-			}
+			id={ sub.id }
 			data-slot="dropdown-menu-sub-content"
 			data-closed
 			data-nested
 			role="menu"
-			aria-labelledby={ triggerID(subState(ctx).id) }
+			aria-labelledby={ triggerID(sub.id) }
 			tabindex="-1"
 			data-base-ui-focusable
 			class={

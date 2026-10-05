@@ -117,7 +117,14 @@ templ formExample() {
 								@field.Label(field.LabelProps{For: "small-form-role"}) {
 									Role
 								}
-								@selectcomp.Select() {
+								@selectcomp.Select(selectcomp.Props{
+									Items: []selectcomp.ItemData{
+										{Value: "developer", Label: "Developer"},
+										{Value: "designer", Label: "Designer"},
+										{Value: "manager", Label: "Manager"},
+										{Value: "other", Label: "Other"},
+									},
+								}) {
 									@selectcomp.Trigger(selectcomp.TriggerProps{ID: "small-form-role"}) {
 										@selectcomp.Value()
 									}

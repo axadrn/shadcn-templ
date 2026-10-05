@@ -1,0 +1,332 @@
+package attachment
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+type State string
+
+const (
+	StateIdle       State = "idle"
+	StateUploading  State = "uploading"
+	StateProcessing State = "processing"
+	StateError      State = "error"
+	StateDone       State = "done"
+)
+
+type Size string
+
+const (
+	SizeDefault Size = "default"
+	SizeSm      Size = "sm"
+	SizeXs      Size = "xs"
+)
+
+type Orientation string
+
+const (
+	OrientationHorizontal Orientation = "horizontal"
+	OrientationVertical   Orientation = "vertical"
+)
+
+type MediaVariant string
+
+const (
+	MediaVariantIcon  MediaVariant = "icon"
+	MediaVariantImage MediaVariant = "image"
+)
+
+type Props struct {
+	ID          string
+	Class       string
+	Attributes  templ.Attributes
+	State       State       // default "done"
+	Size        Size        // default "default"
+	Orientation Orientation // default "horizontal"
+}
+
+type GroupProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type MediaProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Variant    MediaVariant // default "icon"
+}
+
+type ContentProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type TitleProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type DescriptionProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type ActionsProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+// ActionProps are the Button props AttachmentAction forwards.
+type ActionProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Variant    button.Variant // default "ghost"
+	Size       button.Size    // default "icon-xs"
+	Type       button.Type
+	Disabled   bool
+}
+
+type TriggerProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	// Href renders the trigger as a link (render={<a href />}); target and
+	// rel go in Attributes.
+	Href string
+}
+
+// 1:1 base/ui/attachment.tsx: structure lives here, the look comes from the
+// active style-*.css via the cn-attachment-* classes.
+func attachmentClasses(size Size, orientation Orientation) string {
+	s := "cn-attachment-size-default"
+	switch size {
+	case SizeSm:
+		s = "cn-attachment-size-sm"
+	case SizeXs:
+		s = "cn-attachment-size-xs"
+	}
+	o := "cn-attachment-orientation-horizontal items-center"
+	if orientation == OrientationVertical {
+		o = "cn-attachment-orientation-vertical flex-col"
+	}
+	return utils.CN("cn-attachment group/attachment relative flex max-w-full min-w-0 shrink-0 flex-wrap border bg-card text-card-foreground transition-colors has-[>a,>button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed", s, o)
+}
+
+func mediaClasses(variant MediaVariant) string {
+	v := "cn-attachment-media-variant-icon"
+	if variant == MediaVariantImage {
+		v = "cn-attachment-media-variant-image *:[img]:aspect-square *:[img]:w-full *:[img]:object-cover"
+	}
+	return utils.CN("cn-attachment-media relative flex aspect-square shrink-0 items-center justify-center overflow-hidden group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive [&_svg]:pointer-events-none", v)
+}
+
+const triggerClasses = "cn-attachment-trigger absolute inset-0 z-10 outline-none"
+
+templ Attachment(props ...Props) {
+	{{ var p Props }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.State == "" {
+		{{ p.State = StateDone }}
+	}
+	if p.Size == "" {
+		{{ p.Size = SizeDefault }}
+	}
+	if p.Orientation == "" {
+		{{ p.Orientation = OrientationHorizontal }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="attachment"
+		data-state={ string(p.State) }
+		data-size={ string(p.Size) }
+		data-orientation={ string(p.Orientation) }
+		class={ utils.CN(attachmentClasses(p.Size, p.Orientation), p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+templ Media(props ...MediaProps) {
+	{{ var p MediaProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.Variant == "" {
+		{{ p.Variant = MediaVariantIcon }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="attachment-media"
+		data-variant={ string(p.Variant) }
+		class={ utils.CN(mediaClasses(p.Variant), p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+templ Content(props ...ContentProps) {
+	{{ var p ContentProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="attachment-content"
+		class={ utils.CN("cn-attachment-content max-w-full min-w-0 flex-1", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+templ Title(props ...TitleProps) {
+	{{ var p TitleProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<span
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="attachment-title"
+		class={ utils.CN("cn-attachment-title block max-w-full min-w-0 truncate group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</span>
+}
+
+templ Description(props ...DescriptionProps) {
+	{{ var p DescriptionProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<span
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="attachment-description"
+		class={ utils.CN("cn-attachment-description block min-w-0 truncate text-muted-foreground group-data-[state=error]/attachment:text-destructive/80", "max-w-full", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</span>
+}
+
+templ Actions(props ...ActionsProps) {
+	{{ var p ActionsProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="attachment-actions"
+		class={ utils.CN("cn-attachment-actions flex shrink-0 items-center", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+// Action is AttachmentAction: a Button carrying the attachment-action slot.
+templ Action(props ...ActionProps) {
+	{{ var p ActionProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.Variant == "" {
+		{{ p.Variant = button.VariantGhost }}
+	}
+	if p.Size == "" {
+		{{ p.Size = button.SizeIconXs }}
+	}
+	@button.Button(button.Props{
+		ID:         p.ID,
+		Class:      utils.CN("cn-attachment-action", p.Class),
+		Attributes: utils.MergeAttributes(templ.Attributes{"data-slot": "attachment-action"}, p.Attributes),
+		Variant:    p.Variant,
+		Size:       p.Size,
+		Type:       p.Type,
+		Disabled:   p.Disabled,
+	}) {
+		{ children... }
+	}
+}
+
+// Trigger is AttachmentTrigger: a full-card overlay button. Another
+// component's trigger merged onto it (dialog.Trigger(ctx) in Attributes)
+// may set its own data-slot, which wins like Base UI's render prop.
+templ Trigger(props ...TriggerProps) {
+	{{ var p TriggerProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	{{ _, hasSlot := p.Attributes["data-slot"] }}
+	if p.Href != "" {
+		<a
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			href={ templ.SafeURL(p.Href) }
+			if !hasSlot {
+				data-slot="attachment-trigger"
+			}
+			class={ utils.CN(triggerClasses, p.Class) }
+			{ p.Attributes... }
+		></a>
+	} else {
+		{{ _, hasType := p.Attributes["type"] }}
+		<button
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			if !hasType {
+				type="button"
+			}
+			if !hasSlot {
+				data-slot="attachment-trigger"
+			}
+			class={ utils.CN(triggerClasses, p.Class) }
+			{ p.Attributes... }
+		>
+			{ children... }
+		</button>
+	}
+}
+
+templ Group(props ...GroupProps) {
+	{{ var p GroupProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="attachment-group"
+		class={ utils.CN("cn-attachment-group flex min-w-0 scroll-fade-x snap-x snap-mandatory scrollbar-none overflow-x-auto overscroll-x-contain *:data-[slot=attachment]:flex-none *:data-[slot=attachment]:snap-start", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}

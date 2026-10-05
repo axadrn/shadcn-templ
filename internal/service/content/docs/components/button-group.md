@@ -149,6 +149,12 @@ Use with a `Popover` component.
 
 <ComponentPreview name="button-group-popover" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="button-group-rtl" direction="rtl" />
+
 ## API Reference
 
 ### ButtonGroup

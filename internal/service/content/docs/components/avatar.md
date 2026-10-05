@@ -31,6 +31,8 @@ shadcn-templ add avatar
 
 <ComponentSource name="avatar" title="components/avatar/avatar.js" />
 
+<ComponentSource name="avatar" title="components/baseui/lifecycle.js" />
+
 Component scripts are loaded through the shared script bundle, see [JavaScript](/docs/installation#javascript).
 
 <Step>Update the import paths to match your project setup.</Step>
@@ -141,6 +143,12 @@ Use the `Size` prop to change the size of the avatar.
 You can use the `Avatar` component as a trigger for a dropdown menu.
 
 <ComponentPreview name="avatar-dropdown" />
+
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="avatar-rtl" direction="rtl" previewClassName="h-72" />
 
 ## API Reference
 

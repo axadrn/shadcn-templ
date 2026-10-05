@@ -1,0 +1,16 @@
+package avatar
+
+import "github.com/axadrn/shadcn-templ/v2/components/avatar"
+
+templ AvatarBasic() {
+	@avatar.Avatar() {
+		@avatar.Image(avatar.ImageProps{
+			Src:   "https://github.com/axadrn.png",
+			Alt:   "@axadrn",
+			Class: "grayscale",
+		})
+		@avatar.Fallback() {
+			AA
+		}
+	}
+}

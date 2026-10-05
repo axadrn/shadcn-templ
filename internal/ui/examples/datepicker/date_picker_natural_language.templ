@@ -1,0 +1,111 @@
+package datepicker
+
+import (
+	"time"
+
+	"github.com/axadrn/shadcn-templ/v2/components/calendar"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/popover"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ DatePickerNaturalLanguage() {
+	// parseDate("In 2 days"): two days from today, at noon like chrono.
+	{{ now := time.Now() }}
+	{{ date := time.Date(now.Year(), now.Month(), now.Day()+2, 12, 0, 0, 0, time.Local) }}
+	@field.Field(field.Props{Class: "mx-auto max-w-xs"}) {
+		@field.Label(field.LabelProps{For: "date-optional"}) {
+			Schedule Date
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{
+				ID:          "date-optional",
+				Value:       "In 2 days",
+				Placeholder: "Tomorrow or next week",
+			})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@popover.Popover() {
+					@inputgroup.Button(inputgroup.ButtonProps{
+						Variant:    "ghost",
+						Size:       inputgroup.ButtonSizeIconXs,
+						Attributes: utils.MergeAttributes(popover.Trigger(ctx), templ.Attributes{"id": "date-picker", "aria-label": "Select date"}),
+					}) {
+						@icon.Calendar()
+						<span class="sr-only">Select date</span>
+					}
+					@popover.Content(popover.ContentProps{
+						Class:      "w-auto overflow-hidden p-0",
+						Align:      popover.AlignEnd,
+						SideOffset: 8,
+					}) {
+						@calendar.Calendar(calendar.Props{
+							Mode:          calendar.ModeSingle,
+							Selected:      date,
+							CaptionLayout: calendar.CaptionLayoutDropdown,
+							DefaultMonth:  date,
+						})
+					}
+				}
+			}
+		}
+		<div class="px-1 text-sm text-muted-foreground">
+			Your post will be published on{ " " }
+			<span class="font-medium">{ date.Format("January 02, 2006") }</span>.
+		</div>
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			// The open, value and date state. parseDate is chrono-node's,
+			// which shadcn-templ does not ship: this pendant reads today,
+			// tomorrow, yesterday, "in N days|weeks|months", next week|month
+			// and whatever Date parses.
+			const demo = document.currentScript.previousElementSibling;
+			const input = demo.querySelector("input");
+			const trigger = demo.querySelector('[data-slot="popover-trigger"]');
+			const popup = document.getElementById(trigger.getAttribute("data-templ-controls"));
+			const calendar = popup.querySelector('[data-slot="calendar"]');
+			const output = demo.lastElementChild.querySelector("span");
+			const formatDate = (d) => (d ? d.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" }) : "");
+			const parseDate = (text) => {
+				const t = text.trim().toLowerCase();
+				const day = (n) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n); return d; };
+				const month = (n) => { const d = day(0); d.setMonth(d.getMonth() + n); return d; };
+				if (t === "today" || t === "now") return day(0);
+				if (t === "tomorrow") return day(1);
+				if (t === "yesterday") return day(-1);
+				if (t === "next week") return day(7);
+				if (t === "next month") return month(1);
+				const m = t.match(/^in (\d+|a|an|one|two|three) (day|week|month|year)s?$/);
+				if (m) {
+					const n = { a: 1, an: 1, one: 1, two: 2, three: 3 }[m[1]] ?? Number(m[1]);
+					return m[2] === "day" ? day(n) : m[2] === "week" ? day(7 * n) : m[2] === "month" ? month(n) : month(12 * n);
+				}
+				const d = new Date(text);
+				return text.trim() && !isNaN(d.getTime()) ? d : null;
+			};
+			const setDate = (date) => {
+				window.templ.calendar.setSelected(calendar, date);
+				output.textContent = formatDate(date);
+			};
+			input.addEventListener("input", () => {
+				const date = parseDate(input.value);
+				if (date) setDate(date);
+			});
+			input.addEventListener("keydown", (e) => {
+				if (e.key === "ArrowDown") {
+					e.preventDefault();
+					window.templ.popover.open(popup);
+				}
+			});
+			calendar.addEventListener("calendar-select", (e) => {
+				// The calendar holds its own selection already, like the
+				// re-render of the same DayPicker: no remount.
+				output.textContent = formatDate(e.detail.selected);
+				input.value = formatDate(e.detail.selected);
+				window.templ.popover.close(popup);
+			});
+		})();
+	</script>
+}

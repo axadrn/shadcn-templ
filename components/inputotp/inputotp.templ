@@ -23,13 +23,18 @@ func state(ctx context.Context) ctxState {
 	return ctxState{}
 }
 
+// Props are the OTPInput props of the input-otp library shadcn wraps; ID,
+// Class, Attributes and the input props land on the real input like the
+// library spreads them.
 type Props struct {
 	ID         string
 	Class      string
 	Attributes templ.Attributes
-	Value      string
-	Name       string
-	Form       string
+	// Value is the controlled value, set it on input-otp-change through
+	// window.templ.inputOTP.setValue. DefaultValue is the uncontrolled one.
+	Value        *string
+	DefaultValue string
+	MaxLength    int
 	// Pattern restricts input to a regular expression, e.g.
 	// inputotp.RegexpOnlyDigits (input-otp's REGEXP constants).
 	Pattern  string
@@ -43,6 +48,45 @@ const (
 	RegexpOnlyChars          = "^[a-zA-Z]+$"
 	RegexpOnlyDigitsAndChars = "^[a-zA-Z0-9]+$"
 )
+
+// The library's NOSCRIPT_CSS_FALLBACK.
+const noScriptCSSFallback = `
+[data-input-otp] {
+  --nojs-bg: white !important;
+  --nojs-fg: black !important;
+
+  background-color: var(--nojs-bg) !important;
+  color: var(--nojs-fg) !important;
+  caret-color: var(--nojs-fg) !important;
+  letter-spacing: .25em !important;
+  text-align: center !important;
+  border: 1px solid var(--nojs-fg) !important;
+  border-radius: 4px !important;
+  width: 100% !important;
+}
+@media (prefers-color-scheme: dark) {
+  [data-input-otp] {
+    --nojs-bg: black !important;
+    --nojs-fg: white !important;
+  }
+}`
+
+func (p Props) value() string {
+	if p.Value != nil {
+		return *p.Value
+	}
+	return p.DefaultValue
+}
+
+func rootStyle(disabled bool) string {
+	cursor := "text"
+	if disabled {
+		cursor = "default"
+	}
+	return "position:relative;cursor:" + cursor + ";user-select:none;-webkit-user-select:none;pointer-events:none"
+}
+
+const inputStyle = "position:absolute;inset:0;width:100%;height:100%;display:flex;text-align:left;opacity:1;color:transparent;pointer-events:all;background:transparent;caret-color:transparent;border:0 solid transparent;outline:0 solid transparent;box-shadow:none;line-height:1;letter-spacing:-.5em;font-size:var(--root-height);font-family:monospace;font-variant-numeric:tabular-nums"
 
 type GroupProps struct {
 	ID         string
@@ -71,40 +115,45 @@ templ InputOTP(props ...Props) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	{{ ctx = context.WithValue(ctx, stateKey, ctxState{value: p.Value}) }}
+	{{ value := p.value() }}
+	{{ ctx = context.WithValue(ctx, stateKey, ctxState{value: value}) }}
+	<noscript>
+		@templ.Raw("<style>" + noScriptCSSFallback + "</style>")
+	</noscript>
 	<div
-		data-slot="input-otp"
-		data-input-otp-container
-		if p.Pattern != "" {
-			data-templ-pattern={ p.Pattern }
-		}
-		class={ utils.CN("cn-input-otp relative flex items-center has-disabled:opacity-50", p.Class) }
-		{ p.Attributes... }
+		data-input-otp-container="true"
+		style={ rootStyle(p.Disabled) }
+		class="cn-input-otp flex items-center has-disabled:opacity-50"
 	>
 		{ children... }
-		<input
-			if p.ID != "" {
-				id={ p.ID }
-			}
-			data-input-otp
-			type="text"
-			inputmode="numeric"
-			autocomplete="one-time-code"
-			spellcheck="false"
-			if p.Value != "" {
-				value={ p.Value }
-			}
-			if p.Name != "" {
-				name={ p.Name }
-			}
-			if p.Form != "" {
-				form={ p.Form }
-			}
-			disabled?={ p.Disabled }
-			required?={ p.Required }
-			class="cn-input-otp-input absolute inset-y-0 left-0 h-full opacity-0 disabled:cursor-not-allowed"
-			style="width:calc(100% + 40px);clip-path:inset(0 40px 0 0)"
-		/>
+		<div style="position:absolute;inset:0;pointer-events:none">
+			<input
+				autocomplete="one-time-code"
+				data-slot="input-otp"
+				spellcheck="false"
+				class={ utils.CN("cn-input-otp-input disabled:cursor-not-allowed", p.Class) }
+				if p.ID != "" {
+					id={ p.ID }
+				}
+				disabled?={ p.Disabled }
+				required?={ p.Required }
+				data-input-otp="true"
+				if value == "" {
+					data-input-otp-placeholder-shown="true"
+				}
+				inputmode="numeric"
+				if p.Pattern != "" {
+					pattern={ p.Pattern }
+				}
+				style={ inputStyle }
+				maxlength={ strconv.Itoa(p.MaxLength) }
+				value={ value }
+				if p.Value != nil {
+					data-templ-value={ *p.Value }
+				}
+				{ p.Attributes... }
+			/>
+		</div>
 	</div>
 }
 
@@ -142,6 +191,7 @@ templ Slot(props ...SlotProps) {
 			id={ p.ID }
 		}
 		data-slot="input-otp-slot"
+		data-active="false"
 		data-templ-index={ strconv.Itoa(p.Index) }
 		class={
 			utils.CN(
@@ -151,12 +201,7 @@ templ Slot(props ...SlotProps) {
 		}
 		{ p.Attributes... }
 	>
-		<span>{ char }</span>
-		// input-otp only mounts the caret in the active empty slot; ours starts
-		// hidden and inputotp.js toggles hidden/flex.
-		<div class="cn-input-otp-caret pointer-events-none absolute inset-0 hidden items-center justify-center">
-			<div class="cn-input-otp-caret-line"></div>
-		</div>
+		{ char }
 	</div>
 }
 

@@ -1,0 +1,11 @@
+package skeleton
+
+import "github.com/axadrn/shadcn-templ/v2/components/skeleton"
+
+templ SkeletonText() {
+	<div class="flex w-full max-w-xs flex-col gap-2">
+		@skeleton.Skeleton(skeleton.Props{Class: "h-4 w-full"})
+		@skeleton.Skeleton(skeleton.Props{Class: "h-4 w-full"})
+		@skeleton.Skeleton(skeleton.Props{Class: "h-4 w-3/4"})
+	</div>
+}

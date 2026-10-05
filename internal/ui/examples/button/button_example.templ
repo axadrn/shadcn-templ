@@ -1,0 +1,163 @@
+package button
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+// The loops render every variant in the same DOM order.
+templ buttonExampleSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+type buttonExampleVariant struct {
+	Variant button.Variant
+	Label   string
+}
+
+var buttonExampleVariants = []buttonExampleVariant{
+	{button.VariantDefault, "Default"},
+	{button.VariantSecondary, "Secondary"},
+	{button.VariantOutline, "Outline"},
+	{button.VariantGhost, "Ghost"},
+	{button.VariantDestructive, "Destructive"},
+	{button.VariantLink, "Link"},
+}
+
+var buttonExampleSizes = []button.Size{
+	button.SizeXs,
+	button.SizeSm,
+	button.SizeDefault,
+	button.SizeLg,
+}
+
+var buttonExampleIconSizes = []button.Size{
+	button.SizeIconXs,
+	button.SizeIconSm,
+	button.SizeIcon,
+	button.SizeIconLg,
+}
+
+templ ButtonExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class={ utils.CN("mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl", "lg:grid-cols-1 2xl:grid-cols-1") }>
+			@buttonExampleVariantsAndSizes()
+			@buttonExampleIconRight()
+			@buttonExampleIconLeft()
+			@buttonExampleIconOnly()
+			@buttonExampleInvalidStates()
+			@buttonExampleExamples()
+		</div>
+	</div>
+}
+
+templ buttonExampleVariantsAndSizes() {
+	@buttonExampleSection("Variants & Sizes") {
+		for _, size := range buttonExampleSizes {
+			<div class="flex flex-wrap items-center gap-2">
+				for _, v := range buttonExampleVariants {
+					@button.Button(button.Props{Size: size, Variant: v.Variant}) {
+						{ v.Label }
+					}
+				}
+			</div>
+		}
+	}
+}
+
+templ buttonExampleIconRight() {
+	@buttonExampleSection("Icon Right") {
+		for _, size := range buttonExampleSizes {
+			<div class="flex flex-wrap items-center gap-2">
+				for _, v := range buttonExampleVariants {
+					@button.Button(button.Props{Size: size, Variant: v.Variant}) {
+						{ v.Label }
+						@icon.ArrowRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+					}
+				}
+			</div>
+		}
+	}
+}
+
+templ buttonExampleIconLeft() {
+	@buttonExampleSection("Icon Left") {
+		for _, size := range buttonExampleSizes {
+			<div class="flex flex-wrap items-center gap-2">
+				for _, v := range buttonExampleVariants {
+					@button.Button(button.Props{Size: size, Variant: v.Variant}) {
+						@icon.CircleArrowLeft(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+						{ v.Label }
+					}
+				}
+			</div>
+		}
+	}
+}
+
+templ buttonExampleIconOnly() {
+	@buttonExampleSection("Icon Only") {
+		for _, size := range buttonExampleIconSizes {
+			<div class="flex flex-wrap items-center gap-2">
+				for _, v := range buttonExampleVariants {
+					@button.Button(button.Props{Size: size, Variant: v.Variant}) {
+						@icon.ArrowRight()
+					}
+				}
+			</div>
+		}
+	}
+}
+
+templ buttonExampleInvalidStates() {
+	@buttonExampleSection("Invalid States") {
+		for _, size := range buttonExampleSizes {
+			<div class="flex flex-wrap items-center gap-2">
+				for _, v := range buttonExampleVariants {
+					@button.Button(button.Props{
+						Size:       size,
+						Variant:    v.Variant,
+						Attributes: templ.Attributes{"aria-invalid": "true"},
+					}) {
+						{ v.Label }
+					}
+				}
+			</div>
+		}
+	}
+}
+
+templ buttonExampleExamples() {
+	@buttonExampleSection("Examples") {
+		<div class="flex flex-wrap items-center gap-4">
+			<div class="flex items-center gap-2">
+				@button.Button(button.Props{Variant: button.VariantOutline}) {
+					Cancel
+				}
+				@button.Button() {
+					Submit
+					@icon.ArrowRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+				}
+			</div>
+			<div class="flex items-center gap-2">
+				@button.Button(button.Props{Variant: button.VariantDestructive}) {
+					Delete
+				}
+				@button.Button(button.Props{Size: button.SizeIcon}) {
+					@icon.ArrowRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+				}
+			</div>
+			@button.Button(button.Props{Href: "#"}) {
+				Link
+			}
+		</div>
+	}
+}

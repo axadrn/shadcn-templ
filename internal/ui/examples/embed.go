@@ -4,5 +4,5 @@ import (
 	"embed"
 )
 
-//go:embed *.templ
+//go:embed */*.templ
 var TemplFiles embed.FS

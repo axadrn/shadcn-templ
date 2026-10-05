@@ -1,0 +1,15 @@
+package textarea
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/textarea"
+)
+
+templ TextareaButton() {
+	<div class="grid w-full gap-2">
+		@textarea.Textarea(textarea.Props{Placeholder: "Type your message here."})
+		@button.Button() {
+			Send message
+		}
+	</div>
+}

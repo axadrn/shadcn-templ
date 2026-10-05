@@ -61,6 +61,12 @@ A portrait aspect ratio component using the `Ratio: "9/16"` prop. This is useful
 
 <ComponentPreview name="aspect-ratio-portrait" previewClassName="h-96" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="aspect-ratio-rtl" direction="rtl" previewClassName="h-96" />
+
 ## API Reference
 
 ### AspectRatio

@@ -1,0 +1,37 @@
+package hovercard
+
+import (
+	exshared "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/shared"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/hovercard"
+)
+
+templ HoverCardSides() {
+	<div class="flex flex-wrap justify-center gap-2">
+		@hoverCardSide("Left", hovercard.SideLeft)
+		@hoverCardSide("Top", hovercard.SideTop)
+		@hoverCardSide("Bottom", hovercard.SideBottom)
+		@hoverCardSide("Right", hovercard.SideRight)
+	</div>
+}
+
+templ hoverCardSide(label string, side hovercard.Side) {
+	@hovercard.HoverCard(hovercard.Props{
+		Delay:      100,
+		CloseDelay: 100,
+	}) {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Class:      "capitalize",
+			Attributes: exshared.ServerRendered(hovercard.Trigger(ctx)),
+		}) {
+			{ label }
+		}
+		@hovercard.Content(hovercard.ContentProps{Side: side}) {
+			<div class="flex flex-col gap-1">
+				<h4 class="font-medium">Hover Card</h4>
+				<p>This hover card appears on the { label } side of the trigger.</p>
+			</div>
+		}
+	}
+}

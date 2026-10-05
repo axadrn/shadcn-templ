@@ -1,0 +1,38 @@
+package bubble
+
+import (
+	exshared "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/shared"
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/tooltip"
+)
+
+templ BubbleTooltipDemo() {
+	<div class="flex w-full max-w-sm flex-col gap-4 py-12">
+		@bubble.Bubble(bubble.Props{Variant: bubble.VariantSecondary}) {
+			@bubble.Content() {
+				Did you remove the stale route?
+			}
+		}
+		@bubble.Bubble(bubble.Props{Align: bubble.AlignEnd}) {
+			@bubble.Content() {
+				Yes, removed it from the registry.
+			}
+			@bubble.Reactions() {
+				@tooltip.Tooltip() {
+					@button.Button(button.Props{
+						Variant:    button.VariantGhost,
+						Size:       button.SizeIconXs,
+						Attributes: exshared.ServerRendered(tooltip.Trigger(ctx)),
+					}) {
+						@icon.Check()
+					}
+					@tooltip.Content() {
+						Read on Jan 5, 2026 at 4:32 PM
+					}
+				}
+			}
+		}
+	</div>
+}

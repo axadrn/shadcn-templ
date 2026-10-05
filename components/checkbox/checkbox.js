@@ -54,15 +54,17 @@
     const indeterminate = input.indeterminate;
     root.setAttribute("aria-checked", indeterminate ? "mixed" : String(checked));
     root.toggleAttribute("data-indeterminate", indeterminate);
-    root.toggleAttribute("data-checked", checked);
-    root.toggleAttribute("data-unchecked", !checked);
+    // useStateAttributesMapping: the mixed state renders neither
+    // data-checked nor data-unchecked.
+    root.toggleAttribute("data-checked", checked && !indeterminate);
+    root.toggleAttribute("data-unchecked", !checked && !indeterminate);
     const indicator = root.querySelector('[data-slot="checkbox-indicator"]');
     if (indicator) {
       // Base UI unmounts the indicator while unchecked; we toggle [hidden].
       indicator.hidden = !checked && !indeterminate;
       indicator.toggleAttribute("data-indeterminate", indeterminate);
-      indicator.toggleAttribute("data-checked", checked);
-      indicator.toggleAttribute("data-unchecked", !checked);
+      indicator.toggleAttribute("data-checked", checked && !indeterminate);
+      indicator.toggleAttribute("data-unchecked", !checked && !indeterminate);
     }
   }
 
@@ -181,4 +183,16 @@
   }
 
   window.templ.lifecycle.register(ROOT, { init: setup });
+
+  // The owner's API: setChecked is the pendant of the checked prop a page
+  // renders a controlled checkbox with.
+  window.templ = window.templ || {};
+  window.templ.checkbox = {
+    setChecked(root, checked) {
+      const input = inputOf(root);
+      if (!input) return;
+      input.checked = checked;
+      sync(root, input);
+    },
+  };
 })();

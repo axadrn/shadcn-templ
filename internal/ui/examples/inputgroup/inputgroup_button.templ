@@ -1,0 +1,89 @@
+package inputgroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/popover"
+)
+
+templ InputGroupButton() {
+	<div class="grid w-full max-w-sm gap-6">
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{Placeholder: "https://x.com/shadcn", Attributes: templ.Attributes{"readonly": true}})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@inputgroup.Button(inputgroup.ButtonProps{
+					Size:       inputgroup.ButtonSizeIconXs,
+					Attributes: templ.Attributes{"aria-label": "Copy", "title": "Copy"},
+				}) {
+					@icon.Copy()
+				}
+				// The icon isCopied renders.
+				<template>
+					@icon.Check()
+				</template>
+			}
+		}
+		@inputgroup.InputGroup(inputgroup.Props{Class: "[--radius:9999px]"}) {
+			@popover.Popover() {
+				@inputgroup.Addon(inputgroup.AddonProps{Attributes: popover.Trigger(ctx)}) {
+					@inputgroup.Button(inputgroup.ButtonProps{
+						Variant: "secondary",
+						Size:    inputgroup.ButtonSizeIconXs,
+					}) {
+						@icon.Info()
+					}
+				}
+				@popover.Content(popover.ContentProps{
+					Align: popover.AlignStart,
+					Class: "flex flex-col gap-1 rounded-xl text-sm",
+				}) {
+					<p class="font-medium">Your connection is not secure.</p>
+					<p>You should not enter any sensitive information on this site.</p>
+				}
+			}
+			@inputgroup.Addon(inputgroup.AddonProps{Class: "pl-1.5 text-muted-foreground"}) {
+				https://
+			}
+			@inputgroup.Input(inputgroup.InputProps{ID: "input-secure-19"})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@inputgroup.Button(inputgroup.ButtonProps{Size: inputgroup.ButtonSizeIconXs}) {
+					@icon.Star(icon.Props{
+						Class:      "data-[favorite=true]:fill-blue-600 data-[favorite=true]:stroke-blue-600",
+						Attributes: templ.Attributes{"data-favorite": "false"},
+					})
+				}
+			}
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{Placeholder: "Type to search..."})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@inputgroup.Button(inputgroup.ButtonProps{Variant: "secondary"}) {
+					Search
+				}
+			}
+		}
+	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The isCopied state of useCopyToClipboard (2 s) and the isFavorite
+		// state.
+		(() => {
+			const demo = document.currentScript.previousElementSibling;
+			const [copyGroup, secureGroup] = demo.children;
+			const copy = copyGroup.querySelector("button");
+			const copyIcon = copy.firstElementChild;
+			const checkIcon = copyGroup.querySelector("template").content.firstElementChild;
+			let timer;
+			copy.addEventListener("click", () => {
+				navigator.clipboard.writeText("https://x.com/shadcn").then(() => {
+					copy.replaceChildren(checkIcon.cloneNode(true));
+					clearTimeout(timer);
+					timer = setTimeout(() => copy.replaceChildren(copyIcon), 2000);
+				});
+			});
+			const star = secureGroup.querySelector('[data-favorite]');
+			star.parentElement.addEventListener("click", () => {
+				star.setAttribute("data-favorite", String(star.getAttribute("data-favorite") !== "true"));
+			});
+		})();
+	</script>
+}

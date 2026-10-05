@@ -1,0 +1,202 @@
+package menubar
+
+import "github.com/axadrn/shadcn-templ/v2/components/menubar"
+
+templ MenubarDemo() {
+	@menubar.Menubar(menubar.Props{Class: "w-72"}) {
+		@menubar.Menu() {
+			@menubar.Trigger() {
+				File
+			}
+			@menubar.Content() {
+				@menubar.Group() {
+					@menubar.Item() {
+						New Tab
+						@menubar.Shortcut() {
+							⌘T
+						}
+					}
+					@menubar.Item() {
+						New Window
+						@menubar.Shortcut() {
+							⌘N
+						}
+					}
+					@menubar.Item(menubar.ItemProps{Disabled: true}) {
+						New Incognito Window
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Sub() {
+						@menubar.SubTrigger() {
+							Share
+						}
+						@menubar.SubContent() {
+							@menubar.Group() {
+								@menubar.Item() {
+									Email link
+								}
+								@menubar.Item() {
+									Messages
+								}
+								@menubar.Item() {
+									Notes
+								}
+							}
+						}
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item() {
+						Print...
+						@menubar.Shortcut() {
+							⌘P
+						}
+					}
+				}
+			}
+		}
+		@menubar.Menu() {
+			@menubar.Trigger() {
+				Edit
+			}
+			@menubar.Content() {
+				@menubar.Group() {
+					@menubar.Item() {
+						Undo
+						@menubar.Shortcut() {
+							⌘Z
+						}
+					}
+					@menubar.Item() {
+						Redo
+						@menubar.Shortcut() {
+							⇧⌘Z
+						}
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Sub() {
+						@menubar.SubTrigger() {
+							Find
+						}
+						@menubar.SubContent() {
+							@menubar.Group() {
+								@menubar.Item() {
+									Search the web
+								}
+							}
+							@menubar.Separator()
+							@menubar.Group() {
+								@menubar.Item() {
+									Find...
+								}
+								@menubar.Item() {
+									Find Next
+								}
+								@menubar.Item() {
+									Find Previous
+								}
+							}
+						}
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item() {
+						Cut
+					}
+					@menubar.Item() {
+						Copy
+					}
+					@menubar.Item() {
+						Paste
+					}
+				}
+			}
+		}
+		@menubar.Menu() {
+			@menubar.Trigger() {
+				View
+			}
+			@menubar.Content(menubar.ContentProps{Class: "w-44"}) {
+				@menubar.Group() {
+					@menubar.CheckboxItem() {
+						Bookmarks Bar
+					}
+					@menubar.CheckboxItem(menubar.CheckboxItemProps{Checked: menubarBool(true)}) {
+						Full URLs
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item(menubar.ItemProps{Inset: true}) {
+						Reload
+						@menubar.Shortcut() {
+							⌘R
+						}
+					}
+					@menubar.Item(menubar.ItemProps{Disabled: true, Inset: true}) {
+						Force Reload
+						@menubar.Shortcut() {
+							⇧⌘R
+						}
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item(menubar.ItemProps{Inset: true}) {
+						Toggle Fullscreen
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item(menubar.ItemProps{Inset: true}) {
+						Hide Sidebar
+					}
+				}
+			}
+		}
+		@menubar.Menu() {
+			@menubar.Trigger() {
+				Profiles
+			}
+			@menubar.Content() {
+				@menubar.RadioGroup(menubar.RadioGroupProps{Value: menubarValue("benoit")}) {
+					@menubar.RadioItem(menubar.RadioItemProps{Value: "andy"}) {
+						Andy
+					}
+					@menubar.RadioItem(menubar.RadioItemProps{Value: "benoit"}) {
+						Benoit
+					}
+					@menubar.RadioItem(menubar.RadioItemProps{Value: "Luis"}) {
+						Luis
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item(menubar.ItemProps{Inset: true}) {
+						Edit...
+					}
+				}
+				@menubar.Separator()
+				@menubar.Group() {
+					@menubar.Item(menubar.ItemProps{Inset: true}) {
+						Add Profile...
+					}
+				}
+			}
+		}
+	}
+}
+
+func menubarValue(v string) *string {
+	return &v
+}
+
+func menubarBool(v bool) *bool {
+	return &v
+}

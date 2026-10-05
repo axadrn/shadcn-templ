@@ -1,0 +1,111 @@
+package drawer
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/badge"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/drawer"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/radiogroup"
+)
+
+// The upstream example's Arabic translation, its default language.
+var drawerRtlTimes = []drawerDemoTime{
+	{Value: "asap", ID: "delivery-asap-rtl", Label: "توصيل قياسي", Description: "25–35 دقيقة · تم تعيين السائق الآن", Badge: "الأسرع"},
+	{Value: "5-00", ID: "delivery-5-00-rtl", Label: "5:00 م – 5:15 م", Description: "يبدأ التحضير في 4:45 م"},
+	{Value: "5-30", ID: "delivery-5-30-rtl", Label: "5:30 م – 5:45 م", Description: "مناسب إذا كنت في الطريق إلى المنزل"},
+	{Value: "6-00", ID: "delivery-6-00-rtl", Label: "6:00 م – 6:15 م", Description: "الأكثر شيوعًا · طلب مرتفع"},
+	{Value: "6-30", ID: "delivery-6-30-rtl", Label: "6:30 م – 6:45 م", Description: "آخر موعد قبل إغلاق المطبخ"},
+}
+
+func drawerRtlLabels() map[string]string {
+	labels := map[string]string{}
+	for _, time := range drawerRtlTimes {
+		labels[time.Value] = time.Label
+	}
+	return labels
+}
+
+templ DrawerRtl() {
+	@drawer.Drawer(drawer.Props{SwipeDirection: drawer.SwipeDirectionRight, ShowSwipeHandle: true}) {
+		@button.Button(button.Props{Variant: button.VariantSecondary, Attributes: drawer.Trigger(ctx)}) {
+			فتح الدرج
+		}
+		@drawer.Content(drawer.ContentProps{Attributes: templ.Attributes{"dir": "rtl", "data-lang": "ar"}}) {
+			@drawer.Header() {
+				@drawer.Title() {
+					اختر وقت التوصيل
+				}
+				@drawer.Description() {
+					سنجهز طلبك في أقرب وقت ممكن.
+				}
+			}
+			<div class="flex-1 scroll-fade overflow-y-auto p-4">
+				@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "asap", Class: "gap-2", Attributes: templ.Attributes{"dir": "rtl"}}) {
+					for _, time := range drawerRtlTimes {
+						@field.Label(field.LabelProps{For: time.ID, Attributes: templ.Attributes{"dir": "rtl"}}) {
+							@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+								@field.Content() {
+									@field.Title(field.TitleProps{Class: "flex items-center gap-2"}) {
+										{ time.Label }
+										if time.Badge != "" {
+											@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+												{ time.Badge }
+											}
+										}
+									}
+									@field.Description(field.DescriptionProps{Attributes: templ.Attributes{"dir": "rtl"}}) {
+										{ time.Description }
+									}
+								}
+								@radiogroup.Item(radiogroup.ItemProps{ID: time.ID, Value: time.Value, Attributes: templ.Attributes{"dir": "rtl"}})
+							}
+						}
+					}
+				}
+			</div>
+			@drawer.Footer() {
+				@button.Button(button.Props{Class: "h-[34px]"}) {
+					تأكيد وقت التوصيل
+				}
+				@button.Button(button.Props{Variant: button.VariantOutline, Attributes: drawer.Close(ctx)}) {
+					إلغاء
+				}
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			// The drawer's portal, before the drawer script moves it.
+			const popup = document.currentScript.previousElementSibling.querySelector('[data-slot="drawer-popup"]');
+			if (!popup) return;
+
+			// useIsMobile pendant (hooks/use-mobile.ts): swipeDirection is
+			// down and the swipe handle renders below the md breakpoint, right
+			// and no handle from md up.
+			const handle = popup.querySelector('[data-slot="drawer-swipe-handle"]');
+			const mq = window.matchMedia("(max-width: 767px)");
+			const apply = () => {
+				popup.setAttribute("data-swipe-direction", mq.matches ? "down" : "right");
+				popup.setAttribute("data-swipe-axis", mq.matches ? "y" : "x");
+				if (mq.matches) popup.prepend(handle);
+				else handle.remove();
+			};
+			apply();
+			mq.addEventListener("change", apply);
+
+			// handleConfirm pendant: close the drawer, then confirm the
+			// selected slot via toast (sonner's toast in upstream).
+			const labels = {{ drawerRtlLabels() }};
+			const confirm = popup.querySelector('[data-slot="drawer-footer"] > [data-slot="button"]');
+			confirm?.addEventListener("click", () => {
+				const selected = popup.querySelector("[data-slot=radio-group-item] + input:checked");
+				if (!selected || !(selected.value in labels)) return;
+				window.templ.drawer.close(popup);
+				window.templ.toast.add({
+					title: "تم تأكيد وقت التوصيل",
+					description: labels[selected.value],
+				});
+			});
+		})();
+	</script>
+}

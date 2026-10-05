@@ -1,0 +1,262 @@
+package messagescroller
+
+import (
+	"regexp"
+	"strings"
+
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/message"
+	"github.com/axadrn/shadcn-templ/v2/components/messagescroller"
+)
+
+// msMessage is one scripted transcript turn, the pendant of the messages
+// @shadcn/helpers' createChat() scripts for the upstream examples. Sleep is
+// the delay before an assistant turn starts streaming.
+type msMessage struct {
+	ID    string
+	Role  string
+	Text  string
+	Sleep int
+}
+
+var msParagraphSplit = regexp.MustCompile(`\n\s*\n`)
+
+// msParagraphs is text.split(/\n\s*\n/).map(trim).filter(Boolean).
+func msParagraphs(text string) []string {
+	var out []string
+	for _, p := range msParagraphSplit.Split(text, -1) {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+func msVariant(role string, user, assistant bubble.Variant) bubble.Variant {
+	if role == "user" {
+		return user
+	}
+	return assistant
+}
+
+func msAlign(role string) message.Align {
+	if role == "user" {
+		return message.AlignEnd
+	}
+	return message.AlignStart
+}
+
+// msMessageItem is the row upstream examples render per message: a
+// MessageScrollerItem holding a Message with one Bubble of paragraphs
+// (components/message-animated.tsx and the inline rows of the examples).
+templ msMessageItem(m msMessage, scrollAnchor bool, userVariant, assistantVariant bubble.Variant) {
+	@messagescroller.Item(messagescroller.ItemProps{MessageID: m.ID, ScrollAnchor: scrollAnchor}) {
+		@message.Message(message.Props{Align: msAlign(m.Role)}) {
+			@message.Content() {
+				@bubble.Bubble(bubble.Props{Variant: msVariant(m.Role, userVariant, assistantVariant)}) {
+					@bubble.Content(bubble.ContentProps{Class: "space-y-2"}) {
+						for _, p := range msParagraphs(m.Text) {
+							<p class="whitespace-pre-wrap">{ p }</p>
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+// msTurnTemplates renders the turns a chat example sends later as inert
+// templates for msChatScript, in transcript order: the row markup with the
+// full text, which the script streams word by word for assistant turns.
+templ msTurnTemplates(turns []msMessage, anchorUser bool, userVariant, assistantVariant bubble.Variant) {
+	for _, t := range turns {
+		<template>
+			@msMessageItem(t, anchorUser && t.Role == "user", userVariant, assistantVariant)
+		</template>
+	}
+}
+
+// msTurn is a turn's role, text and sleep for msChatScript.
+type msTurn struct {
+	Role  string `json:"role"`
+	Text  string `json:"text"`
+	Sleep int    `json:"sleep"`
+}
+
+// msChatOptions configure msChatScript for one example. The example root
+// ends with its templates as direct children: first the ones named in
+// Templates ("scroller", "empty-state", "none"), then one per turn. Send,
+// Reset and Status select the controls inside the root.
+type msChatOptions struct {
+	Turns              []msTurn `json:"turns"`
+	Templates          []string `json:"templates"`
+	Delay              int      `json:"delay"`
+	Initial            int      `json:"initial"`
+	ResetNeedsMessages bool     `json:"resetNeedsMessages"`
+	// Animation is the user row preset; AnimationSelect lets the root's
+	// select change it.
+	Animation       string `json:"animation"`
+	AnimationSelect bool   `json:"animationSelect"`
+	// PeekSlider lets the root's slider set the scroller's
+	// scrollPreviousItemPeek and the label before it.
+	PeekSlider bool   `json:"peekSlider"`
+	Send       string `json:"send"`
+	Reset      string `json:"reset"`
+	Status     string `json:"status"`
+}
+
+func msTurns(turns []msMessage) []msTurn {
+	out := make([]msTurn, len(turns))
+	for i, t := range turns {
+		out[i] = msTurn{Role: t.Role, Text: t.Text, Sleep: t.Sleep}
+	}
+	return out
+}
+
+// msChatScript is the demo-side pendant of useChat with createChat's
+// transport: send appends the next scripted user turn, then streams the
+// assistant reply after its sleep in word deltas, and reset restores the
+// opening transcript. It sits right after the example root it drives.
+templ msChatScript(opts msChatOptions) {
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const chat = document.currentScript.previousElementSibling;
+			const opts = {{ opts }};
+			const reduce = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+			const PRESETS = {
+				"fade": { from: { opacity: 0 }, duration: 220, easing: "ease-out" },
+				"slide-up": { from: { opacity: 0, transform: "translateY(10px)" }, duration: 260, easing: "cubic-bezier(0.16,1,0.3,1)" },
+				"slide-side": { from: { opacity: 0, transform: "translateX(18px)" }, duration: 280, easing: "cubic-bezier(0.16,1,0.3,1)" },
+				"pop": { from: { opacity: 0, transform: "translateY(6px) scale(0.94)", transformOrigin: "100% 100%" }, duration: 320, easing: "cubic-bezier(0.34,1.4,0.64,1)" },
+				"spring-bounce": { from: { opacity: 0, transform: "translateY(12px) scale(0.96)" }, duration: 360, easing: "cubic-bezier(0.34,1.56,0.64,1)" },
+				"blur-fade": { from: { opacity: 0, filter: "blur(4px)", transform: "translateY(6px)" }, duration: 280, easing: "ease-out" },
+				"scale-fade": { from: { opacity: 0, transform: "scale(0.98)" }, duration: 240, easing: "ease-out" },
+			};
+			function paragraphs(text) {
+				return text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean).map((p) => {
+					const el = document.createElement("p");
+					el.className = "whitespace-pre-wrap";
+					el.textContent = p;
+					return el;
+				});
+			}
+			const templates = [...chat.querySelectorAll(":scope > template")];
+			const named = (name) => templates[opts.templates.indexOf(name)];
+			const rows = templates.slice(opts.templates.length);
+			const turns = opts.turns;
+			const delay = opts.delay || 20;
+			let animation = opts.animation || "slide-up";
+			const s = { count: opts.initial, status: "ready", timers: [] };
+			const q = (sel) => (sel ? chat.querySelector(sel) : null);
+			const send = q(opts.send);
+			const resetButton = q(opts.reset);
+			const nextUser = () => {
+				for (let i = s.count; i < turns.length; i++) if (turns[i].role === "user") return i;
+				return -1;
+			};
+			const content = () => chat.querySelector('[data-slot="message-scroller-content"]');
+			function render() {
+				const busy = s.status !== "ready";
+				const next = nextUser();
+				const status = q(opts.status);
+				if (status) {
+					status.setAttribute("data-status", s.status);
+					status.replaceChildren();
+					if (next >= 0) status.textContent = turns[next].text;
+					else status.append(named("none").content.cloneNode(true));
+				}
+				if (send) {
+					send.disabled = next < 0 || busy;
+					send.toggleAttribute("data-disabled", send.disabled);
+				}
+				if (resetButton) {
+					resetButton.disabled = busy || (opts.resetNeedsMessages && s.count === 0);
+					resetButton.toggleAttribute("data-disabled", resetButton.disabled);
+				}
+				const c = content();
+				if (c && c.hasAttribute("aria-busy")) c.setAttribute("aria-busy", busy ? "true" : "false");
+			}
+			// The transcript replaces the empty state once it has rows.
+			function ensureScroller() {
+				const empty = chat.querySelector('[data-slot="empty"]');
+				if (empty) empty.replaceWith(named("scroller").content.cloneNode(true));
+			}
+			function append(i, streamed) {
+				ensureScroller();
+				const row = rows[i].content.firstElementChild.cloneNode(true);
+				if (streamed) row.querySelector('[data-slot="bubble-content"]').replaceChildren();
+				content().append(row);
+				if (turns[i].role === "user" && !reduce()) {
+					const preset = PRESETS[animation];
+					row.animate([preset.from, {}], { duration: preset.duration, easing: preset.easing });
+				}
+				return row;
+			}
+			function stream(i) {
+				const text = turns[i].text;
+				const deltas = text.match(/\S+\s*/g) || [text];
+				const row = append(i, true);
+				const target = row.querySelector('[data-slot="bubble-content"]');
+				s.status = "streaming";
+				render();
+				let so = "";
+				let k = 0;
+				const tick = () => {
+					so += deltas[k++];
+					target.replaceChildren(...paragraphs(so));
+					if (k < deltas.length) s.timers.push(setTimeout(tick, delay));
+					else {
+						s.status = "ready";
+						render();
+					}
+				};
+				s.timers.push(setTimeout(tick, delay));
+			}
+			function sendNext() {
+				const i = nextUser();
+				if (i < 0 || s.status !== "ready") return;
+				append(i, false);
+				s.count = i + 1;
+				s.status = "submitted";
+				render();
+				const a = s.count;
+				if (a < turns.length && turns[a].role === "assistant") {
+					s.count = a + 1;
+					s.timers.push(setTimeout(() => stream(a), turns[a].sleep || 0));
+				} else {
+					s.status = "ready";
+					render();
+				}
+			}
+			function reset() {
+				s.timers.forEach(clearTimeout);
+				s.timers = [];
+				s.count = opts.initial;
+				s.status = "ready";
+				const c = content();
+				if (c) [...c.querySelectorAll(':scope > [data-slot="message-scroller-item"]')].slice(opts.initial).forEach((row) => row.remove());
+				if (opts.initial === 0) {
+					const root = chat.querySelector('[data-slot="message-scroller"]');
+					const empty = named("empty-state");
+					if (root && empty) root.replaceWith(empty.content.cloneNode(true));
+				}
+				render();
+			}
+			chat.addEventListener("submit", (e) => {
+				e.preventDefault();
+				sendNext();
+			});
+			if (send && send.type !== "submit") send.addEventListener("click", sendNext);
+			if (resetButton) resetButton.addEventListener("click", reset);
+			if (opts.animationSelect) chat.addEventListener("select-change", (e) => { animation = e.detail.value; });
+			if (opts.peekSlider) {
+				chat.addEventListener("slider-change", (e) => {
+					const peek = Math.round(e.detail.values[0]);
+					e.target.closest('[data-slot="slider"]').previousElementSibling.textContent = peek + "px";
+					chat.querySelector('[data-slot="message-scroller"]').setAttribute("data-templ-scroll-previous-item-peek", String(peek));
+				});
+			}
+			render();
+		})();
+	</script>
+}

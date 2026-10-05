@@ -1,0 +1,18 @@
+package progress
+
+import "github.com/axadrn/shadcn-templ/v2/components/progress"
+
+// Start at 13 and advance to 66 after 500ms.
+templ ProgressDemo() {
+	@progress.Progress(progress.Props{
+		ID:    "progress-demo",
+		Value: 13,
+		Class: "w-[60%]",
+	})
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const bar = document.getElementById("progress-demo");
+			setTimeout(() => bar.setAttribute("aria-valuenow", "66"), 500);
+		})();
+	</script>
+}

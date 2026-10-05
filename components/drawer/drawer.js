@@ -83,10 +83,10 @@
     return !!viewport._templOpen;
   }
 
-  // The popup and the overlay render the transition status, the viewport
-  // the open state.
+  // The viewport (DialogViewport's transitionStatusMapping), the popup and
+  // the overlay render the open state and the transition status.
   function partsOf(viewport) {
-    return { parts: [popupOf(viewport), overlayOf(viewport)], stateParts: [viewport] };
+    return { parts: [popupOf(viewport), overlayOf(viewport), viewport] };
   }
 
   function setPartsAttr(viewport, name, on) {
@@ -133,7 +133,7 @@
 
   // Resolves a drawer viewport from the popup's id, the element itself, or
   // anything inside it. The id is the popup's, like Base UI's, which the
-  // trigger's aria-controls names.
+  // trigger's data-templ-controls names.
   function getDrawer(target) {
     if (!target) return null;
     if (typeof target === "string") {
@@ -148,7 +148,7 @@
     // Drawer.Close links through context in Base UI; its port marker carries
     // the drawer id when the close sits outside the drawer.
     const id =
-      element.getAttribute("aria-controls") || element.getAttribute("data-templ-drawer-close");
+      element.getAttribute("data-templ-controls") || element.getAttribute("data-templ-drawer-close");
     if (id) return getDrawer(id);
     return getDrawer(element);
   }
@@ -164,7 +164,7 @@
   function triggersFor(viewport) {
     if (!idOf(viewport)) return [];
     return document.querySelectorAll(
-      '[data-base-ui-click-trigger][aria-controls="' + idOf(viewport) + '"]',
+      '[data-base-ui-click-trigger][data-templ-controls="' + idOf(viewport) + '"]',
     );
   }
 
@@ -191,10 +191,14 @@
     }
   }
 
+  // DrawerTrigger (DialogTrigger) renders aria-controls while the popup is
+  // open (triggerPopupId).
   function updateState(viewport, isOpen) {
     triggersFor(viewport).forEach((trigger) => {
       trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
       trigger.toggleAttribute("data-popup-open", isOpen);
+      if (isOpen) trigger.setAttribute("aria-controls", idOf(viewport));
+      else trigger.removeAttribute("aria-controls");
     });
   }
 
@@ -595,7 +599,7 @@
     if (!popup || viewport._templDismiss) return;
     viewport._templDismiss = window.templ.dismiss.useDismiss({
       floating: popup,
-      reference: [...document.querySelectorAll('[aria-controls="' + idOf(viewport) + '"]')],
+      reference: [...triggersFor(viewport)],
       // A nested open drawer blocks its parent.
       escapeKey: () => !hasOpenNested(viewport),
       // With a backdrop the dismissal waits for the click.
@@ -1331,7 +1335,7 @@
   // DrawerTrigger is DialogTrigger: useClick with its default click event.
   // The identifier is shared with dialog and popover triggers; only those
   // naming a drawer popup are ours.
-  window.templ.lifecycle.register("[data-base-ui-click-trigger][aria-controls]", {
+  window.templ.lifecycle.register("[data-base-ui-click-trigger][data-templ-controls]", {
     init(trigger) {
       if (!drawerFor(trigger)) return;
       trigger._templDrawerClick = window.templ.click.useClick(trigger, {

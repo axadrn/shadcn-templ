@@ -32,25 +32,19 @@
     else if (!open && dialog.isOpen(popup)) dialog.close(popup);
   }
 
-  // The sidebar content renders once and moves between the desktop container
-  // and the mobile sheet, depending on the viewport.
-  const CONTENT = "[data-templ-sidebar-content]";
-
-  function place(content) {
-    const sidebarId = content.getAttribute("data-templ-sidebar-content");
-    const portal = document.querySelector(
-      '[data-templ-sidebar-mobile-portal="' + sidebarId + '"]',
-    );
-    if (!portal) return;
+  // shadcn's Sidebar renders its children in the mobile sheet below md and
+  // in sidebar-inner otherwise: they render once and move between the two.
+  function place(sidebar) {
+    const sidebarId = sidebar.getAttribute("data-templ-sidebar-id");
+    const inner = sidebar.querySelector('[data-slot="sidebar-inner"]');
+    const portal = document.querySelector('[data-templ-sidebar-mobile-portal="' + sidebarId + '"]');
+    if (!inner || !portal) return;
 
     const isMobile = window.matchMedia(MOBILE_QUERY).matches;
-
-    if (isMobile && content.parentElement !== portal) {
-      portal.appendChild(content);
-    } else if (!isMobile && content.parentElement === portal) {
-      const inner = wrapperFor(sidebarId)?.querySelector('[data-slot="sidebar-inner"]');
-      if (inner) inner.appendChild(content);
-    }
+    const from = isMobile ? inner : portal;
+    const to = isMobile ? portal : inner;
+    if (from.firstChild) to.append(...from.childNodes);
+    syncTooltips(sidebarId);
 
     // Mount/unmount the Sheet with open={openMobile}, as in shadcn's Sidebar.
     const popup = document.getElementById(sidebarId + "-mobile");
@@ -63,8 +57,23 @@
     }
   }
 
-  window.templ.lifecycle.register(CONTENT, { init: place });
-  window.addEventListener("resize", () => document.querySelectorAll(CONTENT).forEach(place));
+  window.templ.lifecycle.register(WRAPPER, { init: place });
+  window.addEventListener("resize", () => document.querySelectorAll(WRAPPER).forEach(place));
+
+  // SidebarMenuButton's TooltipContent: hidden={state !== "collapsed" ||
+  // isMobile}, unless the tooltip prop sets hidden itself.
+  function syncTooltips(sidebarId) {
+    const wrapper = wrapperFor(sidebarId);
+    const portal = document.querySelector('[data-templ-sidebar-mobile-portal="' + sidebarId + '"]');
+    const hidden = wrapper?.getAttribute("data-state") !== "collapsed" || window.matchMedia(MOBILE_QUERY).matches;
+    [wrapper, portal].forEach((root) => {
+      root?.querySelectorAll("[data-templ-tooltip-trigger]").forEach((trigger) => {
+        const popup = document.getElementById(trigger.getAttribute("data-templ-tooltip-trigger"));
+        if (!popup || popup.hasAttribute("data-templ-tooltip-hidden")) return;
+        popup.hidden = hidden;
+      });
+    });
+  }
 
   function toggleSidebar(sidebarId) {
     // shadcn's toggleSidebar: setOpenMobile((open) => !open) below md.
@@ -84,16 +93,7 @@
     // so icon/offcanvas selectors need no extra state check.
     wrapper.setAttribute("data-collapsible", collapsed ? mode : "");
 
-    // Menu button tooltips only show while collapsed to icons.
-    const tooltipsDisabled = !(collapsed && mode === "icon");
-    // Tooltip triggers either carry Base UI's identifier or, disabled,
-    // data-trigger-disabled (TooltipTrigger disabled prop).
-    wrapper.querySelectorAll("[data-base-ui-tooltip-trigger], [data-trigger-disabled]").forEach((trigger) => {
-      // An explicit tooltip.hidden pendant pins the state.
-      if (trigger.hasAttribute("data-templ-tooltip-hidden")) return;
-      trigger.toggleAttribute("data-trigger-disabled", tooltipsDisabled);
-      trigger.toggleAttribute("data-base-ui-tooltip-trigger", !tooltipsDisabled);
-    });
+    syncTooltips(sidebarId);
 
     document.cookie =
       SIDEBAR_COOKIE_NAME +

@@ -45,16 +45,17 @@ templ ButtonGroup(props ...Props) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
-	if p.Orientation == "" {
-		{{ p.Orientation = OrientationHorizontal }}
-	}
+	// shadcn renders data-orientation only when the prop is set; the cva
+	// default for the classes is horizontal.
 	<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
 		role="group"
 		data-slot="button-group"
-		data-orientation={ string(p.Orientation) }
+		if p.Orientation != "" {
+			data-orientation={ string(p.Orientation) }
+		}
 		class={ utils.CN(baseClasses, orientationClasses(p.Orientation), p.Class) }
 		{ p.Attributes... }
 	>

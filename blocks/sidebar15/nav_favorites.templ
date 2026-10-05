@@ -78,7 +78,7 @@ templ NavFavorites(favorites []Favorite) {
 		// its side when it opens, onMobileChange keeps it current until the
 		// block is swapped out.
 		// side={isMobile ? "bottom" : "right"} align={isMobile ? "end" : "start"}
-		const menus = [...document.querySelectorAll('[id^="sidebar15-nav-favorites-menu-"][data-templ-side]')];
+		const menus = [...document.querySelectorAll('[data-slot="dropdown-menu-content"][id^="sidebar15-nav-favorites-menu-"]')].map((popup) => popup.parentElement);
 		window.templ.sidebar.onMobileChange((isMobile) => {
 			if (!menus[0]?.isConnected) return false;
 			menus.forEach((menu) => {

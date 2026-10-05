@@ -1,0 +1,24 @@
+package inputgroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+)
+
+templ InputGroupInlineEnd() {
+	@field.Field(field.Props{Class: "max-w-sm"}) {
+		@field.Label(field.LabelProps{For: "inline-end-input"}) {
+			Input
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{ID: "inline-end-input", Type: "password", Placeholder: "Enter password"})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@icon.EyeOff()
+			}
+		}
+		@field.Description() {
+			Icon positioned at the end.
+		}
+	}
+}

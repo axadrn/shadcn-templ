@@ -121,6 +121,12 @@ Use the `alertdialog.Action` component to add a destructive action button to the
 
 <ComponentPreview name="alert-dialog-destructive" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="alert-dialog-rtl" direction="rtl" previewClassName="h-56" />
+
 ## API Reference
 
 ### AlertDialog

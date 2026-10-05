@@ -40,8 +40,8 @@ templ ChartLineLabel() {
 			@chart.Container(chart.ContainerProps{ID: "line-label", Config: chartLineLabelConfig}) {
 				@chart.LineChart(chart.LineChartProps{
 					AccessibilityLayer: true,
-					Data:   chartLineLabelData,
-					Margin: &chart.Margin{Top: 20, Left: 12, Right: 12},
+					Data:               chartLineLabelData,
+					Margin:             &chart.Margin{Top: 20, Left: 12, Right: 12},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.XAxis(chart.XAxisProps{

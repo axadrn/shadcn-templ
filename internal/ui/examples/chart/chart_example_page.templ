@@ -1,0 +1,440 @@
+package chart
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/chart"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+// ChartExample and chart_example.templ are the "Your First Chart" docs steps,
+// so this showcase lives in its own file.
+templ chartExamplePageSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ ChartExamplePage() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@chartExamplePageArea()
+			@chartExamplePageBar()
+			@chartExamplePageLine()
+			@chartExamplePagePie()
+			@chartExamplePageRadial()
+			@chartExamplePageRadar()
+		</div>
+	</div>
+}
+
+func chartExamplePageMonthShort(v any) string {
+	return v.(string)[:3]
+}
+
+// chartExamplePageLocaleNumber formats like the source's toLocaleString.
+func chartExamplePageLocaleNumber(sum int) string {
+	s := fmt.Sprintf("%d", sum)
+	var sb strings.Builder
+	for i, r := range s {
+		if i > 0 && (len(s)-i)%3 == 0 {
+			sb.WriteRune(',')
+		}
+		sb.WriteRune(r)
+	}
+	return sb.String()
+}
+
+var chartExamplePageAreaData = []chart.Datum{
+	{"month": "January", "desktop": 186},
+	{"month": "February", "desktop": 305},
+	{"month": "March", "desktop": 237},
+	{"month": "April", "desktop": 73},
+	{"month": "May", "desktop": 209},
+	{"month": "June", "desktop": 214},
+}
+
+var chartExamplePageAreaConfig = chart.Config{
+	{Key: "desktop", Label: "Desktop", Color: "var(--chart-1)"},
+}
+
+templ chartExamplePageArea() {
+	@chartExamplePageSection("Area Chart") {
+		@card.Card(card.Props{Class: "w-full"}) {
+			@card.Header() {
+				@card.Title() {
+					Area Chart
+				}
+				@card.Description() {
+					Showing total visitors for the last 6 months
+				}
+			}
+			@card.Content() {
+				@chart.Container(chart.ContainerProps{ID: "chart-example-page-area", Config: chartExamplePageAreaConfig}) {
+					@chart.AreaChart(chart.AreaChartProps{
+						AccessibilityLayer: true,
+						Data:               chartExamplePageAreaData,
+						Margin:             &chart.Margin{Left: 12, Right: 12},
+					}) {
+						@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
+						@chart.XAxis(chart.XAxisProps{
+							DataKey:       "month",
+							TickMargin:    8,
+							TickFormatter: chartExamplePageMonthShort,
+						})
+						@chart.Tooltip(chart.TooltipProps{
+							Cursor:  chart.Bool(false),
+							Content: chart.TooltipContentProps{Indicator: "line"},
+						})
+						@chart.Area(chart.AreaProps{
+							DataKey:     "desktop",
+							Type:        chart.CurveNatural,
+							Fill:        "var(--color-desktop)",
+							FillOpacity: 0.4,
+							Stroke:      "var(--color-desktop)",
+						})
+					}
+				}
+			}
+			@card.Footer() {
+				<div class="flex w-full items-start gap-2">
+					<div class="grid gap-2">
+						<div class="flex items-center gap-2 leading-none font-medium">
+							Trending up by 5.2% this month
+							@icon.TrendingUp(icon.Props{Class: "size-4"})
+						</div>
+						<div class="flex items-center gap-2 leading-none text-muted-foreground">
+							January - June 2024
+						</div>
+					</div>
+				</div>
+			}
+		}
+	}
+}
+
+var chartExamplePageBarData = []chart.Datum{
+	{"month": "January", "desktop": 186, "mobile": 80},
+	{"month": "February", "desktop": 305, "mobile": 200},
+	{"month": "March", "desktop": 237, "mobile": 120},
+	{"month": "April", "desktop": 73, "mobile": 190},
+	{"month": "May", "desktop": 209, "mobile": 130},
+	{"month": "June", "desktop": 214, "mobile": 140},
+}
+
+var chartExamplePageBarConfig = chart.Config{
+	{Key: "desktop", Label: "Desktop", Color: "var(--chart-1)"},
+	{Key: "mobile", Label: "Mobile", Color: "var(--chart-2)"},
+}
+
+templ chartExamplePageBar() {
+	@chartExamplePageSection("Bar Chart") {
+		@card.Card(card.Props{Class: "w-full"}) {
+			@card.Header() {
+				@card.Title() {
+					Bar Chart - Multiple
+				}
+				@card.Description() {
+					January - June 2024
+				}
+			}
+			@card.Content() {
+				@chart.Container(chart.ContainerProps{ID: "chart-example-page-bar", Config: chartExamplePageBarConfig}) {
+					@chart.BarChart(chart.BarChartProps{AccessibilityLayer: true, Data: chartExamplePageBarData}) {
+						@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
+						@chart.XAxis(chart.XAxisProps{
+							DataKey:       "month",
+							TickMargin:    10,
+							TickFormatter: chartExamplePageMonthShort,
+						})
+						@chart.Tooltip(chart.TooltipProps{
+							Cursor:  chart.Bool(false),
+							Content: chart.TooltipContentProps{Indicator: "dashed"},
+						})
+						@chart.Bar(chart.BarProps{DataKey: "desktop", Fill: "var(--color-desktop)", Radius: 4})
+						@chart.Bar(chart.BarProps{DataKey: "mobile", Fill: "var(--color-mobile)", Radius: 4})
+					}
+				}
+			}
+			@card.Footer(card.FooterProps{Class: "flex-col items-start gap-2"}) {
+				<div class="flex gap-2 leading-none font-medium">
+					Trending up by 5.2% this month
+					@icon.TrendingUp(icon.Props{Class: "size-4"})
+				</div>
+				<div class="leading-none text-muted-foreground">
+					Showing total visitors for the last 6 months
+				</div>
+			}
+		}
+	}
+}
+
+var chartExamplePageLineData = []chart.Datum{
+	{"month": "January", "desktop": 186, "mobile": 80},
+	{"month": "February", "desktop": 305, "mobile": 200},
+	{"month": "March", "desktop": 237, "mobile": 120},
+	{"month": "April", "desktop": 73, "mobile": 190},
+	{"month": "May", "desktop": 209, "mobile": 130},
+	{"month": "June", "desktop": 214, "mobile": 140},
+}
+
+var chartExamplePageLineConfig = chart.Config{
+	{Key: "desktop", Label: "Desktop", Color: "var(--chart-1)"},
+	{Key: "mobile", Label: "Mobile", Color: "var(--chart-2)"},
+}
+
+templ chartExamplePageLine() {
+	@chartExamplePageSection("Line Chart") {
+		@card.Card(card.Props{Class: "w-full"}) {
+			@card.Header() {
+				@card.Title() {
+					Line Chart - Multiple
+				}
+				@card.Description() {
+					January - June 2024
+				}
+			}
+			@card.Content() {
+				@chart.Container(chart.ContainerProps{ID: "chart-example-page-line", Config: chartExamplePageLineConfig}) {
+					@chart.LineChart(chart.LineChartProps{
+						AccessibilityLayer: true,
+						Data:               chartExamplePageLineData,
+						Margin:             &chart.Margin{Left: 12, Right: 12},
+					}) {
+						@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
+						@chart.XAxis(chart.XAxisProps{
+							DataKey:       "month",
+							TickMargin:    8,
+							TickFormatter: chartExamplePageMonthShort,
+						})
+						@chart.Tooltip(chart.TooltipProps{Cursor: chart.Bool(false)})
+						@chart.Line(chart.LineProps{
+							DataKey:     "desktop",
+							Type:        "monotone",
+							Stroke:      "var(--color-desktop)",
+							StrokeWidth: 2,
+						})
+						@chart.Line(chart.LineProps{
+							DataKey:     "mobile",
+							Type:        "monotone",
+							Stroke:      "var(--color-mobile)",
+							StrokeWidth: 2,
+						})
+					}
+				}
+			}
+			@card.Footer() {
+				<div class="flex w-full items-start gap-2">
+					<div class="grid gap-2">
+						<div class="flex items-center gap-2 leading-none font-medium">
+							Trending up by 5.2% this month
+							@icon.TrendingUp(icon.Props{Class: "size-4"})
+						</div>
+						<div class="flex items-center gap-2 leading-none text-muted-foreground">
+							Showing total visitors for the last 6 months
+						</div>
+					</div>
+				</div>
+			}
+		}
+	}
+}
+
+var chartExamplePagePieData = []chart.Datum{
+	{"browser": "chrome", "visitors": 275, "fill": "var(--color-chrome)"},
+	{"browser": "safari", "visitors": 200, "fill": "var(--color-safari)"},
+	{"browser": "firefox", "visitors": 287, "fill": "var(--color-firefox)"},
+	{"browser": "edge", "visitors": 173, "fill": "var(--color-edge)"},
+	{"browser": "other", "visitors": 190, "fill": "var(--color-other)"},
+}
+
+var chartExamplePagePieConfig = chart.Config{
+	{Key: "visitors", Label: "Visitors"},
+	{Key: "chrome", Label: "Chrome", Color: "var(--chart-1)"},
+	{Key: "safari", Label: "Safari", Color: "var(--chart-2)"},
+	{Key: "firefox", Label: "Firefox", Color: "var(--chart-3)"},
+	{Key: "edge", Label: "Edge", Color: "var(--chart-4)"},
+	{Key: "other", Label: "Other", Color: "var(--chart-5)"},
+}
+
+// chartExamplePagePieTotal sums the visitors for the center label.
+func chartExamplePagePieTotal() string {
+	sum := 0
+	for _, d := range chartExamplePagePieData {
+		sum += d["visitors"].(int)
+	}
+	return chartExamplePageLocaleNumber(sum)
+}
+
+templ chartExamplePagePie() {
+	@chartExamplePageSection("Pie Chart") {
+		@card.Card(card.Props{Class: "w-full"}) {
+			@card.Header(card.HeaderProps{Class: "items-center pb-0"}) {
+				@card.Title() {
+					Pie Chart - Donut with Text
+				}
+				@card.Description() {
+					January - June 2024
+				}
+			}
+			@card.Content(card.ContentProps{Class: "flex-1 pb-0"}) {
+				@chart.Container(chart.ContainerProps{ID: "chart-example-page-pie", Config: chartExamplePagePieConfig, Class: "mx-auto aspect-square max-h-[250px]"}) {
+					@chart.PieChart() {
+						@chart.Tooltip(chart.TooltipProps{
+							Cursor:  chart.Bool(false),
+							Content: chart.TooltipContentProps{HideLabel: true},
+						})
+						@chart.Pie(chart.PieProps{
+							Data:        chartExamplePagePieData,
+							DataKey:     "visitors",
+							NameKey:     "browser",
+							InnerRadius: 60,
+							StrokeWidth: 5,
+						}) {
+							@chart.Label(chart.LabelProps{
+								DominantBaseline: "middle",
+								Spans: []chart.LabelSpan{
+									{Text: chartExamplePagePieTotal(), Class: "fill-foreground text-3xl font-bold"},
+									{Text: "Visitors", Class: "fill-muted-foreground", OffsetY: 24},
+								},
+							})
+						}
+					}
+				}
+			}
+			@card.Footer(card.FooterProps{Class: "flex-col gap-2"}) {
+				<div class="flex items-center gap-2 leading-none font-medium">
+					Trending up by 5.2% this month
+					@icon.TrendingUp(icon.Props{Class: "size-4"})
+				</div>
+				<div class="leading-none text-muted-foreground">
+					Showing total visitors for the last 6 months
+				</div>
+			}
+		}
+	}
+}
+
+var chartExamplePageRadarData = []chart.Datum{
+	{"month": "January", "desktop": 186, "mobile": 80},
+	{"month": "February", "desktop": 305, "mobile": 200},
+	{"month": "March", "desktop": 237, "mobile": 120},
+	{"month": "April", "desktop": 73, "mobile": 190},
+	{"month": "May", "desktop": 209, "mobile": 130},
+	{"month": "June", "desktop": 214, "mobile": 140},
+}
+
+var chartExamplePageRadarConfig = chart.Config{
+	{Key: "desktop", Label: "Desktop", Color: "var(--chart-1)"},
+	{Key: "mobile", Label: "Mobile", Color: "var(--chart-2)"},
+}
+
+templ chartExamplePageRadar() {
+	@chartExamplePageSection("Radar Chart") {
+		@card.Card(card.Props{Class: "w-full"}) {
+			@card.Header(card.HeaderProps{Class: "items-center pb-4"}) {
+				@card.Title() {
+					Radar Chart - Multiple
+				}
+				@card.Description() {
+					Showing total visitors for the last 6 months
+				}
+			}
+			@card.Content(card.ContentProps{Class: "pb-0"}) {
+				@chart.Container(chart.ContainerProps{ID: "chart-example-page-radar", Config: chartExamplePageRadarConfig, Class: "mx-auto aspect-square max-h-[250px]"}) {
+					@chart.RadarChart(chart.RadarChartProps{Data: chartExamplePageRadarData}) {
+						@chart.Tooltip(chart.TooltipProps{
+							Cursor:  chart.Bool(false),
+							Content: chart.TooltipContentProps{Indicator: "line"},
+						})
+						@chart.PolarAngleAxis(chart.PolarAngleAxisProps{DataKey: "month"})
+						@chart.PolarGrid()
+						@chart.Radar(chart.RadarProps{
+							DataKey:     "desktop",
+							Fill:        "var(--color-desktop)",
+							FillOpacity: chart.Float(0.6),
+						})
+						@chart.Radar(chart.RadarProps{DataKey: "mobile", Fill: "var(--color-mobile)"})
+					}
+				}
+			}
+			@card.Footer(card.FooterProps{Class: "flex-col gap-2"}) {
+				<div class="flex items-center gap-2 leading-none font-medium">
+					Trending up by 5.2% this month
+					@icon.TrendingUp(icon.Props{Class: "size-4"})
+				</div>
+				<div class="flex items-center gap-2 leading-none text-muted-foreground">
+					January - June 2024
+				</div>
+			}
+		}
+	}
+}
+
+var chartExamplePageRadialData = []chart.Datum{
+	{"browser": "safari", "visitors": 1260, "fill": "var(--color-safari)"},
+}
+
+var chartExamplePageRadialConfig = chart.Config{
+	{Key: "visitors", Label: "Visitors"},
+	{Key: "safari", Label: "Safari", Color: "var(--chart-2)"},
+}
+
+templ chartExamplePageRadial() {
+	@chartExamplePageSection("Radial Chart") {
+		@card.Card(card.Props{Class: "w-full"}) {
+			@card.Header() {
+				@card.Title() {
+					Radial Chart - Shape
+				}
+				@card.Description() {
+					January - June 2024
+				}
+			}
+			@card.Content(card.ContentProps{Class: "flex-1 pb-0"}) {
+				@chart.Container(chart.ContainerProps{ID: "chart-example-page-radial", Config: chartExamplePageRadialConfig, Class: "mx-auto aspect-square max-h-[210px]"}) {
+					@chart.RadialBarChart(chart.RadialBarChartProps{
+						Data:        chartExamplePageRadialData,
+						EndAngle:    chart.Float(100),
+						InnerRadius: 64,
+						OuterRadius: 94,
+					}) {
+						@chart.PolarGrid(chart.PolarGridProps{
+							GridType:    "circle",
+							RadialLines: chart.Bool(false),
+							Stroke:      "none",
+							Class:       "first:fill-muted last:fill-background",
+							PolarRadius: []float64{86, 74},
+						})
+						@chart.RadialBar(chart.RadialBarProps{DataKey: "visitors", Background: true})
+						@chart.PolarRadiusAxis(chart.PolarRadiusAxisProps{Tick: chart.Bool(false), TickLine: chart.Bool(false), AxisLine: chart.Bool(false)}) {
+							@chart.Label(chart.LabelProps{
+								DominantBaseline: "middle",
+								Spans: []chart.LabelSpan{
+									{Text: chartExamplePageLocaleNumber(chartExamplePageRadialData[0]["visitors"].(int)), Class: "fill-foreground text-4xl font-bold"},
+									{Text: "Visitors", Class: "fill-muted-foreground", OffsetY: 24},
+								},
+							})
+						}
+					}
+				}
+			}
+			@card.Footer(card.FooterProps{Class: "flex-col gap-2"}) {
+				<div class="flex items-center gap-2 leading-none font-medium">
+					Trending up by 5.2% this month
+					@icon.TrendingUp(icon.Props{Class: "size-4"})
+				</div>
+				<div class="leading-none text-muted-foreground">
+					Showing total visitors for the last 6 months
+				</div>
+			}
+		}
+	}
+}

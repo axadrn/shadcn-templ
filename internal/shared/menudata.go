@@ -11,7 +11,7 @@ import (
 // (and their raw markdown under /docs/<slug>.md). cmd/docs registers the
 // routes from this list and cmd/sitemap generates the sitemap from it.
 var DocSlugs = []string{
-	"introduction", "installation", "components-json", "package-imports", "theming", "typeset", "dark-mode", "cli", "import-workflow",
+	"introduction", "installation", "components-json", "package-imports", "theming", "typeset", "dark-mode", "cli", "monorepo", "import-workflow",
 	"utils/scroll-fade", "utils/shimmer",
 	"registry", "registry/getting-started", "registry/registry-json", "registry/registry-item-json",
 }
@@ -68,31 +68,38 @@ var ExcludedSidebarPages = map[string]bool{
 
 // PagesNew is the PAGES_NEW pendant of shadcn's lib/docs.ts: docs URLs that
 // render the blue "New" dot in the sidebar, the mobile nav and the components
-// list. Ours marks what shadcn-templ 2.0 adds over v1: components without a v1
-// predecessor (renames like dropdown -> dropdown-menu, radio -> radio-group,
-// selectbox -> select do not count, date picker became a pattern page) and
-// the new docs pages. Curated by hand like the reference: a PR that adds a
-// page adds its entry here, and the list is pruned at the release after the
-// one that introduced the entries.
+// list. Ours marks the components shadcn's base registry has that
+// shadcn-templ adds now; a link shows the dot once its page exists. Curated
+// by hand like the reference.
 var PagesNew = []string{
-	"/docs/typeset",
-	"/docs/utils/scroll-fade",
-	"/docs/utils/shimmer",
-	"/docs/components/alert-dialog",
-	"/docs/components/button-group",
-	"/docs/components/combobox",
-	"/docs/components/command",
-	"/docs/components/context-menu",
-	"/docs/components/drawer",
-	"/docs/components/empty",
-	"/docs/components/field",
-	"/docs/components/input-group",
-	"/docs/components/item",
-	"/docs/components/kbd",
-	"/docs/components/resizable",
-	"/docs/components/spinner",
-	"/docs/components/toggle",
-	"/docs/components/toggle-group",
+	"/docs/components/attachment",
+	"/docs/components/bubble",
+	"/docs/components/direction",
+	"/docs/components/marker",
+	"/docs/components/menubar",
+	"/docs/components/message",
+	"/docs/components/message-scroller",
+	"/docs/components/native-select",
+	"/docs/components/navigation-menu",
+	"/docs/components/questionnaire",
+	"/docs/components/scroll-area",
+}
+
+// HasNewComponents reports whether a component page in the sidebar is in
+// PagesNew: the components overview renders its New Components section only
+// then, an empty one would be a heading over nothing.
+func HasNewComponents() bool {
+	for _, section := range Sections {
+		if section.Title != "Components" {
+			continue
+		}
+		for _, link := range section.Links {
+			if PageIsNew(link.Href) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // PageIsNew reports whether a docs URL is in PagesNew.
@@ -171,6 +178,11 @@ var Sections = []Section{
 			{
 				Text: "CLI",
 				Href: "/docs/cli",
+			},
+			// Monorepo follows CLI, per shadcn's (root)/meta.json order.
+			{
+				Text: "Monorepo",
+				Href: "/docs/monorepo",
 			},
 			// Changelog before llms.txt, per shadcn's (root)/meta.json order.
 			{

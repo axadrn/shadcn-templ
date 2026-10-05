@@ -57,7 +57,7 @@ templ ChartRadarLabelCustom() {
 		@card.Content(card.ContentProps{Class: "pb-0"}) {
 			@chart.Container(chart.ContainerProps{ID: "radar-label-custom", Config: chartRadarLabelCustomConfig, Class: "mx-auto aspect-square max-h-[250px]"}) {
 				@chart.RadarChart(chart.RadarChartProps{
-					Data: chartRadarLabelCustomData,
+					Data:   chartRadarLabelCustomData,
 					Margin: &chart.Margin{Top: 10, Right: 10, Bottom: 10, Left: 10},
 				}) {
 					@chart.Tooltip(chart.TooltipProps{
@@ -75,19 +75,19 @@ templ ChartRadarLabelCustom() {
 						FillOpacity: chart.Float(0.6),
 					})
 					@chart.Radar(chart.RadarProps{
-						DataKey:     "mobile",
-						Fill:        "var(--color-mobile)",
+						DataKey: "mobile",
+						Fill:    "var(--color-mobile)",
 					})
 				}
 			}
 		}
 		@card.Footer(card.FooterProps{Class: "flex-col gap-2 text-sm"}) {
 			<div class="flex items-center gap-2 leading-none font-medium">
-			Trending up by 5.2% this month
-			@icon.TrendingUp(icon.Props{Class: "h-4 w-4"})
+				Trending up by 5.2% this month
+				@icon.TrendingUp(icon.Props{Class: "h-4 w-4"})
 			</div>
 			<div class="flex items-center gap-2 leading-none text-muted-foreground">
-			January - June 2024
+				January - June 2024
 			</div>
 		}
 	}

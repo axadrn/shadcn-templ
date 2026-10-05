@@ -1,0 +1,19 @@
+{
+  "name": "shadcn-templ-parity",
+  "private": true,
+  "type": "module",
+  "description": "Compares shadcn-templ against the shadcn reference app, see README.md",
+  "scripts": {
+    "compare": "node compare.mjs",
+    "all": "./all.sh",
+    "behavior": "node behavior.mjs",
+    "a11y": "node a11y.mjs",
+    "escape": "node escape.mjs",
+    "htmx": "node htmx/htmx.mjs"
+  },
+  "dependencies": {
+    "pixelmatch": "6.0.0",
+    "playwright": "1.63.0",
+    "pngjs": "7.0.0"
+  }
+}

@@ -1,0 +1,19 @@
+version: "3"
+
+# One include per app. A new app under apps/ gets its own Taskfile.yml and an
+# entry here; its tasks run in its directory.
+includes:
+  web:
+    taskfile: ./apps/web/Taskfile.yml
+    dir: ./apps/web
+
+tasks:
+  dev:
+    desc: Start the web app with hot reload
+    cmds:
+      - task: web:dev
+
+  build:
+    desc: Build every app with production assets
+    cmds:
+      - task: web:build

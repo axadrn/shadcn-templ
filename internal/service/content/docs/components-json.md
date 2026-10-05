@@ -52,7 +52,7 @@ See the [installation section](/docs/installation) for how to set up Tailwind CS
 
 ### tailwind.css
 
-Path to the CSS file that imports Tailwind CSS into your project, relative to your project root. `init` detects it, or creates `assets/css/globals.css`; override with `--css`.
+Path to the CSS file that imports Tailwind CSS into your project, relative to the directory of `components.json`. `init` detects it, or creates `assets/css/globals.css`; override with `--css`.
 
 ```json title="components.json"
 {
@@ -132,7 +132,7 @@ The menu accent of your preset: `subtle` or `bold`. Written from your preset and
 
 The CLI uses these values to place generated components in the correct location and rewrite imports.
 
-The aliases are Go import paths. `init` derives them from the `module` path in your `go.mod`, and both must live under that module path.
+The aliases are Go import paths. `init` derives them from the `module` path in your `go.mod`, and both must live under that module path. They resolve against the directory of `go.mod`, which can be a parent of `components.json`; several apps of one module share their components that way, see [Monorepo](/docs/monorepo).
 
 ### aliases.utils
 
@@ -175,10 +175,10 @@ Existing configurations without `scripts` receive these defaults when the CLI bu
 
 ### scripts.dir
 
-The output directory, relative to the project root. `bundle` writes `shadcn-templ-<hash>.js` here and removes older `shadcn-templ-*.js` files from the same directory. Add this generated filename pattern to `.gitignore` if you change the directory.
+The output directory, relative to the directory of `components.json`. `bundle` writes `shadcn-templ-<hash>.js` here and removes older `shadcn-templ-*.js` files from the same directory. Add this generated filename pattern to `.gitignore` if you change the directory.
 
 ### scripts.path
 
-The public URL prefix for the output directory. Use `/assets/js`, an application prefix such as `/my-app/assets/js`, or a CDN URL such as `https://cdn.example.com/js`. The CLI writes the complete URL into `components/scripts_bundle.go`; `@components.Scripts()` renders it.
+The public URL prefix for the output directory. Use `/assets/js`, an application prefix such as `/my-app/assets/js`, or a CDN URL such as `https://cdn.example.com/js`. The CLI writes the complete URL into `components/scripts_bundle.go`; `@components.Scripts()` renders it. Apps of a [monorepo](/docs/monorepo) that share components share this file, so they must use the same `scripts.path`.
 
 After changing either setting, run `shadcn-templ bundle` and configure your server or upload step to expose `scripts.dir` at `scripts.path`.

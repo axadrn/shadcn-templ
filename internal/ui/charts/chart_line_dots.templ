@@ -40,8 +40,8 @@ templ ChartLineDots() {
 			@chart.Container(chart.ContainerProps{ID: "line-dots", Config: chartLineDotsConfig}) {
 				@chart.LineChart(chart.LineChartProps{
 					AccessibilityLayer: true,
-					Data:   chartLineDotsData,
-					Margin: &chart.Margin{Left: 12, Right: 12},
+					Data:               chartLineDotsData,
+					Margin:             &chart.Margin{Left: 12, Right: 12},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.XAxis(chart.XAxisProps{

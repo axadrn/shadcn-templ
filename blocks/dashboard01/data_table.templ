@@ -27,14 +27,11 @@ const dataTablePageSize = 10
 // lists in the tsx: every accessor column that can hide.
 var dataTableHideableColumns = []string{"type", "status", "target", "limit", "reviewer"}
 
-var dataTableViews = []struct {
-	Value string
-	Label string
-}{
-	{"outline", "Outline"},
-	{"past-performance", "Past Performance"},
-	{"key-personnel", "Key Personnel"},
-	{"focus-documents", "Focus Documents"},
+var dataTableViews = []selectcomp.ItemData{
+	{Value: "outline", Label: "Outline"},
+	{Value: "past-performance", Label: "Past Performance"},
+	{Value: "key-personnel", Label: "Key Personnel"},
+	{Value: "focus-documents", Label: "Focus Documents"},
 }
 
 templ DataTable(data []Item) {
@@ -57,7 +54,7 @@ templ DataTable(data []Item) {
 				}
 				// The view select is static: it mirrors the tabs but does not
 				// switch them (the tsx does not wire it to the tabs either).
-				@selectcomp.Select(selectcomp.Props{DefaultValue: "outline"}) {
+				@selectcomp.Select(selectcomp.Props{Items: dataTableViews, DefaultValue: "outline"}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{
 						Class: "flex w-fit @4xl/main:hidden",
 						Size:  selectcomp.SizeSm,
@@ -69,7 +66,7 @@ templ DataTable(data []Item) {
 						@selectcomp.Group() {
 							for _, view := range dataTableViews {
 								@selectcomp.Item(selectcomp.ItemProps{Value: view.Value}) {
-									{ view.Label }
+									{ view.Label.(string) }
 								}
 							}
 						}
@@ -487,13 +484,14 @@ templ dataTableScript() {
 			// useIsMobile pendant for TableCellViewer: mutate the inert portal
 			// template before drawer.js opens it, so the first open is correct.
 			// The drawer lives in the document from the first render (hidden
-			// portal node), so the trigger's aria-controls always resolves.
-			const drawerDialog = (trigger) => {
-				const id = trigger.getAttribute("aria-controls");
+			// portal node), so the trigger's data-templ-controls always resolves.
+			// The id is the drawer popup's.
+			const drawerPopup = (trigger) => {
+				const id = trigger.getAttribute("data-templ-controls");
 				return id ? document.getElementById(id) : null;
 			};
 			const syncDrawerDirection = (trigger) => {
-				const popup = drawerDialog(trigger)?.querySelector('[data-slot="drawer-popup"]');
+				const popup = drawerPopup(trigger);
 				if (!popup) return;
 				const mobile = window.matchMedia("(max-width: 767px)").matches;
 				popup.setAttribute("data-swipe-direction", mobile ? "down" : "right");
@@ -530,8 +528,8 @@ templ dataTableRow(item Item, page, size int) {
 				Class:   "size-7 text-muted-foreground hover:bg-transparent",
 				Attributes: templ.Attributes{
 					"data-dashboard01-drag-handle": "",
-					"draggable":                      "true",
-					"style":                          "touch-action:none",
+					"draggable":                    "true",
+					"style":                        "touch-action:none",
 				},
 			}) {
 				@icon.GripVertical(icon.Props{Class: "size-3 text-muted-foreground"})
@@ -596,7 +594,12 @@ templ dataTableRow(item Item, page, size int) {
 				@label.Label(label.Props{For: fmt.Sprintf("%d-reviewer", item.ID), Class: "sr-only"}) {
 					Reviewer
 				}
-				@selectcomp.Select() {
+				@selectcomp.Select(selectcomp.Props{
+					Items: []selectcomp.ItemData{
+						{Value: "Eddie Lake", Label: "Eddie Lake"},
+						{Value: "Jamik Tashpulatov", Label: "Jamik Tashpulatov"},
+					},
+				}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{
 						Class: "w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate",
 						Size:  selectcomp.SizeSm,
@@ -729,51 +732,51 @@ templ dataTableCellViewer(item Item, page, size int) {
 templ dataTableDrawerBody(item Item) {
 	<div class="hidden md:contents">
 		@chart.Container(chart.ContainerProps{Config: dataTableCellViewerChartConfig}) {
-		@chart.AreaChart(chart.AreaChartProps{
-			AccessibilityLayer: true,
-			Data:               dataTableCellViewerChartData,
-			Margin:             &chart.Margin{Left: 0, Right: 10},
-		}) {
-			@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
-			@chart.XAxis(chart.XAxisProps{
-				DataKey:       "month",
-				TickMargin:    8,
-				TickFormatter: dataTableCellViewerMonthShort,
-				Hide:          true,
-			})
-			@chart.Tooltip(chart.TooltipProps{
-				Cursor:  chart.Bool(false),
-				Content: chart.TooltipContentProps{Indicator: "dot"},
-			})
-			@chart.Area(chart.AreaProps{
-				DataKey:     "mobile",
-				Type:        chart.CurveNatural,
-				Fill:        "var(--color-mobile)",
-				FillOpacity: 0.6,
-				Stroke:      "var(--color-mobile)",
-				StackID:     "a",
-			})
-			@chart.Area(chart.AreaProps{
-				DataKey:     "desktop",
-				Type:        chart.CurveNatural,
-				Fill:        "var(--color-desktop)",
-				FillOpacity: 0.4,
-				Stroke:      "var(--color-desktop)",
-				StackID:     "a",
-			})
-		}
+			@chart.AreaChart(chart.AreaChartProps{
+				AccessibilityLayer: true,
+				Data:               dataTableCellViewerChartData,
+				Margin:             &chart.Margin{Left: 0, Right: 10},
+			}) {
+				@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
+				@chart.XAxis(chart.XAxisProps{
+					DataKey:       "month",
+					TickMargin:    8,
+					TickFormatter: dataTableCellViewerMonthShort,
+					Hide:          true,
+				})
+				@chart.Tooltip(chart.TooltipProps{
+					Cursor:  chart.Bool(false),
+					Content: chart.TooltipContentProps{Indicator: "dot"},
+				})
+				@chart.Area(chart.AreaProps{
+					DataKey:     "mobile",
+					Type:        chart.CurveNatural,
+					Fill:        "var(--color-mobile)",
+					FillOpacity: 0.6,
+					Stroke:      "var(--color-mobile)",
+					StackID:     "a",
+				})
+				@chart.Area(chart.AreaProps{
+					DataKey:     "desktop",
+					Type:        chart.CurveNatural,
+					Fill:        "var(--color-desktop)",
+					FillOpacity: 0.4,
+					Stroke:      "var(--color-desktop)",
+					StackID:     "a",
+				})
+			}
 		}
 		@separator.Separator()
 		<div class="grid gap-2">
-		<div class="flex gap-2 leading-none font-medium">
-			Trending up by 5.2% this month
-			@icon.TrendingUp(icon.Props{Class: "size-4"})
-		</div>
-		<div class="text-muted-foreground">
-			Showing total visitors for the last 6 months. This is just
-			some random text to test the layout. It spans multiple lines
-			and should wrap around.
-		</div>
+			<div class="flex gap-2 leading-none font-medium">
+				Trending up by 5.2% this month
+				@icon.TrendingUp(icon.Props{Class: "size-4"})
+			</div>
+			<div class="text-muted-foreground">
+				Showing total visitors for the last 6 months. This is just
+				some random text to test the layout. It spans multiple lines
+				and should wrap around.
+			</div>
 		</div>
 		@separator.Separator()
 	</div>
@@ -808,7 +811,14 @@ templ dataTableDrawerBody(item Item) {
 				@label.Label(label.Props{For: "status"}) {
 					Status
 				}
-				@selectcomp.Select(selectcomp.Props{DefaultValue: item.Status}) {
+				@selectcomp.Select(selectcomp.Props{
+					Items: []selectcomp.ItemData{
+						{Value: "Done", Label: "Done"},
+						{Value: "In Progress", Label: "In Progress"},
+						{Value: "Not Started", Label: "Not Started"},
+					},
+					DefaultValue: item.Status,
+				}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{ID: "status", Class: "w-full"}) {
 						@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a status"})
 					}
@@ -846,7 +856,14 @@ templ dataTableDrawerBody(item Item) {
 			@label.Label(label.Props{For: "reviewer"}) {
 				Reviewer
 			}
-			@selectcomp.Select(selectcomp.Props{DefaultValue: item.Reviewer}) {
+			@selectcomp.Select(selectcomp.Props{
+				Items: []selectcomp.ItemData{
+					{Value: "Eddie Lake", Label: "Eddie Lake"},
+					{Value: "Jamik Tashpulatov", Label: "Jamik Tashpulatov"},
+					{Value: "Emily Whalen", Label: "Emily Whalen"},
+				},
+				DefaultValue: item.Reviewer,
+			}) {
 				@selectcomp.Trigger(selectcomp.TriggerProps{ID: "reviewer", Class: "w-full"}) {
 					@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Select a reviewer"})
 				}

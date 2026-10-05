@@ -1,0 +1,65 @@
+package inputgroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/tooltip"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ InputGroupTooltip() {
+	<div class="grid w-full max-w-sm gap-4">
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{Placeholder: "Enter password", Type: "password"})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@tooltip.Tooltip() {
+					@inputgroup.Button(inputgroup.ButtonProps{
+						Variant:    button.VariantGhost,
+						Size:       inputgroup.ButtonSizeIconXs,
+						Attributes: utils.MergeAttributes(tooltip.Trigger(ctx), templ.Attributes{"aria-label": "Info"}),
+					}) {
+						@icon.Info()
+					}
+					@tooltip.Content() {
+						<p>Password must be at least 8 characters</p>
+					}
+				}
+			}
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{Placeholder: "Your email address"})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@tooltip.Tooltip() {
+					@inputgroup.Button(inputgroup.ButtonProps{
+						Variant:    button.VariantGhost,
+						Size:       inputgroup.ButtonSizeIconXs,
+						Attributes: utils.MergeAttributes(tooltip.Trigger(ctx), templ.Attributes{"aria-label": "Help"}),
+					}) {
+						@icon.CircleQuestionMark()
+					}
+					@tooltip.Content() {
+						<p>We&apos;ll use this to send you notifications</p>
+					}
+				}
+			}
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{Placeholder: "Enter API key"})
+			@tooltip.Tooltip() {
+				@inputgroup.Addon(inputgroup.AddonProps{Attributes: tooltip.Trigger(ctx)}) {
+					@inputgroup.Button(inputgroup.ButtonProps{
+						Variant:    button.VariantGhost,
+						Size:       inputgroup.ButtonSizeIconXs,
+						Attributes: templ.Attributes{"aria-label": "Help"},
+					}) {
+						@icon.CircleQuestionMark()
+					}
+				}
+				@tooltip.Content(tooltip.ContentProps{Side: tooltip.SideLeft}) {
+					<p>Click for help with API keys</p>
+				}
+			}
+		}
+	</div>
+}

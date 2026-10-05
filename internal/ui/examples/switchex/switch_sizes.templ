@@ -1,0 +1,23 @@
+package switchex
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	switchcomp "github.com/axadrn/shadcn-templ/v2/components/switch"
+)
+
+templ SwitchSizes() {
+	@field.Group(field.GroupProps{Class: "w-full max-w-[10rem]"}) {
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@switchcomp.Switch(switchcomp.Props{ID: "switch-size-sm", Size: switchcomp.SizeSm})
+			@field.Label(field.LabelProps{For: "switch-size-sm"}) {
+				Small
+			}
+		}
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+			@switchcomp.Switch(switchcomp.Props{ID: "switch-size-default", Size: switchcomp.SizeDefault})
+			@field.Label(field.LabelProps{For: "switch-size-default"}) {
+				Default
+			}
+		}
+	}
+}

@@ -133,11 +133,13 @@ func chartAreaInteractiveShortDate(v any) string {
 	return t.Format("Jan 2")
 }
 
-var chartAreaInteractiveRanges = []struct {
+type chartAreaInteractiveRange struct {
 	Key   string
 	Label string
 	Days  int
-}{
+}
+
+var chartAreaInteractiveRanges = []chartAreaInteractiveRange{
 	{"90d", "Last 3 months", 90},
 	{"30d", "Last 30 days", 30},
 	{"7d", "Last 7 days", 7},
@@ -145,8 +147,7 @@ var chartAreaInteractiveRanges = []struct {
 
 templ ChartAreaInteractive() {
 	@card.Card(card.Props{
-		Class:      "@container/card",
-		Attributes: templ.Attributes{"data-dashboard01-chart-range-card": ""},
+		Class: "@container/card",
 	}) {
 		@card.Header() {
 			@card.Title() {
@@ -166,9 +167,8 @@ templ ChartAreaInteractive() {
 					Value:   []string{"90d"},
 					// Spacing 0 is the joined bar of the TSX ToggleGroup default;
 					// px-4! beats the joined mode's px-2 like upstream.
-					Spacing:    utils.Ptr(0),
-					Class:      "hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex",
-					Attributes: templ.Attributes{"data-templ-chart-range-toggle": "dashboard01-area-interactive"},
+					Spacing: utils.Ptr(0),
+					Class:   "hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex",
 				}) {
 					for _, rng := range chartAreaInteractiveRanges {
 						@togglegroup.Item(togglegroup.ItemProps{Value: rng.Key}) {
@@ -176,11 +176,16 @@ templ ChartAreaInteractive() {
 						}
 					}
 				}
-				@selectcomp.Select(selectcomp.Props{Value: utils.Ptr("90d")}) {
+				@selectcomp.Select(selectcomp.Props{
+					Items: utils.Map(chartAreaInteractiveRanges, func(r chartAreaInteractiveRange) selectcomp.ItemData {
+						return selectcomp.ItemData{Value: r.Key, Label: r.Label}
+					}),
+					Value: utils.Ptr("90d"),
+				}) {
 					@selectcomp.Trigger(selectcomp.TriggerProps{
 						Class:      "flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden",
 						Size:       selectcomp.SizeSm,
-						Attributes: templ.Attributes{"aria-label": "Select a value", "data-templ-chart-range-select": "dashboard01-area-interactive"},
+						Attributes: templ.Attributes{"aria-label": "Select a value"},
 					}) {
 						@selectcomp.Value(selectcomp.ValueProps{Placeholder: "Last 3 months"})
 					}
@@ -198,114 +203,95 @@ templ ChartAreaInteractive() {
 		}
 		@card.Content(card.ContentProps{Class: "px-2 pt-4 sm:px-6 sm:pt-6"}) {
 			@chart.Container(chart.ContainerProps{ID: "dashboard01-area-interactive", Config: chartAreaInteractiveConfig, Class: "aspect-auto h-[250px] w-full"}) {
-				// All three ranges render up front, the chart script toggles
-				// them on range change (the pendant of the timeRange state).
-				for _, rng := range chartAreaInteractiveRanges {
-					<div data-templ-chart-range={ rng.Key } hidden?={ rng.Key != "90d" } style="width:100%;height:100%">
-						@chart.AreaChart(chart.AreaChartProps{
-							Data: chartAreaInteractiveFilteredData(rng.Days),
-						}) {
-							@chart.Defs() {
-								@chart.LinearGradient(chart.LinearGradientProps{ID: "fillDesktop", X1: "0", Y1: "0", X2: "0", Y2: "1"}) {
-									<stop offset="5%" stop-color="var(--color-desktop)" stop-opacity="1.0"></stop>
-									<stop offset="95%" stop-color="var(--color-desktop)" stop-opacity="0.1"></stop>
-								}
-								@chart.LinearGradient(chart.LinearGradientProps{ID: "fillMobile", X1: "0", Y1: "0", X2: "0", Y2: "1"}) {
-									<stop offset="5%" stop-color="var(--color-mobile)" stop-opacity="0.8"></stop>
-									<stop offset="95%" stop-color="var(--color-mobile)" stop-opacity="0.1"></stop>
-								}
-							}
-							@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
-							@chart.XAxis(chart.XAxisProps{
-								DataKey:       "date",
-								TickMargin:    8,
-								MinTickGap:    32,
-								TickFormatter: chartAreaInteractiveShortDate,
-							})
-							@chart.Tooltip(chart.TooltipProps{
-								Cursor: chart.Bool(false),
-								Content: chart.TooltipContentProps{
-									Indicator:      "dot",
-									LabelFormatter: chartAreaInteractiveShortDate,
-								},
-							})
-							@chart.Area(chart.AreaProps{
-								DataKey: "mobile",
-								Type:    chart.CurveNatural,
-								Fill:    "url(#fillMobile)",
-								Stroke:  "var(--color-mobile)",
-								StackID: "a",
-							})
-							@chart.Area(chart.AreaProps{
-								DataKey: "desktop",
-								Type:    chart.CurveNatural,
-								Fill:    "url(#fillDesktop)",
-								Stroke:  "var(--color-desktop)",
-								StackID: "a",
-							})
-						}
-					</div>
+				@chartAreaInteractiveChart(chartAreaInteractiveRanges[0].Days)
+				// The charts of the other time ranges, the props the controls set.
+				for _, rng := range chartAreaInteractiveRanges[1:] {
+					<template>
+						@chartAreaInteractiveChart(rng.Days)
+					</template>
 				}
 			}
 		}
 	}
 	<script nonce={ templ.GetNonce(ctx) }>
+		// The timeRange state: the toggle group and the select render it, a
+		// pick in either sets it, useIsMobile sets 7d whenever the viewport
+		// enters mobile; the chart renders the data of the range.
 		(() => {
-			// The TSX's timeRange state: the toggle group and the mobile select
-			// are controlled by it, a pick in either sets it and both follow,
-			// with the chart panels.
-			if (window.__templDashboard01ChartRange) return;
-			window.__templDashboard01ChartRange = true;
-			const mobile = window.matchMedia("(max-width: 767px)");
-
-			const setTimeRange = (card, value) => {
-				if (!card) return;
-				card.querySelectorAll("[data-templ-chart-range-toggle] [data-slot=toggle-group-item]").forEach((t) => {
-					const on = t.getAttribute("data-templ-value") === value;
-					t.toggleAttribute("data-pressed", on);
-					t.setAttribute("aria-pressed", String(on));
-				});
-				const trigger = card.querySelector("[data-templ-chart-range-select]");
-				const content = trigger && document.getElementById(trigger.getAttribute("aria-controls"));
-				const item = content && content.querySelector('[data-slot="select-item"][data-templ-value="' + value + '"]');
-				if (item) {
-					content.querySelectorAll('[data-slot="select-item"]').forEach((candidate) => {
-						const selected = candidate === item;
-						candidate.toggleAttribute("data-selected", selected);
-						candidate.setAttribute("aria-selected", String(selected));
-					});
-					const valueNode = trigger.querySelector('[data-slot="select-value"]');
-					if (valueNode) valueNode.textContent = item.getAttribute("data-templ-label") || item.textContent.trim();
-					trigger.removeAttribute("data-placeholder");
-				}
-				card.querySelectorAll("[data-templ-chart-range]").forEach((el) => {
-					el.hidden = el.getAttribute("data-templ-chart-range") !== value;
-				});
+			const card = document.currentScript.previousElementSibling;
+			const group = card.querySelector('[data-slot="toggle-group"]');
+			const trigger = card.querySelector('[data-slot="select-trigger"]');
+			const chartEl = card.querySelector('[data-slot="chart"]');
+			const wrapper = chartEl.querySelector(".recharts-wrapper");
+			const keys = {{ utils.Map(chartAreaInteractiveRanges, func(r chartAreaInteractiveRange) string { return r.Key }) }};
+			const models = [
+				wrapper.querySelector("script[data-templ-chart-model]").textContent,
+				...[...chartEl.querySelectorAll("template")].map((t) => t.content.querySelector("script[data-templ-chart-model]").textContent),
+			];
+			let timeRange = keys[0];
+			const setTimeRange = (value) => {
+				if (value === timeRange) return;
+				timeRange = value;
+				window.templ.toggleGroup.setValue(group, [value]);
+				window.templ.select.setValue(trigger, value);
+				window.templ.chart.update(wrapper, JSON.parse(models[keys.indexOf(value)]));
 			};
-
-			// useIsMobile sets 7d whenever the viewport enters mobile.
-			const syncMobileRange = () => {
-				if (!mobile.matches) return;
-				document.querySelectorAll("[data-dashboard01-chart-range-card]").forEach((card) => setTimeRange(card, "7d"));
-			};
-			if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", syncMobileRange, { once: true });
-			else syncMobileRange();
-			mobile.addEventListener("change", syncMobileRange);
-
-			// ToggleGroup onValueChange: setTimeRange(value[0] ?? "90d"), so a
-			// press on the pressed item keeps a range.
-			document.addEventListener("toggle-group-value-change", (e) => {
-				if (!(e.target instanceof Element) || !e.target.matches("[data-templ-chart-range-toggle]")) return;
-				setTimeRange(e.target.closest("[data-slot=card]"), (e.detail && e.detail.value && e.detail.value[0]) || "90d");
-			});
-
+			// ToggleGroup onValueChange: setTimeRange(value[0] ?? "90d").
+			group.addEventListener("toggle-group-value-change", (e) => setTimeRange(e.detail.value[0] ?? "90d"));
 			// Select onValueChange: a non null value sets it.
-			document.addEventListener("select-change", (e) => {
-				if (!(e.target instanceof Element)) return;
-				const trigger = e.target.closest("[data-templ-chart-range-select]");
-				if (!trigger || !e.detail || e.detail.value == null || e.detail.value === "") return;
-				setTimeRange(trigger.closest("[data-slot=card]"), e.detail.value);
+			trigger.addEventListener("select-change", (e) => {
+				if (e.detail.value) setTimeRange(e.detail.value);
 			});
+			const mobile = window.matchMedia("(max-width: 767px)");
+			const syncMobile = () => mobile.matches && setTimeRange("7d");
+			mobile.addEventListener("change", syncMobile);
+			if (window.templ?.chart) syncMobile();
+			else document.addEventListener("DOMContentLoaded", syncMobile);
 		})();
 	</script>
+}
+
+templ chartAreaInteractiveChart(days int) {
+	@chart.AreaChart(chart.AreaChartProps{
+		Data: chartAreaInteractiveFilteredData(days),
+	}) {
+		@chart.Defs() {
+			@chart.LinearGradient(chart.LinearGradientProps{ID: "fillDesktop", X1: "0", Y1: "0", X2: "0", Y2: "1"}) {
+				<stop offset="5%" stop-color="var(--color-desktop)" stop-opacity="1.0"></stop>
+				<stop offset="95%" stop-color="var(--color-desktop)" stop-opacity="0.1"></stop>
+			}
+			@chart.LinearGradient(chart.LinearGradientProps{ID: "fillMobile", X1: "0", Y1: "0", X2: "0", Y2: "1"}) {
+				<stop offset="5%" stop-color="var(--color-mobile)" stop-opacity="0.8"></stop>
+				<stop offset="95%" stop-color="var(--color-mobile)" stop-opacity="0.1"></stop>
+			}
+		}
+		@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
+		@chart.XAxis(chart.XAxisProps{
+			DataKey:       "date",
+			TickMargin:    8,
+			MinTickGap:    32,
+			TickFormatter: chartAreaInteractiveShortDate,
+		})
+		@chart.Tooltip(chart.TooltipProps{
+			Cursor: chart.Bool(false),
+			Content: chart.TooltipContentProps{
+				Indicator:      "dot",
+				LabelFormatter: chartAreaInteractiveShortDate,
+			},
+		})
+		@chart.Area(chart.AreaProps{
+			DataKey: "mobile",
+			Type:    chart.CurveNatural,
+			Fill:    "url(#fillMobile)",
+			Stroke:  "var(--color-mobile)",
+			StackID: "a",
+		})
+		@chart.Area(chart.AreaProps{
+			DataKey: "desktop",
+			Type:    chart.CurveNatural,
+			Fill:    "url(#fillDesktop)",
+			Stroke:  "var(--color-desktop)",
+			StackID: "a",
+		})
+	}
 }

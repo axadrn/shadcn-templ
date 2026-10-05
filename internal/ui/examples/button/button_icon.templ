@@ -1,0 +1,15 @@
+package button
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ ButtonIcon() {
+	@button.Button(button.Props{
+		Variant: button.VariantOutline,
+		Size:    button.SizeIcon,
+	}) {
+		@icon.CircleFadingArrowUp()
+	}
+}

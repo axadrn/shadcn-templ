@@ -1,0 +1,53 @@
+package field
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/radiogroup"
+)
+
+templ FieldChoiceCard() {
+	@field.Group(field.GroupProps{Class: "w-full max-w-xs"}) {
+		@field.Set() {
+			@field.Legend(field.LegendProps{Variant: field.LegendVariantLabel}) {
+				Compute Environment
+			}
+			@field.Description() {
+				Select the compute environment for your cluster.
+			}
+			@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "kubernetes"}) {
+				@field.Label(field.LabelProps{For: "kubernetes-r2h"}) {
+					@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+						@field.Content() {
+							@field.Title() {
+								Kubernetes
+							}
+							@field.Description() {
+								Run GPU workloads on a K8s cluster.
+							}
+						}
+						@radiogroup.Item(radiogroup.ItemProps{
+							Value: "kubernetes",
+							ID:    "kubernetes-r2h",
+						})
+					}
+				}
+				@field.Label(field.LabelProps{For: "vm-z4k"}) {
+					@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+						@field.Content() {
+							@field.Title() {
+								Virtual Machine
+							}
+							@field.Description() {
+								Access a cluster to run GPU workloads.
+							}
+						}
+						@radiogroup.Item(radiogroup.ItemProps{
+							Value: "vm",
+							ID:    "vm-z4k",
+						})
+					}
+				}
+			}
+		}
+	}
+}

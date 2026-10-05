@@ -1,0 +1,16 @@
+package progress
+
+import "github.com/axadrn/shadcn-templ/v2/components/progress"
+
+// The upstream example's Arabic translation, its default language, with its
+// Value children rendering the percentage in Arabic numerals.
+templ ProgressRtl() {
+	@progress.Progress(progress.Props{Value: 56, Class: "w-full max-w-sm", Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@progress.Label() {
+			تقدم الرفع
+		}
+		@progress.Value() {
+			<span class="ms-auto">٥٦%</span>
+		}
+	}
+}

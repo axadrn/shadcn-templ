@@ -1,0 +1,56 @@
+package command
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/command"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ CommandRtl() {
+	@command.Command(command.Props{Class: "max-w-sm rounded-lg border", Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@command.Input(command.InputProps{Placeholder: "اكتب أمرًا أو ابحث...", Attributes: templ.Attributes{"dir": "rtl"}})
+		@command.List() {
+			@command.Empty() {
+				لم يتم العثور على نتائج.
+			}
+			@command.Group(command.GroupProps{Heading: "اقتراحات"}) {
+				@command.Item() {
+					@icon.Calendar()
+					<span>التقويم</span>
+				}
+				@command.Item() {
+					@icon.Smile()
+					<span>البحث عن الرموز التعبيرية</span>
+				}
+				@command.Item(command.ItemProps{Disabled: true}) {
+					@icon.Calculator()
+					<span>الآلة الحاسبة</span>
+				}
+			}
+			@command.Separator()
+			@command.Group(command.GroupProps{Heading: "الإعدادات"}) {
+				@command.Item() {
+					@icon.User()
+					<span>الملف الشخصي</span>
+					@command.Shortcut() {
+						⌘P
+					}
+				}
+				@command.Item() {
+					@icon.CreditCard()
+					<span>الفوترة</span>
+					@command.Shortcut() {
+						⌘B
+					}
+				}
+				@command.Item() {
+					@icon.Settings()
+					<span>الإعدادات</span>
+					@command.Shortcut() {
+						⌘S
+					}
+				}
+			}
+		}
+	}
+}

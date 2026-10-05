@@ -1,0 +1,15 @@
+package switchex
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	switchcomp "github.com/axadrn/shadcn-templ/v2/components/switch"
+)
+
+templ SwitchDisabled() {
+	@field.Field(field.Props{Orientation: field.OrientationHorizontal, Class: "w-fit", Attributes: templ.Attributes{"data-disabled": "true"}}) {
+		@switchcomp.Switch(switchcomp.Props{ID: "switch-disabled-unchecked", Disabled: true})
+		@field.Label(field.LabelProps{For: "switch-disabled-unchecked"}) {
+			Disabled
+		}
+	}
+}

@@ -198,7 +198,25 @@
 
   // opts.scroll false mirrors cmdk's pointer selection, which skips the
   // scroll-into-view that keyboard selection performs.
+  //
+  // aria-activedescendant is cmdk's selectedItemId: a value change schedules
+  // reading the item that is aria-selected in the DOM at the next render. A
+  // keyboard or pointer change has rendered by then and names the new item.
+  // The first item selection on mount and after a search runs in a layout
+  // effect before the items render, so it names the item selected before
+  // (none on mount). No value change, no update.
   function setSelected(root, item, opts) {
+    const previous = getSelectedItem(root);
+    if (previous !== item) {
+      const named = opts && opts.layoutEffect ? previous : item;
+      const id = named ? named.id : null;
+      [inputOf(root), listOf(root)].forEach((el) => {
+        if (!el) return;
+        if (id) el.setAttribute("aria-activedescendant", id);
+        else el.removeAttribute("aria-activedescendant");
+      });
+    }
+
     root.querySelectorAll(ITEM_SELECTOR).forEach((i) => {
       const selected = i === item;
       i.setAttribute("data-selected", selected ? "true" : "false");
@@ -213,18 +231,11 @@
       else listOf(root)?.focus();
     }
 
-    const id = item ? item.id : null;
-    [input, listOf(root)].forEach((el) => {
-      if (!el) return;
-      if (id) el.setAttribute("aria-activedescendant", id);
-      else el.removeAttribute("aria-activedescendant");
-    });
-
     if (item && !(opts && opts.scroll === false)) scrollSelectedIntoView(root);
   }
 
   function selectFirstItem(root) {
-    setSelected(root, getValidItems(root)[0] || null);
+    setSelected(root, getValidItems(root)[0] || null, { layoutEffect: true });
   }
 
   function updateSelectedToIndex(root, index) {
@@ -390,6 +401,8 @@
 
   document.addEventListener("input", (e) => {
     if (!(e.target instanceof Element) || !e.target.hasAttribute("cmdk-input")) return;
+    // React renders a controlled input's value as its attribute too.
+    e.target.setAttribute("value", e.target.value);
     const root = rootFor(e.target);
     if (root) onSearchChange(root, e.target.value);
   });
@@ -488,7 +501,10 @@
     if (!(e.target instanceof Element)) return;
     e.target.querySelectorAll("[cmdk-root]").forEach((root) => {
       const input = inputOf(root);
-      if (input) input.value = "";
+      if (input) {
+        input.value = "";
+        input.setAttribute("value", "");
+      }
       onSearchChange(root, "");
     });
   });

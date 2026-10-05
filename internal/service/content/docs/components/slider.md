@@ -79,6 +79,12 @@ Use the `Disabled` prop to disable the slider.
 
 <ComponentPreview name="slider-disabled" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="slider-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Slider

@@ -3,10 +3,11 @@ package toast
 import (
 	"strconv"
 
-	"github.com/axadrn/shadcn-templ/v2/utils"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
 )
 
-// Type mirrors the toast types the built-in renderer recognizes.
+// Type is the toast type ToastIcon renders an icon for.
 type Type string
 
 const (
@@ -17,30 +18,27 @@ const (
 	TypeLoading Type = "loading"
 )
 
+// ToasterProps are the Toast.Provider props shadcn's Toaster passes on.
 type ToasterProps struct {
-	ID         string
-	Class      string
-	Attributes templ.Attributes
-	// Timeout in ms before a toast hides. Defaults to 5000 (Base UI).
+	// Timeout in ms before a toast closes. Defaults to 5000 (Base UI).
 	Timeout int
 	// Limit of toasts shown at once. Defaults to 3 (Base UI).
 	Limit int
 }
 
+// Props are the toastManager.add options of a toast requested server side.
 type Props struct {
-	ID          string
-	Class       string
-	Attributes  templ.Attributes
 	Title       string
 	Description string
-	// Type renders a status icon: success, info, warning, error or loading.
-	Type Type
+	Type        Type
 	// Timeout in ms overrides the toaster timeout for this toast.
 	Timeout int
 }
 
-// Toaster is the pendant of shadcn's Toaster: the fixed viewport that hosts
-// the toasts, mounted once in the layout.
+// Toaster is shadcn's Toaster: Toast.Provider with Toast.Portal and
+// Toast.Viewport, mounted once in the layout. The provider props live on the
+// viewport, ToastList and ToastIcon are templates toast.js renders a toast
+// from, since the toasts only exist in the toast manager.
 templ Toaster(props ...ToasterProps) {
 	{{ var p ToasterProps }}
 	if len(props) > 0 {
@@ -52,36 +50,94 @@ templ Toaster(props ...ToasterProps) {
 	if p.Limit == 0 {
 		{{ p.Limit = 3 }}
 	}
-	<div
-		if p.ID != "" {
-			id={ p.ID }
+	<div data-base-ui-portal data-slot="toast-portal">
+		<div
+			data-slot="toast-viewport"
+			tabindex="-1"
+			role="region"
+			aria-live="polite"
+			aria-atomic="false"
+			aria-relevant="additions text"
+			aria-label="Notifications"
+			data-templ-timeout={ strconv.Itoa(p.Timeout) }
+			data-templ-limit={ strconv.Itoa(p.Limit) }
+			class="pointer-events-none fixed inset-x-4 bottom-4 z-50 mx-auto w-auto max-w-sm outline-none sm:right-4 sm:left-auto sm:mx-0 sm:w-full"
+		></div>
+		<template data-templ-toast-list>
+			@toastListItem()
+		</template>
+		@toastIcon(TypeSuccess) {
+			@icon.CircleCheck(icon.Props{Attributes: templ.Attributes{"aria-hidden": "true"}})
 		}
-		data-slot="toast-viewport"
-		data-base-ui-portal
-		data-templ-timeout={ strconv.Itoa(p.Timeout) }
-		data-templ-limit={ strconv.Itoa(p.Limit) }
-		class={ utils.CN(
-			"pointer-events-none fixed inset-x-4 bottom-4 z-50 mx-auto w-auto max-w-sm outline-none sm:right-4 sm:left-auto sm:mx-0 sm:w-full",
-			p.Class,
-		) }
-		{ p.Attributes... }
-	>
-		{ children... }
+		@toastIcon(TypeInfo) {
+			@icon.Info(icon.Props{Attributes: templ.Attributes{"aria-hidden": "true"}})
+		}
+		@toastIcon(TypeWarning) {
+			@icon.TriangleAlert(icon.Props{Attributes: templ.Attributes{"aria-hidden": "true"}})
+		}
+		@toastIcon(TypeError) {
+			@icon.OctagonX(icon.Props{Class: "text-destructive", Attributes: templ.Attributes{"aria-hidden": "true"}})
+		}
+		@toastIcon(TypeLoading) {
+			@icon.LoaderCircle(icon.Props{Class: "animate-spin", Attributes: templ.Attributes{"aria-hidden": "true"}})
+		}
 	</div>
 }
 
-// Toast renders a toast server side (e.g. swapped into the Toaster via
-// htmx); the script adopts it, builds the markup, stacks it and starts its
-// timer.
+// toastListItem is one toast of ToastList: Toast, ToastContent, ToastTitle,
+// ToastDescription, ToastAction and ToastClose with shadcn's classes. toast.js
+// mounts the title, description and action only when the toast has them.
+templ toastListItem() {
+	<div
+		data-slot="toast"
+		class="cn-toast group/toast pointer-events-auto absolute right-0 bottom-0 z-[calc(1000-var(--toast-index))] w-full origin-bottom border bg-popover text-popover-foreground shadow-lg will-change-transform outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [--gap:0.75rem] [--height:var(--toast-frontmost-height,var(--toast-height))] [--offset-y:calc(var(--toast-offset-y)*-1+calc(var(--toast-index)*var(--gap)*-1)+var(--toast-swipe-movement-y))] [--peek:0.75rem] [--scale:calc(max(0,1-(var(--toast-index)*0.1)))] [--shrink:calc(1-var(--scale))] h-(--height) [transform:translateX(var(--toast-swipe-movement-x))_translateY(calc(var(--toast-swipe-movement-y)-(var(--toast-index)*var(--peek))-(var(--shrink)*var(--height))))_scale(var(--scale))] [transition:transform_500ms_cubic-bezier(0.22,1,0.36,1),opacity_500ms,height_150ms] after:absolute after:top-full after:left-0 after:h-[calc(var(--gap)+1px)] after:w-full after:content-[''] data-expanded:h-(--toast-height) data-expanded:[transform:translateX(var(--toast-swipe-movement-x))_translateY(var(--offset-y))] data-limited:opacity-0 data-starting-style:[transform:translateY(150%)] [&[data-ending-style]:not([data-limited]):not([data-swipe-direction])]:[transform:translateY(150%)] data-ending-style:data-[swipe-direction=down]:[transform:translateY(calc(var(--toast-swipe-movement-y)+150%))] data-ending-style:data-[swipe-direction=left]:[transform:translateX(calc(var(--toast-swipe-movement-x)-150%))_translateY(var(--offset-y))] data-ending-style:data-[swipe-direction=right]:[transform:translateX(calc(var(--toast-swipe-movement-x)+150%))_translateY(var(--offset-y))] data-ending-style:data-[swipe-direction=up]:[transform:translateY(calc(var(--toast-swipe-movement-y)-150%))] data-expanded:data-ending-style:data-[swipe-direction=down]:[transform:translateY(calc(var(--toast-swipe-movement-y)+150%))] data-expanded:data-ending-style:data-[swipe-direction=left]:[transform:translateX(calc(var(--toast-swipe-movement-x)-150%))_translateY(var(--offset-y))] data-expanded:data-ending-style:data-[swipe-direction=right]:[transform:translateX(calc(var(--toast-swipe-movement-x)+150%))_translateY(var(--offset-y))] data-expanded:data-ending-style:data-[swipe-direction=up]:[transform:translateY(calc(var(--toast-swipe-movement-y)-150%))]"
+	>
+		<div
+			data-slot="toast-content"
+			class="flex h-full items-center gap-3 overflow-hidden p-4 transition-opacity duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] data-behind:opacity-0 data-expanded:opacity-100"
+		>
+			<div class="flex min-w-0 flex-1 flex-col gap-1">
+				<h2 data-slot="toast-title" class="text-sm font-medium"></h2>
+				<p data-slot="toast-description" class="text-sm text-muted-foreground"></p>
+			</div>
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Size:       button.SizeSm,
+				Class:      "shrink-0",
+				Attributes: templ.Attributes{"data-slot": "toast-action"},
+			})
+			@button.Button(button.Props{
+				Variant:    button.VariantGhost,
+				Size:       button.SizeIconSm,
+				Class:      "relative shrink-0 text-muted-foreground after:absolute after:-inset-2 after:content-[''] hover:text-foreground",
+				Attributes: templ.Attributes{"data-slot": "toast-close", "aria-label": "Close toast"},
+			}) {
+				@icon.X(icon.Props{Attributes: templ.Attributes{"aria-hidden": "true"}})
+			}
+		</div>
+	</div>
+}
+
+// toastIcon is ToastIcon for one type.
+templ toastIcon(t Type) {
+	<template data-templ-toast-icon={ string(t) }>
+		<span
+			data-slot="toast-icon"
+			class="shrink-0 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4"
+		>
+			{ children... }
+		</span>
+	</template>
+}
+
+// Toast requests a toast server side (e.g. swapped in via htmx): toast.js
+// turns the marker into toastManager.add with these options.
 templ Toast(props ...Props) {
 	{{ var p Props }}
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
 	<div
-		if p.ID != "" {
-			id={ p.ID }
-		}
 		data-templ-toast
 		if p.Type != "" {
 			data-templ-type={ string(p.Type) }
@@ -95,6 +151,5 @@ templ Toast(props ...Props) {
 		if p.Description != "" {
 			data-templ-description={ p.Description }
 		}
-		class={ p.Class }
 	></div>
 }

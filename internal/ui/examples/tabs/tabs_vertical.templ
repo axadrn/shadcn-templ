@@ -1,0 +1,19 @@
+package tabs
+
+import "github.com/axadrn/shadcn-templ/v2/components/tabs"
+
+templ TabsVertical() {
+	@tabs.Tabs(tabs.Props{DefaultValue: "account", Orientation: tabs.OrientationVertical}) {
+		@tabs.List() {
+			@tabs.Trigger(tabs.TriggerProps{Value: "account"}) {
+				Account
+			}
+			@tabs.Trigger(tabs.TriggerProps{Value: "password"}) {
+				Password
+			}
+			@tabs.Trigger(tabs.TriggerProps{Value: "notifications"}) {
+				Notifications
+			}
+		}
+	}
+}

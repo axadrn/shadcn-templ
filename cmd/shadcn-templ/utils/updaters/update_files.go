@@ -64,10 +64,7 @@ func UpdateFiles(files []registry.ItemFile, config *utils.Config, options Update
 		if err != nil {
 			return result, err
 		}
-		relPath, err := filepath.Rel(config.ResolvedPaths.Cwd, targetPath)
-		if err != nil {
-			relPath = targetPath
-		}
+		relPath := utils.DisplayPath(config, targetPath)
 
 		content := transformContent(file, config)
 

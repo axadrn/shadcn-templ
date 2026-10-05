@@ -1,0 +1,42 @@
+package item
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/item"
+)
+
+templ ItemLink() {
+	<div class="flex w-full max-w-md flex-col gap-4">
+		@item.Item(item.Props{Href: "#"}) {
+			@item.Content() {
+				@item.Title() {
+					Visit our documentation
+				}
+				@item.Description() {
+					Learn how to get started with our components.
+				}
+			}
+			@item.Actions() {
+				@icon.ChevronRight(icon.Props{Class: "size-4"})
+			}
+		}
+		@item.Item(item.Props{
+			Variant:    item.VariantOutline,
+			Href:       "#",
+			Target:     "_blank",
+			Attributes: templ.Attributes{"rel": "noopener noreferrer"},
+		}) {
+			@item.Content() {
+				@item.Title() {
+					External resource
+				}
+				@item.Description() {
+					Opens in a new tab with security attributes.
+				}
+			}
+			@item.Actions() {
+				@icon.ExternalLink(icon.Props{Class: "size-4"})
+			}
+		}
+	</div>
+}

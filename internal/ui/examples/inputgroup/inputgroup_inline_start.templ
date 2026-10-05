@@ -1,0 +1,24 @@
+package inputgroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+)
+
+templ InputGroupInlineStart() {
+	@field.Field(field.Props{Class: "max-w-sm"}) {
+		@field.Label(field.LabelProps{For: "inline-start-input"}) {
+			Input
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{ID: "inline-start-input", Placeholder: "Search..."})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineStart}) {
+				@icon.Search(icon.Props{Class: "text-muted-foreground"})
+			}
+		}
+		@field.Description() {
+			Icon positioned at the start.
+		}
+	}
+}

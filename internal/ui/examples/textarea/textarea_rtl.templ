@@ -1,0 +1,24 @@
+package textarea
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/textarea"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ TextareaRtl() {
+	@field.Field(field.Props{Class: "w-full max-w-xs", Attributes: templ.Attributes{"dir": "rtl"}}) {
+		@field.Label(field.LabelProps{For: "feedback", Attributes: templ.Attributes{"dir": "rtl"}}) {
+			التعليقات
+		}
+		@textarea.Textarea(textarea.Props{
+			ID:          "feedback",
+			Placeholder: "تعليقاتك تساعدنا على التحسين...",
+			Rows:        4,
+			Attributes:  templ.Attributes{"dir": "rtl"},
+		})
+		@field.Description(field.DescriptionProps{Attributes: templ.Attributes{"dir": "rtl"}}) {
+			شاركنا أفكارك حول خدمتنا.
+		}
+	}
+}

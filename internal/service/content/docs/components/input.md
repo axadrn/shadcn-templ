@@ -125,6 +125,12 @@ A full form example with multiple inputs, a select, and a button.
 
 <ComponentPreview name="input-form" previewClassName="h-[32rem]" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="input-rtl" direction="rtl" previewClassName="*:max-w-xs" />
+
 ## API Reference
 
 ### Input

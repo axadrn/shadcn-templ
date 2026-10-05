@@ -102,6 +102,12 @@ Show a tooltip on a disabled button by wrapping it with a span.
 
 <ComponentPreview name="tooltip-disabled" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="tooltip-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Tooltip

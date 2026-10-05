@@ -40,9 +40,10 @@ func TestInteractiveBaseBlockPendantsAreRendered(t *testing.T) {
 	}
 	html = out.String()
 	for _, want := range []string{
-		"data-dashboard01-chart-range-card",
 		"window.matchMedia(\"(max-width: 767px)\")",
-		"setTimeRange(card, \"7d\")",
+		"setTimeRange(\"7d\")",
+		// One chart, the other time ranges as templates.
+		"<template>",
 		// The range toggle is controlled by timeRange like the TSX.
 		"data-templ-value=\"[&#34;90d&#34;]\"",
 	} {

@@ -1,0 +1,37 @@
+package dropdownmenu
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ DropdownMenuCheckboxesIcons() {
+	@dropdownmenu.DropdownMenu() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: dropdownmenu.Trigger(ctx),
+		}) {
+			Notifications
+		}
+		@dropdownmenu.Content(dropdownmenu.ContentProps{Class: "w-48"}) {
+			@dropdownmenu.Group() {
+				@dropdownmenu.Label() {
+					Notification Preferences
+				}
+				@dropdownmenu.CheckboxItem(dropdownmenu.CheckboxItemProps{DefaultChecked: true}) {
+					@icon.Mail()
+					Email notifications
+				}
+				@dropdownmenu.CheckboxItem() {
+					@icon.MessageSquare()
+					SMS notifications
+				}
+				@dropdownmenu.CheckboxItem(dropdownmenu.CheckboxItemProps{DefaultChecked: true}) {
+					@icon.Bell()
+					Push notifications
+				}
+			}
+		}
+	}
+}

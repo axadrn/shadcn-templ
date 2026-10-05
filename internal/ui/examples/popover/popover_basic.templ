@@ -1,0 +1,28 @@
+package popover
+
+import (
+	exshared "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/shared"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/popover"
+)
+
+templ PopoverBasic() {
+	@popover.Popover() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: exshared.ServerRendered(popover.Trigger(ctx)),
+		}) {
+			Open Popover
+		}
+		@popover.Content(popover.ContentProps{Side: popover.SideBottom, Align: popover.AlignStart}) {
+			@popover.Header() {
+				@popover.Title() {
+					Dimensions
+				}
+				@popover.Description() {
+					Set the dimensions for the layer.
+				}
+			}
+		}
+	}
+}

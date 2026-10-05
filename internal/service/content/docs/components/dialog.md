@@ -122,6 +122,12 @@ Long content can scroll while the header stays in view.
 
 <ComponentPreview name="dialog-scrollable-content" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="dialog-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Dialog

@@ -1,0 +1,31 @@
+package calendar
+
+import (
+	"time"
+
+	"github.com/axadrn/shadcn-templ/v2/components/calendar"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+)
+
+templ CalendarBookedDates() {
+	{{
+		selected := time.Date(time.Now().Year(), 1, 6, 0, 0, 0, 0, time.Local)
+		booked := make([]time.Time, 15)
+		for i := range booked {
+			booked[i] = time.Date(time.Now().Year(), 1, 12+i, 0, 0, 0, 0, time.Local)
+		}
+	}}
+	@card.Card(card.Props{Class: "mx-auto w-fit p-0"}) {
+		@card.Content(card.ContentProps{Class: "p-0"}) {
+			@calendar.Calendar(calendar.Props{
+				Mode:                calendar.ModeSingle,
+				DefaultMonth:        selected,
+				Selected:            selected,
+				Disabled:            booked,
+				Modifiers:           map[string]any{"booked": booked},
+				ModifiersClassNames: map[string]string{"booked": "[&>button]:line-through opacity-100"},
+			})
+		}
+	}
+	@calendarSelectState()
+}

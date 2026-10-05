@@ -45,8 +45,8 @@ templ ChartLineLabelCustom() {
 			@chart.Container(chart.ContainerProps{ID: "line-label-custom", Config: chartLineLabelCustomConfig}) {
 				@chart.LineChart(chart.LineChartProps{
 					AccessibilityLayer: true,
-					Data:   chartLineLabelCustomData,
-					Margin: &chart.Margin{Top: 24, Left: 24, Right: 24},
+					Data:               chartLineLabelCustomData,
+					Margin:             &chart.Margin{Top: 24, Left: 24, Right: 24},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.Tooltip(chart.TooltipProps{

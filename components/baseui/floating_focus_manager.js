@@ -63,10 +63,19 @@
   // ----- FocusGuard -----------------------------------------------------------
 
   // A visually hidden tabbable span that hands focus on when it receives it.
+  // @base-ui/utils/platform: VoiceOver may run on any Apple OS. Through
+  // WebKit its virtual cursor only focuses focusable or button elements, so
+  // the guards there are buttons the cursor can land on instead of hidden.
+  const platform = (navigator.platform || "").toLowerCase();
+  const ios = /^i(os$|p)/.test(platform) || (platform === "macintel" && navigator.maxTouchPoints > 1);
+  const apple = ios || platform.startsWith("mac");
+  const voiceOverGuards = apple && webkit;
+
   function createFocusGuard(type, onFocus) {
     const guard = document.createElement("span");
     if (type) guard.setAttribute("data-type", type);
-    guard.setAttribute("aria-hidden", "true");
+    if (voiceOverGuards) guard.setAttribute("role", "button");
+    else guard.setAttribute("aria-hidden", "true");
     guard.setAttribute("tabindex", "0");
     guard.setAttribute("data-base-ui-focus-guard", "");
     guard.style.cssText = "clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:-1px;position:fixed;top:0;left:0";
@@ -178,12 +187,16 @@
       returnFocus = true,
       restoreFocus = false,
       closeOnFocusOut = true,
-      openInteractionType = "",
       previousFocusableElement = null,
       nextFocusableElement = null,
       getInsideElements,
       onOpenChange,
+      // The element the guards wrap: the focus manager's children, the
+      // floating focus element unless the popup holds a focusable list.
+      guardsAround = null,
     } = options;
+    // A reopened popup renders the manager again with this open's type.
+    let openInteractionType = options.openInteractionType === undefined ? "" : options.openInteractionType;
     const triggers = [...(options.triggers || [domReference])].filter(Boolean);
     const doc = floating.ownerDocument;
     const floatingFocusElement = getFloatingFocusElement(floating);
@@ -246,8 +259,8 @@
           }
         }
       });
-      floatingFocusElement.before(beforeGuard);
-      floatingFocusElement.after(afterGuard);
+      (guardsAround || floatingFocusElement).before(beforeGuard);
+      (guardsAround || floatingFocusElement).after(afterGuard);
     }
 
     // Prevent Tab from escaping the modal when there is nothing tabbable.
@@ -354,7 +367,8 @@
 
     // The effects that run while open. A popup that opens again during its
     // exit animation runs them again on the same manager.
-    function open() {
+    function open(nextOpenInteractionType) {
+      if (nextOpenInteractionType !== undefined) openInteractionType = nextOpenInteractionType;
       self.open = true;
       // The portal's outside guards render first, they count as inside below.
       window.templ.portal.setFocusManagerState(portalNode, { ...portalNode?._templFocusState, open: true });

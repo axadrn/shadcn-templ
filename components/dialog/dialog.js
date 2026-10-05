@@ -41,7 +41,7 @@
     // Dialog.Close links through context in Base UI; its port marker carries
     // the dialog id when the close sits outside the popup.
     const id =
-      element.getAttribute("aria-controls") || element.getAttribute("data-templ-dialog-close");
+      element.getAttribute("data-templ-controls") || element.getAttribute("data-templ-dialog-close");
     if (id) return getDialog(id);
     return getDialog(element);
   }
@@ -49,7 +49,7 @@
   function triggersFor(popup) {
     if (!popup.id) return [];
     return document.querySelectorAll(
-      '[data-base-ui-click-trigger][aria-controls="' + popup.id + '"]',
+      '[data-base-ui-click-trigger][data-templ-controls="' + popup.id + '"]',
     );
   }
 
@@ -138,10 +138,14 @@
 
   // ----- open / close --------------------------------------------------------
 
+  // DialogTrigger renders aria-controls while the popup is open
+  // (triggerPopupId).
   function updateTriggers(state, isOpen) {
     triggersFor(state.popup).forEach((trigger) => {
       trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
       trigger.toggleAttribute("data-popup-open", isOpen);
+      if (isOpen) trigger.setAttribute("aria-controls", state.popup.id);
+      else trigger.removeAttribute("aria-controls");
     });
   }
 
@@ -362,8 +366,8 @@
 
   // DialogTrigger's useClick with its default click event. Base UI's
   // DialogTrigger identifier is shared with PopoverTrigger and DrawerTrigger;
-  // only triggers whose aria-controls names a dialog popup are ours.
-  window.templ.lifecycle.register("[data-base-ui-click-trigger][aria-controls]", {
+  // only triggers whose data-templ-controls names a dialog popup are ours.
+  window.templ.lifecycle.register("[data-base-ui-click-trigger][data-templ-controls]", {
     init(trigger) {
       if (!dialogFor(trigger)) return;
       trigger._templDialogClick = window.templ.click.useClick(trigger, {

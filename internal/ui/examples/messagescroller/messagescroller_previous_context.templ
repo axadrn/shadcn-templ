@@ -1,0 +1,63 @@
+package messagescroller
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/messagescroller"
+	"github.com/axadrn/shadcn-templ/v2/components/slider"
+)
+
+templ msPeekSlider() {
+	<div class="flex w-28 items-center gap-2">
+		<span class="text-xs text-muted-foreground tabular-nums">64px</span>
+		@slider.Slider(slider.Props{
+			DefaultValue: []float64{64},
+			Min:          64,
+			Max:          128,
+			Step:         1,
+			Attributes:   templ.Attributes{"aria-label": "Previous context peek"},
+		})
+	</div>
+}
+
+// The slider sets the provider's scrollPreviousItemPeek, which the scroller
+// reads on the next anchored turn.
+templ MessageScrollerPreviousContext() {
+	{{ peek := 64 }}
+	@messagescroller.Provider(messagescroller.ProviderProps{ScrollMargin: 24, ScrollPreviousItemPeek: &peek}) {
+		<div class="relative flex flex-col gap-4">
+			@card.Card(card.Props{Class: "mx-auto h-140 w-full max-w-sm gap-0"}) {
+				@card.Header(card.HeaderProps{Class: "gap-1 border-b"}) {
+					@card.Title() {
+						Keeping Context Visible
+					}
+					@card.Description() {
+						New turns keep part of the previous reply in view.
+					}
+					@card.Action() {
+						@msResetButton("Reset context example", false)
+					}
+				}
+				@card.Content(card.ContentProps{Class: "flex-1 overflow-hidden p-0"}) {
+					@msScroller(msStreamingTurns[:2], true)
+				}
+				@card.Footer(card.FooterProps{Class: "flex-col gap-2"}) {
+					@msComposer(msStreamingTurns[2].Text, msPeekSlider())
+				}
+			}
+			<div class="px-0.5 text-center text-xs text-muted-foreground">
+				Adjust the slider and send. Observe the previous message peak
+			</div>
+			@msNoneTemplate("No messages queued. Reset the context.")
+			@msTurnTemplates(msStreamingTurns, true, bubble.VariantMuted, bubble.VariantGhost)
+		</div>
+		@msChatScript(msPreviousContextChat())
+	}
+}
+
+func msPreviousContextChat() msChatOptions {
+	opts := msComposerChat(msStreamingTurns, 2, false, "Reset context example")
+	opts.Delay = 35
+	opts.PeekSlider = true
+	return opts
+}

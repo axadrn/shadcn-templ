@@ -1,0 +1,233 @@
+package marker
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/accordion"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/drawer"
+	"github.com/axadrn/shadcn-templ/v2/components/example"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+)
+
+templ MarkerExample() {
+	@example.Wrapper() {
+		@example.Example(example.Props{Title: "Markers", Class: "gap-8"}) {
+			@marker.Marker() {
+				@marker.Content() {
+					A default marker
+				}
+			}
+			@marker.Marker() {
+				@marker.Icon() {
+					@icon.FileText()
+				}
+				@marker.Content() {
+					Marker with icon
+				}
+			}
+			@marker.Marker(marker.Props{Attributes: templ.Attributes{"role": "status"}}) {
+				@marker.Icon() {
+					@spinner.Spinner()
+				}
+				@marker.Content() {
+					Marker with a spinner
+				}
+			}
+			@marker.Marker(marker.Props{Attributes: templ.Attributes{"role": "status"}}) {
+				@marker.Icon() {
+					@spinner.Spinner()
+				}
+				@marker.Content(marker.ContentProps{Class: "shimmer"}) {
+					Marker with shimmer effect
+				}
+			}
+			@marker.Marker(marker.Props{Attributes: templ.Attributes{"role": "status"}}) {
+				@marker.Content(marker.ContentProps{Class: "shimmer"}) {
+					Thinking...
+				}
+			}
+			@marker.Marker(marker.Props{Href: "#"}) {
+				@marker.Icon() {
+					@icon.GitBranch()
+				}
+				@marker.Content() {
+					Marker as a link
+				}
+			}
+			// Marker render={<button />}: the button carries the marker's state.
+			<button
+				class={ marker.Variants(marker.Props{Variant: marker.VariantDefault}) + " transition-colors hover:text-foreground" }
+				data-slot="marker"
+				data-variant="default"
+			>
+				@marker.Icon() {
+					@icon.Clock()
+				}
+				@marker.Content(marker.ContentProps{Class: "flex-1"}) {
+					<div>Marker as a button</div>
+				}
+				@marker.Icon() {
+					@icon.ChevronRight()
+				}
+			</button>
+			<script nonce={ templ.GetNonce(ctx) }>
+				// onClick: the example calls sonner's toast, which shadcn-templ
+				// does not port; the toast manager shows the same message.
+				document.currentScript.previousElementSibling.addEventListener("click", () =>
+					window.templ.toast.add({ description: "You clicked the button" }),
+				);
+			</script>
+			@marker.Marker() {
+				@marker.Icon() {
+					@icon.CircleUser()
+				}
+				@marker.Content() {
+					Rhea joined the chat
+				}
+			}
+			@marker.Marker(marker.Props{Class: "justify-center"}) {
+				@marker.Content() {
+					<strong class="font-medium">Olivia Rose</strong> left the chat
+				}
+			}
+			@marker.Marker(marker.Props{Class: "flex-col"}) {
+				@marker.Icon() {
+					@icon.FileText()
+				}
+				@marker.Content() {
+					Marker with icon at the top
+				}
+			}
+		}
+		@example.Example(example.Props{Title: "Border", Class: "gap-3"}) {
+			@marker.Marker(marker.Props{Variant: marker.VariantBorder}) {
+				@marker.Icon() {
+					@icon.GitBranch()
+				}
+				@marker.Content() {
+					Switched to release-candidate
+				}
+			}
+			@marker.Marker(marker.Props{Variant: marker.VariantBorder}) {
+				@marker.Icon() {
+					@icon.Search()
+				}
+				@marker.Content() {
+					Reviewed 8 related files
+				}
+			}
+			@marker.Marker(marker.Props{Variant: marker.VariantBorder}) {
+				@marker.Icon() {
+					@icon.FileText()
+				}
+				@marker.Content() {
+					Opened implementation notes
+				}
+			}
+		}
+		@example.Example(example.Props{Title: "Separator", Class: "gap-8"}) {
+			@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+				@marker.Content() {
+					Worked for 42s
+				}
+			}
+			@marker.Marker(marker.Props{Variant: marker.VariantSeparator, Attributes: templ.Attributes{"role": "status"}}) {
+				@marker.Icon() {
+					@spinner.Spinner()
+				}
+				@marker.Content() {
+					Compacting conversation
+				}
+			}
+			@marker.Marker(marker.Props{Variant: marker.VariantSeparator, Attributes: templ.Attributes{"role": "status"}}) {
+				@marker.Content(marker.ContentProps{Class: "shimmer"}) {
+					Reading 4 files
+				}
+			}
+			@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+				@marker.Icon() {
+					@icon.Check()
+				}
+				@marker.Content() {
+					Conversation compacted
+				}
+			}
+			@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+				@marker.Content() {
+					With a <a href="#">link to learn more</a>
+				}
+			}
+			@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+				@marker.Content() {
+					@button.Button(button.Props{Variant: button.VariantOutline}) {
+						@icon.GitBranch()
+						Button
+					}
+				}
+			}
+		}
+		@example.Example(example.Props{Title: "Accordion", ContainerClass: "min-h-72"}) {
+			@accordion.Accordion() {
+				@accordion.Item(accordion.ItemProps{Value: "1"}) {
+					@accordion.Trigger() {
+						@marker.Marker() {
+							@marker.Icon() {
+								@icon.Clock()
+							}
+							@marker.Content() {
+								Worked for 42s
+							}
+						}
+					}
+					@accordion.Content() {
+						<p class="text-sm text-muted-foreground">
+							The user asked for a list of all the files in the current
+							directory. The assistant responded with a list of all the files in
+							the current directory.
+						</p>
+					}
+				}
+			}
+		}
+		@example.Example(example.Props{Title: "Drawer"}) {
+			@drawer.Drawer(drawer.Props{SwipeDirection: drawer.SwipeDirectionRight}) {
+				@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+					@button.Button(button.Props{Variant: button.VariantOutline, Attributes: drawer.Trigger(ctx)}) {
+						@icon.Search(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+						Explored 4 files
+					}
+				}
+				@drawer.Content() {
+					@drawer.Header() {
+						@drawer.Title() {
+							File Activity
+						}
+						@drawer.Description() {
+							Files read while preparing the response.
+						}
+					}
+					<div class="grid gap-3 px-4 text-sm">
+						<div class="flex items-center justify-between gap-4 rounded-md border px-3 py-2">
+							<span class="truncate">app/chat/page.tsx</span>
+							<span class="text-muted-foreground">read</span>
+						</div>
+						<div class="flex items-center justify-between gap-4 rounded-md border px-3 py-2">
+							<span class="truncate">components/message.tsx</span>
+							<span class="text-muted-foreground">read</span>
+						</div>
+						<div class="flex items-center justify-between gap-4 rounded-md border px-3 py-2">
+							<span class="truncate">lib/ai.ts</span>
+							<span class="text-muted-foreground">read</span>
+						</div>
+					</div>
+					@drawer.Footer() {
+						@button.Button(button.Props{Variant: button.VariantOutline, Attributes: drawer.Close(ctx)}) {
+							Close
+						}
+					}
+				}
+			}
+		}
+	}
+}

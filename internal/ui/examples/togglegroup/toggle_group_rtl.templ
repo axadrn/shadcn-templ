@@ -1,0 +1,22 @@
+package togglegroup
+
+import "github.com/axadrn/shadcn-templ/v2/components/togglegroup"
+
+// The upstream example's Arabic translation, its default language.
+templ ToggleGroupRtl() {
+	@togglegroup.ToggleGroup(togglegroup.Props{
+		Variant:      togglegroup.VariantOutline,
+		DefaultValue: []string{"list"},
+		Attributes:   templ.Attributes{"dir": "rtl"},
+	}) {
+		@togglegroup.Item(togglegroup.ItemProps{Value: "list", Attributes: templ.Attributes{"aria-label": "قائمة"}}) {
+			قائمة
+		}
+		@togglegroup.Item(togglegroup.ItemProps{Value: "grid", Attributes: templ.Attributes{"aria-label": "شبكة"}}) {
+			شبكة
+		}
+		@togglegroup.Item(togglegroup.ItemProps{Value: "cards", Attributes: templ.Attributes{"aria-label": "بطاقات"}}) {
+			بطاقات
+		}
+	}
+}

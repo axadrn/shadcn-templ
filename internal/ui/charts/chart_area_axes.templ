@@ -40,8 +40,8 @@ templ ChartAreaAxes() {
 			@chart.Container(chart.ContainerProps{ID: "area-axes", Config: chartAreaAxesConfig}) {
 				@chart.AreaChart(chart.AreaChartProps{
 					AccessibilityLayer: true,
-					Data:   chartAreaAxesData,
-					Margin: &chart.Margin{Left: -20, Right: 12},
+					Data:               chartAreaAxesData,
+					Margin:             &chart.Margin{Left: -20, Right: 12},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.XAxis(chart.XAxisProps{

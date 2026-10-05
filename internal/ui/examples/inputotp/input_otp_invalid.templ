@@ -1,0 +1,32 @@
+package inputotp
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/inputotp"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ InputOTPInvalid() {
+	@inputotp.InputOTP(inputotp.Props{MaxLength: 6, Value: utils.Ptr("000000")}) {
+		@inputotp.Group() {
+			@inputotp.Slot(inputotp.SlotProps{Index: 0, Attributes: templ.Attributes{"aria-invalid": "true"}})
+			@inputotp.Slot(inputotp.SlotProps{Index: 1, Attributes: templ.Attributes{"aria-invalid": "true"}})
+		}
+		@inputotp.Separator()
+		@inputotp.Group() {
+			@inputotp.Slot(inputotp.SlotProps{Index: 2, Attributes: templ.Attributes{"aria-invalid": "true"}})
+			@inputotp.Slot(inputotp.SlotProps{Index: 3, Attributes: templ.Attributes{"aria-invalid": "true"}})
+		}
+		@inputotp.Separator()
+		@inputotp.Group() {
+			@inputotp.Slot(inputotp.SlotProps{Index: 4, Attributes: templ.Attributes{"aria-invalid": "true"}})
+			@inputotp.Slot(inputotp.SlotProps{Index: 5, Attributes: templ.Attributes{"aria-invalid": "true"}})
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The value state: onChange sets it, the input renders it.
+		(() => {
+			const input = document.currentScript.previousElementSibling.querySelector("[data-input-otp]");
+			input.addEventListener("input-otp-change", (e) => window.templ.inputOTP.setValue(input, e.detail.value));
+		})();
+	</script>
+}

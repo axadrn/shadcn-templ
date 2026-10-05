@@ -1,0 +1,217 @@
+package radiogroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/radiogroup"
+)
+
+templ radioGroupExampleSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ RadioGroupExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@radioGroupExampleBasic()
+			@radioGroupExampleWithDescriptions()
+			@radioGroupExampleWithFieldSet()
+			@radioGroupExampleGrid()
+			@radioGroupExampleDisabled()
+			@radioGroupExampleInvalid()
+		</div>
+	</div>
+}
+
+templ radioGroupExampleBasic() {
+	@radioGroupExampleSection("Basic") {
+		@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "comfortable"}) {
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{ID: "r1", Value: "default"})
+				@field.Label(field.LabelProps{For: "r1", Class: "font-normal"}) {
+					Default
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{ID: "r2", Value: "comfortable"})
+				@field.Label(field.LabelProps{For: "r2", Class: "font-normal"}) {
+					Comfortable
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+				@radiogroup.Item(radiogroup.ItemProps{ID: "r3", Value: "compact"})
+				@field.Label(field.LabelProps{For: "r3", Class: "font-normal"}) {
+					Compact
+				}
+			}
+		}
+	}
+}
+
+templ radioGroupExampleWithDescriptions() {
+	@radioGroupExampleSection("With Descriptions") {
+		@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "plus"}) {
+			@field.Label(field.LabelProps{For: "plus-plan"}) {
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@field.Content() {
+						<div class="font-medium">Plus</div>
+						@field.Description() {
+							For individuals and small teams
+						}
+					}
+					@radiogroup.Item(radiogroup.ItemProps{ID: "plus-plan", Value: "plus"})
+				}
+			}
+			@field.Label(field.LabelProps{For: "pro-plan"}) {
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@field.Content() {
+						<div class="font-medium">Pro</div>
+						@field.Description() {
+							For growing businesses
+						}
+					}
+					@radiogroup.Item(radiogroup.ItemProps{ID: "pro-plan", Value: "pro"})
+				}
+			}
+			@field.Label(field.LabelProps{For: "enterprise-plan"}) {
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@field.Content() {
+						<div class="font-medium">Enterprise</div>
+						@field.Description() {
+							For large teams and enterprises
+						}
+					}
+					@radiogroup.Item(radiogroup.ItemProps{ID: "enterprise-plan", Value: "enterprise"})
+				}
+			}
+		}
+	}
+}
+
+templ radioGroupExampleWithFieldSet() {
+	@radioGroupExampleSection("With FieldSet") {
+		@field.Set() {
+			@field.Legend() {
+				Battery Level
+			}
+			@field.Description() {
+				Choose your preferred battery level.
+			}
+			@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "medium"}) {
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@radiogroup.Item(radiogroup.ItemProps{ID: "battery-high", Value: "high"})
+					@field.Label(field.LabelProps{For: "battery-high", Class: "font-normal"}) {
+						High
+					}
+				}
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@radiogroup.Item(radiogroup.ItemProps{ID: "battery-medium", Value: "medium"})
+					@field.Label(field.LabelProps{For: "battery-medium", Class: "font-normal"}) {
+						Medium
+					}
+				}
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@radiogroup.Item(radiogroup.ItemProps{ID: "battery-low", Value: "low"})
+					@field.Label(field.LabelProps{For: "battery-low", Class: "font-normal"}) {
+						Low
+					}
+				}
+			}
+		}
+	}
+}
+
+templ radioGroupExampleGrid() {
+	@radioGroupExampleSection("Grid Layout") {
+		@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "medium", Class: "grid grid-cols-2 gap-2"}) {
+			@field.Label(field.LabelProps{For: "size-small"}) {
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@radiogroup.Item(radiogroup.ItemProps{ID: "size-small", Value: "small"})
+					<div class="font-medium">Small</div>
+				}
+			}
+			@field.Label(field.LabelProps{For: "size-medium"}) {
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@radiogroup.Item(radiogroup.ItemProps{ID: "size-medium", Value: "medium"})
+					<div class="font-medium">Medium</div>
+				}
+			}
+			@field.Label(field.LabelProps{For: "size-large"}) {
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@radiogroup.Item(radiogroup.ItemProps{ID: "size-large", Value: "large"})
+					<div class="font-medium">Large</div>
+				}
+			}
+			@field.Label(field.LabelProps{For: "size-xlarge"}) {
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@radiogroup.Item(radiogroup.ItemProps{ID: "size-xlarge", Value: "xlarge"})
+					<div class="font-medium">X-Large</div>
+				}
+			}
+		}
+	}
+}
+
+templ radioGroupExampleDisabled() {
+	@radioGroupExampleSection("Disabled") {
+		@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "option2"}) {
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-disabled": "true"}}) {
+				@radiogroup.Item(radiogroup.ItemProps{ID: "disabled-1", Value: "option1", Disabled: true})
+				@field.Label(field.LabelProps{For: "disabled-1", Class: "font-normal"}) {
+					Option 1
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-disabled": "true"}}) {
+				@radiogroup.Item(radiogroup.ItemProps{ID: "disabled-2", Value: "option2", Disabled: true})
+				@field.Label(field.LabelProps{For: "disabled-2", Class: "font-normal"}) {
+					Option 2
+				}
+			}
+			@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-disabled": "true"}}) {
+				@radiogroup.Item(radiogroup.ItemProps{ID: "disabled-3", Value: "option3", Disabled: true})
+				@field.Label(field.LabelProps{For: "disabled-3", Class: "font-normal"}) {
+					Option 3
+				}
+			}
+		}
+	}
+}
+
+templ radioGroupExampleInvalid() {
+	@radioGroupExampleSection("Invalid") {
+		@field.Set() {
+			@field.Legend() {
+				Notification Preferences
+			}
+			@field.Description() {
+				Choose how you want to receive notifications.
+			}
+			@radiogroup.RadioGroup(radiogroup.Props{DefaultValue: "email"}) {
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-invalid": "true"}}) {
+					@radiogroup.Item(radiogroup.ItemProps{ID: "invalid-email", Value: "email", Attributes: templ.Attributes{"aria-invalid": "true"}})
+					@field.Label(field.LabelProps{For: "invalid-email", Class: "font-normal"}) {
+						Email only
+					}
+				}
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-invalid": "true"}}) {
+					@radiogroup.Item(radiogroup.ItemProps{ID: "invalid-sms", Value: "sms", Attributes: templ.Attributes{"aria-invalid": "true"}})
+					@field.Label(field.LabelProps{For: "invalid-sms", Class: "font-normal"}) {
+						SMS only
+					}
+				}
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal, Attributes: templ.Attributes{"data-invalid": "true"}}) {
+					@radiogroup.Item(radiogroup.ItemProps{ID: "invalid-both", Value: "both", Attributes: templ.Attributes{"aria-invalid": "true"}})
+					@field.Label(field.LabelProps{For: "invalid-both", Class: "font-normal"}) {
+						Both Email & SMS
+					}
+				}
+			}
+		}
+	}
+}

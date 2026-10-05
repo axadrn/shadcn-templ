@@ -2,6 +2,7 @@ package selectcomp
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
@@ -38,6 +39,7 @@ type ctxState struct {
 	readOnly        bool
 	required        bool
 	form            string
+	items           []ItemData
 }
 
 func state(ctx context.Context) ctxState {
@@ -47,10 +49,20 @@ func state(ctx context.Context) ctxState {
 	return ctxState{}
 }
 
+// ItemData is one entry of Base UI's items prop: the label Value shows for
+// the value. Label is a string or a templ.Component, Base UI's ReactNode.
+// The value "" is Base UI's null, the placeholder item.
+type ItemData struct {
+	Value string
+	Label any
+}
+
 type Props struct {
 	ID string
 	// Name makes the select submit its value in forms (hidden input).
 	Name string
+	// Items is Base UI's items: the labels Value renders for the values.
+	Items []ItemData
 	// Value is the controlled selected value. Use DefaultValue when the
 	// browser should own selection after the initial render.
 	Value        *string
@@ -61,6 +73,16 @@ type Props struct {
 	ReadOnly     bool
 	Required     bool
 	Form         string
+}
+
+// label is the items entry of the value, if any.
+func (s ctxState) label() (any, bool) {
+	for _, item := range s.items {
+		if item.Value == s.value {
+			return item.Label, true
+		}
+	}
+	return nil, false
 }
 
 func initialValue(p Props) string {
@@ -126,8 +148,8 @@ type SeparatorProps struct {
 	Attributes templ.Attributes
 }
 
-// Select renders no element: it only carries the id, name and value that link
-// Trigger, Content and the hidden form input (via ctx).
+// Select is SelectRoot: it carries the id, name and value that link Trigger
+// and Content (via ctx), and renders the hidden input after its children.
 templ Select(props ...Props) {
 	{{ var p Props }}
 	if len(props) > 0 {
@@ -136,8 +158,32 @@ templ Select(props ...Props) {
 	if p.ID == "" {
 		{{ p.ID = utils.RandomID() }}
 	}
-	{{ ctx = context.WithValue(ctx, stateKey, ctxState{id: p.ID, name: p.Name, value: initialValue(p), valueControlled: p.Value != nil, open: p.Open, defaultOpen: p.DefaultOpen, disabled: p.Disabled, readOnly: p.ReadOnly, required: p.Required, form: p.Form}) }}
+	{{ s := ctxState{id: p.ID, name: p.Name, value: initialValue(p), valueControlled: p.Value != nil, open: p.Open, defaultOpen: p.DefaultOpen, disabled: p.Disabled, readOnly: p.ReadOnly, required: p.Required, form: p.Form, items: p.Items} }}
+	{{ ctx = context.WithValue(ctx, stateKey, s) }}
 	{ children... }
+	// The input that carries the value for forms and autofill, visually
+	// hidden, focus moves on to the trigger.
+	<input
+		if s.name == "" {
+			id={ s.id + "-hidden-input" }
+		} else {
+			name={ s.name }
+		}
+		if s.form != "" {
+			form={ s.form }
+		}
+		value={ s.value }
+		disabled?={ s.disabled }
+		required?={ s.required }
+		readonly?={ s.readOnly }
+		if s.name != "" {
+			style="clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:-1px;position:absolute"
+		} else {
+			style="clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:-1px;position:fixed;top:0;left:0"
+		}
+		tabindex="-1"
+		aria-hidden="true"
+	/>
 }
 
 templ Trigger(props ...TriggerProps) {
@@ -152,28 +198,17 @@ templ Trigger(props ...TriggerProps) {
 	if p.ID == "" {
 		{{ p.ID = s.id + "-trigger" }}
 	}
-	if s.name != "" {
-		<input
-			type="hidden"
-			name={ s.name }
-			value={ s.value }
-			if s.form != "" {
-				form={ s.form }
-			}
-			aria-hidden="true"
-			tabindex="-1"
-		/>
-	}
+	// useButton: a disabled trigger leaves the tab order.
 	<button
 		type="button"
 		id={ p.ID }
 		if _, ok := p.Attributes["tabindex"]; !ok {
-			tabindex="0"
+			tabindex={ utils.IfElse(s.disabled, "-1", "0") }
 		}
 		data-slot="select-trigger"
 		data-size={ string(p.Size) }
 		role="combobox"
-		aria-controls={ s.id }
+		data-templ-controls={ s.id }
 		aria-haspopup="listbox"
 		aria-expanded="false"
 		aria-readonly?={ s.readOnly }
@@ -197,7 +232,8 @@ templ Trigger(props ...TriggerProps) {
 		{ p.Attributes... }
 	>
 		{ children... }
-		@icon.ChevronDown(icon.Props{Class: "cn-select-trigger-icon pointer-events-none"})
+		// SelectIcon.
+		@icon.ChevronDown(icon.Props{Class: "cn-select-trigger-icon pointer-events-none", Attributes: templ.Attributes{"aria-hidden": "true"}})
 	</button>
 }
 
@@ -206,14 +242,46 @@ templ Value(props ...ValueProps) {
 	if len(props) > 0 {
 		{{ p = props[0] }}
 	}
+	{{ s := state(ctx) }}
+	{{ label, hasLabel := s.label() }}
+	// SelectValue: the selected value's label, else the placeholder; while no
+	// value is selected (the null item counts as none) it is a placeholder.
 	<span
 		data-slot="select-value"
-		data-templ-placeholder={ p.Placeholder }
+		data-placeholder?={ s.value == "" }
+		if p.Placeholder != "" {
+			data-templ-placeholder={ p.Placeholder }
+		}
 		class={ utils.CN("cn-select-value", p.Class) }
 		{ p.Attributes... }
 	>
-		{ p.Placeholder }
+		if hasLabel {
+			@itemLabel(label)
+		} else if s.value == "" {
+			{ p.Placeholder }
+		} else {
+			{ s.value }
+		}
+		// The labels of the items, for the value a later selection picks.
+		if len(s.items) > 0 {
+			<template data-templ-items>
+				for _, item := range s.items {
+					<span data-templ-value={ item.Value }>
+						@itemLabel(item.Label)
+					</span>
+				}
+			</template>
+		}
 	</span>
+}
+
+// itemLabel renders an items label: a templ.Component, or text.
+templ itemLabel(label any) {
+	if c, ok := label.(templ.Component); ok {
+		@c
+	} else if label != nil {
+		{ fmt.Sprint(label) }
+	}
 }
 
 templ Content(props ...ContentProps) {
@@ -229,9 +297,8 @@ templ Content(props ...ContentProps) {
 	// Hidden until the script portals it to <body> on open, so the SSRd
 	// content never participates in layout or sibling CSS.
 	<div data-templ-portal hidden>
-		<div data-base-ui-portal>
+		<div data-base-ui-portal hidden>
 		<div
-			id={ s.id }
 			if !alignItem {
 				data-templ-align-item-with-trigger="false"
 			}
@@ -243,9 +310,11 @@ templ Content(props ...ContentProps) {
 			data-closed
 			hidden
 			role="presentation"
-			class="isolate fixed inset-auto z-50 m-0 overflow-visible border-0 bg-transparent p-0"
+			class="isolate z-50"
+			{ utils.DirectionAttributes(ctx)... }
 		>
 			<div
+				id={ s.id }
 				data-slot="select-content"
 				tabindex="-1"
 				data-base-ui-focusable
@@ -255,27 +324,28 @@ templ Content(props ...ContentProps) {
 					data-align-trigger="true"
 				}
 				data-closed
-				role="listbox"
+				role="presentation"
 				class={
 					utils.CN(
 						// 1:1 base/ui/select.tsx SelectContent, the look comes from
 						// cn-select-content and Base UI's standard positioner variables.
 						"cn-select-content cn-select-content-logical cn-menu-target cn-menu-translucent relative isolate z-50 max-h-(--available-height) w-(--anchor-width) origin-(--transform-origin) overflow-x-hidden overflow-y-auto data-[align-trigger=true]:animate-none",
-						// The scroll arrows and viewport need a flex column, and the popup
-						// stays mounted after animate-out until it unmounts.
-						"flex flex-col data-closed:fill-mode-forwards",
+						// The popup stays mounted after animate-out until it unmounts.
+						"data-closed:fill-mode-forwards",
 						p.Class,
 					),
 				}
 				{ p.Attributes... }
 			>
-				<div data-slot="select-scroll-up-button" class="cn-select-scroll-up-button top-0 w-full absolute hidden">
+				// SelectScrollUpArrow, mounted while the list can scroll up.
+				<div data-slot="select-scroll-up-button" data-direction="up" aria-hidden="true" hidden style="position:absolute" class="cn-select-scroll-up-button top-0 w-full">
 					@icon.ChevronUp()
 				</div>
-				<div class="relative flex-1 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+				// SelectList.
+				<div id={ s.id + "-list" } role="listbox">
 					{ children... }
 				</div>
-				<div data-slot="select-scroll-down-button" class="cn-select-scroll-down-button bottom-0 w-full absolute hidden">
+				<div data-slot="select-scroll-down-button" data-direction="down" aria-hidden="true" hidden style="position:absolute" class="cn-select-scroll-down-button bottom-0 w-full">
 					@icon.ChevronDown()
 				</div>
 			</div>
@@ -325,7 +395,7 @@ templ Item(props ...ItemProps) {
 		{{ p = props[0] }}
 	}
 	{{ s := state(ctx) }}
-	{{ selected := s.value != "" && s.value == p.Value }}
+	{{ selected := s.value == p.Value }}
 	<div
 		if p.ID != "" {
 			id={ p.ID }
@@ -353,18 +423,18 @@ templ Item(props ...ItemProps) {
 				// cn-select-item (items highlight via real focus, our JS moves focus
 				// to the item under the pointer like Base UI).
 				"cn-select-item relative flex w-full cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-				// Native wiring: Base UI unmounts the indicator when unchecked, our
-				// indicator toggles on the checked state via the group instead.
-				"group/select-item",
 				p.Class,
 			),
 		}
 		{ p.Attributes... }
 	>
-		<span class="cn-select-item-text shrink-0 whitespace-nowrap">
+		// SelectItemText.
+		<div class="cn-select-item-text shrink-0 whitespace-nowrap">
 			{ children... }
-		</span>
-		<span class="cn-select-item-indicator opacity-0 group-data-selected/select-item:opacity-100">
+		</div>
+		// SelectItemIndicator: mounted while the item is selected, the script
+		// toggles [hidden] for the unmount.
+		<span class="cn-select-item-indicator" aria-hidden="true" data-selected hidden?={ !selected }>
 			@icon.Check(icon.Props{Class: "cn-select-item-indicator-icon pointer-events-none"})
 		</span>
 	</div>
@@ -380,6 +450,8 @@ templ Separator(props ...SeparatorProps) {
 			id={ p.ID }
 		}
 		role="separator"
+		aria-orientation="horizontal"
+		data-orientation="horizontal"
 		data-slot="select-separator"
 		class={ utils.CN("cn-select-separator pointer-events-none", p.Class) }
 		{ p.Attributes... }

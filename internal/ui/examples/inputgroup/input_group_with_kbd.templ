@@ -1,0 +1,134 @@
+package inputgroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/kbd"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+)
+
+templ InputGroupWithKbd() {
+	@field.Group() {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "input-kbd-22"}) {
+				Input Group with Kbd
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-kbd-22"})
+				@inputgroup.Addon() {
+					@kbd.Kbd() {
+						⌘K
+					}
+				}
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-kbd-23"})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					@kbd.Kbd() {
+						⌘K
+					}
+				}
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-search-apps-24", Placeholder: "Search for Apps..."})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					Ask AI
+				}
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					@kbd.Kbd() {
+						Tab
+					}
+				}
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-search-type-25", Placeholder: "Type to search..."})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineStart}) {
+					@icon.Sparkles()
+				}
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					@kbd.Group() {
+						@kbd.Kbd() {
+							Ctrl
+						}
+						@kbd.Kbd() {
+							C
+						}
+					}
+				}
+			}
+		}
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "input-username-26"}) {
+				Username
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-username-26", Value: "shadcn"})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					<div class="flex size-4 items-center justify-center rounded-full bg-green-500 dark:bg-green-800">
+						@icon.Check(icon.Props{Class: "size-3 text-white"})
+					</div>
+				}
+			}
+			@field.Description(field.DescriptionProps{Class: "text-green-700"}) {
+				This username is available.
+			}
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{ID: "input-search-docs-27", Placeholder: "Search documentation..."})
+			@inputgroup.Addon() {
+				@icon.Search()
+			}
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				12 results
+			}
+		}
+		@inputgroup.InputGroup(inputgroup.Props{Attributes: templ.Attributes{"data-disabled": "true"}}) {
+			@inputgroup.Input(inputgroup.InputProps{ID: "input-search-disabled-28", Placeholder: "Search documentation...", Disabled: true})
+			@inputgroup.Addon() {
+				@icon.Search()
+			}
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				Disabled
+			}
+		}
+		@field.Group(field.GroupProps{Class: "grid grid-cols-2 gap-4"}) {
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "input-group-11"}) {
+					First Name
+				}
+				@inputgroup.InputGroup() {
+					@inputgroup.Input(inputgroup.InputProps{ID: "input-group-11", Placeholder: "First Name"})
+					@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+						@icon.Info()
+					}
+				}
+			}
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "input-group-12"}) {
+					Last Name
+				}
+				@inputgroup.InputGroup() {
+					@inputgroup.Input(inputgroup.InputProps{ID: "input-group-12", Placeholder: "Last Name"})
+					@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+						@icon.Info()
+					}
+				}
+			}
+		}
+		@field.Field(field.Props{Attributes: templ.Attributes{"data-disabled": "true"}}) {
+			@field.Label(field.LabelProps{For: "input-group-29"}) {
+				Loading (&quot;data-disabled=&quot;true&quot;)
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-group-29", Disabled: true, Value: "shadcn"})
+				@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+					@spinner.Spinner()
+				}
+			}
+			@field.Description() {
+				This is a description of the input group.
+			}
+		}
+	}
+}

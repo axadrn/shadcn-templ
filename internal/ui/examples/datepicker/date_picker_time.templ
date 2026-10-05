@@ -1,0 +1,76 @@
+package datepicker
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/calendar"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+	"github.com/axadrn/shadcn-templ/v2/components/popover"
+)
+
+templ DatePickerTime() {
+	@field.Group(field.GroupProps{Class: "mx-auto max-w-xs flex-row"}) {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "date-picker-optional"}) {
+				Date
+			}
+			@popover.Popover(popover.Props{ID: "date-picker-time"}) {
+				{{
+					triggerAttrs := popover.Trigger(ctx)
+					triggerAttrs["id"] = "date-picker-optional"
+				}}
+				@button.Button(button.Props{
+					Variant:    button.VariantOutline,
+					Class:      "w-32 justify-between font-normal",
+					Attributes: triggerAttrs,
+				}) {
+					Select date
+					@icon.ChevronDown(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+				}
+				@popover.Content(popover.ContentProps{
+					Class: "w-auto overflow-hidden p-0",
+					Align: popover.AlignStart,
+				}) {
+					@calendar.Calendar(calendar.Props{
+						Mode:          calendar.ModeSingle,
+						CaptionLayout: calendar.CaptionLayoutDropdown,
+					})
+				}
+			}
+		}
+		@field.Field(field.Props{Class: "w-32"}) {
+			@field.Label(field.LabelProps{For: "time-picker-optional"}) {
+				Time
+			}
+			@input.Input(input.Props{
+				ID:    "time-picker-optional",
+				Type:  "time",
+				Value: "10:30:00",
+				Class: "appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none",
+				Attributes: templ.Attributes{
+					"step": "1",
+				},
+			})
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The date and open state: onSelect sets the date and closes.
+		(() => {
+			// date-fns format(date, "PPP").
+			const ppp = (d) => {
+				const n = d.getDate();
+				const s = n % 100 >= 11 && n % 100 <= 13 ? "th" : { 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th";
+				return d.toLocaleDateString("en-US", { month: "long" }) + " " + n + s + ", " + d.getFullYear();
+			};
+			document.addEventListener("calendar-select", (e) => {
+				if (!(e.target instanceof Element) || !e.target.closest("#date-picker-time")) return;
+				const trigger = document.querySelector('[data-templ-controls="date-picker-time"]');
+				const date = e.detail.selected;
+				window.templ.calendar.setSelected(e.target, e.detail.selected);
+				trigger.firstChild.textContent = date ? ppp(date) : "Select date";
+				window.templ.popover.close(e.target.closest("#date-picker-time"));
+			});
+		})();
+	</script>
+}

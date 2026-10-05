@@ -1,0 +1,25 @@
+package marker
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+)
+
+templ MarkerSeparatorDemo() {
+	<div class="flex w-full max-w-sm flex-col gap-8 py-12">
+		@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+			@marker.Content() {
+				Today
+			}
+		}
+		@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+			@marker.Content() {
+				Worked for 42s
+			}
+		}
+		@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+			@marker.Content() {
+				Conversation compacted
+			}
+		}
+	</div>
+}

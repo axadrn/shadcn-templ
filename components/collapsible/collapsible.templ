@@ -76,20 +76,26 @@ templ Collapsible(props ...Props) {
 // into the collapsible trigger — the asChild equivalent: no wrapper element.
 // On an element with its own data-slot (sidebar.MenuButton) that slot wins,
 // as with Base UI's render prop, so collapsible.js finds a trigger by its
-// aria-controls link to the panel.
+// data-templ-controls link to the panel. aria-controls follows the open
+// state, as CollapsibleTrigger renders it.
 func Trigger(ctx context.Context) templ.Attributes {
 	s := state(ctx)
 	attrs := templ.Attributes{
-		"data-slot":     "collapsible-trigger",
-		"aria-controls": s.id,
-		"aria-expanded": utils.IfElse(s.open, "true", "false"),
+		// useButton: tabIndex 0 and the native type.
+		"tabindex":            "0",
+		"type":                "button",
+		"data-slot":           "collapsible-trigger",
+		"data-templ-controls": s.id,
+		"aria-expanded":       utils.IfElse(s.open, "true", "false"),
+		// useButton with focusableWhenDisabled: aria-disabled either way.
+		"aria-disabled": utils.IfElse(s.disabled, "true", "false"),
 	}
 	if s.disabled {
 		attrs["data-disabled"] = true
-		attrs["aria-disabled"] = "true"
 	}
 	if s.open {
 		attrs["data-panel-open"] = true
+		attrs["aria-controls"] = s.id
 	}
 	return attrs
 }

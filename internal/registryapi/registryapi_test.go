@@ -436,12 +436,9 @@ func TestBuildStyleItemCompilesJavaScript(t *testing.T) {
 		if marker.MatchString(toastJavaScript) {
 			t.Errorf("%s toast JavaScript contains a cn-* marker", styleName)
 		}
-		for _, name := range []string{"cn-toast", "cn-button-variant-outline", "cn-button-size-icon-sm"} {
-			assertContainsClasses(t, styleName+" toast "+name, toastJavaScript, styleMap[name])
-		}
-		if !strings.Contains(toastJavaScript, `var ACTION_CLASS = [BUTTON_BASE, "`) {
-			t.Errorf("%s toast action does not preserve the complete-token join", styleName)
-		}
+		// The toast's markup lives in the Toaster's templates.
+		toastTempl := itemFileContent(t, toast, "components/toast/toast.templ")
+		assertContainsClasses(t, styleName+" toast cn-toast", toastTempl, styleMap["cn-toast"])
 	}
 
 	lyra, err := BuildStyleItem("base-lyra", "chart", inliner.Options{})

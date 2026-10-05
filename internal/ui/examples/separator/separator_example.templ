@@ -1,0 +1,100 @@
+package separator
+
+import "github.com/axadrn/shadcn-templ/v2/components/separator"
+
+templ separatorExampleSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ SeparatorExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@separatorExampleHorizontal()
+			@separatorExampleVertical()
+			@separatorExampleVerticalMenu()
+			@separatorExampleInList()
+		</div>
+	</div>
+}
+
+templ separatorExampleHorizontal() {
+	@separatorExampleSection("Horizontal") {
+		<div class="flex flex-col gap-4 text-sm style-lyra:text-xs/relaxed">
+			<div class="flex flex-col gap-1">
+				<div class="leading-none font-medium">shadcn-templ</div>
+				<div class="text-muted-foreground">
+					The UI Kit for templ
+				</div>
+			</div>
+			@separator.Separator()
+			<div>
+				A set of beautifully designed components that you can customize, extend, and build on.
+			</div>
+		</div>
+	}
+}
+
+templ separatorExampleVertical() {
+	@separatorExampleSection("Vertical") {
+		<div class="flex h-5 items-center gap-4 text-sm style-lyra:text-xs/relaxed">
+			<div>Blog</div>
+			@separator.Separator(separator.Props{Orientation: separator.OrientationVertical})
+			<div>Docs</div>
+			@separator.Separator(separator.Props{Orientation: separator.OrientationVertical})
+			<div>Source</div>
+		</div>
+	}
+}
+
+templ separatorExampleVerticalMenu() {
+	@separatorExampleSection("Vertical Menu") {
+		<div class="flex items-center gap-2 text-sm md:gap-4 style-lyra:text-xs/relaxed">
+			<div class="flex flex-col gap-1">
+				<span class="font-medium">Settings</span>
+				<span class="text-xs text-muted-foreground">
+					Manage preferences
+				</span>
+			</div>
+			@separator.Separator(separator.Props{Orientation: separator.OrientationVertical})
+			<div class="flex flex-col gap-1">
+				<span class="font-medium">Account</span>
+				<span class="text-xs text-muted-foreground">
+					Profile & security
+				</span>
+			</div>
+			@separator.Separator(separator.Props{Orientation: separator.OrientationVertical})
+			<div class="flex flex-col gap-1">
+				<span class="font-medium">Help</span>
+				<span class="text-xs text-muted-foreground">Support & docs</span>
+			</div>
+		</div>
+	}
+}
+
+templ separatorExampleInList() {
+	@separatorExampleSection("In List") {
+		<div class="flex flex-col gap-2 text-sm style-lyra:text-xs/relaxed">
+			<dl class="flex items-center justify-between">
+				<dt>Item 1</dt>
+				<dd class="text-muted-foreground">Value 1</dd>
+			</dl>
+			@separator.Separator()
+			<dl class="flex items-center justify-between">
+				<dt>Item 2</dt>
+				<dd class="text-muted-foreground">Value 2</dd>
+			</dl>
+			@separator.Separator()
+			<dl class="flex items-center justify-between">
+				<dt>Item 3</dt>
+				<dd class="text-muted-foreground">Value 3</dd>
+			</dl>
+		</div>
+	}
+}

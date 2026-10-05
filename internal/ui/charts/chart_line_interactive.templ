@@ -161,7 +161,6 @@ templ ChartLineInteractive() {
 				for _, series := range []string{"desktop", "mobile"} {
 					<button
 						data-active={ utils.IfElse(series == "desktop", "true", "false") }
-						data-templ-chart-series={ series }
 						class="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
 					>
 						<span class="text-xs text-muted-foreground">
@@ -176,37 +175,61 @@ templ ChartLineInteractive() {
 		}
 		@card.Content(card.ContentProps{Class: "px-2 sm:p-6"}) {
 			@chart.Container(chart.ContainerProps{ID: "line-interactive", Config: chartLineInteractiveConfig, Class: "aspect-auto h-[250px] w-full"}) {
-				for _, series := range []string{"desktop", "mobile"} {
-					<div data-templ-chart-series-panel={ series } hidden?={ series != "desktop" } style="width:100%;height:100%">
-						@chart.LineChart(chart.LineChartProps{
-							AccessibilityLayer: true,
-							Data:   chartLineInteractiveData,
-							Margin: &chart.Margin{Left: 12, Right: 12},
-						}) {
-							@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
-							@chart.XAxis(chart.XAxisProps{
-								DataKey:       "date",
-								TickMargin:    8,
-								MinTickGap:    32,
-								TickFormatter: lineInteractiveShortDate,
-							})
-							@chart.Tooltip(chart.TooltipProps{
-								Content: chart.TooltipContentProps{
-									Class:          "w-[150px]",
-									NameKey:        "views",
-									LabelFormatter: lineInteractiveLongDate,
-								},
-							})
-							@chart.Line(chart.LineProps{
-								DataKey:     series,
-								Type:        "monotone",
-								Stroke:      "var(--color-" + series + ")",
-								StrokeWidth: 2,
-							})
-						}
-					</div>
-				}
+				@chartLineInteractiveChart("desktop")
+				// The chart with dataKey="mobile", the props the button sets.
+				<template>
+					@chartLineInteractiveChart("mobile")
+				</template>
 			}
 		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The activeChart state: the buttons set it, the chart renders the
+		// series with that dataKey.
+		(() => {
+			const card = document.currentScript.previousElementSibling;
+			const buttons = [...card.querySelector('[data-slot="card-header"]').lastElementChild.children];
+			const chartEl = card.querySelector('[data-slot="chart"]');
+			const wrapper = chartEl.querySelector(".recharts-wrapper");
+			const models = [
+				wrapper.querySelector("script[data-templ-chart-model]").textContent,
+				chartEl.querySelector("template").content.querySelector("script[data-templ-chart-model]").textContent,
+			];
+			buttons.forEach((button, i) => {
+				button.addEventListener("click", () => {
+					buttons.forEach((b) => b.setAttribute("data-active", String(b === button)));
+					window.templ.chart.update(wrapper, JSON.parse(models[i]));
+				});
+			});
+		})();
+	</script>
+}
+
+templ chartLineInteractiveChart(series string) {
+	@chart.LineChart(chart.LineChartProps{
+		AccessibilityLayer: true,
+		Data:               chartLineInteractiveData,
+		Margin:             &chart.Margin{Left: 12, Right: 12},
+	}) {
+		@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
+		@chart.XAxis(chart.XAxisProps{
+			DataKey:       "date",
+			TickMargin:    8,
+			MinTickGap:    32,
+			TickFormatter: lineInteractiveShortDate,
+		})
+		@chart.Tooltip(chart.TooltipProps{
+			Content: chart.TooltipContentProps{
+				Class:          "w-[150px]",
+				NameKey:        "views",
+				LabelFormatter: lineInteractiveLongDate,
+			},
+		})
+		@chart.Line(chart.LineProps{
+			DataKey:     series,
+			Type:        "monotone",
+			Stroke:      "var(--color-" + series + ")",
+			StrokeWidth: 2,
+		})
 	}
 }

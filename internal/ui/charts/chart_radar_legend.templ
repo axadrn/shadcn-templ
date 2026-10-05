@@ -35,7 +35,7 @@ templ ChartRadarLegend() {
 		@card.Content() {
 			@chart.Container(chart.ContainerProps{ID: "radar-legend", Config: chartRadarLegendConfig, Class: "mx-auto aspect-square max-h-[250px]"}) {
 				@chart.RadarChart(chart.RadarChartProps{
-					Data: chartRadarLegendData,
+					Data:   chartRadarLegendData,
 					Margin: &chart.Margin{Top: -40, Bottom: -10, Left: 0, Right: 0},
 				}) {
 					@chart.Tooltip(chart.TooltipProps{
@@ -50,8 +50,8 @@ templ ChartRadarLegend() {
 						FillOpacity: chart.Float(0.6),
 					})
 					@chart.Radar(chart.RadarProps{
-						DataKey:     "mobile",
-						Fill:        "var(--color-mobile)",
+						DataKey: "mobile",
+						Fill:    "var(--color-mobile)",
 					})
 					@chart.Legend(chart.LegendProps{Class: "mt-8"})
 				}
@@ -59,11 +59,11 @@ templ ChartRadarLegend() {
 		}
 		@card.Footer(card.FooterProps{Class: "flex-col gap-2 pt-4 text-sm"}) {
 			<div class="flex items-center gap-2 leading-none font-medium">
-			Trending up by 5.2% this month
-			@icon.TrendingUp(icon.Props{Class: "h-4 w-4"})
+				Trending up by 5.2% this month
+				@icon.TrendingUp(icon.Props{Class: "h-4 w-4"})
 			</div>
 			<div class="flex items-center gap-2 leading-none text-muted-foreground">
-			January - June 2024
+				January - June 2024
 			</div>
 		}
 	}

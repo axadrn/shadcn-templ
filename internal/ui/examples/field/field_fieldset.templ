@@ -1,0 +1,51 @@
+package field
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+)
+
+templ FieldFieldset() {
+	@field.Set(field.SetProps{Class: "w-full max-w-sm"}) {
+		@field.Legend() {
+			Address Information
+		}
+		@field.Description() {
+			We need your address to deliver your order.
+		}
+		@field.Group() {
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "street"}) {
+					Street Address
+				}
+				@input.Input(input.Props{
+					ID:          "street",
+					Type:        "text",
+					Placeholder: "123 Main St",
+				})
+			}
+			<div class="grid grid-cols-2 gap-4">
+				@field.Field() {
+					@field.Label(field.LabelProps{For: "city"}) {
+						City
+					}
+					@input.Input(input.Props{
+						ID:          "city",
+						Type:        "text",
+						Placeholder: "New York",
+					})
+				}
+				@field.Field() {
+					@field.Label(field.LabelProps{For: "zip"}) {
+						Postal Code
+					}
+					@input.Input(input.Props{
+						ID:          "zip",
+						Type:        "text",
+						Placeholder: "90502",
+					})
+				}
+			</div>
+		}
+	}
+}

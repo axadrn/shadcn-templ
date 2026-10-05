@@ -1,0 +1,156 @@
+package message
+
+import "github.com/axadrn/shadcn-templ/v2/utils"
+
+type Align string
+
+const (
+	AlignStart Align = "start"
+	AlignEnd   Align = "end"
+)
+
+type Props struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Align      Align
+}
+
+type GroupProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type AvatarProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type ContentProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type HeaderProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type FooterProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+// 1:1 base/ui/message.tsx: structure lives here, the look comes from the
+// active style-*.css via the cn-message-* classes.
+
+templ Group(props ...GroupProps) {
+	{{ var p GroupProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="message-group"
+		class={ utils.CN("cn-message-group flex min-w-0 flex-col", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+templ Message(props ...Props) {
+	{{ var p Props }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.Align == "" {
+		{{ p.Align = AlignStart }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="message"
+		data-align={ string(p.Align) }
+		class={ utils.CN("cn-message group/message relative flex w-full min-w-0 data-[align=end]:flex-row-reverse", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+templ Avatar(props ...AvatarProps) {
+	{{ var p AvatarProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="message-avatar"
+		class={ utils.CN("cn-message-avatar flex w-fit shrink-0 items-center justify-center self-end overflow-hidden rounded-full bg-muted", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+templ Content(props ...ContentProps) {
+	{{ var p ContentProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="message-content"
+		class={ utils.CN("cn-message-content flex w-full min-w-0 flex-col wrap-break-word", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+templ Header(props ...HeaderProps) {
+	{{ var p HeaderProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="message-header"
+		class={ utils.CN("cn-message-header flex max-w-full min-w-0 items-center", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+templ Footer(props ...FooterProps) {
+	{{ var p FooterProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="message-footer"
+		class={ utils.CN("cn-message-footer flex max-w-full min-w-0 items-center group-data-[align=end]/message:justify-end", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}

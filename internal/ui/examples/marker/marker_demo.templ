@@ -1,0 +1,41 @@
+package marker
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/marker"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+)
+
+templ MarkerDemo() {
+	<div class="flex w-full max-w-sm flex-col gap-8 py-12">
+		@marker.Marker() {
+			@marker.Icon() {
+				@icon.GitBranch()
+			}
+			@marker.Content() {
+				Switched to a new branch
+			}
+		}
+		@marker.Marker(marker.Props{Attributes: templ.Attributes{"role": "status"}}) {
+			@marker.Icon() {
+				@spinner.Spinner()
+			}
+			@marker.Content(marker.ContentProps{Class: "shimmer"}) {
+				Thinking...
+			}
+		}
+		@marker.Marker(marker.Props{Variant: marker.VariantSeparator}) {
+			@marker.Content() {
+				Conversation compacted
+			}
+		}
+		@marker.Marker() {
+			@marker.Icon() {
+				@icon.Search()
+			}
+			@marker.Content() {
+				Explored 4 files
+			}
+		}
+	</div>
+}

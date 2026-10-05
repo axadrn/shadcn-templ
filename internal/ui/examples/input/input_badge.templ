@@ -1,0 +1,26 @@
+package input
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/badge"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+)
+
+templ InputBadge() {
+	@field.Field() {
+		@field.Label(field.LabelProps{For: "input-badge"}) {
+			Webhook URL
+			@badge.Badge(badge.Props{
+				Variant: badge.VariantSecondary,
+				Class:   "ml-auto",
+			}) {
+				Beta
+			}
+		}
+		@input.Input(input.Props{
+			ID:          "input-badge",
+			Type:        "url",
+			Placeholder: "https://api.example.com/webhook",
+		})
+	}
+}

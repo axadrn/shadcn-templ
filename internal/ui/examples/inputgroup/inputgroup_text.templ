@@ -1,0 +1,50 @@
+package inputgroup
+
+import "github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+
+templ InputGroupText() {
+	<div class="grid w-full max-w-sm gap-6">
+		@inputgroup.InputGroup() {
+			@inputgroup.Addon() {
+				@inputgroup.Text() {
+					$
+				}
+			}
+			@inputgroup.Input(inputgroup.InputProps{Placeholder: "0.00"})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@inputgroup.Text() {
+					USD
+				}
+			}
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Addon() {
+				@inputgroup.Text() {
+					https://
+				}
+			}
+			@inputgroup.Input(inputgroup.InputProps{Placeholder: "example.com", Class: "pl-0.5!"})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@inputgroup.Text() {
+					.com
+				}
+			}
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{Placeholder: "Enter your username"})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@inputgroup.Text() {
+					{ "@company.com" }
+				}
+			}
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Textarea(inputgroup.TextareaProps{Placeholder: "Enter your message"})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockEnd}) {
+				@inputgroup.Text(inputgroup.TextProps{Class: "text-xs text-muted-foreground"}) {
+					120 characters left
+				}
+			}
+		}
+	</div>
+}

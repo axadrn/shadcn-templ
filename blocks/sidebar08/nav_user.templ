@@ -92,7 +92,8 @@ templ NavUser(user User) {
 		// its side when it opens, onMobileChange keeps it current until the
 		// block is swapped out.
 		// side={isMobile ? "bottom" : "right"}
-		const menu = document.getElementById("sidebar08-nav-user-menu");
+		// The id names the menu popup, its positioner holds the side.
+		const menu = document.getElementById("sidebar08-nav-user-menu")?.parentElement;
 		window.templ.sidebar.onMobileChange((isMobile) => {
 			if (!menu?.isConnected) return false;
 			menu.setAttribute("data-templ-side", isMobile ? "bottom" : "right");

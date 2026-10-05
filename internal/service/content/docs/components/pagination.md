@@ -98,6 +98,12 @@ Use just the previous and next buttons without page numbers. This is useful for 
 
 <ComponentPreview name="pagination-icons-only" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="pagination-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Pagination

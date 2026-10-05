@@ -84,6 +84,12 @@ You can use the `Kbd` component inside a `inputgroup.Addon` component to display
 
 <ComponentPreview name="kbd-input-group" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="kbd-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Kbd

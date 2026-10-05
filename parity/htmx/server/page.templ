@@ -1,0 +1,152 @@
+package main
+
+import (
+ "github.com/axadrn/shadcn-templ/v2/components"
+ "github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+ "github.com/axadrn/shadcn-templ/v2/components/contextmenu"
+ "github.com/axadrn/shadcn-templ/v2/components/popover"
+ "github.com/axadrn/shadcn-templ/v2/components/hovercard"
+ "github.com/axadrn/shadcn-templ/v2/components/tooltip"
+ "github.com/axadrn/shadcn-templ/v2/components/select"
+ "github.com/axadrn/shadcn-templ/v2/components/combobox"
+ "github.com/axadrn/shadcn-templ/v2/components/dialog"
+ "github.com/axadrn/shadcn-templ/v2/components/alertdialog"
+ "github.com/axadrn/shadcn-templ/v2/components/sheet"
+ "github.com/axadrn/shadcn-templ/v2/components/drawer"
+)
+
+templ Hit(name string) {
+ <button type="button" hx-post={ "/hit/" + name } hx-swap="none">Post {name}</button>
+}
+
+templ Fragment() {
+ <section data-probe="dropdownmenu">
+ @dropdownmenu.DropdownMenu(dropdownmenu.Props{ID: "probe-dropdownmenu"}) {
+ <button type="button" { dropdownmenu.Trigger(ctx)... }>Open dropdownmenu</button>
+ @dropdownmenu.Content() {
+ @dropdownmenu.Item(dropdownmenu.ItemProps{Attributes: templ.Attributes{"hx-post": "/hit/dropdownmenu", "hx-swap": "none"}}) { Post dropdownmenu }
+ }
+ }
+ </section>
+ <section data-probe="contextmenu">
+ @contextmenu.ContextMenu(contextmenu.Props{ID: "probe-contextmenu"}) {
+ @contextmenu.Trigger() { Open contextmenu }
+ @contextmenu.Content() {
+ @contextmenu.Item(contextmenu.ItemProps{Attributes: templ.Attributes{"hx-post": "/hit/contextmenu", "hx-swap": "none"}}) { Post contextmenu }
+ }
+ }
+ </section>
+ <section data-probe="popover">
+ @popover.Popover(popover.Props{ID: "probe-popover"}) {
+ <button type="button" { popover.Trigger(ctx)... }>Open popover</button>
+ @popover.Content() {
+ @Hit("popover")
+ }
+ }
+ </section>
+ <section data-probe="hovercard">
+ @hovercard.HoverCard(hovercard.Props{ID: "probe-hovercard"}) {
+ <button type="button" { hovercard.Trigger(ctx)... }>Open hovercard</button>
+ @hovercard.Content() {
+ @Hit("hovercard")
+ }
+ }
+ </section>
+ <section data-probe="tooltip">
+ @tooltip.Tooltip(tooltip.Props{ID: "probe-tooltip"}) {
+ <button type="button" { tooltip.Trigger(ctx)... }>Open tooltip</button>
+ @tooltip.Content() {
+ @Hit("tooltip")
+ }
+ }
+ </section>
+ <section data-probe="select">
+ @selectcomp.Select(selectcomp.Props{ID: "probe-select"}) {
+ @selectcomp.Trigger() {
+ @selectcomp.Value()
+ }
+ @selectcomp.Content() {
+ @selectcomp.Item(selectcomp.ItemProps{Value: "one", Attributes: templ.Attributes{"hx-post": "/hit/select", "hx-swap": "none"}}) { Post select }
+ }
+ }
+ </section>
+ <section data-probe="combobox">
+ @combobox.Combobox(combobox.Props{ID: "probe-combobox"}) {
+ <button type="button" { combobox.Trigger(ctx)... }>Open combobox</button>
+ @combobox.Content() {
+ @combobox.Item(combobox.ItemProps{Value: "one", Attributes: templ.Attributes{"hx-post": "/hit/combobox", "hx-swap": "none"}}) { Post combobox }
+ }
+ }
+ </section>
+ <section data-probe="dialog">
+ @dialog.Dialog(dialog.Props{ID: "probe-dialog"}) {
+ <button type="button" { dialog.Trigger(ctx)... }>Open dialog</button>
+ @dialog.Content() {
+ @Hit("dialog")
+ @dialog.Title() { Probe dialog }
+ @dialog.Dialog(dialog.Props{ID: "probe-nested"}) {
+ <button type="button" { dialog.Trigger(ctx)... }>Nested</button>
+ @dialog.Content() {
+ @dialog.Title() { Nested dialog }
+ @Hit("nested")
+ }
+ }
+ }
+ }
+ </section>
+ <section data-probe="alertdialog">
+ @alertdialog.AlertDialog(alertdialog.Props{ID: "probe-alertdialog"}) {
+ <button type="button" { alertdialog.Trigger(ctx)... }>Open alertdialog</button>
+ @alertdialog.Content() {
+ @Hit("alertdialog")
+ }
+ }
+ </section>
+ <section data-probe="sheet">
+ @sheet.Sheet(sheet.Props{ID: "probe-sheet"}) {
+ <button type="button" { sheet.Trigger(ctx)... }>Open sheet</button>
+ @sheet.Content() {
+ @Hit("sheet")
+ }
+ }
+ </section>
+ <section data-probe="drawer">
+ @drawer.Drawer(drawer.Props{ID: "probe-drawer"}) {
+ <button type="button" { drawer.Trigger(ctx)... }>Open drawer</button>
+ @drawer.Content() {
+ @Hit("drawer")
+ }
+ }
+ </section>
+}
+
+templ Page() {
+ <!DOCTYPE html>
+ <html><head><script src="/htmx.js"></script>
+ @components.Scripts()
+ </head><body>
+ <div id="slot">
+ @Fragment()
+ </div>
+ <button id="swap" hx-get="/fragment" hx-target="#slot" hx-swap="innerHTML">swap</button>
+ </body></html>
+}
+
+templ OpenModal() {
+ @dialog.Dialog(dialog.Props{ID: "probe-modal", DefaultOpen: true}) {
+  @dialog.Content() {
+   @dialog.Title() { Modal }
+   <form hx-post="/hit/modal" hx-swap="none"><button type="submit" hx-post="/hit/modal-button" hx-swap="none">Send</button></form>
+  }
+ }
+}
+
+templ OpenPage() {
+ <!DOCTYPE html>
+ <html><head><script src="/htmx.js"></script>
+ @components.Scripts()
+ </head><body>
+ <button id="load" hx-get="/fragment-open" hx-target="#modal" hx-swap="innerHTML">load modal</button>
+ <div id="modal"></div>
+ </body></html>
+}

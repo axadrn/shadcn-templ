@@ -23,7 +23,13 @@
 //                       variables are still set
 //   onPosition(result)  called after every position
 //
-// Left out: adaptiveOrigin, which only popups with a viewport part use.
+//   adaptiveOrigin      true for popups with a viewport part (NavigationMenu):
+//                       left/top (right/bottom on the top and left sides) in
+//                       place of the transform, so the size and position can
+//                       transition together while it stays anchored
+//
+// The returned setAnchor(element) moves it to another anchor without
+// unpositioning it, like refs.setPositionReference.
 (function () {
   "use strict";
 
@@ -46,7 +52,7 @@
   // DirectionProvider pendant: the nearest dir attribute.
   function isRtlAt(element) {
     const el = element?.closest ? element : element?.contextElement;
-    return el?.closest?.("[dir]")?.getAttribute("dir") === "rtl";
+    return window.templ.direction.useDirection(el) === "rtl";
   }
 
   // utils/hideMiddleware.ts: an anchor with an empty rect counts as hidden too.
@@ -117,9 +123,44 @@
     return Math.round(value * dpr) / dpr;
   }
 
+  // utils/adaptiveOriginMiddleware.ts
+  const DEFAULT_SIDES = { sideX: "left", sideY: "top" };
+  const adaptiveOriginMiddleware = {
+    name: "adaptiveOrigin",
+    async fn(state) {
+      const { x: rawX, y: rawY, rects: { floating: floatRect }, elements: { floating }, platform, strategy, placement } = state;
+      const win = floating.ownerDocument.defaultView;
+      const styles = win.getComputedStyle(floating);
+      const hasTransition = styles.transitionDuration !== "0s" && styles.transitionDuration !== "";
+      if (!hasTransition) return { x: rawX, y: rawY, data: DEFAULT_SIDES };
+      const offsetParent = await platform.getOffsetParent?.(floating);
+      let offsetDimensions = { width: 0, height: 0 };
+      if (strategy === "fixed" && win?.visualViewport) {
+        offsetDimensions = { width: win.visualViewport.width, height: win.visualViewport.height };
+      } else if (offsetParent === win) {
+        const doc = floating.ownerDocument;
+        offsetDimensions = { width: doc.documentElement.clientWidth, height: doc.documentElement.clientHeight };
+      } else if (await platform.isElement?.(offsetParent)) {
+        offsetDimensions = await platform.getDimensions(offsetParent);
+      }
+      const currentSide = getSide(placement);
+      let x = rawX;
+      let y = rawY;
+      if (currentSide === "left") x = offsetDimensions.width - (rawX + floatRect.width);
+      if (currentSide === "top") y = offsetDimensions.height - (rawY + floatRect.height);
+      return {
+        x,
+        y,
+        data: { sideX: currentSide === "left" ? "right" : DEFAULT_SIDES.sideX, sideY: currentSide === "top" ? "bottom" : DEFAULT_SIDES.sideY },
+      };
+    },
+  };
+
   function useAnchorPositioning(options) {
-    const {
+    let {
       anchor,
+    } = options;
+    const {
       positioner,
       arrow: arrowEl = null,
       positionMethod = "absolute",
@@ -136,6 +177,7 @@
       shiftCrossAxis = false,
       lazyFlip = false,
       applyPosition = () => true,
+      adaptiveOrigin = false,
       onPosition,
     } = options;
     const parts = (options.parts || [positioner]).filter(Boolean);
@@ -144,7 +186,8 @@
     const collisionAvoidanceSide = collisionAvoidance.side || "flip";
     const collisionAvoidanceAlign = collisionAvoidance.align || "flip";
     const collisionAvoidanceFallbackAxisSide = collisionAvoidance.fallbackAxisSide || "end";
-    const isRtl = isRtlAt(anchor);
+    // Base UI reads useDirection in the positioner.
+    const isRtl = isRtlAt(positioner);
     let mountSide = null;
 
     // Create a bias to the preferred side. On iOS, when the software keyboard
@@ -279,6 +322,7 @@
           },
         },
         hideMiddleware(),
+        adaptiveOrigin ? adaptiveOriginMiddleware : null,
       );
       return list.filter(Boolean);
     }
@@ -318,12 +362,22 @@
         const logicalSide = getLogicalSide(sideParam, renderedSide, isRtl);
         style.opacity = "";
         if (applyPosition()) {
-          // floatingStyles of useFloating with transform: true
           style.position = positionMethod;
-          style.left = "0px";
-          style.top = "0px";
-          style.transform = `translate(${roundByDPR(positioner, result.x)}px, ${roundByDPR(positioner, result.y)}px)`;
-          if ((positioner.ownerDocument.defaultView.devicePixelRatio || 1) >= 1.5) style.willChange = "transform";
+          if (adaptiveOrigin) {
+            // { position, [sideX]: x, [sideY]: y }
+            const { sideX, sideY } = result.middlewareData.adaptiveOrigin || DEFAULT_SIDES;
+            ["left", "top", "right", "bottom"].forEach((prop) => {
+              if (prop !== sideX && prop !== sideY) style[prop] = "";
+            });
+            style[sideX] = `${result.x}px`;
+            style[sideY] = `${result.y}px`;
+          } else {
+            // floatingStyles of useFloating with transform: true
+            style.left = "0px";
+            style.top = "0px";
+            style.transform = `translate(${roundByDPR(positioner, result.x)}px, ${roundByDPR(positioner, result.y)}px)`;
+            if ((positioner.ownerDocument.defaultView.devicePixelRatio || 1) >= 1.5) style.willChange = "transform";
+          }
           parts.forEach((part) => part.setAttribute("data-side", logicalSide));
         }
         parts.forEach((part) => part.setAttribute("data-align", renderedAlign));
@@ -342,14 +396,21 @@
       });
     }
 
-    const stopAutoUpdate = autoUpdate(anchor, positioner, update, {
+    const autoUpdateOptions = {
       elementResize: !disableAnchorTracking && typeof ResizeObserver !== "undefined",
       layoutShift: !disableAnchorTracking && typeof IntersectionObserver !== "undefined",
-    });
+    };
+    let stopAutoUpdate = autoUpdate(anchor, positioner, update, autoUpdateOptions);
 
     return {
       positioned,
       update,
+      setAnchor(next) {
+        if (!active || next === anchor) return;
+        stopAutoUpdate();
+        anchor = next;
+        stopAutoUpdate = autoUpdate(anchor, positioner, update, autoUpdateOptions);
+      },
       cleanup() {
         active = false;
         stopAutoUpdate();

@@ -1,0 +1,28 @@
+package tooltip
+
+import (
+	exshared "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/shared"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/tooltip"
+)
+
+var tooltipSides = []tooltip.Side{tooltip.SideLeft, tooltip.SideTop, tooltip.SideBottom, tooltip.SideRight}
+
+templ TooltipSides() {
+	<div class="flex flex-wrap gap-2">
+		for _, side := range tooltipSides {
+			@tooltip.Tooltip() {
+				@button.Button(button.Props{
+					Variant:    button.VariantOutline,
+					Class:      "w-fit capitalize",
+					Attributes: exshared.ServerRendered(tooltip.Trigger(ctx)),
+				}) {
+					{ string(side) }
+				}
+				@tooltip.Content(tooltip.ContentProps{Side: side}) {
+					<p>Add to library</p>
+				}
+			}
+		}
+	</div>
+}

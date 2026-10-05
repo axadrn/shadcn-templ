@@ -1,0 +1,46 @@
+package item
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/item"
+)
+
+// The upstream example's Arabic translation, its default language.
+templ ItemRtl() {
+	<div class="flex w-full max-w-md flex-col gap-6" dir="rtl">
+		@item.Item(item.Props{Variant: item.VariantOutline, Attributes: templ.Attributes{"dir": "rtl"}}) {
+			@item.Content() {
+				@item.Title() {
+					عنصر أساسي
+				}
+				@item.Description() {
+					عنصر بسيط يحتوي على عنوان ووصف.
+				}
+			}
+			@item.Actions() {
+				@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeSm}) {
+					إجراء
+				}
+			}
+		}
+		@item.Item(item.Props{
+			Variant:    item.VariantOutline,
+			Size:       item.SizeSm,
+			Href:       "#",
+			Attributes: templ.Attributes{"dir": "rtl"},
+		}) {
+			@item.Media() {
+				@icon.BadgeCheck(icon.Props{Class: "size-5"})
+			}
+			@item.Content() {
+				@item.Title() {
+					تم التحقق من ملفك الشخصي.
+				}
+			}
+			@item.Actions() {
+				@icon.ChevronRight(icon.Props{Class: "size-4"})
+			}
+		}
+	</div>
+}

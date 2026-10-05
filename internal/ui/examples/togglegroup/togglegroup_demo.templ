@@ -1,0 +1,32 @@
+package togglegroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/togglegroup"
+)
+
+templ ToggleGroupDemo() {
+	@togglegroup.ToggleGroup(togglegroup.Props{
+		Variant:  togglegroup.VariantOutline,
+		Multiple: true,
+	}) {
+		@togglegroup.Item(togglegroup.ItemProps{
+			Value:      "bold",
+			Attributes: templ.Attributes{"aria-label": "Toggle bold"},
+		}) {
+			@icon.Bold()
+		}
+		@togglegroup.Item(togglegroup.ItemProps{
+			Value:      "italic",
+			Attributes: templ.Attributes{"aria-label": "Toggle italic"},
+		}) {
+			@icon.Italic()
+		}
+		@togglegroup.Item(togglegroup.ItemProps{
+			Value:      "strikethrough",
+			Attributes: templ.Attributes{"aria-label": "Toggle strikethrough"},
+		}) {
+			@icon.Underline()
+		}
+	}
+}

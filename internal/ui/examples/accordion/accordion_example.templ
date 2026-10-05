@@ -1,0 +1,241 @@
+package accordion
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/accordion"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ accordionExampleSection(title string, class string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class={ utils.CN("flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full", class) }>
+			{ children... }
+		</div>
+	</div>
+}
+
+templ AccordionExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class={ utils.CN("mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl", "w-full max-w-4xl lg:grid-cols-1 2xl:max-w-4xl 2xl:grid-cols-1") }>
+			@accordionExampleBasic()
+			@accordionExampleMultiple()
+			@accordionExampleWithBorders()
+			@accordionExampleInCard()
+			@accordionExampleWithDisabled()
+		</div>
+	</div>
+}
+
+templ accordionExampleBasic() {
+	@accordionExampleSection("Basic", "") {
+		@accordion.Accordion(accordion.Props{Class: "mx-auto max-w-lg"}) {
+			@accordion.Item(accordion.ItemProps{Value: "item-1"}) {
+				@accordion.Trigger() {
+					Is it accessible?
+				}
+				@accordion.Content() {
+					Yes. It adheres to the WAI-ARIA design pattern.
+				}
+			}
+			@accordion.Item(accordion.ItemProps{Value: "item-2"}) {
+				@accordion.Trigger() {
+					Is it styled?
+				}
+				@accordion.Content() {
+					Yes. It comes with default styles that matches the other components' aesthetic.
+				}
+			}
+			@accordion.Item(accordion.ItemProps{Value: "item-3"}) {
+				@accordion.Trigger() {
+					Is it animated?
+				}
+				@accordion.Content() {
+					Yes. It's animated by default, but you can disable it if you prefer.
+				}
+			}
+		}
+	}
+}
+
+templ accordionExampleMultiple() {
+	@accordionExampleSection("Multiple", "") {
+		@accordion.Accordion(accordion.Props{Multiple: true, Class: "mx-auto max-w-lg"}) {
+			@accordion.Item(accordion.ItemProps{Value: "item-4"}) {
+				@accordion.Trigger() {
+					What are the key considerations when implementing a comprehensive enterprise-level authentication system?
+				}
+				@accordion.Content() {
+					Implementing a robust enterprise authentication system requires careful consideration of multiple factors. This includes secure password hashing and storage, multi-factor authentication (MFA) implementation, session management, OAuth2 and SSO integration, regular security audits, rate limiting to prevent brute force attacks, and maintaining detailed audit logs. Additionally, you'll need to consider scalability, performance impact, and compliance with relevant data protection regulations such as GDPR or HIPAA.
+				}
+			}
+			@accordion.Item(accordion.ItemProps{Value: "item-5"}) {
+				@accordion.Trigger() {
+					How does modern distributed system architecture handle eventual consistency and data synchronization across multiple regions?
+				}
+				@accordion.Content() {
+					Modern distributed systems employ various strategies to maintain data consistency across regions. This often involves using techniques like CRDT (Conflict-Free Replicated Data Types), vector clocks, and gossip protocols. Systems might implement event sourcing patterns, utilize message queues for asynchronous updates, and employ sophisticated conflict resolution strategies. Popular solutions like Amazon's DynamoDB and Google's Spanner demonstrate different approaches to solving these challenges, balancing between consistency, availability, and partition tolerance as described in the CAP theorem.
+				}
+			}
+		}
+	}
+}
+
+templ accordionExampleWithBorders() {
+	@accordionExampleSection("With Borders", "") {
+		@accordion.Accordion(accordion.Props{Class: "mx-auto max-w-lg style-vega:gap-2 style-nova:gap-2 style-lyra:gap-2"}) {
+			@accordion.Item(accordion.ItemProps{Value: "item-10", Class: "style-vega:rounded-lg style-vega:border style-nova:rounded-lg style-nova:border style-lyra:border"}) {
+				@accordion.Trigger(accordion.TriggerProps{Class: "font-medium style-vega:px-4 style-vega:text-sm style-nova:px-2.5 style-nova:text-sm style-lyra:px-2 style-lyra:text-xs style-maia:text-sm style-mira:text-xs style-luma:text-sm"}) {
+					How does billing work?
+				}
+				@accordion.Content(accordion.ContentProps{Class: "text-muted-foreground style-vega:px-4 style-nova:px-2.5 style-nova:text-sm style-lyra:px-2 style-lyra:text-xs style-maia:px-0 style-mira:px-0 style-luma:px-0"}) {
+					We offer monthly and annual subscription plans. Billing is charged at the beginning of each cycle, and you can cancel anytime. All plans include automatic backups, 24/7 support, and unlimited team members. There are no hidden fees or setup costs.
+				}
+			}
+			@accordion.Item(accordion.ItemProps{Value: "item-11", Class: "style-vega:rounded-lg style-vega:border style-nova:rounded-lg style-nova:border style-lyra:border"}) {
+				@accordion.Trigger(accordion.TriggerProps{Class: "font-medium style-vega:px-4 style-vega:text-sm style-nova:px-2.5 style-nova:text-sm style-lyra:px-2 style-lyra:text-xs style-maia:text-sm style-mira:text-xs style-luma:text-sm"}) {
+					Is my data secure?
+				}
+				@accordion.Content(accordion.ContentProps{Class: "text-muted-foreground style-vega:px-4 style-nova:px-2.5 style-nova:text-sm style-lyra:px-2 style-lyra:text-xs style-maia:px-0 style-mira:px-0 style-luma:px-0"}) {
+					Yes. We use end-to-end encryption, SOC 2 Type II compliance, and regular third-party security audits. All data is encrypted at rest and in transit using industry-standard protocols. We also offer optional two-factor authentication and single sign-on for enterprise customers.
+				}
+			}
+			@accordion.Item(accordion.ItemProps{Value: "item-12", Class: "style-vega:rounded-lg style-vega:border style-nova:rounded-lg style-nova:border style-lyra:border"}) {
+				@accordion.Trigger(accordion.TriggerProps{Class: "font-medium style-vega:px-4 style-vega:text-sm style-nova:px-2.5 style-nova:text-sm style-lyra:px-2 style-lyra:text-xs style-maia:text-sm style-mira:text-xs style-luma:text-sm"}) {
+					What integrations do you support?
+				}
+				@accordion.Content(accordion.ContentProps{Class: "text-muted-foreground style-vega:px-4 style-nova:px-2.5 style-nova:text-sm style-lyra:px-2 style-lyra:text-xs style-maia:px-0 style-mira:px-0 style-luma:px-0"}) {
+					<p>
+						We integrate with 500+ popular tools including Slack, Zapier, Salesforce, HubSpot, and more. You can also build custom integrations using our REST API and webhooks.
+					</p>
+					<p>
+						Our API documentation includes code examples in 10+ programming languages.
+					</p>
+				}
+			}
+		}
+	}
+}
+
+templ accordionExampleInCard() {
+	@accordionExampleSection("In Card", "") {
+		@card.Card(card.Props{Class: "mx-auto w-full max-w-lg gap-4"}) {
+			@card.Header() {
+				@card.Title() {
+					Subscription & Billing
+				}
+				@card.Description() {
+					Common questions about your account, plans, and payments
+				}
+			}
+			@card.Content() {
+				@accordion.Accordion(accordion.Props{DefaultValue: []string{"item-13"}, Class: "style-maia:rounded-md style-mira:rounded-md"}) {
+					@accordion.Item(accordion.ItemProps{Value: "item-13"}) {
+						@accordion.Trigger() {
+							What subscription plans do you offer?
+						}
+						@accordion.Content() {
+							<p>
+								We offer three subscription tiers: Starter ($9/month), Professional ($29/month), and Enterprise ($99/month). Each plan includes increasing storage limits, API access, priority support, and team collaboration features.
+							</p>
+							<p>
+								<a href="#">Annual billing is available</a> with a 20% discount. All plans include a 14-day free trial with no credit card required.
+							</p>
+							@button.Button(button.Props{Size: button.SizeSm}) {
+								View plans
+								@icon.ArrowUpRight(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-end"}})
+							}
+						}
+					}
+					@accordion.Item(accordion.ItemProps{Value: "item-6"}) {
+						@accordion.Trigger() {
+							How does billing work?
+						}
+						@accordion.Content() {
+							<p>
+								Billing occurs automatically at the start of each billing cycle. We accept all major credit cards, PayPal, and ACH transfers for enterprise customers.
+							</p>
+							<p>
+								You'll receive an invoice via email after each payment. You can update your payment method or billing information anytime in your account settings. Failed payments will trigger automated retry attempts and email notifications.
+							</p>
+						}
+					}
+					@accordion.Item(accordion.ItemProps{Value: "item-7"}) {
+						@accordion.Trigger() {
+							Can I upgrade or downgrade my plan?
+						}
+						@accordion.Content() {
+							<p>
+								Yes, you can change your plan at any time. When upgrading, you'll be charged a prorated amount for the remainder of your billing cycle and immediately gain access to new features.
+							</p>
+							<p>
+								When downgrading, the change takes effect at the end of your current billing period, and you'll retain access to premium features until then. No refunds are provided for downgrades.
+							</p>
+						}
+					}
+					@accordion.Item(accordion.ItemProps{Value: "item-8"}) {
+						@accordion.Trigger() {
+							How do I cancel my subscription?
+						}
+						@accordion.Content() {
+							<p>
+								You can cancel your subscription anytime from your account settings. There are no cancellation fees or penalties. Your access will continue until the end of your current billing period.
+							</p>
+							<p>
+								After cancellation, your data is retained for 30 days in case you want to reactivate. You can export all your data before or after canceling. We'd love to hear your feedback about why you're leaving.
+							</p>
+						}
+					}
+					@accordion.Item(accordion.ItemProps{Value: "item-9"}) {
+						@accordion.Trigger() {
+							What is your refund policy?
+						}
+						@accordion.Content() {
+							<p>
+								We offer a 30-day money-back guarantee for new subscriptions. If you're not satisfied within the first 30 days, contact our support team for a full refund.
+							</p>
+							<p>
+								After 30 days, we don't provide refunds for partial billing periods, but you can cancel anytime to avoid future charges. Enterprise customers have custom refund terms outlined in their contracts.
+							</p>
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+templ accordionExampleWithDisabled() {
+	@accordionExampleSection("With Disabled", "") {
+		@accordion.Accordion(accordion.Props{Class: "mx-auto max-w-lg overflow-hidden border style-vega:rounded-lg style-nova:rounded-lg style-lyra:rounded-none style-maia:rounded-lg style-mira:rounded-lg style-luma:rounded-xl"}) {
+			@accordion.Item(accordion.ItemProps{Value: "item-14", Class: "p-1 data-open:bg-muted/50"}) {
+				@accordion.Trigger(accordion.TriggerProps{Class: "style-vega:px-4 style-nova:px-2.5 style-lyra:px-2"}) {
+					Can I access my account history?
+				}
+				@accordion.Content(accordion.ContentProps{Class: "style-vega:px-4 style-nova:px-2.5 style-lyra:px-2"}) {
+					Yes, you can view your complete account history including all transactions, plan changes, and support tickets in the Account History section of your dashboard.
+				}
+			}
+			@accordion.Item(accordion.ItemProps{Value: "item-15", Disabled: true, Class: "p-1 data-open:bg-muted/50"}) {
+				@accordion.Trigger(accordion.TriggerProps{Class: "style-vega:px-4 style-nova:px-2.5 style-lyra:px-2"}) {
+					Premium feature information
+				}
+				@accordion.Content(accordion.ContentProps{Class: "style-vega:px-4 style-nova:px-2.5 style-lyra:px-2"}) {
+					This section contains information about premium features. Upgrade your plan to access this content.
+				}
+			}
+			@accordion.Item(accordion.ItemProps{Value: "item-16", Class: "p-1 data-open:bg-muted/50"}) {
+				@accordion.Trigger(accordion.TriggerProps{Class: "style-vega:px-4 style-nova:px-2.5 style-lyra:px-2"}) {
+					How do I update my email address?
+				}
+				@accordion.Content(accordion.ContentProps{Class: "style-vega:px-4 style-nova:px-2.5 style-lyra:px-2"}) {
+					You can update your email address in your account settings. You'll receive a verification email at your new address to confirm the change.
+				}
+			}
+		}
+	}
+}

@@ -2,6 +2,8 @@ package accordion
 
 import (
 	"context"
+	"strconv"
+	"strings"
 
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/utils"
@@ -48,12 +50,18 @@ type rootState struct {
 	values     map[string]bool
 	controlled bool
 	disabled   bool
+	// value is the root's value as its state attribute renders it, the
+	// open values joined by commas.
+	value string
+	// next counts the items for their index.
+	next *int
 }
 
 type itemState struct {
 	open     bool
 	disabled bool
 	id       string
+	index    int
 }
 
 func root(ctx context.Context) rootState {
@@ -102,13 +110,15 @@ templ Accordion(props ...Props) {
 	for _, value := range values {
 		{{ expanded[value] = true }}
 	}
-	{{ ctx = context.WithValue(ctx, rootKey, rootState{values: expanded, controlled: p.Value != nil, disabled: p.Disabled}) }}
+	{{ ctx = context.WithValue(ctx, rootKey, rootState{values: expanded, controlled: p.Value != nil, disabled: p.Disabled, value: strings.Join(values, ","), next: new(int)}) }}
+	// AccordionRoot renders the direction and its state.
 	<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
 		data-slot="accordion"
 		data-orientation="vertical"
+		dir={ utils.Direction(ctx) }
 		data-templ-multiple?={ p.Multiple }
 		data-disabled?={ p.Disabled }
 		if p.Value != nil {
@@ -141,16 +151,16 @@ templ Item(props ...ItemProps) {
 	{{ r := root(ctx) }}
 	{{ open := r.values[p.Value] }}
 	{{ disabled := p.Disabled || r.disabled }}
-	{{ ctx = context.WithValue(ctx, itemKey, itemState{open: open, disabled: disabled, id: id}) }}
+	{{ index := *r.next }}
+	{{ *r.next++ }}
+	{{ ctx = context.WithValue(ctx, itemKey, itemState{open: open, disabled: disabled, id: id, index: index}) }}
 	<div
 		if p.ID != "" {
 			id={ p.ID }
 		}
 		data-slot="accordion-item"
 		data-templ-value={ p.Value }
-		data-open?={ open }
-		data-closed?={ !open }
-		data-disabled?={ disabled }
+		{ itemStateAttrs(ctx)... }
 		class={
 			utils.CN(
 				"cn-accordion-item",
@@ -163,8 +173,25 @@ templ Item(props ...ItemProps) {
 	</div>
 }
 
+// itemStateAttrs is the item state as AccordionItem, AccordionHeader and
+// AccordionPanel render it (accordionStateAttributesMapping): the index, open
+// or closed, hidden while closed and unmounted, the orientation.
+func itemStateAttrs(ctx context.Context) templ.Attributes {
+	it := item(ctx)
+	return templ.Attributes{
+		"data-index":       strconv.Itoa(it.index),
+		"data-open":        it.open,
+		"data-closed":      !it.open,
+		"data-hidden":      !it.open,
+		"data-disabled":    it.disabled,
+		"data-orientation": "vertical",
+	}
+}
+
 // Trigger is Base UI's Accordion.Trigger: aria-expanded for the state and
-// aria-controls for the panel it discloses.
+// aria-controls for the panel it discloses. Its state attributes follow the
+// default mapping: the root's value, an index other than 0, and focusable
+// while disabled (aria-disabled, no disabled attribute).
 templ Trigger(props ...TriggerProps) {
 	{{ var p TriggerProps }}
 	if len(props) > 0 {
@@ -173,7 +200,7 @@ templ Trigger(props ...TriggerProps) {
 	if p.ID == "" {
 		{{ p.ID = triggerID(itemID(ctx)) }}
 	}
-	<h3 class="flex">
+	<h3 class="flex" { itemStateAttrs(ctx)... }>
 		<button
 			id={ p.ID }
 			type="button"
@@ -185,12 +212,15 @@ templ Trigger(props ...TriggerProps) {
 			if itemOpen(ctx) {
 				aria-controls={ panelID(itemID(ctx)) }
 			}
-			data-panel-open?={ itemOpen(ctx) }
-			disabled?={ itemDisabled(ctx) }
-			data-disabled?={ itemDisabled(ctx) }
-			if itemDisabled(ctx) {
-				aria-disabled="true"
+			data-value={ root(ctx).value }
+			data-orientation="vertical"
+			if item(ctx).index != 0 {
+				data-index={ strconv.Itoa(item(ctx).index) }
 			}
+			data-panel-open?={ itemOpen(ctx) }
+			data-hidden?={ !itemOpen(ctx) }
+			data-disabled?={ itemDisabled(ctx) }
+			aria-disabled={ utils.IfElse(itemDisabled(ctx), "true", "false") }
 			class={
 				utils.CN(
 					"cn-accordion-trigger group/accordion-trigger relative flex flex-1 items-start justify-between border border-transparent transition-all outline-none aria-disabled:pointer-events-none aria-disabled:opacity-50",
@@ -227,8 +257,7 @@ templ Content(props ...ContentProps) {
 		role="region"
 		aria-labelledby={ triggerID(itemID(ctx)) }
 		data-slot="accordion-content"
-		data-open?={ itemOpen(ctx) }
-		data-closed?={ !itemOpen(ctx) }
+		{ itemStateAttrs(ctx)... }
 		hidden?={ !itemOpen(ctx) }
 		class="cn-accordion-content overflow-hidden"
 		{ p.Attributes... }

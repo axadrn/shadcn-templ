@@ -1,0 +1,36 @@
+package alertdialog
+
+import (
+	exshared "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/shared"
+	"github.com/axadrn/shadcn-templ/v2/components/alertdialog"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+)
+
+templ AlertDialogDemo() {
+	@alertdialog.AlertDialog() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: exshared.ServerRendered(alertdialog.Trigger(ctx)),
+		}) {
+			Show Dialog
+		}
+		@alertdialog.Content() {
+			@alertdialog.Header() {
+				@alertdialog.Title() {
+					Are you absolutely sure?
+				}
+				@alertdialog.Description() {
+					This action cannot be undone. This will permanently delete your account from our servers.
+				}
+			}
+			@alertdialog.Footer() {
+				@alertdialog.Cancel() {
+					Cancel
+				}
+				@alertdialog.Action() {
+					Continue
+				}
+			}
+		}
+	}
+}

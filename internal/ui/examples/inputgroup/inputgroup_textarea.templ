@@ -1,0 +1,40 @@
+package inputgroup
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+)
+
+templ InputGroupTextareaExample() {
+	<div class="grid w-full max-w-md gap-4">
+		@inputgroup.InputGroup() {
+			@inputgroup.Textarea(inputgroup.TextareaProps{
+				ID:          "textarea-code",
+				Placeholder: `fmt.Println("Hello, world!")`,
+				Class:       "min-h-[200px]",
+			})
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockEnd, Class: "border-t"}) {
+				@inputgroup.Text() {
+					Line 1, Column 1
+				}
+				@inputgroup.Button(inputgroup.ButtonProps{Variant: button.VariantDefault, Size: inputgroup.ButtonSizeSm, Class: "ml-auto"}) {
+					Run
+					@icon.CornerDownLeft()
+				}
+			}
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockStart, Class: "border-b"}) {
+				@inputgroup.Text(inputgroup.TextProps{Class: "font-mono font-medium"}) {
+					@icon.FileCode()
+					main.go
+				}
+				@inputgroup.Button(inputgroup.ButtonProps{Size: inputgroup.ButtonSizeIconXs, Class: "ml-auto"}) {
+					@icon.RefreshCw()
+				}
+				@inputgroup.Button(inputgroup.ButtonProps{Variant: button.VariantGhost, Size: inputgroup.ButtonSizeIconXs}) {
+					@icon.Copy()
+				}
+			}
+		}
+	</div>
+}

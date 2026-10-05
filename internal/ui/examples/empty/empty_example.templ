@@ -1,0 +1,216 @@
+package empty
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/empty"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/kbd"
+)
+
+templ emptyExampleSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ EmptyExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@emptyExampleBasic()
+			@emptyExampleWithMutedBackground()
+			@emptyExampleWithBorder()
+			@emptyExampleWithIcon()
+			@emptyExampleWithMutedBackgroundAlt()
+			@emptyExampleInCard()
+		</div>
+	</div>
+}
+
+templ emptyExampleBasic() {
+	@emptyExampleSection("Basic") {
+		@empty.Empty() {
+			@empty.Header() {
+				@empty.Title() {
+					No projects yet
+				}
+				@empty.Description() {
+					You haven't created any projects yet. Get started by creating your first project.
+				}
+			}
+			@empty.Content() {
+				<div class="flex gap-2">
+					@button.Button(button.Props{Href: "#"}) {
+						Create project
+					}
+					@button.Button(button.Props{Variant: button.VariantOutline}) {
+						Import project
+					}
+				</div>
+				@button.Button(button.Props{
+					Variant: button.VariantLink,
+					Href:    "#",
+					Class:   "text-muted-foreground",
+				}) {
+					Learn more
+					@icon.ArrowUpRight()
+				}
+			}
+		}
+	}
+}
+
+templ emptyExampleWithMutedBackground() {
+	@emptyExampleSection("With Muted Background") {
+		@empty.Empty(empty.Props{Class: "bg-muted"}) {
+			@empty.Header() {
+				@empty.Title() {
+					No results found
+				}
+				@empty.Description() {
+					No results found for your search. Try adjusting your search terms.
+				}
+			}
+			@empty.Content() {
+				@button.Button() {
+					Try again
+				}
+				@button.Button(button.Props{
+					Variant: button.VariantLink,
+					Href:    "#",
+					Class:   "text-muted-foreground",
+				}) {
+					Learn more
+					@icon.ArrowUpRight()
+				}
+			}
+		}
+	}
+}
+
+templ emptyExampleWithBorder() {
+	@emptyExampleSection("With Border") {
+		@empty.Empty(empty.Props{Class: "border"}) {
+			@empty.Header() {
+				@empty.Title() {
+					404 - Not Found
+				}
+				@empty.Description() {
+					The page you're looking for doesn't exist. Try searching for what you need below.
+				}
+			}
+			@empty.Content() {
+				@inputgroup.InputGroup(inputgroup.Props{Class: "w-3/4"}) {
+					@inputgroup.Input(inputgroup.InputProps{Placeholder: "Try searching for pages..."})
+					@inputgroup.Addon() {
+						@icon.CircleDashed()
+					}
+					@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+						@kbd.Kbd() {
+							/
+						}
+					}
+				}
+				@empty.Description() {
+					Need help? <a href="#">Contact support</a>
+				}
+			}
+		}
+	}
+}
+
+templ emptyExampleWithIcon() {
+	@emptyExampleSection("With Icon") {
+		@empty.Empty(empty.Props{Class: "border"}) {
+			@empty.Header() {
+				@empty.Media(empty.MediaProps{Variant: empty.MediaVariantIcon}) {
+					@icon.Folder()
+				}
+				@empty.Title() {
+					Nothing to see here
+				}
+				@empty.Description() {
+					No posts have been created yet. Get started by <a href="#">creating your first post</a>.
+				}
+			}
+			@empty.Content() {
+				@button.Button(button.Props{Variant: button.VariantOutline}) {
+					@icon.Plus(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+					New Post
+				}
+			}
+		}
+	}
+}
+
+templ emptyExampleWithMutedBackgroundAlt() {
+	@emptyExampleSection("With Muted Background Alt") {
+		@empty.Empty(empty.Props{Class: "bg-muted/50"}) {
+			@empty.Header() {
+				@empty.Title() {
+					404 - Not Found
+				}
+				@empty.Description() {
+					The page you're looking for doesn't exist. Try searching for what you need below.
+				}
+			}
+			@empty.Content() {
+				@inputgroup.InputGroup(inputgroup.Props{Class: "w-3/4"}) {
+					@inputgroup.Input(inputgroup.InputProps{Placeholder: "Try searching for pages..."})
+					@inputgroup.Addon() {
+						@icon.CircleDashed()
+					}
+					@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+						@kbd.Kbd() {
+							/
+						}
+					}
+				}
+				@empty.Description() {
+					Need help? <a href="#">Contact support</a>
+				}
+			}
+		}
+	}
+}
+
+templ emptyExampleInCard() {
+	@emptyExampleSection("In Card") {
+		@empty.Empty() {
+			@empty.Header() {
+				@empty.Media(empty.MediaProps{Variant: empty.MediaVariantIcon}) {
+					@icon.Folder()
+				}
+				@empty.Title() {
+					No projects yet
+				}
+				@empty.Description() {
+					You haven't created any projects yet. Get started by creating your first project.
+				}
+			}
+			@empty.Content() {
+				<div class="flex gap-2">
+					@button.Button(button.Props{Href: "#"}) {
+						Create project
+					}
+					@button.Button(button.Props{Variant: button.VariantOutline}) {
+						Import project
+					}
+				</div>
+				@button.Button(button.Props{
+					Variant: button.VariantLink,
+					Href:    "#",
+					Class:   "text-muted-foreground",
+				}) {
+					Learn more
+					@icon.ArrowUpRight()
+				}
+			}
+		}
+	}
+}

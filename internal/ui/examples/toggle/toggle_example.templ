@@ -1,0 +1,280 @@
+package toggle
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/toggle"
+)
+
+templ toggleExampleSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ ToggleExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@toggleExampleBasic()
+			@toggleExampleOutline()
+			@toggleExampleSizes()
+			@toggleExampleWithButtonText()
+			@toggleExampleWithButtonIcon()
+			@toggleExampleWithButtonIconText()
+			@toggleExampleDisabled()
+			@toggleExampleWithIcon()
+		</div>
+	</div>
+}
+
+templ toggleExampleBasic() {
+	@toggleExampleSection("Basic") {
+		<div class="flex flex-wrap items-center gap-2">
+			@toggle.Toggle(toggle.Props{
+				DefaultPressed: true,
+				Attributes:     templ.Attributes{"aria-label": "Toggle bold"},
+			}) {
+				@icon.Bold()
+			}
+			@toggle.Toggle(toggle.Props{
+				Attributes: templ.Attributes{"aria-label": "Toggle italic"},
+			}) {
+				@icon.Italic()
+			}
+			@toggle.Toggle(toggle.Props{
+				Attributes: templ.Attributes{"aria-label": "Toggle underline"},
+			}) {
+				@icon.Underline()
+			}
+		</div>
+	}
+}
+
+templ toggleExampleOutline() {
+	@toggleExampleSection("Outline") {
+		<div class="flex flex-wrap items-center gap-2">
+			@toggle.Toggle(toggle.Props{
+				Variant:    toggle.VariantOutline,
+				Attributes: templ.Attributes{"aria-label": "Toggle italic"},
+			}) {
+				@icon.Italic()
+				Italic
+			}
+			@toggle.Toggle(toggle.Props{
+				Variant:    toggle.VariantOutline,
+				Attributes: templ.Attributes{"aria-label": "Toggle bold"},
+			}) {
+				@icon.Bold()
+				Bold
+			}
+		</div>
+	}
+}
+
+templ toggleExampleSizes() {
+	@toggleExampleSection("Sizes") {
+		<div class="flex flex-wrap items-center gap-2">
+			@toggle.Toggle(toggle.Props{
+				Variant:    toggle.VariantOutline,
+				Size:       toggle.SizeSm,
+				Attributes: templ.Attributes{"aria-label": "Toggle small"},
+			}) {
+				Small
+			}
+			@toggle.Toggle(toggle.Props{
+				Variant:    toggle.VariantOutline,
+				Size:       toggle.SizeDefault,
+				Attributes: templ.Attributes{"aria-label": "Toggle default"},
+			}) {
+				Default
+			}
+			@toggle.Toggle(toggle.Props{
+				Variant:    toggle.VariantOutline,
+				Size:       toggle.SizeLg,
+				Attributes: templ.Attributes{"aria-label": "Toggle large"},
+			}) {
+				Large
+			}
+		</div>
+	}
+}
+
+templ toggleExampleWithButtonText() {
+	@toggleExampleSection("With Button Text") {
+		<div class="flex flex-col gap-4">
+			<div class="flex items-center gap-2">
+				@button.Button(button.Props{Size: button.SizeSm, Variant: button.VariantOutline}) {
+					Button
+				}
+				@toggle.Toggle(toggle.Props{
+					Variant:    toggle.VariantOutline,
+					Size:       toggle.SizeSm,
+					Attributes: templ.Attributes{"aria-label": "Toggle sm"},
+				}) {
+					Toggle
+				}
+			</div>
+			<div class="flex items-center gap-2">
+				@button.Button(button.Props{Size: button.SizeDefault, Variant: button.VariantOutline}) {
+					Button
+				}
+				@toggle.Toggle(toggle.Props{
+					Variant:    toggle.VariantOutline,
+					Size:       toggle.SizeDefault,
+					Attributes: templ.Attributes{"aria-label": "Toggle default"},
+				}) {
+					Toggle
+				}
+			</div>
+			<div class="flex items-center gap-2">
+				@button.Button(button.Props{Size: button.SizeLg, Variant: button.VariantOutline}) {
+					Button
+				}
+				@toggle.Toggle(toggle.Props{
+					Variant:    toggle.VariantOutline,
+					Size:       toggle.SizeLg,
+					Attributes: templ.Attributes{"aria-label": "Toggle lg"},
+				}) {
+					Toggle
+				}
+			</div>
+		</div>
+	}
+}
+
+templ toggleExampleWithButtonIcon() {
+	@toggleExampleSection("With Button Icon") {
+		<div class="flex flex-col gap-4">
+			<div class="flex items-center gap-2">
+				@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeIconSm}) {
+					@icon.Bold()
+				}
+				@toggle.Toggle(toggle.Props{
+					Variant:    toggle.VariantOutline,
+					Size:       toggle.SizeSm,
+					Attributes: templ.Attributes{"aria-label": "Toggle sm icon"},
+				}) {
+					@icon.Bold()
+				}
+			</div>
+			<div class="flex items-center gap-2">
+				@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeIcon}) {
+					@icon.Italic()
+				}
+				@toggle.Toggle(toggle.Props{
+					Variant:    toggle.VariantOutline,
+					Size:       toggle.SizeDefault,
+					Attributes: templ.Attributes{"aria-label": "Toggle default icon"},
+				}) {
+					@icon.Italic()
+				}
+			</div>
+			<div class="flex items-center gap-2">
+				@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeIconLg}) {
+					@icon.Underline()
+				}
+				@toggle.Toggle(toggle.Props{
+					Variant:    toggle.VariantOutline,
+					Size:       toggle.SizeLg,
+					Attributes: templ.Attributes{"aria-label": "Toggle lg icon"},
+				}) {
+					@icon.Underline()
+				}
+			</div>
+		</div>
+	}
+}
+
+templ toggleExampleWithButtonIconText() {
+	@toggleExampleSection("With Button Icon + Text") {
+		<div class="flex flex-col gap-4">
+			<div class="flex items-center gap-2">
+				@button.Button(button.Props{Size: button.SizeSm, Variant: button.VariantOutline}) {
+					@icon.Bold(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+					Button
+				}
+				@toggle.Toggle(toggle.Props{
+					Variant:    toggle.VariantOutline,
+					Size:       toggle.SizeSm,
+					Attributes: templ.Attributes{"aria-label": "Toggle sm icon text"},
+				}) {
+					@icon.Bold()
+					Toggle
+				}
+			</div>
+			<div class="flex items-center gap-2">
+				@button.Button(button.Props{Size: button.SizeDefault, Variant: button.VariantOutline}) {
+					@icon.Italic(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+					Button
+				}
+				@toggle.Toggle(toggle.Props{
+					Variant:    toggle.VariantOutline,
+					Size:       toggle.SizeDefault,
+					Attributes: templ.Attributes{"aria-label": "Toggle default icon text"},
+				}) {
+					@icon.Italic()
+					Toggle
+				}
+			</div>
+			<div class="flex items-center gap-2">
+				@button.Button(button.Props{Size: button.SizeLg, Variant: button.VariantOutline}) {
+					@icon.Underline(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+					Button
+				}
+				@toggle.Toggle(toggle.Props{
+					Variant:    toggle.VariantOutline,
+					Size:       toggle.SizeLg,
+					Attributes: templ.Attributes{"aria-label": "Toggle lg icon text"},
+				}) {
+					@icon.Underline()
+					Toggle
+				}
+			</div>
+		</div>
+	}
+}
+
+templ toggleExampleDisabled() {
+	@toggleExampleSection("Disabled") {
+		<div class="flex flex-wrap items-center gap-2">
+			@toggle.Toggle(toggle.Props{
+				Disabled:   true,
+				Attributes: templ.Attributes{"aria-label": "Toggle disabled"},
+			}) {
+				Disabled
+			}
+			@toggle.Toggle(toggle.Props{
+				Variant:    toggle.VariantOutline,
+				Disabled:   true,
+				Attributes: templ.Attributes{"aria-label": "Toggle disabled outline"},
+			}) {
+				Disabled
+			}
+		</div>
+	}
+}
+
+templ toggleExampleWithIcon() {
+	@toggleExampleSection("With Icon") {
+		<div class="flex flex-wrap items-center gap-2">
+			@toggle.Toggle(toggle.Props{
+				DefaultPressed: true,
+				Attributes:     templ.Attributes{"aria-label": "Toggle bookmark"},
+			}) {
+				@icon.Bookmark(icon.Props{Class: "group-aria-pressed/toggle:fill-accent-foreground"})
+			}
+			@toggle.Toggle(toggle.Props{
+				Variant:    toggle.VariantOutline,
+				Attributes: templ.Attributes{"aria-label": "Toggle bookmark outline"},
+			}) {
+				@icon.Bookmark(icon.Props{Class: "group-aria-pressed/toggle:fill-accent-foreground"})
+				Bookmark
+			}
+		</div>
+	}
+}

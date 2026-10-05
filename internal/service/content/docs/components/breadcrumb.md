@@ -114,6 +114,12 @@ The `breadcrumb.Link` component renders a standard anchor. Set the `Href` prop t
 
 <ComponentPreview name="breadcrumb-link" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="breadcrumb-rtl" direction="rtl" previewClassName="p-2" />
+
 ## API Reference
 
 ### Breadcrumb

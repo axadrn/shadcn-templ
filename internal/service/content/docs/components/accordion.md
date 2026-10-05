@@ -110,6 +110,12 @@ Wrap the `Accordion` in a `Card` component.
 
 <ComponentPreview name="accordion-card" align="start" previewClassName="*:data-[slot=accordion]:max-w-sm h-[435px]" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="accordion-rtl" align="start" direction="rtl" />
+
 ## API Reference
 
 ### Accordion

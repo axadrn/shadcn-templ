@@ -1,0 +1,238 @@
+package dropdownmenu
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ DropdownMenuComplex() {
+	@dropdownmenu.DropdownMenu() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Attributes: dropdownmenu.Trigger(ctx),
+		}) {
+			Complex Menu
+		}
+		@dropdownmenu.Content(dropdownmenu.ContentProps{Class: "w-44"}) {
+			@dropdownmenu.Group() {
+				@dropdownmenu.Label() {
+					File
+				}
+				@dropdownmenu.Item() {
+					@icon.File()
+					New File
+					@dropdownmenu.Shortcut() {
+						⌘N
+					}
+				}
+				@dropdownmenu.Item() {
+					@icon.Folder()
+					New Folder
+					@dropdownmenu.Shortcut() {
+						⇧⌘N
+					}
+				}
+				@dropdownmenu.Sub() {
+					@dropdownmenu.SubTrigger() {
+						@icon.FolderOpen()
+						Open Recent
+					}
+					@dropdownmenu.Portal() {
+						@dropdownmenu.SubContent() {
+							@dropdownmenu.Group() {
+								@dropdownmenu.Label() {
+									Recent Projects
+								}
+								@dropdownmenu.Item() {
+									@icon.FileCode()
+									Project Alpha
+								}
+								@dropdownmenu.Item() {
+									@icon.FileCode()
+									Project Beta
+								}
+								@dropdownmenu.Sub() {
+									@dropdownmenu.SubTrigger() {
+										@icon.Ellipsis()
+										More Projects
+									}
+									@dropdownmenu.Portal() {
+										@dropdownmenu.SubContent() {
+											@dropdownmenu.Item() {
+												@icon.FileCode()
+												Project Gamma
+											}
+											@dropdownmenu.Item() {
+												@icon.FileCode()
+												Project Delta
+											}
+										}
+									}
+								}
+							}
+							@dropdownmenu.Separator()
+							@dropdownmenu.Group() {
+								@dropdownmenu.Item() {
+									@icon.FolderSearch()
+									Browse...
+								}
+							}
+						}
+					}
+				}
+				@dropdownmenu.Separator()
+				@dropdownmenu.Item() {
+					@icon.Save()
+					Save
+					@dropdownmenu.Shortcut() {
+						⌘S
+					}
+				}
+				@dropdownmenu.Item() {
+					@icon.Download()
+					Export
+					@dropdownmenu.Shortcut() {
+						⇧⌘E
+					}
+				}
+			}
+			@dropdownmenu.Separator()
+			@dropdownmenu.Group() {
+				@dropdownmenu.Label() {
+					View
+				}
+				@dropdownmenu.CheckboxItem(dropdownmenu.CheckboxItemProps{DefaultChecked: true}) {
+					@icon.Eye()
+					Show Sidebar
+				}
+				@dropdownmenu.CheckboxItem() {
+					@icon.LayoutTemplate()
+					Show Status Bar
+				}
+				@dropdownmenu.Sub() {
+					@dropdownmenu.SubTrigger() {
+						@icon.Palette()
+						Theme
+					}
+					@dropdownmenu.Portal() {
+						@dropdownmenu.SubContent() {
+							@dropdownmenu.Group() {
+								@dropdownmenu.Label() {
+									Appearance
+								}
+								@dropdownmenu.RadioGroup(dropdownmenu.RadioGroupProps{DefaultValue: "light"}) {
+									@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{
+										Value: "light",
+									}) {
+										@icon.Sun()
+										Light
+									}
+									@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{Value: "dark"}) {
+										@icon.Moon()
+										Dark
+									}
+									@dropdownmenu.RadioItem(dropdownmenu.RadioItemProps{Value: "system"}) {
+										@icon.Monitor()
+										System
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			@dropdownmenu.Separator()
+			@dropdownmenu.Group() {
+				@dropdownmenu.Label() {
+					Account
+				}
+				@dropdownmenu.Item() {
+					@icon.User()
+					Profile
+					@dropdownmenu.Shortcut() {
+						⇧⌘P
+					}
+				}
+				@dropdownmenu.Item() {
+					@icon.CreditCard()
+					Billing
+				}
+				@dropdownmenu.Sub() {
+					@dropdownmenu.SubTrigger() {
+						@icon.Settings()
+						Settings
+					}
+					@dropdownmenu.Portal() {
+						@dropdownmenu.SubContent() {
+							@dropdownmenu.Group() {
+								@dropdownmenu.Label() {
+									Preferences
+								}
+								@dropdownmenu.Item() {
+									@icon.Keyboard()
+									Keyboard Shortcuts
+								}
+								@dropdownmenu.Item() {
+									@icon.Languages()
+									Language
+								}
+								@dropdownmenu.Sub() {
+									@dropdownmenu.SubTrigger() {
+										@icon.Bell()
+										Notifications
+									}
+									@dropdownmenu.Portal() {
+										@dropdownmenu.SubContent() {
+											@dropdownmenu.Group() {
+												@dropdownmenu.Label() {
+													Notification Types
+												}
+												@dropdownmenu.CheckboxItem(dropdownmenu.CheckboxItemProps{DefaultChecked: true}) {
+													@icon.Bell()
+													Push Notifications
+												}
+												@dropdownmenu.CheckboxItem(dropdownmenu.CheckboxItemProps{DefaultChecked: true}) {
+													@icon.Mail()
+													Email Notifications
+												}
+											}
+										}
+									}
+								}
+							}
+							@dropdownmenu.Separator()
+							@dropdownmenu.Group() {
+								@dropdownmenu.Item() {
+									@icon.Shield()
+									Privacy & Security
+								}
+							}
+						}
+					}
+				}
+			}
+			@dropdownmenu.Separator()
+			@dropdownmenu.Group() {
+				@dropdownmenu.Item() {
+					@icon.CircleQuestionMark()
+					Help & Support
+				}
+				@dropdownmenu.Item() {
+					@icon.FileText()
+					Documentation
+				}
+			}
+			@dropdownmenu.Separator()
+			@dropdownmenu.Group() {
+				@dropdownmenu.Item(dropdownmenu.ItemProps{Variant: dropdownmenu.ItemVariantDestructive}) {
+					@icon.LogOut()
+					Sign Out
+					@dropdownmenu.Shortcut() {
+						⇧⌘Q
+					}
+				}
+			}
+		}
+	}
+}

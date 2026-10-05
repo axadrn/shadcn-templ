@@ -39,8 +39,8 @@ templ ChartAreaLinear() {
 			@chart.Container(chart.ContainerProps{ID: "area-linear", Config: chartAreaLinearConfig}) {
 				@chart.AreaChart(chart.AreaChartProps{
 					AccessibilityLayer: true,
-					Data:   chartAreaLinearData,
-					Margin: &chart.Margin{Left: 12, Right: 12},
+					Data:               chartAreaLinearData,
+					Margin:             &chart.Margin{Left: 12, Right: 12},
 				}) {
 					@chart.CartesianGrid(chart.CartesianGridProps{Vertical: chart.Bool(false)})
 					@chart.XAxis(chart.XAxisProps{

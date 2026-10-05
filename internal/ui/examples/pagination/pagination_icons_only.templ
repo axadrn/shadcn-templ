@@ -1,0 +1,56 @@
+package pagination
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/pagination"
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+)
+
+templ PaginationIconsOnly() {
+	<div class="flex items-center justify-between gap-4">
+		@field.Field(field.Props{Orientation: field.OrientationHorizontal, Class: "w-fit"}) {
+			@field.Label(field.LabelProps{For: "select-rows-per-page"}) {
+				Rows per page
+			}
+			@selectcomp.Select(selectcomp.Props{
+				Items: []selectcomp.ItemData{
+					{Value: "10", Label: "10"},
+					{Value: "25", Label: "25"},
+					{Value: "50", Label: "50"},
+					{Value: "100", Label: "100"},
+				},
+				DefaultValue: "25",
+			}) {
+				@selectcomp.Trigger(selectcomp.TriggerProps{ID: "select-rows-per-page", Class: "w-20"}) {
+					@selectcomp.Value()
+				}
+				@selectcomp.Content(selectcomp.ContentProps{Align: selectcomp.AlignStart}) {
+					@selectcomp.Group() {
+						@selectcomp.Item(selectcomp.ItemProps{Value: "10"}) {
+							10
+						}
+						@selectcomp.Item(selectcomp.ItemProps{Value: "25"}) {
+							25
+						}
+						@selectcomp.Item(selectcomp.ItemProps{Value: "50"}) {
+							50
+						}
+						@selectcomp.Item(selectcomp.ItemProps{Value: "100"}) {
+							100
+						}
+					}
+				}
+			}
+		}
+		@pagination.Pagination(pagination.Props{Class: "mx-0 w-auto"}) {
+			@pagination.Content() {
+				@pagination.Item() {
+					@pagination.Previous(pagination.PreviousProps{Href: "#"})
+				}
+				@pagination.Item() {
+					@pagination.Next(pagination.NextProps{Href: "#"})
+				}
+			}
+		}
+	</div>
+}

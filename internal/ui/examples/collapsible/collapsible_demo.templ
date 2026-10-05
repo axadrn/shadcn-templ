@@ -1,0 +1,38 @@
+package collapsible
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/collapsible"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ CollapsibleDemo() {
+	@collapsible.Collapsible(collapsible.Props{Class: "flex w-[350px] flex-col gap-2"}) {
+		<div class="flex items-center justify-between gap-4 px-4">
+			<h4 class="text-sm font-semibold">Order #4189</h4>
+			@button.Button(button.Props{
+				Variant:    button.VariantGhost,
+				Size:       button.SizeIcon,
+				Class:      "size-8",
+				Attributes: collapsible.Trigger(ctx),
+			}) {
+				@icon.ChevronsUpDown()
+				<span class="sr-only">Toggle details</span>
+			}
+		</div>
+		<div class="flex items-center justify-between rounded-md border px-4 py-2 text-sm">
+			<span class="text-muted-foreground">Status</span>
+			<span class="font-medium">Shipped</span>
+		</div>
+		@collapsible.Content(collapsible.ContentProps{Class: "flex flex-col gap-2"}) {
+			<div class="rounded-md border px-4 py-2 text-sm">
+				<p class="font-medium">Shipping address</p>
+				<p class="text-muted-foreground">100 Market St, San Francisco</p>
+			</div>
+			<div class="rounded-md border px-4 py-2 text-sm">
+				<p class="font-medium">Items</p>
+				<p class="text-muted-foreground">2x Studio Headphones</p>
+			</div>
+		}
+	}
+}

@@ -14,7 +14,7 @@ go install github.com/axadrn/shadcn-templ/v2/cmd/shadcn-templ@latest
 
 Use the `init` command to initialize configuration and dependencies for an existing project.
 
-The `init` command writes `components.json`, adds the shared `utils` package, merges the theme CSS variables into your Tailwind entry file and vendors the shared stylesheets next to it. A `go.mod` is required.
+The `init` command writes `components.json`, adds the shared `utils` package, merges the theme CSS variables into your Tailwind entry file and vendors the shared stylesheets next to it. A `go.mod` is required, in this directory or a parent directory; run `init` in each app of a [monorepo](/docs/monorepo).
 
 ```shell
 shadcn-templ init
@@ -26,13 +26,28 @@ Pick a design on [shadcn-templ.com/create](/create) and pass its preset code or 
 shadcn-templ init --preset b2D0wqNxT
 ```
 
+To start a new project instead, pass a template and a project name. `--monorepo` scaffolds a [monorepo](/docs/monorepo): one module with the shared components at its root and the app in `apps/web`.
+
+```shell
+shadcn-templ init my-app -t templ
+```
+
+```shell
+shadcn-templ init my-app --monorepo
+```
+
 **Options**
 
 ```shell
 Usage:
-  shadcn-templ init [--preset <code|url|name>] [--base-color <color>] [--css <path>] [--force] [--silent] [--registry <url>]
+  shadcn-templ init [name] [--template <templ>] [--monorepo] [--preset <code|url|name>] [--base-color <color>] [--css <path>] [--force] [--silent] [--registry <url>]
+
+Arguments:
+  name                          the project name for --template and --monorepo (default templ-app, templ-monorepo)
 
 Options:
+  -t, --template <templ>        scaffold a new project from a template (templ)
+  --monorepo                    scaffold a monorepo project (implies --template templ)
   -p, --preset <code|url|name>  use a preset configuration (code, URL or name)
   --base-color <color>          override the base color
   --css <path>                  path to your Tailwind CSS entry file
@@ -79,7 +94,7 @@ Use `bundle` to build the component JavaScript asset and its generated Go URL ma
 shadcn-templ bundle
 ```
 
-`add` rebuilds the bundle when it writes component JavaScript. Run `bundle --watch` when editing scripts by hand. The watcher debounces changes by 100ms and writes only changed output.
+`add` rebuilds the bundle when it writes component JavaScript. Run `bundle --watch` when editing scripts by hand. The watcher debounces changes by 100ms and writes only changed output. In a [monorepo](/docs/monorepo), `bundle` writes the bundle into every app that shares the components.
 
 The output location comes from [scripts](/docs/components-json#scripts) in `components.json`. Old hashed bundles in that directory are removed. Ignore the JS output and commit `components/scripts_bundle.go`. For production builds and Docker images, see [Build and Deploy](/docs/installation#build-and-deploy).
 

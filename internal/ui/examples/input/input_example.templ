@@ -1,0 +1,348 @@
+package input
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+	selectcomp "github.com/axadrn/shadcn-templ/v2/components/select"
+)
+
+// The native select markup is inlined in this showcase.
+templ inputExampleSection(title string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class="flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ InputExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@inputExampleBasic()
+			@inputExampleInvalid()
+			@inputExampleWithLabel()
+			@inputExampleWithDescription()
+			@inputExampleDisabled()
+			@inputExampleTypes()
+			@inputExampleWithSelect()
+			@inputExampleWithButton()
+			@inputExampleWithNativeSelect()
+			@inputExampleForm()
+		</div>
+	</div>
+}
+
+templ inputExampleBasic() {
+	@inputExampleSection("Basic") {
+		@input.Input(input.Props{Type: "email", Placeholder: "Email"})
+	}
+}
+
+templ inputExampleInvalid() {
+	@inputExampleSection("Invalid") {
+		@input.Input(input.Props{
+			Type:        "text",
+			Placeholder: "Error",
+			Attributes:  templ.Attributes{"aria-invalid": "true"},
+		})
+	}
+}
+
+templ inputExampleWithLabel() {
+	@inputExampleSection("With Label") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "input-demo-email"}) {
+				Email
+			}
+			@input.Input(input.Props{
+				ID:          "input-demo-email",
+				Type:        "email",
+				Placeholder: "name@example.com",
+			})
+		}
+	}
+}
+
+templ inputExampleWithDescription() {
+	@inputExampleSection("With Description") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "input-demo-username"}) {
+				Username
+			}
+			@input.Input(input.Props{
+				ID:          "input-demo-username",
+				Type:        "text",
+				Placeholder: "Enter your username",
+			})
+			@field.Description() {
+				Choose a unique username for your account.
+			}
+		}
+	}
+}
+
+templ inputExampleDisabled() {
+	@inputExampleSection("Disabled") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "input-demo-disabled"}) {
+				Email
+			}
+			@input.Input(input.Props{
+				ID:          "input-demo-disabled",
+				Type:        "email",
+				Placeholder: "Email",
+				Disabled:    true,
+			})
+		}
+	}
+}
+
+templ inputExampleTypes() {
+	@inputExampleSection("Input Types") {
+		<div class="flex w-full flex-col gap-6">
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "input-demo-password"}) {
+					Password
+				}
+				@input.Input(input.Props{
+					ID:          "input-demo-password",
+					Type:        "password",
+					Placeholder: "Password",
+				})
+			}
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "input-demo-tel"}) {
+					Phone
+				}
+				@input.Input(input.Props{
+					ID:          "input-demo-tel",
+					Type:        "tel",
+					Placeholder: "+1 (555) 123-4567",
+				})
+			}
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "input-demo-url"}) {
+					URL
+				}
+				@input.Input(input.Props{
+					ID:          "input-demo-url",
+					Type:        "url",
+					Placeholder: "https://example.com",
+				})
+			}
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "input-demo-search"}) {
+					Search
+				}
+				@input.Input(input.Props{
+					ID:          "input-demo-search",
+					Type:        "search",
+					Placeholder: "Search",
+				})
+			}
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "input-demo-number"}) {
+					Number
+				}
+				@input.Input(input.Props{
+					ID:          "input-demo-number",
+					Type:        "number",
+					Placeholder: "123",
+				})
+			}
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "input-demo-date"}) {
+					Date
+				}
+				@input.Input(input.Props{ID: "input-demo-date", Type: "date"})
+			}
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "input-demo-time"}) {
+					Time
+				}
+				@input.Input(input.Props{ID: "input-demo-time", Type: "time"})
+			}
+			@field.Field() {
+				@field.Label(field.LabelProps{For: "input-demo-file"}) {
+					File
+				}
+				@input.Input(input.Props{ID: "input-demo-file", Type: "file"})
+			}
+		</div>
+	}
+}
+
+templ inputExampleWithSelect() {
+	@inputExampleSection("With Select") {
+		<div class="flex w-full gap-2">
+			@input.Input(input.Props{
+				Type:        "text",
+				Placeholder: "Enter amount",
+				Class:       "flex-1",
+			})
+			@selectcomp.Select(selectcomp.Props{
+				Items: []selectcomp.ItemData{
+					{Value: "usd", Label: "USD"},
+					{Value: "eur", Label: "EUR"},
+					{Value: "gbp", Label: "GBP"},
+				},
+				DefaultValue: "usd",
+			}) {
+				@selectcomp.Trigger(selectcomp.TriggerProps{Class: "w-32"}) {
+					@selectcomp.Value()
+				}
+				@selectcomp.Content() {
+					@selectcomp.Group() {
+						@selectcomp.Item(selectcomp.ItemProps{Value: "usd"}) {
+							USD
+						}
+						@selectcomp.Item(selectcomp.ItemProps{Value: "eur"}) {
+							EUR
+						}
+						@selectcomp.Item(selectcomp.ItemProps{Value: "gbp"}) {
+							GBP
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ inputExampleWithButton() {
+	@inputExampleSection("With Button") {
+		<div class="flex w-full gap-2">
+			@input.Input(input.Props{
+				Type:        "search",
+				Placeholder: "Search...",
+				Class:       "flex-1",
+			})
+			@button.Button() {
+				Search
+			}
+		</div>
+	}
+}
+
+templ inputExampleWithNativeSelect() {
+	@inputExampleSection("With Native Select") {
+		<div class="flex w-full gap-2">
+			@input.Input(input.Props{
+				Type:        "tel",
+				Placeholder: "(555) 123-4567",
+				Class:       "flex-1",
+			})
+			<div class="cn-native-select-wrapper group/native-select relative w-fit has-[select:disabled]:opacity-50" data-slot="native-select-wrapper" data-size="default">
+				<select data-slot="native-select" data-size="default" class="cn-native-select outline-none disabled:pointer-events-none disabled:cursor-not-allowed">
+					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="+1" selected>+1</option>
+					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="+44">+44</option>
+					<option data-slot="native-select-option" class="bg-[Canvas] text-[CanvasText]" value="+46">+46</option>
+				</select>
+				@icon.ChevronDown(icon.Props{
+					Class: "cn-native-select-icon pointer-events-none absolute select-none",
+					Attributes: templ.Attributes{
+						"aria-hidden": "true",
+						"data-slot":   "native-select-icon",
+					},
+				})
+			</div>
+		</div>
+	}
+}
+
+templ inputExampleForm() {
+	@inputExampleSection("Form") {
+		<form class="w-full">
+			@field.Group() {
+				@field.Field() {
+					@field.Label(field.LabelProps{For: "form-name"}) {
+						Name
+					}
+					@input.Input(input.Props{
+						ID:          "form-name",
+						Type:        "text",
+						Placeholder: "Axel Adrian",
+					})
+				}
+				@field.Field() {
+					@field.Label(field.LabelProps{For: "form-email"}) {
+						Email
+					}
+					@input.Input(input.Props{
+						ID:          "form-email",
+						Type:        "email",
+						Placeholder: "john@example.com",
+					})
+					@field.Description() {
+						We'll never share your email with anyone.
+					}
+				}
+				<div class="grid grid-cols-2 gap-4">
+					@field.Field() {
+						@field.Label(field.LabelProps{For: "form-phone"}) {
+							Phone
+						}
+						@input.Input(input.Props{
+							ID:          "form-phone",
+							Type:        "tel",
+							Placeholder: "+1 (555) 123-4567",
+						})
+					}
+					@field.Field() {
+						@field.Label(field.LabelProps{For: "form-country"}) {
+							Country
+						}
+						@selectcomp.Select(selectcomp.Props{
+							Items: []selectcomp.ItemData{
+								{Value: "us", Label: "United States"},
+								{Value: "uk", Label: "United Kingdom"},
+								{Value: "ca", Label: "Canada"},
+							},
+							DefaultValue: "us",
+						}) {
+							@selectcomp.Trigger(selectcomp.TriggerProps{ID: "form-country"}) {
+								@selectcomp.Value()
+							}
+							@selectcomp.Content() {
+								@selectcomp.Group() {
+									@selectcomp.Item(selectcomp.ItemProps{Value: "us"}) {
+										United States
+									}
+									@selectcomp.Item(selectcomp.ItemProps{Value: "uk"}) {
+										United Kingdom
+									}
+									@selectcomp.Item(selectcomp.ItemProps{Value: "ca"}) {
+										Canada
+									}
+								}
+							}
+						}
+					}
+				</div>
+				@field.Field() {
+					@field.Label(field.LabelProps{For: "form-address"}) {
+						Address
+					}
+					@input.Input(input.Props{
+						ID:          "form-address",
+						Type:        "text",
+						Placeholder: "123 Main St",
+					})
+				}
+				@field.Field(field.Props{Orientation: field.OrientationHorizontal}) {
+					@button.Button(button.Props{Type: button.TypeButton, Variant: button.VariantOutline}) {
+						Cancel
+					}
+					@button.Button(button.Props{Type: button.TypeSubmit}) {
+						Submit
+					}
+				}
+			}
+		</form>
+	}
+}

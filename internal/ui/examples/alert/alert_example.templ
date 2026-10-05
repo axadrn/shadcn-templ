@@ -1,0 +1,169 @@
+package alert
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/alert"
+	"github.com/axadrn/shadcn-templ/v2/components/badge"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ alertExampleSection(title string, class string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class={ utils.CN("flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full", class) }>
+			{ children... }
+		</div>
+	</div>
+}
+
+templ AlertExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class={ utils.CN("mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl", "lg:grid-cols-1") }>
+			@alertExampleBasic()
+			@alertExampleWithIcons()
+			@alertExampleDestructive()
+			@alertExampleWithActions()
+		</div>
+	</div>
+}
+
+templ alertExampleBasic() {
+	@alertExampleSection("Basic", "") {
+		<div class="mx-auto flex w-full max-w-lg flex-col gap-4">
+			@alert.Alert() {
+				@alert.Title() {
+					Success! Your changes have been saved.
+				}
+			}
+			@alert.Alert() {
+				@alert.Title() {
+					Success! Your changes have been saved.
+				}
+				@alert.Description() {
+					This is an alert with title and description.
+				}
+			}
+			@alert.Alert() {
+				@alert.Description() {
+					This one has a description only. No title. No icon.
+				}
+			}
+		</div>
+	}
+}
+
+templ alertExampleWithIcons() {
+	@alertExampleSection("With Icons", "") {
+		<div class="mx-auto flex w-full max-w-lg flex-col gap-4">
+			@alert.Alert() {
+				@icon.CircleAlert()
+				@alert.Title() {
+					Let's try one with icon, title and a <a href="#">link</a>.
+				}
+			}
+			@alert.Alert() {
+				@icon.CircleAlert()
+				@alert.Description() {
+					This one has an icon and a description only. No title. <a href="#">But it has a link</a> and a <a href="#">second link</a>.
+				}
+			}
+			@alert.Alert() {
+				@icon.CircleAlert()
+				@alert.Title() {
+					Success! Your changes have been saved
+				}
+				@alert.Description() {
+					This is an alert with icon, title and description.
+				}
+			}
+			@alert.Alert() {
+				@icon.CircleAlert()
+				@alert.Title() {
+					This is a very long alert title that demonstrates how the component handles extended text content and potentially wraps across multiple lines
+				}
+			}
+			@alert.Alert() {
+				@icon.CircleAlert()
+				@alert.Description() {
+					This is a very long alert description that demonstrates how the component handles extended text content and potentially wraps across multiple lines
+				}
+			}
+			@alert.Alert() {
+				@icon.CircleAlert()
+				@alert.Title() {
+					This is an extremely long alert title that spans multiple lines to demonstrate how the component handles very lengthy headings while maintaining readability and proper text wrapping behavior
+				}
+				@alert.Description() {
+					This is an equally long description that contains detailed information about the alert. It shows how the component can accommodate extensive content while preserving proper spacing, alignment, and readability across different screen sizes and viewport widths. This helps ensure the user experience remains consistent regardless of the content length.
+				}
+			}
+		</div>
+	}
+}
+
+templ alertExampleDestructive() {
+	@alertExampleSection("Destructive", "") {
+		<div class="mx-auto flex w-full max-w-lg flex-col gap-4">
+			@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+				@icon.CircleAlert()
+				@alert.Title() {
+					Something went wrong!
+				}
+				@alert.Description() {
+					Your session has expired. Please log in again.
+				}
+			}
+			@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+				@icon.CircleAlert()
+				@alert.Title() {
+					Unable to process your payment.
+				}
+				@alert.Description() {
+					<p>
+						Please verify your <a href="#">billing information</a> and try again.
+					</p>
+					<ul class="list-inside list-disc">
+						<li>Check your card details</li>
+						<li>Ensure sufficient funds</li>
+						<li>Verify billing address</li>
+					</ul>
+				}
+			}
+		</div>
+	}
+}
+
+templ alertExampleWithActions() {
+	@alertExampleSection("With Actions", "") {
+		<div class="mx-auto flex w-full max-w-lg flex-col gap-4">
+			@alert.Alert() {
+				@icon.CircleAlert()
+				@alert.Title() {
+					The selected emails have been marked as spam.
+				}
+				@alert.Action() {
+					@button.Button(button.Props{Size: button.SizeXs}) {
+						Undo
+					}
+				}
+			}
+			@alert.Alert() {
+				@icon.CircleAlert()
+				@alert.Title() {
+					The selected emails have been marked as spam.
+				}
+				@alert.Description() {
+					This is a very long alert title that demonstrates how the component handles extended text content.
+				}
+				@alert.Action() {
+					@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+						Badge
+					}
+				}
+			}
+		</div>
+	}
+}

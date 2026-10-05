@@ -1,0 +1,68 @@
+package datepicker
+
+import (
+	"time"
+
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/calendar"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/popover"
+)
+
+templ DatePickerRange() {
+	{{
+		from := time.Date(time.Now().Year(), 1, 20, 0, 0, 0, 0, time.Local)
+		to := from.AddDate(0, 0, 20)
+	}}
+	@field.Field(field.Props{Class: "mx-auto w-60"}) {
+		@field.Label(field.LabelProps{For: "date-picker-range"}) {
+			Date Picker Range
+		}
+		@popover.Popover(popover.Props{ID: "date-picker-range-popover"}) {
+			{{
+				triggerAttrs := popover.Trigger(ctx)
+				triggerAttrs["id"] = "date-picker-range"
+			}}
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Class:      "justify-start px-2.5 font-normal",
+				Attributes: triggerAttrs,
+			}) {
+				@icon.Calendar(icon.Props{Attributes: templ.Attributes{"data-icon": "inline-start"}})
+				{ from.Format("Jan 02, 2006") } - { to.Format("Jan 02, 2006") }
+			}
+			@popover.Content(popover.ContentProps{
+				Class: "w-auto p-0",
+				Align: popover.AlignStart,
+			}) {
+				@calendar.Calendar(calendar.Props{
+					Mode:           calendar.ModeRange,
+					DefaultMonth:   from,
+					Selected:       calendar.DateRange{From: from, To: to},
+					NumberOfMonths: 2,
+				})
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The date state: onSelect sets it, the trigger renders it.
+		(() => {
+			// date-fns format(date, "LLL dd, y").
+			const fmt = (d) => d.toLocaleDateString("en-US", { month: "short" }) + " " + String(d.getDate()).padStart(2, "0") + ", " + d.getFullYear();
+			document.addEventListener("calendar-select", (e) => {
+				if (!(e.target instanceof Element) || !e.target.closest("#date-picker-range-popover")) return;
+				const trigger = document.querySelector('[data-templ-controls="date-picker-range-popover"]');
+				const range = e.detail.selected;
+				window.templ.calendar.setSelected(e.target, e.detail.selected);
+				const icon = trigger.querySelector('[data-icon="inline-start"]');
+				const text = range?.from
+					? range.to
+						? fmt(range.from) + " - " + fmt(range.to)
+						: fmt(range.from)
+					: Object.assign(document.createElement("span"), { textContent: "Pick a date" });
+				trigger.replaceChildren(icon, text);
+			});
+		})();
+	</script>
+}

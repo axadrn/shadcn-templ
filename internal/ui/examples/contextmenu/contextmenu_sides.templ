@@ -1,0 +1,84 @@
+package contextmenu
+
+import "github.com/axadrn/shadcn-templ/v2/components/contextmenu"
+
+templ ContextMenuSides() {
+	<div class="grid w-full max-w-sm grid-cols-2 gap-4">
+		@contextmenu.ContextMenu() {
+			@contextmenu.Trigger(contextmenu.TriggerProps{Class: "flex aspect-video w-full max-w-xs items-center justify-center rounded-xl border border-dashed text-sm"}) {
+				<span class="hidden pointer-fine:inline-block">Right click (top)</span>
+				<span class="hidden pointer-coarse:inline-block">Long press (top)</span>
+			}
+			@contextmenu.Content(contextmenu.ContentProps{Side: contextmenu.SideTop}) {
+				@contextmenu.Group() {
+					@contextmenu.Item() {
+						Back
+					}
+					@contextmenu.Item() {
+						Forward
+					}
+					@contextmenu.Item() {
+						Reload
+					}
+				}
+			}
+		}
+		@contextmenu.ContextMenu() {
+			@contextmenu.Trigger(contextmenu.TriggerProps{Class: "flex aspect-video w-full max-w-xs items-center justify-center rounded-xl border border-dashed text-sm"}) {
+				<span class="hidden pointer-fine:inline-block">Right click (right)</span>
+				<span class="hidden pointer-coarse:inline-block">Long press (right)</span>
+			}
+			@contextmenu.Content(contextmenu.ContentProps{Side: contextmenu.SideRight}) {
+				@contextmenu.Group() {
+					@contextmenu.Item() {
+						Back
+					}
+					@contextmenu.Item() {
+						Forward
+					}
+					@contextmenu.Item() {
+						Reload
+					}
+				}
+			}
+		}
+		@contextmenu.ContextMenu() {
+			@contextmenu.Trigger(contextmenu.TriggerProps{Class: "flex aspect-video w-full max-w-xs items-center justify-center rounded-xl border border-dashed text-sm"}) {
+				<span class="hidden pointer-fine:inline-block">Right click (bottom)</span>
+				<span class="hidden pointer-coarse:inline-block">Long press (bottom)</span>
+			}
+			@contextmenu.Content(contextmenu.ContentProps{Side: contextmenu.SideBottom}) {
+				@contextmenu.Group() {
+					@contextmenu.Item() {
+						Back
+					}
+					@contextmenu.Item() {
+						Forward
+					}
+					@contextmenu.Item() {
+						Reload
+					}
+				}
+			}
+		}
+		@contextmenu.ContextMenu() {
+			@contextmenu.Trigger(contextmenu.TriggerProps{Class: "flex aspect-video w-full max-w-xs items-center justify-center rounded-xl border border-dashed text-sm"}) {
+				<span class="hidden pointer-fine:inline-block">Right click (left)</span>
+				<span class="hidden pointer-coarse:inline-block">Long press (left)</span>
+			}
+			@contextmenu.Content(contextmenu.ContentProps{Side: contextmenu.SideLeft}) {
+				@contextmenu.Group() {
+					@contextmenu.Item() {
+						Back
+					}
+					@contextmenu.Item() {
+						Forward
+					}
+					@contextmenu.Item() {
+						Reload
+					}
+				}
+			}
+		}
+	</div>
+}

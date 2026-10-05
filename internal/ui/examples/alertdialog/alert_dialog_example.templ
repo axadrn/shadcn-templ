@@ -1,0 +1,247 @@
+package alertdialog
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/alertdialog"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dialog"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+templ alertDialogExampleSection(title string, class string) {
+	<div data-slot="example" class="mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none">
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class={ utils.CN("flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full", class) }>
+			{ children... }
+		</div>
+	</div>
+}
+
+templ AlertDialogExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@alertDialogExampleBasic()
+			@alertDialogExampleSmall()
+			@alertDialogExampleWithMedia()
+			@alertDialogExampleSmallWithMedia()
+			@alertDialogExampleDestructive()
+			@alertDialogExampleInDialog()
+		</div>
+	</div>
+}
+
+templ alertDialogExampleBasic() {
+	@alertDialogExampleSection("Basic", "items-center") {
+		@alertdialog.AlertDialog() {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Attributes: alertdialog.Trigger(ctx),
+			}) {
+				Default
+			}
+			@alertdialog.Content() {
+				@alertdialog.Header() {
+					@alertdialog.Title() {
+						Are you absolutely sure?
+					}
+					@alertdialog.Description() {
+						This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+					}
+				}
+				@alertdialog.Footer() {
+					@alertdialog.Cancel() {
+						Cancel
+					}
+					@alertdialog.Action() {
+						Continue
+					}
+				}
+			}
+		}
+	}
+}
+
+templ alertDialogExampleSmall() {
+	@alertDialogExampleSection("Small", "items-center") {
+		@alertdialog.AlertDialog() {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Attributes: alertdialog.Trigger(ctx),
+			}) {
+				Small
+			}
+			@alertdialog.Content(alertdialog.ContentProps{Size: alertdialog.SizeSm}) {
+				@alertdialog.Header() {
+					@alertdialog.Title() {
+						Allow accessory to connect?
+					}
+					@alertdialog.Description() {
+						Do you want to allow the USB accessory to connect to this device?
+					}
+				}
+				@alertdialog.Footer() {
+					@alertdialog.Cancel() {
+						Don't allow
+					}
+					@alertdialog.Action() {
+						Allow
+					}
+				}
+			}
+		}
+	}
+}
+
+templ alertDialogExampleWithMedia() {
+	@alertDialogExampleSection("With Media", "items-center") {
+		@alertdialog.AlertDialog() {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Attributes: alertdialog.Trigger(ctx),
+			}) {
+				Default (Media)
+			}
+			@alertdialog.Content() {
+				@alertdialog.Header() {
+					@alertdialog.Media() {
+						@icon.Bluetooth()
+					}
+					@alertdialog.Title() {
+						Are you absolutely sure?
+					}
+					@alertdialog.Description() {
+						This will permanently delete your account and remove your data from our servers.
+					}
+				}
+				@alertdialog.Footer() {
+					@alertdialog.Cancel() {
+						Cancel
+					}
+					@alertdialog.Action() {
+						Continue
+					}
+				}
+			}
+		}
+	}
+}
+
+templ alertDialogExampleSmallWithMedia() {
+	@alertDialogExampleSection("Small With Media", "items-center") {
+		@alertdialog.AlertDialog() {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Attributes: alertdialog.Trigger(ctx),
+			}) {
+				Small (Media)
+			}
+			@alertdialog.Content(alertdialog.ContentProps{Size: alertdialog.SizeSm}) {
+				@alertdialog.Header() {
+					@alertdialog.Media() {
+						@icon.Bluetooth()
+					}
+					@alertdialog.Title() {
+						Allow accessory to connect?
+					}
+					@alertdialog.Description() {
+						Do you want to allow the USB accessory to connect to this device?
+					}
+				}
+				@alertdialog.Footer() {
+					@alertdialog.Cancel() {
+						Don't allow
+					}
+					@alertdialog.Action() {
+						Allow
+					}
+				}
+			}
+		}
+	}
+}
+
+templ alertDialogExampleDestructive() {
+	@alertDialogExampleSection("Destructive", "items-center") {
+		@alertdialog.AlertDialog() {
+			@button.Button(button.Props{
+				Variant:    button.VariantDestructive,
+				Attributes: alertdialog.Trigger(ctx),
+			}) {
+				Delete Chat
+			}
+			@alertdialog.Content(alertdialog.ContentProps{Size: alertdialog.SizeSm}) {
+				@alertdialog.Header() {
+					@alertdialog.Media(alertdialog.MediaProps{Class: "bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive"}) {
+						@icon.Trash2()
+					}
+					@alertdialog.Title() {
+						Delete chat?
+					}
+					@alertdialog.Description() {
+						This will permanently delete this chat conversation. View <a href="#">Settings</a> delete any memories saved during this chat.
+					}
+				}
+				@alertdialog.Footer() {
+					@alertdialog.Cancel(alertdialog.CancelProps{Variant: button.VariantGhost}) {
+						Cancel
+					}
+					@alertdialog.Action(alertdialog.ActionProps{Variant: button.VariantDestructive}) {
+						Delete
+					}
+				}
+			}
+		}
+	}
+}
+
+templ alertDialogExampleInDialog() {
+	@alertDialogExampleSection("In Dialog", "items-center") {
+		@dialog.Dialog() {
+			@button.Button(button.Props{
+				Variant:    button.VariantOutline,
+				Attributes: dialog.Trigger(ctx),
+			}) {
+				Open Dialog
+			}
+			@dialog.Content() {
+				@dialog.Header() {
+					@dialog.Title() {
+						Alert Dialog Example
+					}
+					@dialog.Description() {
+						Click the button below to open an alert dialog.
+					}
+				}
+				@dialog.Footer() {
+					@alertdialog.AlertDialog() {
+						@button.Button(button.Props{
+							Attributes: alertdialog.Trigger(ctx),
+						}) {
+							Open Alert Dialog
+						}
+						@alertdialog.Content(alertdialog.ContentProps{Size: alertdialog.SizeSm}) {
+							@alertdialog.Header() {
+								@alertdialog.Title() {
+									Are you absolutely sure?
+								}
+								@alertdialog.Description() {
+									This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+								}
+							}
+							@alertdialog.Footer() {
+								@alertdialog.Cancel() {
+									Cancel
+								}
+								@alertdialog.Action() {
+									Continue
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

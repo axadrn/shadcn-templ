@@ -1,0 +1,85 @@
+package contextmenu
+
+import "github.com/axadrn/shadcn-templ/v2/components/contextmenu"
+
+templ ContextMenuGroups() {
+	@contextmenu.ContextMenu() {
+		@contextmenu.Trigger(contextmenu.TriggerProps{Class: "flex aspect-video w-full max-w-xs items-center justify-center rounded-xl border border-dashed text-sm"}) {
+			<span class="hidden pointer-fine:inline-block">Right click here</span>
+			<span class="hidden pointer-coarse:inline-block">Long press here</span>
+		}
+		@contextmenu.Content() {
+			@contextmenu.Group() {
+				@contextmenu.Label() {
+					File
+				}
+				@contextmenu.Item() {
+					New File
+					@contextmenu.Shortcut() {
+						⌘N
+					}
+				}
+				@contextmenu.Item() {
+					Open File
+					@contextmenu.Shortcut() {
+						⌘O
+					}
+				}
+				@contextmenu.Item() {
+					Save
+					@contextmenu.Shortcut() {
+						⌘S
+					}
+				}
+			}
+			@contextmenu.Separator()
+			@contextmenu.Group() {
+				@contextmenu.Label() {
+					Edit
+				}
+				@contextmenu.Item() {
+					Undo
+					@contextmenu.Shortcut() {
+						⌘Z
+					}
+				}
+				@contextmenu.Item() {
+					Redo
+					@contextmenu.Shortcut() {
+						⇧⌘Z
+					}
+				}
+			}
+			@contextmenu.Separator()
+			@contextmenu.Group() {
+				@contextmenu.Item() {
+					Cut
+					@contextmenu.Shortcut() {
+						⌘X
+					}
+				}
+				@contextmenu.Item() {
+					Copy
+					@contextmenu.Shortcut() {
+						⌘C
+					}
+				}
+				@contextmenu.Item() {
+					Paste
+					@contextmenu.Shortcut() {
+						⌘V
+					}
+				}
+			}
+			@contextmenu.Separator()
+			@contextmenu.Group() {
+				@contextmenu.Item(contextmenu.ItemProps{Variant: contextmenu.ItemVariantDestructive}) {
+					Delete
+					@contextmenu.Shortcut() {
+						⌫
+					}
+				}
+			}
+		}
+	}
+}

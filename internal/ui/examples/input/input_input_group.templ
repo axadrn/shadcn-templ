@@ -1,0 +1,26 @@
+package input
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+)
+
+templ InputInputGroup() {
+	@field.Field() {
+		@field.Label(field.LabelProps{For: "input-group-url"}) {
+			Website URL
+		}
+		@inputgroup.InputGroup() {
+			@inputgroup.Input(inputgroup.InputProps{ID: "input-group-url", Placeholder: "example.com"})
+			@inputgroup.Addon() {
+				@inputgroup.Text() {
+					https://
+				}
+			}
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignInlineEnd}) {
+				@icon.Info()
+			}
+		}
+	}
+}

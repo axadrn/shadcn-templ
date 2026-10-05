@@ -1,0 +1,74 @@
+package command
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/command"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ CommandGroups() {
+	<div class="flex flex-col gap-4">
+		@button.Button(button.Props{
+			Variant: button.VariantOutline,
+			Class:   "w-fit",
+			ID:      "command-groups-open",
+		}) {
+			Open Menu
+		}
+		@command.Dialog(command.DialogProps{ID: "command-groups"}) {
+			@command.Command() {
+				@command.Input(command.InputProps{Placeholder: "Type a command or search..."})
+				@command.List() {
+					@command.Empty() {
+						No results found.
+					}
+					@command.Group(command.GroupProps{Heading: "Suggestions"}) {
+						@command.Item() {
+							@icon.Calendar()
+							<span>Calendar</span>
+						}
+						@command.Item() {
+							@icon.Smile()
+							<span>Search Emoji</span>
+						}
+						@command.Item() {
+							@icon.Calculator()
+							<span>Calculator</span>
+						}
+					}
+					@command.Separator()
+					@command.Group(command.GroupProps{Heading: "Settings"}) {
+						@command.Item() {
+							@icon.User()
+							<span>Profile</span>
+							@command.Shortcut() {
+								⌘P
+							}
+						}
+						@command.Item() {
+							@icon.CreditCard()
+							<span>Billing</span>
+							@command.Shortcut() {
+								⌘B
+							}
+						}
+						@command.Item() {
+							@icon.Settings()
+							<span>Settings</span>
+							@command.Shortcut() {
+								⌘S
+							}
+						}
+					}
+				}
+			}
+		}
+	</div>
+	// shadcn's example opens the dialog from the button's onClick
+	// (setOpen(true)), the button is no dialog trigger.
+	<script nonce={ templ.GetNonce(ctx) }>
+		document.addEventListener("click", (e) => {
+			if (e.target instanceof Element && e.target.closest("#command-groups-open")) window.templ.dialog.open("command-groups");
+		});
+	</script>
+}

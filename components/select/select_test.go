@@ -80,12 +80,21 @@ func TestClientRequestsCancelableValueAndOpenChanges(t *testing.T) {
 	}
 }
 
+// The positioner has shadcn's classes only; the aligned mode fixes it inline
+// before it measures, like SelectPositioner's style.
 func TestPositionerStartsFixedForAlignedMode(t *testing.T) {
-	source, err := os.ReadFile("select.templ")
+	templSource, err := os.ReadFile("select.templ")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(source), `class="isolate fixed`) {
-		t.Fatal("select positioner must start fixed like Base UI's aligned mode")
+	if !strings.Contains(string(templSource), `class="isolate z-50"`) {
+		t.Fatal("select positioner must have shadcn's classes")
+	}
+	js, err := os.ReadFile("select.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(js), `if (alignActive) content.style.position = "fixed";`) {
+		t.Fatal("select positioner must start fixed in the aligned mode")
 	}
 }

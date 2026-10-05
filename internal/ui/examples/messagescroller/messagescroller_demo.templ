@@ -1,0 +1,205 @@
+package messagescroller
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/bubble"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/empty"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/messagescroller"
+	"github.com/axadrn/shadcn-templ/v2/components/tooltip"
+	"github.com/axadrn/shadcn-templ/v2/utils"
+)
+
+// The scripted conversation of message-scroller-demo, -streaming and
+// -previous-context (createChat() in the upstream examples).
+var msStreamingTurns = []msMessage{
+	{ID: "msg-1", Role: "user", Text: "I'm building a chat for our app and the scroll behavior is driving me nuts. Every time the AI streams a reply, the whole thread jumps around."},
+	{ID: "msg-2", Role: "assistant", Sleep: 1000, Text: "That's the classic streaming scroll problem. Wrap your message list in `MessageScroller` and turn on `autoScroll` — the viewport pins to the bottom as tokens arrive, so users always see the latest text land in place.\n\nThe important part: it only auto-scrolls while the reader is already at the bottom. The moment they scroll up to read something earlier, auto-scroll backs off and their position is preserved. You get smooth streaming without fighting the user's intent."},
+	{ID: "msg-3", Role: "user", Text: "Okay, but when someone sends a new message the view still feels jarring — like the whole conversation reloads from the top."},
+	{ID: "msg-4", Role: "assistant", Sleep: 1000, Text: "MessageScrollerItem fixes that with turn anchoring. Set `scrollAnchor` on the turn that should settle near the top instead of blindly snapping to the document bottom.\n\nIt also leaves a small peek of the previous exchange visible above the anchor, so context isn't lost. The reply starts in view without that disorienting jump you get from a plain overflow container."},
+	{ID: "msg-5", Role: "user", Text: "And if they've scrolled up to re-read an older answer? I don't want to yank them back down."},
+	{ID: "msg-6", Role: "assistant", Sleep: 1000, Text: "You won't. Auto-scroll only runs when the viewport is already pinned to the bottom, so scrolling up is a deliberate opt-out — their place in the thread stays put even as new tokens keep arriving below.\n\nWhen there is content they haven't seen yet, `MessageScrollerButton` appears at the bottom of the viewport. One tap jumps them back to the newest message and re-engages auto-scroll. Same pattern as Slack or iMessage: quiet when you're caught up, helpful when you're not."},
+	{ID: "msg-7", Role: "user", Text: "Last one — does this work with assistive tech?"},
+	{ID: "msg-8", Role: "assistant", Sleep: 1000, Text: "`MessageScrollerContent` sets `role=\"log\"` and `aria-relevant=\"additions\"` by default, so screen readers announce new messages as they stream in.\n\nThe scroll button is a real `<button>` with an sr-only label, and it's removed from the tab order when you're already at the bottom — no ghost focus stops."},
+}
+
+// msResetButton is the outline icon button with a "Reset" tooltip.
+templ msResetButton(label string, disabled bool) {
+	@tooltip.Tooltip() {
+		@button.Button(button.Props{
+			Variant:    button.VariantOutline,
+			Size:       button.SizeIcon,
+			Disabled:   disabled,
+			Attributes: utils.MergeAttributes(tooltip.Trigger(ctx), templ.Attributes{"aria-label": label}),
+		}) {
+			@icon.RotateCw()
+		}
+		@tooltip.Content() {
+			<p>Reset</p>
+		}
+	}
+}
+
+templ msEmptyState(title, description string) {
+	@empty.Empty(empty.Props{Class: "h-full"}) {
+		@empty.Header() {
+			@empty.Media(empty.MediaProps{Variant: empty.MediaVariantIcon}) {
+				@icon.MessageCircleDashed()
+			}
+			@empty.Title() {
+				{ title }
+			}
+			@empty.Description() {
+				{ description }
+			}
+		}
+	}
+}
+
+// msScroller is the transcript frame of the chat examples, with rows.
+templ msScroller(rows []msMessage, busy bool) {
+	@messagescroller.MessageScroller() {
+		@messagescroller.Viewport() {
+			@messagescroller.Content(messagescroller.ContentProps{
+				Class:      "p-(--card-spacing)",
+				Attributes: msBusyAttrs(busy),
+			}) {
+				for _, m := range rows {
+					@msMessageItem(m, m.Role == "user", bubble.VariantMuted, bubble.VariantGhost)
+				}
+			}
+		}
+		@messagescroller.Button()
+	}
+}
+
+func msBusyAttrs(busy bool) templ.Attributes {
+	if busy {
+		return templ.Attributes{"aria-busy": "false"}
+	}
+	return nil
+}
+
+// msNoneTemplate is the composer text once no message is queued.
+templ msNoneTemplate(text string) {
+	<template>
+		<span class="text-muted-foreground">{ text }</span>
+	</template>
+}
+
+// msComposer is the read-only prompt box of the streaming examples; extra
+// renders between the attachment menu and the send button.
+templ msComposer(nextText string, extra templ.Component) {
+	<form class="w-full">
+		@inputgroup.InputGroup() {
+			<div class="h-14 w-full px-3 py-2.5">
+				<span class="line-clamp-2 opacity-60 data-[status=ready]:opacity-100" data-status="ready">
+					{ nextText }
+				</span>
+			</div>
+			@inputgroup.Addon(inputgroup.AddonProps{Align: inputgroup.AlignBlockEnd, Class: "pt-1"}) {
+				@dropdownmenu.DropdownMenu() {
+					@inputgroup.Button(inputgroup.ButtonProps{
+						Type:       button.TypeButton,
+						Size:       inputgroup.ButtonSizeIconSm,
+						Variant:    button.VariantOutline,
+						Attributes: utils.MergeAttributes(dropdownmenu.Trigger(ctx), templ.Attributes{"aria-label": "Add files"}),
+					}) {
+						@icon.Plus()
+					}
+					@dropdownmenu.Content(dropdownmenu.ContentProps{Align: dropdownmenu.AlignStart, Side: dropdownmenu.SideTop, Class: "w-44"}) {
+						@dropdownmenu.Item() {
+							@icon.Paperclip()
+							Add Photos & Files
+						}
+						@dropdownmenu.Separator()
+						@dropdownmenu.Item() {
+							@icon.Image()
+							Create Image
+						}
+						@dropdownmenu.Item() {
+							@icon.Telescope()
+							Deep Research
+						}
+						@dropdownmenu.Item() {
+							@icon.Globe()
+							Web Search
+						}
+					}
+				}
+				if extra != nil {
+					@extra
+				}
+				@inputgroup.Button(inputgroup.ButtonProps{
+					Type:       button.TypeSubmit,
+					Variant:    button.VariantDefault,
+					Size:       inputgroup.ButtonSizeIconSm,
+					Class:      "ml-auto",
+				}) {
+					@icon.ArrowUp()
+					<span class="sr-only">Send</span>
+				}
+			}
+		}
+	</form>
+}
+
+templ MessageScrollerDemo() {
+	@messagescroller.Provider() {
+		<div class="relative flex flex-col gap-4">
+			@card.Card(card.Props{Class: "mx-auto h-140 w-full max-w-sm gap-0"}) {
+				@card.Header(card.HeaderProps{Class: "gap-1 border-b"}) {
+					@card.Title() {
+						New Chat
+					}
+					@card.Description() {
+						How can I help you today?
+					}
+					@card.Action() {
+						@msResetButton("Reset conversation", false)
+					}
+				}
+				@card.Content(card.ContentProps{Class: "flex-1 overflow-hidden p-0"}) {
+					@msEmptyState("Morning, shadcn!", "What are we working on today? Press send to start a new conversation")
+				}
+				@card.Footer(card.FooterProps{Class: "flex-col gap-2"}) {
+					@msComposer(msStreamingTurns[0].Text, nil)
+				}
+			}
+			<div class="px-0.5 text-center text-xs text-muted-foreground">
+				Demo is read only. Press send to send messages.
+			</div>
+			<template>
+				@msScroller(nil, true)
+			</template>
+			<template>
+				@msEmptyState("Morning, shadcn!", "What are we working on today? Press send to start a new conversation")
+			</template>
+			@msNoneTemplate("No messages queued. Reset the conversation.")
+			@msTurnTemplates(msStreamingTurns, true, bubble.VariantMuted, bubble.VariantGhost)
+		</div>
+		@msChatScript(msComposerChat(msStreamingTurns, 0, false, "Reset conversation"))
+	}
+}
+
+// msComposerChat is the msChatScript setup of the examples with msComposer:
+// the scroller, empty-state (when the chat starts empty) and none templates.
+func msComposerChat(turns []msMessage, initial int, resetNeedsMessages bool, resetLabel string) msChatOptions {
+	templates := []string{"scroller", "empty-state", "none"}
+	if initial > 0 {
+		templates = []string{"none"}
+	}
+	return msChatOptions{
+		Turns:              msTurns(turns),
+		Templates:          templates,
+		Delay:              20,
+		Initial:            initial,
+		ResetNeedsMessages: resetNeedsMessages,
+		Send:               `button[type="submit"]`,
+		Reset:              `[aria-label="` + resetLabel + `"]`,
+		Status:             "[data-status]",
+	}
+}

@@ -69,6 +69,7 @@ templ ToggleGroup(props ...Props) {
 		}
 		role="group"
 		data-slot="toggle-group"
+		{ utils.DirectionAttributes(ctx)... }
 		data-multiple?={ p.Multiple }
 		if p.Value != nil {
 			data-templ-value={ templ.JSONString(p.Value) }

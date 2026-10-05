@@ -1,0 +1,17 @@
+package toggle
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/toggle"
+)
+
+templ ToggleDemo() {
+	@toggle.Toggle(toggle.Props{
+		Variant:    toggle.VariantOutline,
+		Size:       toggle.SizeSm,
+		Attributes: templ.Attributes{"aria-label": "Toggle bookmark"},
+	}) {
+		@icon.Bookmark(icon.Props{Class: "group-aria-pressed/toggle:fill-foreground"})
+		Bookmark
+	}
+}

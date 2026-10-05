@@ -1,0 +1,44 @@
+package toast
+
+import "github.com/axadrn/shadcn-templ/v2/components/button"
+
+type toastTypeDemo struct {
+	Label       string
+	Type        string
+	Description string
+	Priority    string
+}
+
+var toastTypeDemos = []toastTypeDemo{
+	{"Default", "", "Event has been created.", ""},
+	{"Success", "success", "Event has been created.", ""},
+	{"Info", "info", "Arrive 10 minutes before the event.", ""},
+	{"Warning", "warning", "The event cannot start before 8:00 AM.", ""},
+	{"Error", "error", "The event could not be created.", "high"},
+}
+
+templ ToastTypes() {
+	<div class="flex flex-wrap gap-2">
+		for _, demo := range toastTypeDemos {
+			@button.Button(button.Props{Variant: button.VariantOutline}) {
+				{ demo.Label }
+			}
+		}
+	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		// The buttons' onClick: toast.add with each type.
+		(() => {
+			const demos = {{ toastTypeDemos }};
+			const buttons = document.currentScript.previousElementSibling.children;
+			demos.forEach((demo, i) => {
+				buttons[i].addEventListener("click", () =>
+					window.templ.toast.add({
+						type: demo.Type || undefined,
+						description: demo.Description,
+						priority: demo.Priority || undefined,
+					}),
+				);
+			});
+		})();
+	</script>
+}

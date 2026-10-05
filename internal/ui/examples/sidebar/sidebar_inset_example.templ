@@ -1,0 +1,140 @@
+package sidebar
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/collapsible"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
+)
+
+// Full-page inset sidebar with collapsible menu actions and secondary nav.
+
+type sidebarInsetExampleNavItem struct {
+	Title    string
+	URL      string
+	Icon     func(...icon.Props) templ.Component
+	IsActive bool
+	Items    []sidebarExampleNavItem
+}
+
+var sidebarInsetExampleNavMain = []sidebarInsetExampleNavItem{
+	{
+		Title: "Dashboard", URL: "#", Icon: icon.House, IsActive: true,
+		Items: []sidebarExampleNavItem{
+			{Title: "Overview", URL: "#"},
+			{Title: "Analytics", URL: "#"},
+		},
+	},
+	{
+		Title: "Analytics", URL: "#", Icon: icon.ChartLine,
+		Items: []sidebarExampleNavItem{
+			{Title: "Reports", URL: "#"},
+			{Title: "Metrics", URL: "#"},
+		},
+	},
+	{
+		Title: "Orders", URL: "#", Icon: icon.ShoppingBag,
+		Items: []sidebarExampleNavItem{
+			{Title: "All Orders", URL: "#"},
+			{Title: "Pending", URL: "#"},
+			{Title: "Completed", URL: "#"},
+		},
+	},
+	{
+		Title: "Products", URL: "#", Icon: icon.ShoppingCart,
+		Items: []sidebarExampleNavItem{
+			{Title: "All Products", URL: "#"},
+			{Title: "Categories", URL: "#"},
+		},
+	},
+	{Title: "Invoices", URL: "#", Icon: icon.File},
+	{Title: "Customers", URL: "#", Icon: icon.User},
+	{Title: "Settings", URL: "#", Icon: icon.Settings2},
+}
+
+var sidebarInsetExampleNavSecondary = []sidebarInsetExampleNavItem{
+	{Title: "Support", URL: "#", Icon: icon.LifeBuoy},
+	{Title: "Feedback", URL: "#", Icon: icon.Send},
+}
+
+templ SidebarInsetExample() {
+	@sidebar.Provider() {
+		@sidebar.Sidebar(sidebar.Props{Variant: sidebar.VariantInset}) {
+			@sidebar.Content() {
+				@sidebar.Group() {
+					@sidebar.GroupLabel() {
+						Dashboard
+					}
+					@sidebar.Menu() {
+						for _, navItem := range sidebarInsetExampleNavMain {
+							@collapsible.Collapsible(collapsible.Props{
+								DefaultOpen: navItem.IsActive,
+								Class:       "group/collapsible",
+							}) {
+								@sidebar.MenuItem() {
+									@sidebar.MenuButton(sidebar.MenuButtonProps{
+										Href:     navItem.URL,
+										IsActive: navItem.IsActive,
+									}) {
+										@navItem.Icon()
+										<span>{ navItem.Title }</span>
+									}
+									if len(navItem.Items) > 0 {
+										@sidebar.MenuAction(sidebar.MenuActionProps{
+											Class:      "group-data-open/collapsible:rotate-90",
+											Attributes: collapsible.Trigger(ctx),
+										}) {
+											@icon.ChevronRight()
+											<span class="sr-only">Toggle</span>
+										}
+										@collapsible.Content() {
+											@sidebar.MenuSub() {
+												for _, subItem := range navItem.Items {
+													@sidebar.MenuSubItem() {
+														@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{Href: subItem.URL}) {
+															{ subItem.Title }
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				@sidebar.Group(sidebar.GroupProps{Class: "mt-auto"}) {
+					@sidebar.GroupContent() {
+						@sidebar.Menu() {
+							for _, navItem := range sidebarInsetExampleNavSecondary {
+								@sidebar.MenuItem() {
+									@sidebar.MenuButton(sidebar.MenuButtonProps{
+										Href: navItem.URL,
+										Size: sidebar.MenuButtonSizeSm,
+									}) {
+										@navItem.Icon()
+										<span>{ navItem.Title }</span>
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			@sidebar.Rail()
+		}
+		@sidebar.Inset() {
+			<header class="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+				@sidebar.Trigger(sidebar.TriggerProps{Class: "-ml-1"})
+			</header>
+			<div class="flex flex-1 flex-col gap-4 p-4">
+				<div class="grid auto-rows-min gap-4 md:grid-cols-3">
+					<div class="aspect-video rounded-xl bg-muted/50"></div>
+					<div class="aspect-video rounded-xl bg-muted/50"></div>
+					<div class="aspect-video rounded-xl bg-muted/50"></div>
+				</div>
+				<div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min"></div>
+			</div>
+		}
+	}
+}

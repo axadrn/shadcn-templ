@@ -6,19 +6,13 @@ import (
 	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
 	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
+	"github.com/axadrn/shadcn-templ/v2/utils"
 )
 
 type Team struct {
 	Name string
 	Logo func(...icon.Props) templ.Component
 	Plan string
-}
-
-func teamLogoHidden(i int) string {
-	if i == 0 {
-		return ""
-	}
-	return " hidden"
 }
 
 templ TeamSwitcher(teams []Team) {
@@ -31,15 +25,9 @@ templ TeamSwitcher(teams []Team) {
 						Attributes: dropdownmenu.Trigger(ctx),
 					}) {
 						<div class="flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-							// Render every logo up front; the page script shows the active one.
-							for i, team := range teams {
-								@team.Logo(icon.Props{
-									Class:      teamLogoHidden(i),
-									Attributes: templ.Attributes{"data-team-logo": strconv.Itoa(i)},
-								})
-							}
+							@teams[0].Logo()
 						</div>
-						<span class="truncate font-medium" data-team-name>{ teams[0].Name }</span>
+						<span class="truncate font-medium">{ teams[0].Name }</span>
 						@icon.ChevronDown(icon.Props{Class: "opacity-50"})
 					}
 					@dropdownmenu.Content(dropdownmenu.ContentProps{
@@ -52,10 +40,7 @@ templ TeamSwitcher(teams []Team) {
 							Teams
 						}
 						for i, team := range teams {
-							@dropdownmenu.Item(dropdownmenu.ItemProps{
-								Class:      "gap-2 p-2",
-								Attributes: templ.Attributes{"data-team-index": strconv.Itoa(i)},
-							}) {
+							@dropdownmenu.Item(dropdownmenu.ItemProps{Class: "gap-2 p-2"}) {
 								<div class="flex size-6 items-center justify-center rounded-xs border">
 									@team.Logo()
 								</div>
@@ -76,5 +61,29 @@ templ TeamSwitcher(teams []Team) {
 				}
 			}
 		}
+		// activeTeam.logo for each team, rendered when it becomes the active one.
+		for _, team := range teams {
+			<template>
+				@team.Logo()
+			</template>
+		}
+		<script nonce={ templ.GetNonce(ctx) }>
+			// The activeTeam state: an item's onClick sets it, the trigger
+			// renders it.
+			(() => {
+				const logos = [];
+				for (let el = document.currentScript.previousElementSibling; el?.tagName === "TEMPLATE"; el = el.previousElementSibling) logos.unshift(el);
+				const names = {{ utils.Map(teams, func(t Team) string { return t.Name }) }};
+				const trigger = document.getElementById("sidebar15-team-menu-trigger");
+				const menu = document.getElementById("sidebar15-team-menu");
+				menu.querySelectorAll('[data-slot="dropdown-menu-item"]').forEach((item, i) => {
+					if (i >= names.length) return;
+					item.addEventListener("click", () => {
+						trigger.firstElementChild.replaceChildren(logos[i].content.firstElementChild.cloneNode(true));
+						trigger.querySelector(":scope > span").textContent = names[i];
+					});
+				});
+			})();
+		</script>
 	}
 }

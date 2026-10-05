@@ -123,6 +123,12 @@ Moving focus does not change the active tab; `Enter` or `Space` does. Set
 Leave it off when a panel loads its content on activation, or every arrow
 press costs a request.
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="tabs-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Tabs

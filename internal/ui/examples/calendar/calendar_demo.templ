@@ -1,0 +1,17 @@
+package calendar
+
+import (
+	"time"
+
+	"github.com/axadrn/shadcn-templ/v2/components/calendar"
+)
+
+templ CalendarDemo() {
+	@calendar.Calendar(calendar.Props{
+		Mode:          calendar.ModeSingle,
+		Selected:      time.Now(),
+		Class:         "rounded-lg border",
+		CaptionLayout: calendar.CaptionLayoutDropdown,
+	})
+	@calendarSelectState()
+}

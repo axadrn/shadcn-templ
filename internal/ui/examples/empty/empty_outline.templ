@@ -1,0 +1,31 @@
+package empty
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/empty"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ EmptyOutline() {
+	@empty.Empty(empty.Props{Class: "border border-dashed"}) {
+		@empty.Header() {
+			@empty.Media(empty.MediaProps{Variant: empty.MediaVariantIcon}) {
+				@icon.Cloud()
+			}
+			@empty.Title() {
+				Cloud Storage Empty
+			}
+			@empty.Description() {
+				Upload files to your cloud storage to access them anywhere.
+			}
+		}
+		@empty.Content() {
+			@button.Button(button.Props{
+				Variant: button.VariantOutline,
+				Size:    button.SizeSm,
+			}) {
+				Upload Files
+			}
+		}
+	}
+}

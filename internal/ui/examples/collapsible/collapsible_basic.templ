@@ -1,0 +1,34 @@
+package collapsible
+
+import (
+	exshared "github.com/axadrn/shadcn-templ/v2/internal/ui/examples/shared"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/card"
+	"github.com/axadrn/shadcn-templ/v2/components/collapsible"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ CollapsibleBasic() {
+	@card.Card(card.Props{Class: "mx-auto w-full max-w-sm"}) {
+		@card.Content() {
+			@collapsible.Collapsible(collapsible.Props{Class: "rounded-md data-open:bg-muted"}) {
+				@button.Button(button.Props{
+					Variant:    button.VariantGhost,
+					Class:      "w-full",
+					Attributes: exshared.ServerRendered(collapsible.Trigger(ctx)),
+				}) {
+					Product details
+					@icon.ChevronDown(icon.Props{Class: "ml-auto group-data-panel-open/button:rotate-180"})
+				}
+				@collapsible.Content(collapsible.ContentProps{Class: "flex flex-col items-start gap-2 p-2.5 pt-0 text-sm"}) {
+					<div>
+						This panel can be expanded or collapsed to reveal additional content.
+					</div>
+					@button.Button(button.Props{Size: button.SizeXs}) {
+						Learn More
+					}
+				}
+			}
+		}
+	}
+}

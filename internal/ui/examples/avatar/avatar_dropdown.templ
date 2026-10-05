@@ -1,0 +1,47 @@
+package avatar
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/avatar"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+)
+
+templ AvatarDropdown() {
+	@dropdownmenu.DropdownMenu() {
+		@button.Button(button.Props{
+			Variant:    button.VariantGhost,
+			Size:       button.SizeIcon,
+			Class:      "rounded-full",
+			Attributes: dropdownmenu.Trigger(ctx),
+		}) {
+			@avatar.Avatar() {
+				@avatar.Image(avatar.ImageProps{
+					Src: "https://github.com/axadrn.png",
+					Alt: "axadrn",
+				})
+				@avatar.Fallback() {
+					AA
+				}
+			}
+		}
+		@dropdownmenu.Content(dropdownmenu.ContentProps{Class: "w-32"}) {
+			@dropdownmenu.Group() {
+				@dropdownmenu.Item() {
+					Profile
+				}
+				@dropdownmenu.Item() {
+					Billing
+				}
+				@dropdownmenu.Item() {
+					Settings
+				}
+			}
+			@dropdownmenu.Separator()
+			@dropdownmenu.Group() {
+				@dropdownmenu.Item(dropdownmenu.ItemProps{Variant: dropdownmenu.ItemVariantDestructive}) {
+					Log out
+				}
+			}
+		}
+	}
+}

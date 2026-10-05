@@ -1,0 +1,22 @@
+package input
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/buttongroup"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/input"
+)
+
+templ InputButtonGroup() {
+	@field.Field() {
+		@field.Label(field.LabelProps{For: "input-button-group"}) {
+			Search
+		}
+		@buttongroup.ButtonGroup() {
+			@input.Input(input.Props{ID: "input-button-group", Placeholder: "Type to search..."})
+			@button.Button(button.Props{Variant: button.VariantOutline}) {
+				Search
+			}
+		}
+	}
+}

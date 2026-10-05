@@ -61,6 +61,10 @@ shadcn-templ add dropdown-menu
 
 <ComponentSource name="dropdown-menu" title="components/baseui/use_hover.js" />
 
+<ComponentSource name="dropdown-menu" title="components/baseui/internal_backdrop.js" />
+
+<ComponentSource name="dropdown-menu" title="components/baseui/menu.js" />
+
 <ComponentSource name="dropdown-menu" title="components/floatingui/floating_ui_core.js" />
 
 <ComponentSource name="dropdown-menu" title="components/floatingui/floating_ui_dom.js" />
@@ -211,6 +215,12 @@ An account switcher dropdown triggered by an avatar.
 A richer example combining groups, icons, and submenus.
 
 <ComponentPreview name="dropdown-menu-complex" />
+
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="dropdown-menu-rtl" direction="rtl" />
 
 ## Accessibility
 

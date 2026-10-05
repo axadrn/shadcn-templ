@@ -1,0 +1,68 @@
+package button
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+templ ButtonSize() {
+	<div class="flex flex-col items-start gap-8 sm:flex-row">
+		<div class="flex items-start gap-2">
+			@button.Button(button.Props{
+				Size:    button.SizeXs,
+				Variant: button.VariantOutline,
+			}) {
+				Extra Small
+			}
+			@button.Button(button.Props{
+				Size:       button.SizeIconXs,
+				Variant:    button.VariantOutline,
+				Attributes: templ.Attributes{"aria-label": "Submit"},
+			}) {
+				@icon.ArrowUpRight()
+			}
+		</div>
+		<div class="flex items-start gap-2">
+			@button.Button(button.Props{
+				Size:    button.SizeSm,
+				Variant: button.VariantOutline,
+			}) {
+				Small
+			}
+			@button.Button(button.Props{
+				Size:       button.SizeIconSm,
+				Variant:    button.VariantOutline,
+				Attributes: templ.Attributes{"aria-label": "Submit"},
+			}) {
+				@icon.ArrowUpRight()
+			}
+		</div>
+		<div class="flex items-start gap-2">
+			@button.Button(button.Props{Variant: button.VariantOutline}) {
+				Default
+			}
+			@button.Button(button.Props{
+				Size:       button.SizeIcon,
+				Variant:    button.VariantOutline,
+				Attributes: templ.Attributes{"aria-label": "Submit"},
+			}) {
+				@icon.ArrowUpRight()
+			}
+		</div>
+		<div class="flex items-start gap-2">
+			@button.Button(button.Props{
+				Size:    button.SizeLg,
+				Variant: button.VariantOutline,
+			}) {
+				Large
+			}
+			@button.Button(button.Props{
+				Size:       button.SizeIconLg,
+				Variant:    button.VariantOutline,
+				Attributes: templ.Attributes{"aria-label": "Submit"},
+			}) {
+				@icon.ArrowUpRight()
+			}
+		</div>
+	</div>
+}

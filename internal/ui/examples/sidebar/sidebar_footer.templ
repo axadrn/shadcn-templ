@@ -1,0 +1,50 @@
+package sidebar
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/dropdownmenu"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/sidebar"
+)
+
+templ SidebarFooter() {
+	@sidebar.Provider() {
+		@sidebar.Sidebar() {
+			@sidebar.Header()
+			@sidebar.Content()
+			@sidebar.Footer() {
+				@sidebar.Menu() {
+					@sidebar.MenuItem() {
+						@dropdownmenu.DropdownMenu() {
+							@sidebar.MenuButton(sidebar.MenuButtonProps{
+								Class:      "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
+								Attributes: dropdownmenu.Trigger(ctx),
+							}) {
+								Username
+								@icon.ChevronUp(icon.Props{Class: "ml-auto"})
+							}
+							@dropdownmenu.Content(dropdownmenu.ContentProps{
+								Side:  dropdownmenu.SideTop,
+								Class: "w-(--radix-popper-anchor-width)",
+							}) {
+								@dropdownmenu.Item() {
+									<span>Account</span>
+								}
+								@dropdownmenu.Item() {
+									<span>Billing</span>
+								}
+								@dropdownmenu.Item() {
+									<span>Sign out</span>
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		@sidebar.Inset() {
+			<header class="flex h-12 items-center justify-between px-4">
+				@sidebar.Trigger()
+			</header>
+		}
+	}
+}

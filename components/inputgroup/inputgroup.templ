@@ -170,7 +170,9 @@ templ Addon(props ...AddonProps) {
 			id={ p.ID }
 		}
 		role="group"
-		data-slot="input-group-addon"
+		if _, ok := p.Attributes["data-slot"]; !ok {
+			data-slot="input-group-addon"
+		}
 		data-align={ string(p.Align) }
 		class={ utils.CN("cn-input-group-addon flex cursor-text items-center justify-center select-none", align, p.Class) }
 		{ p.Attributes... }

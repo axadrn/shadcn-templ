@@ -1,0 +1,189 @@
+package bubble
+
+import "github.com/axadrn/shadcn-templ/v2/utils"
+
+type Variant string
+
+const (
+	VariantDefault     Variant = "default"
+	VariantSecondary   Variant = "secondary"
+	VariantMuted       Variant = "muted"
+	VariantTinted      Variant = "tinted"
+	VariantOutline     Variant = "outline"
+	VariantGhost       Variant = "ghost"
+	VariantDestructive Variant = "destructive"
+)
+
+type Align string
+
+const (
+	AlignStart Align = "start"
+	AlignEnd   Align = "end"
+)
+
+type Side string
+
+const (
+	SideTop    Side = "top"
+	SideBottom Side = "bottom"
+)
+
+type GroupProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+type Props struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Variant    Variant
+	Align      Align
+}
+
+// ContentProps are shadcn's BubbleContent props; Href renders the content as
+// a link (the render prop with an a element).
+type ContentProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Href       string
+}
+
+type ReactionsProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Side       Side
+	Align      Align
+}
+
+templ Group(props ...GroupProps) {
+	{{ var p GroupProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="bubble-group"
+		class={ utils.CN("cn-bubble-group flex min-w-0 flex-col", p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+func variantClasses(v Variant) string {
+	switch v {
+	case VariantSecondary:
+		return "cn-bubble-variant-secondary"
+	case VariantMuted:
+		return "cn-bubble-variant-muted"
+	case VariantTinted:
+		return "cn-bubble-variant-tinted"
+	case VariantOutline:
+		return "cn-bubble-variant-outline"
+	case VariantGhost:
+		return "cn-bubble-variant-ghost"
+	case VariantDestructive:
+		return "cn-bubble-variant-destructive"
+	default:
+		return "cn-bubble-variant-default"
+	}
+}
+
+templ Bubble(props ...Props) {
+	{{ var p Props }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.Variant == "" {
+		{{ p.Variant = VariantDefault }}
+	}
+	if p.Align == "" {
+		{{ p.Align = AlignStart }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="bubble"
+		data-variant={ string(p.Variant) }
+		data-align={ string(p.Align) }
+		class={ utils.CN("cn-bubble group/bubble relative flex w-fit min-w-0 flex-col", variantClasses(p.Variant), p.Class) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+// ContentClass is BubbleContent's class, for content rendered through an
+// element of its own (the render prop with a button).
+func ContentClass(p ContentProps) string {
+	return utils.CN("cn-bubble-content w-fit max-w-full min-w-0 overflow-hidden wrap-break-word [button]:text-left [button,a]:transition-colors", p.Class)
+}
+
+// Content renders useRender's state as data-slot.
+templ Content(props ...ContentProps) {
+	{{ var p ContentProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.Href != "" {
+		<a
+			href={ templ.SafeURL(p.Href) }
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			class={ ContentClass(p) }
+			data-slot="bubble-content"
+			{ p.Attributes... }
+		>
+			{ children... }
+		</a>
+	} else {
+		<div
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			class={ ContentClass(p) }
+			data-slot="bubble-content"
+			{ p.Attributes... }
+		>
+			{ children... }
+		</div>
+	}
+}
+
+templ Reactions(props ...ReactionsProps) {
+	{{ var p ReactionsProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	if p.Side == "" {
+		{{ p.Side = SideBottom }}
+	}
+	if p.Align == "" {
+		{{ p.Align = AlignEnd }}
+	}
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-slot="bubble-reactions"
+		data-align={ string(p.Align) }
+		data-side={ string(p.Side) }
+		class={ utils.CN(
+			"cn-bubble-reactions absolute z-10 flex w-fit items-center justify-center",
+			utils.IfElse(p.Side == SideTop, "cn-bubble-reactions-side-top", "cn-bubble-reactions-side-bottom"),
+			utils.IfElse(p.Align == AlignStart, "cn-bubble-reactions-align-start", "cn-bubble-reactions-align-end"),
+			p.Class,
+		) }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}

@@ -6,6 +6,7 @@
 //   const composite = window.templ.composite.useCompositeRoot(root, options)
 //   composite.highlight(index)   onHighlightedIndexChange from the component
 //   composite.index()            the highlighted index
+//   composite.relayKeyboardEvent(event)   a key from a part portaled out of the root
 //   composite.cleanup()
 //
 //   items()                the items in order (elementsRef)
@@ -16,7 +17,9 @@
 //   stopEventPropagation   default true, CompositeRoot's
 //   disabledIndices        an array, a function, or undefined for the DOM
 //   modifierKeys           modifiers that do not cancel the navigation
-//   highlightItemOnHover   default false
+//   highlightItemOnHover   default false, or a function read on every move
+//   itemTabIndex           default true; false when the items render their
+//                          own tabIndex over the composite one (NavigationMenu)
 //   onHighlightedIndexChange(index)   after the highlight moved
 //
 // The root sets the default tab stop once on creation (onMapChange): the item
@@ -169,6 +172,7 @@
       disabledIndices,
       modifierKeys = [],
       highlightItemOnHover = false,
+      itemTabIndex = true,
       onHighlightedIndexChange: onChange,
     } = options;
     let highlightedIndex = 0;
@@ -176,6 +180,7 @@
 
     // useCompositeItem's tabIndex on every item.
     function applyTabIndex() {
+      if (!itemTabIndex) return;
       items().forEach((item, index) => {
         item.tabIndex = index === highlightedIndex ? 0 : -1;
       });
@@ -276,7 +281,7 @@
     }
 
     function onItemMouseMove(event) {
-      if (!highlightItemOnHover) return;
+      if (!(typeof highlightItemOnHover === "function" ? highlightItemOnHover() : highlightItemOnHover)) return;
       const item = itemOf(event.target);
       if (!item) return;
       const disabled = item.hasAttribute("disabled") || item.getAttribute("aria-disabled") === "true";
@@ -291,6 +296,7 @@
     return {
       highlight: (index) => onHighlightedIndexChange(index),
       index: () => highlightedIndex,
+      relayKeyboardEvent: onKeyDown,
       cleanup() {
         root.removeEventListener("keydown", onKeyDown);
         root.removeEventListener("focusin", onFocus);

@@ -1,0 +1,24 @@
+package sidebar
+
+import "github.com/axadrn/shadcn-templ/v2/components/sidebar"
+
+// SidebarRsc is the server component after its data resolved: the server
+// renders the fetched projects, as the reference serves the page once the
+// dummy fetch is done, so the Suspense fallback (five MenuSkeleton rows)
+// never shows.
+templ SidebarRsc() {
+	@sidebar.Provider() {
+		@sidebar.Sidebar() {
+			@sidebar.Content() {
+				@sidebar.Group() {
+					@sidebar.GroupLabel() {
+						Projects
+					}
+					@sidebar.GroupContent() {
+						@sidebarMenuProjectsMenu()
+					}
+				}
+			}
+		}
+	}
+}

@@ -144,6 +144,12 @@ Use `inputotp.RegexpOnlyDigitsAndChars` to accept both letters and numbers.
 
 <ComponentPreview name="input-otp-form" previewClassName="h-[30rem]" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="input-otp-rtl" direction="rtl" />
+
 ## API Reference
 
 ### InputOTP

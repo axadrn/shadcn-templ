@@ -1,0 +1,37 @@
+package pagination
+
+import "github.com/axadrn/shadcn-templ/v2/components/pagination"
+
+templ PaginationSimple() {
+	@pagination.Pagination() {
+		@pagination.Content() {
+			@pagination.Item() {
+				@pagination.Link(pagination.LinkProps{Href: "#"}) {
+					1
+				}
+			}
+			@pagination.Item() {
+				@pagination.Link(pagination.LinkProps{Href: "#", IsActive: true}) {
+					2
+				}
+			}
+			@pagination.Item() {
+				@pagination.Link(pagination.LinkProps{Href: "#"}) {
+					3
+				}
+			}
+			@pagination.Item() {
+				// Upstream renders this one link with the Button's slot, in the
+				// server HTML and after hydration: ported as rendered.
+				@pagination.Link(pagination.LinkProps{Href: "#", Attributes: templ.Attributes{"data-slot": "button"}}) {
+					4
+				}
+			}
+			@pagination.Item() {
+				@pagination.Link(pagination.LinkProps{Href: "#"}) {
+					5
+				}
+			}
+		}
+	}
+}

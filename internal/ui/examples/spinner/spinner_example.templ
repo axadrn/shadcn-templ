@@ -1,0 +1,161 @@
+package spinner
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/badge"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/empty"
+	"github.com/axadrn/shadcn-templ/v2/components/field"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+	"github.com/axadrn/shadcn-templ/v2/components/inputgroup"
+	"github.com/axadrn/shadcn-templ/v2/components/spinner"
+)
+
+templ spinnerExampleSection(title, class, containerClass string) {
+	<div data-slot="example" class={ "mx-auto flex w-full max-w-lg min-w-0 flex-col gap-1 self-stretch lg:max-w-none", containerClass }>
+		if title != "" {
+			<div class="px-1.5 py-2 text-xs font-medium text-muted-foreground">{ title }</div>
+		}
+		<div data-slot="example-content" class={ "flex min-w-0 flex-1 flex-col items-start gap-6 rounded-xl bg-card p-12 text-foreground style-lyra:rounded-none style-sera:rounded-none *:[div:not([class*='w-'])]:w-full", class }>
+			{ children... }
+		</div>
+	</div>
+}
+
+templ SpinnerExample() {
+	<div class="w-full bg-muted dark:bg-background">
+		<div data-slot="example-wrapper" class="mx-auto grid min-h-screen w-full max-w-5xl min-w-0 content-center items-start gap-8 p-4 pt-2 sm:gap-12 sm:p-6 md:grid-cols-2 md:gap-8 lg:p-12 2xl:max-w-6xl">
+			@spinnerExampleBasic()
+			@spinnerExampleInButtons()
+			@spinnerExampleInBadges()
+			@spinnerExampleInInputGroup()
+			@spinnerExampleInEmpty()
+		</div>
+	</div>
+}
+
+templ spinnerExampleBasic() {
+	@spinnerExampleSection("Basic", "", "") {
+		<div class="flex items-center gap-6">
+			@spinner.Spinner()
+			@spinner.Spinner(spinner.Props{Class: "size-6"})
+		</div>
+	}
+}
+
+templ spinnerExampleInButtons() {
+	@spinnerExampleSection("In Buttons", "", "") {
+		<div class="flex flex-wrap items-center gap-4">
+			@button.Button() {
+				@spinner.Spinner(spinner.Props{
+					Attributes: templ.Attributes{"data-icon": "inline-start"},
+				})
+				Submit
+			}
+			@button.Button(button.Props{Disabled: true}) {
+				@spinner.Spinner(spinner.Props{
+					Attributes: templ.Attributes{"data-icon": "inline-start"},
+				})
+				Disabled
+			}
+			@button.Button(button.Props{Variant: button.VariantOutline, Disabled: true}) {
+				@spinner.Spinner(spinner.Props{
+					Attributes: templ.Attributes{"data-icon": "inline-start"},
+				})
+				Outline
+			}
+			@button.Button(button.Props{
+				Variant:  button.VariantOutline,
+				Size:     button.SizeIcon,
+				Disabled: true,
+			}) {
+				@spinner.Spinner(spinner.Props{
+					Attributes: templ.Attributes{"data-icon": "inline-start"},
+				})
+				<span class="sr-only">Loading...</span>
+			}
+		</div>
+	}
+}
+
+templ spinnerExampleInBadges() {
+	@spinnerExampleSection("In Badges", "items-center justify-center", "") {
+		<div class="flex flex-wrap items-center justify-center gap-4">
+			@badge.Badge() {
+				@spinner.Spinner(spinner.Props{
+					Attributes: templ.Attributes{"data-icon": "inline-start"},
+				})
+				Badge
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+				@spinner.Spinner(spinner.Props{
+					Attributes: templ.Attributes{"data-icon": "inline-start"},
+				})
+				Badge
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantDestructive}) {
+				@spinner.Spinner(spinner.Props{
+					Attributes: templ.Attributes{"data-icon": "inline-start"},
+				})
+				Badge
+			}
+			@badge.Badge(badge.Props{Variant: badge.VariantOutline}) {
+				@spinner.Spinner(spinner.Props{
+					Attributes: templ.Attributes{"data-icon": "inline-start"},
+				})
+				Badge
+			}
+		</div>
+	}
+}
+
+templ spinnerExampleInInputGroup() {
+	@spinnerExampleSection("In Input Group", "", "") {
+		@field.Field() {
+			@field.Label(field.LabelProps{For: "input-group-spinner"}) {
+				Input Group
+			}
+			@inputgroup.InputGroup() {
+				@inputgroup.Input(inputgroup.InputProps{ID: "input-group-spinner"})
+				@inputgroup.Addon() {
+					@spinner.Spinner()
+				}
+			}
+		}
+	}
+}
+
+templ spinnerExampleInEmpty() {
+	@spinnerExampleSection("In Empty State", "", "lg:col-span-full") {
+		@empty.Empty(empty.Props{Class: "min-h-[300px]"}) {
+			@empty.Header() {
+				@empty.Media(empty.MediaProps{Variant: empty.MediaVariantIcon}) {
+					@spinner.Spinner()
+				}
+				@empty.Title() {
+					No projects yet
+				}
+				@empty.Description() {
+					You haven't created any projects yet. Get started by creating your first project.
+				}
+			}
+			@empty.Content() {
+				<div class="flex gap-2">
+					@button.Button(button.Props{Href: "#"}) {
+						Create project
+					}
+					@button.Button(button.Props{Variant: button.VariantOutline}) {
+						Import project
+					}
+				</div>
+				@button.Button(button.Props{
+					Variant: button.VariantLink,
+					Href:    "#",
+					Class:   "text-muted-foreground",
+				}) {
+					Learn more
+					@icon.ArrowRight()
+				}
+			}
+		}
+	}
+}

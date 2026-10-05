@@ -150,7 +150,7 @@ var createOtherRadii = []createOption{
 }
 
 templ Create() {
-	@layouts.BaseLayout("New Project", "Customize everything. Pick your base color, theme, fonts and create your own version of shadcn-templ.") {
+	@layouts.AppLayout("New Project", "Customize everything. Pick your base color, theme, fonts and create your own version of shadcn-templ.") {
 		@modules.AnnouncementBar()
 		@modules.Navbar()
 		<link rel="stylesheet" href={ utils.ScriptURL("/assets/css/create-fonts.css") }/>
@@ -969,9 +969,11 @@ func createRegistryNavItems() []createOption {
 		{Value: "alert-example", Label: "Alert"},
 		{Value: "alert-dialog-example", Label: "Alert Dialog"},
 		{Value: "aspect-ratio-example", Label: "Aspect Ratio"},
+		{Value: "attachment-example", Label: "Attachment"},
 		{Value: "avatar-example", Label: "Avatar"},
 		{Value: "badge-example", Label: "Badge"},
 		{Value: "breadcrumb-example", Label: "Breadcrumb"},
+		{Value: "bubble-example", Label: "Bubble"},
 		{Value: "button-example", Label: "Button"},
 		{Value: "button-group-example", Label: "Button Group"},
 		{Value: "calendar-example", Label: "Calendar"},
@@ -995,10 +997,18 @@ func createRegistryNavItems() []createOption {
 		{Value: "item-example", Label: "Item"},
 		{Value: "kbd-example", Label: "Kbd"},
 		{Value: "label-example", Label: "Label"},
+		{Value: "marker-example", Label: "Marker"},
+		{Value: "menubar-example", Label: "Menubar"},
+		{Value: "message-example", Label: "Message"},
+		{Value: "message-scroller-example", Label: "Message Scroller"},
+		{Value: "native-select-example", Label: "Native Select"},
+		{Value: "navigation-menu-example", Label: "Navigation Menu"},
 		{Value: "pagination-example", Label: "Pagination"},
 		{Value: "popover-example", Label: "Popover"},
 		{Value: "progress-example", Label: "Progress"},
+		{Value: "questionnaire-example", Label: "Questionnaire"},
 		{Value: "radio-group-example", Label: "Radio Group"},
+		{Value: "scroll-area-example", Label: "Scroll Area"},
 		{Value: "select-example", Label: "Select"},
 		{Value: "separator-example", Label: "Separator"},
 		{Value: "sheet-example", Label: "Sheet"},

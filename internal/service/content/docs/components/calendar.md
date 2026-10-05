@@ -55,8 +55,9 @@ import (
 
 ```templ showLineNumbers
 @calendar.Calendar(calendar.Props{
+	Mode:     calendar.ModeSingle,
 	Selected: time.Now(),
-	Class: "rounded-lg border",
+	Class:    "rounded-lg border",
 })
 ```
 
@@ -67,6 +68,19 @@ The `Calendar` component is a native templ and vanilla JavaScript implementation
 ## Date Picker
 
 You can use the `Calendar` component to build a date picker. See the [Date Picker](/docs/components/date-picker) page for more information.
+
+## Persian / Hijri / Jalali Calendar
+
+To use the Persian calendar, set `DateLib: calendar.DateLibPersian`, the pendant of react-day-picker's `react-day-picker/persian`. It shows the Jalali calendar with Persian month and day names in Eastern Arabic-Indic numerals, right to left.
+
+```go
+@calendar.Calendar(calendar.Props{
+	Mode:    calendar.ModeSingle,
+	DateLib: calendar.DateLibPersian,
+})
+```
+
+<ComponentPreview name="calendar-hijri" previewClassName="h-[400px]" />
 
 ## Basic
 
@@ -124,29 +138,53 @@ Use `ShowWeekNumber` to show week numbers.
 
 <ComponentPreview name="calendar-week-numbers" previewClassName="h-96" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="calendar-rtl" direction="rtl" previewClassName="h-96" />
+
+When using RTL, pass both the `Locale` and `Dir` props to the Calendar component:
+
+```templ showLineNumbers
+@calendar.Calendar(calendar.Props{
+	Mode:     calendar.ModeSingle,
+	Selected: date,
+	Locale:   "ar-SA",
+	Dir:      "rtl",
+})
+```
+
 ## API Reference
 
 ### Calendar
 
 The `Calendar` component displays a month grid for selecting a date or a range of dates.
 
-| Prop              | Type                                                | Default               |
-| ----------------- | --------------------------------------------------- | --------------------- |
-| `Mode`            | `ModeSingle \| ModeRange`                          | `ModeSingle`          |
-| `CaptionLayout`   | `CaptionLayoutLabel \| CaptionLayoutDropdown`      | `CaptionLayoutLabel`  |
-| `Selected`           | `time.Time`                                         | -                     |
-| `EndValue`        | `time.Time`                                         | -                     |
-| `Month`           | `time.Time`                                         | `Selected` or now        |
-| `Name`            | `string`                                            | -                     |
-| `EndName`         | `string`                                            | `Name + "-end"`       |
-| `Locale`       | `string` (BCP 47, e.g. "de-DE")                     | `"en-US"`             |
-| `WeekStartsOn`     | `Day`                                               | `Sunday`              |
-| `HideOutsideDays` | `bool`                                              | `false`               |
-| `FixedWeeks`      | `bool`                                              | `false`               |
-| `ShowWeekNumber` | `bool`                                              | `false`               |
-| `MinDate`         | `time.Time`                                         | -                     |
-| `MaxDate`         | `time.Time`                                         | -                     |
-| `Disabled`   | `[]time.Time`                                       | -                     |
-| `BookedDates`     | `[]time.Time`                                       | -                     |
-| `NumberOfMonths`  | `int`                                               | `1`                   |
-| `Class`           | `string`                                            | -                     |
+| Prop                  | Type                                                                 | Default              |
+| --------------------- | -------------------------------------------------------------------- | -------------------- |
+| `Mode`                | `ModeSingle \| ModeMultiple \| ModeRange`                            | -                    |
+| `Selected`            | `time.Time`, `[]time.Time` or `DateRange`                            | -                    |
+| `DefaultMonth`        | `time.Time`                                                          | today                |
+| `Month`               | `time.Time` (controlled, see `calendar-month-change`)                | -                    |
+| `CaptionLayout`       | `CaptionLayoutLabel \| CaptionLayoutDropdown` and the `-months`/`-years` variants | `CaptionLayoutLabel` |
+| `NumberOfMonths`      | `int`                                                                | `1`                  |
+| `ShowOutsideDays`     | `*bool`                                                              | `true`               |
+| `FixedWeeks`          | `bool`                                                               | `false`              |
+| `ShowWeekNumber`      | `bool`                                                               | `false`              |
+| `Disabled`            | a matcher or `[]any` of them: `time.Time`, `[]time.Time`, `DateRange`, `DateBefore`, `DateAfter`, `DateInterval`, `DayOfWeek` | - |
+| `Modifiers`           | `map[string]any` of matchers                                         | -                    |
+| `ModifiersClassNames` | `map[string]string`                                                  | -                    |
+| `StartMonth`          | `time.Time`                                                          | -                    |
+| `EndMonth`            | `time.Time`                                                          | -                    |
+| `WeekStartsOn`        | `Day`                                                                | the locale's         |
+| `Required`            | `*bool`                                                              | -                    |
+| `Locale`              | `string` (BCP 47, e.g. "de-DE")                                      | en-US                |
+| `Dir`                 | `string`                                                             | -                    |
+| `DateLib`             | `DateLibPersian`                                                     | Gregorian            |
+| `ButtonVariant`       | `button.Variant`                                                     | `VariantGhost`       |
+| `Class`               | `string`                                                             | -                    |
+
+### Events and API
+
+The calendar keeps its selection and dispatches `calendar-select` (`detail.selected`, `detail.triggerDate`), react-day-picker's `onSelect`. A navigation dispatches `calendar-month-change` (`detail.month`); with `Month` set the calendar moves only when the page calls `window.templ.calendar.setMonth(calendar, month)`. `window.templ.calendar.setSelected(calendar, selected)` sets the selection, `window.templ.calendar.update(calendar, { formatters, components })` takes react-day-picker's `formatMonthDropdown` formatter and a `DayButton(button, { day, modifiers })` component.

@@ -120,6 +120,12 @@ A popover with form fields inside.
 
 <ComponentPreview name="popover-form" />
 
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="popover-rtl" direction="rtl" />
+
 ## API Reference
 
 ### Popover

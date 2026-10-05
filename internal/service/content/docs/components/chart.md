@@ -512,3 +512,9 @@ Set `AccessibilityLayer: true` on the chart root to enable the keyboard layer, t
 ```
 
 The chart becomes focusable, focusing it shows the tooltip and the left and right arrow keys walk the tooltip through the categories.
+
+## RTL
+
+To enable RTL support, see the [Direction](/docs/components/direction) component.
+
+<ComponentPreview styleName="base-nova" name="chart-rtl" direction="rtl" previewClassName="h-92" />

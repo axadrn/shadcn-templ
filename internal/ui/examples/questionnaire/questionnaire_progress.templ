@@ -1,0 +1,129 @@
+package questionnaire
+
+import "github.com/axadrn/shadcn-templ/v2/components/questionnaire"
+
+templ QuestionnaireProgressExample() {
+	@questionnaire.Questionnaire(questionnaire.Props{
+		Class:       "mx-auto max-w-md",
+		DefaultItem: "scope",
+		Items: []questionnaire.ItemDefinition{
+			{Name: "scope", Required: true},
+			{Name: "strategy", Required: true},
+			{Name: "tests", Required: true},
+			{Name: "delivery", Required: true},
+		},
+	}) {
+		// The Progress render state: one bar per item, filled up to the
+		// current one. The script below re-renders it on item changes.
+		@questionnaire.Progress(questionnaire.ProgressProps{Class: "w-full"}) {
+			<div class="mb-2 flex gap-1.5" aria-hidden="true">
+				<span class="h-1.5 flex-1 rounded-full bg-primary"></span>
+				<span class="h-1.5 flex-1 rounded-full bg-muted"></span>
+				<span class="h-1.5 flex-1 rounded-full bg-muted"></span>
+				<span class="h-1.5 flex-1 rounded-full bg-muted"></span>
+			</div>
+			<span>Checkpoint 1 of 4</span>
+		}
+		@questionnaire.Item(questionnaire.ItemProps{Name: "scope", Required: true}) {
+			@questionnaire.Title() {
+				How large is the change?
+			}
+			@questionnaire.Choices() {
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "small"}) {
+					Small patch
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "medium"}) {
+					Feature-sized change
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "large"}) {
+					Cross-package change
+				}
+			}
+			@questionnaire.Error()
+		}
+		@questionnaire.Item(questionnaire.ItemProps{Name: "strategy", Required: true}) {
+			@questionnaire.Title() {
+				How should commits be organized?
+			}
+			@questionnaire.Choices() {
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "single"}) {
+					Single commit
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "logical"}) {
+					Logical commits
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "squash"}) {
+					Squash before review
+				}
+			}
+			@questionnaire.Error()
+		}
+		@questionnaire.Item(questionnaire.ItemProps{Name: "tests", Required: true}) {
+			@questionnaire.Title() {
+				Which tests should run?
+			}
+			@questionnaire.Choices() {
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "targeted"}) {
+					Targeted tests
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "package"}) {
+					Package suite
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "workspace"}) {
+					Full workspace
+				}
+			}
+			@questionnaire.Error()
+		}
+		@questionnaire.Item(questionnaire.ItemProps{Name: "delivery", Required: true}) {
+			@questionnaire.Title() {
+				How should the work be delivered?
+			}
+			@questionnaire.Choices() {
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "patch"}) {
+					Patch only
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "commit"}) {
+					Committed locally
+				}
+				@questionnaire.Choice(questionnaire.ChoiceProps{Value: "branch"}) {
+					Push a review branch
+				}
+			}
+			@questionnaire.Error()
+		}
+		@questionnaire.Actions() {
+			@questionnaire.Previous()
+			@questionnaire.Next() {
+				Next
+			}
+			@questionnaire.Submit() {
+				Finish plan
+			}
+		}
+	}
+	<script nonce={ templ.GetNonce(ctx) }>
+		(() => {
+			const root = document.currentScript.previousElementSibling;
+			const names = ["scope", "strategy", "tests", "delivery"];
+			document.addEventListener("questionnaire-item-change", (e) => {
+				if (e.target !== root) return;
+				const current = names.indexOf(e.detail.item) + 1;
+				const progress = e.target.querySelector('[data-slot="questionnaire-progress"]');
+				progress.querySelectorAll("[aria-hidden] > span").forEach((bar, index) => {
+					bar.className = index < current ? "h-1.5 flex-1 rounded-full bg-primary" : "h-1.5 flex-1 rounded-full bg-muted";
+				});
+				progress.querySelector(":scope > span").textContent = `Checkpoint ${current} of ${names.length}`;
+			});
+			document.addEventListener("submit", (e) => {
+				if (e.target !== root) return;
+				e.preventDefault();
+				const formData = new FormData(e.target);
+				window.templ.toast.add({
+					title: "Pull request plan ready",
+					description: `Scope: ${formData.get("scope") ?? "None"} · Commits: ${formData.get("strategy") ?? "None"} · Tests: ${formData.get("tests") ?? "None"} · Delivery: ${formData.get("delivery") ?? "None"}`,
+				});
+			});
+		})();
+	</script>
+}

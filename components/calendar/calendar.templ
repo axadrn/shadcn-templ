@@ -1,8 +1,8 @@
 package calendar
 
 import (
+	"encoding/json"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/axadrn/shadcn-templ/v2/components/button"
@@ -25,236 +25,266 @@ var (
 type Mode string
 
 const (
-	ModeSingle Mode = "single"
-	ModeRange  Mode = "range"
+	ModeSingle   Mode = "single"
+	ModeMultiple Mode = "multiple"
+	ModeRange    Mode = "range"
 )
 
 type CaptionLayout string
 
 const (
-	// CaptionLayoutLabel shows "July 2026" as a static caption (default).
-	CaptionLayoutLabel CaptionLayout = "label"
-	// CaptionLayoutDropdown shows month and year dropdowns.
-	CaptionLayoutDropdown CaptionLayout = "dropdown"
+	CaptionLayoutLabel          CaptionLayout = "label"
+	CaptionLayoutDropdown       CaptionLayout = "dropdown"
+	CaptionLayoutDropdownMonths CaptionLayout = "dropdown-months"
+	CaptionLayoutDropdownYears  CaptionLayout = "dropdown-years"
 )
 
+// DateLib is react-day-picker's dateLib prop as the calendar system.
+type DateLib string
+
+// DateLibPersian is react-day-picker/persian's DayPicker: the Jalali
+// calendar of date-fns-jalali, formatted with its faIR locale in Eastern
+// Arabic-Indic numerals, dir rtl unless Dir is set.
+const DateLibPersian DateLib = "persian"
+
+// DateRange is react-day-picker's DateRange, the range mode's selection and
+// a matcher.
+type DateRange struct {
+	From time.Time
+	To   time.Time
+}
+
+// The other matchers of react-day-picker.
+type (
+	DateBefore   struct{ Before time.Time }
+	DateAfter    struct{ After time.Time }
+	DateInterval struct{ Before, After time.Time }
+	DayOfWeek    struct{ DayOfWeek []int }
+)
+
+// Props are react-day-picker's DayPicker props shadcn's Calendar passes on,
+// plus its ButtonVariant. The selection is the uncontrolled one (selected
+// without onSelect): the calendar keeps it, dispatches calendar-select and
+// window.templ.calendar.setSelected sets it. Month is controlled: it moves
+// when the owner calls setMonth on calendar-month-change.
 type Props struct {
 	ID         string
 	Class      string
 	Attributes templ.Attributes
-	// Mode: 'single' (default) or 'range'.
-	Mode Mode
-	// CaptionLayout: 'label' (default) or 'dropdown'.
+	Mode       Mode
+	// Selected is a time.Time (single), a []time.Time (multiple) or a
+	// DateRange (range).
+	Selected      any
+	DefaultMonth  time.Time
+	Month         time.Time
 	CaptionLayout CaptionLayout
-	// Selected preselects a date (single mode) or the range start.
-	Selected time.Time
-	// EndValue preselects the range end (range mode).
-	EndValue time.Time
-	// Month controls the initially displayed month. Defaults to Selected or now.
-	Month time.Time
-	// Name renders a hidden input that submits the selected date (ISO).
-	Name string
-	// EndName is the hidden input name for the range end. Defaults to Name + "-end".
-	EndName   string
-	// Locale is a BCP 47 tag like "de-DE", the browser's Intl handles
-	// every locale natively. Defaults to "en-US".
-	Locale string
-	// WeekStartsOn: 0-6, Sunday-Saturday. Defaults to Sunday, like shadcn.
-	WeekStartsOn Day
-	// HideOutsideDays hides the leading/trailing days of adjacent months.
-	HideOutsideDays bool
-	// FixedWeeks always renders six weeks, keeping the height stable.
-	FixedWeeks bool
-	// ShowWeekNumber renders an ISO week number column.
-	ShowWeekNumber bool
-	// MinDate/MaxDate bound the selectable dates.
-	MinDate time.Time
-	MaxDate time.Time
-	// Disabled are not selectable.
-	Disabled []time.Time
-	// BookedDates are not selectable and render struck through.
-	BookedDates []time.Time
-	// NumberOfMonths renders several months side by side. Defaults to 1.
+	// NumberOfMonths defaults to 1.
 	NumberOfMonths int
+	// ShowOutsideDays defaults to true like shadcn's Calendar.
+	ShowOutsideDays *bool
+	FixedWeeks      bool
+	ShowWeekNumber  bool
+	// Disabled is a matcher or a list of them: time.Time, DateRange,
+	// DateBefore, DateAfter, DateInterval, DayOfWeek or bool.
+	Disabled            any
+	Modifiers           map[string]any
+	ModifiersClassNames map[string]string
+	StartMonth          time.Time
+	EndMonth            time.Time
+	WeekStartsOn        Day
+	Required            *bool
+	// Locale is a BCP 47 tag, the pendant of the date-fns locale's code.
+	Locale        string
+	Dir           string
+	// DateLib is the calendar system, the Gregorian one by default.
+	DateLib       DateLib
+	ButtonVariant button.Variant
 }
 
-func isoList(dates []time.Time) string {
-	parts := make([]string, len(dates))
-	for i, d := range dates {
-		parts[i] = d.Format("2006-01-02")
+func isoDate(t time.Time) string {
+	return t.Format("2006-01-02")
+}
+
+// matcherJSON is a matcher with its dates as yyyy-MM-dd strings.
+func matcherJSON(v any) any {
+	switch m := v.(type) {
+	case time.Time:
+		return isoDate(m)
+	case []time.Time:
+		return utils.Map(m, isoDate)
+	case DateRange:
+		r := map[string]any{"from": nil, "to": nil}
+		if !m.From.IsZero() {
+			r["from"] = isoDate(m.From)
+		}
+		if !m.To.IsZero() {
+			r["to"] = isoDate(m.To)
+		}
+		return r
+	case *DateRange:
+		if m == nil {
+			return nil
+		}
+		return matcherJSON(*m)
+	case DateBefore:
+		return map[string]any{"before": isoDate(m.Before)}
+	case DateAfter:
+		return map[string]any{"after": isoDate(m.After)}
+	case DateInterval:
+		return map[string]any{"before": isoDate(m.Before), "after": isoDate(m.After)}
+	case DayOfWeek:
+		return map[string]any{"dayOfWeek": m.DayOfWeek}
+	case []any:
+		return utils.Map(m, matcherJSON)
 	}
-	return strings.Join(parts, ",")
+	return v
 }
 
+func toJSON(v any) string {
+	b, _ := json.Marshal(v)
+	return string(b)
+}
+
+func selectedJSON(v any) string {
+	switch m := v.(type) {
+	case nil:
+		return ""
+	case time.Time:
+		if m.IsZero() {
+			return ""
+		}
+	}
+	return toJSON(matcherJSON(v))
+}
+
+func modifiersJSON(m map[string]any) string {
+	out := map[string]any{}
+	for k, v := range m {
+		out[k] = matcherJSON(v)
+	}
+	return toJSON(out)
+}
+
+func dateAttr(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return isoDate(t)
+}
+
+const dayButtonClasses = "cn-calendar-day-button relative isolate z-10 flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 border-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70"
+
+// Calendar is shadcn's Calendar on react-day-picker. calendar.js renders
+// DayPicker inside the root from the props here and the parts in the
+// template, which carry shadcn's classes.
 templ Calendar(props ...Props) {
 	{{
 		var p Props
 		if len(props) > 0 {
 			p = props[0]
 		}
-		if p.ID == "" {
-			p.ID = utils.RandomID()
-		}
-		if p.Mode == "" {
-			p.Mode = ModeSingle
-		}
 		if p.CaptionLayout == "" {
 			p.CaptionLayout = CaptionLayoutLabel
 		}
-		if p.Locale == "" {
-			p.Locale = "en-US"
+		if p.DateLib == DateLibPersian && p.Dir == "" {
+			p.Dir = "rtl"
 		}
-		if p.Mode == ModeRange && p.Name != "" && p.EndName == "" {
-			p.EndName = p.Name + "-end"
+		if p.ButtonVariant == "" {
+			p.ButtonVariant = button.VariantGhost
 		}
-		view := time.Now()
-		if !p.Selected.IsZero() {
-			view = p.Selected
+		captionLabel := "cn-calendar-caption text-sm"
+		if p.CaptionLayout != CaptionLayoutLabel {
+			captionLabel = "cn-calendar-caption-label flex items-center gap-1 rounded-(--cell-radius) text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground"
 		}
-		if !p.Month.IsZero() {
-			view = p.Month
-		}
-		selectedISO := ""
-		if !p.Selected.IsZero() {
-			selectedISO = p.Selected.Format("2006-01-02")
-		}
-		endISO := ""
-		if !p.EndValue.IsZero() {
-			endISO = p.EndValue.Format("2006-01-02")
-		}
-		monthNames := []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
-		months := p.NumberOfMonths
-		if months < 1 {
-			months = 1
-		}
+		navButton := utils.CN(button.Variants(button.Props{Variant: p.ButtonVariant}), "size-(--cell-size) p-0 select-none aria-disabled:opacity-50")
 	}}
 	<div
-		id={ p.ID }
 		data-slot="calendar"
-		data-templ-mode={ string(p.Mode) }
-		data-templ-locale={ p.Locale }
-		data-templ-week-starts-on={ strconv.Itoa(int(p.WeekStartsOn)) }
-		data-templ-month={ view.Format("2006-01-02") }
-		if selectedISO != "" {
-			data-templ-selected={ selectedISO }
+		if p.ID != "" {
+			id={ p.ID }
 		}
-		if endISO != "" {
-			data-templ-selected-to={ endISO }
+		if p.Dir != "" {
+			dir={ p.Dir }
 		}
-		if p.HideOutsideDays {
+		class={ utils.CN(
+			"w-fit rdp-root cn-calendar group/calendar bg-background in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
+			`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
+			`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
+			p.Class,
+		) }
+		if p.Mode != "" {
+			data-mode={ string(p.Mode) }
+		}
+		if p.Required != nil {
+			data-required={ strconv.FormatBool(*p.Required) }
+		}
+		if p.NumberOfMonths > 1 {
+			data-multiple-months="true"
+			data-templ-number-of-months={ strconv.Itoa(p.NumberOfMonths) }
+		}
+		if p.ShowWeekNumber {
+			data-week-numbers="true"
+		}
+		if s := selectedJSON(p.Selected); s != "" {
+			data-templ-selected={ s }
+		}
+		if d := dateAttr(p.DefaultMonth); d != "" {
+			data-templ-default-month={ d }
+		}
+		if d := dateAttr(p.Month); d != "" {
+			data-templ-month={ d }
+		}
+		if d := dateAttr(p.StartMonth); d != "" {
+			data-templ-start-month={ d }
+		}
+		if d := dateAttr(p.EndMonth); d != "" {
+			data-templ-end-month={ d }
+		}
+		data-templ-caption-layout={ string(p.CaptionLayout) }
+		if p.ShowOutsideDays != nil && !*p.ShowOutsideDays {
 			data-templ-show-outside-days="false"
 		}
 		if p.FixedWeeks {
 			data-templ-fixed-weeks
 		}
-		if p.ShowWeekNumber {
-			data-templ-show-week-number
+		if p.Disabled != nil {
+			data-templ-disabled={ toJSON(matcherJSON(p.Disabled)) }
 		}
-		if !p.MinDate.IsZero() {
-			data-templ-min-date={ p.MinDate.Format("2006-01-02") }
+		if len(p.Modifiers) > 0 {
+			data-templ-modifiers={ modifiersJSON(p.Modifiers) }
 		}
-		if !p.MaxDate.IsZero() {
-			data-templ-max-date={ p.MaxDate.Format("2006-01-02") }
+		if len(p.ModifiersClassNames) > 0 {
+			data-templ-modifiers-class-names={ toJSON(p.ModifiersClassNames) }
 		}
-		if len(p.Disabled) > 0 {
-			data-templ-disabled={ isoList(p.Disabled) }
+		if p.WeekStartsOn != Sunday {
+			data-templ-week-starts-on={ strconv.Itoa(int(p.WeekStartsOn)) }
 		}
-		if len(p.BookedDates) > 0 {
-			data-templ-booked-dates={ isoList(p.BookedDates) }
+		if p.Locale != "" {
+			data-templ-locale={ p.Locale }
 		}
-		class={
-			utils.CN(
-				// 1:1 base/ui/calendar.tsx className + classNames.root. The rtl
-				// chevron flip lives on the icons as cn-rtl-flip (the tsx's extra
-				// rtl:**:[.rdp-button_next>svg] selectors target rdp-* classes our
-				// DOM does not have).
-				"cn-calendar group/calendar bg-background in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent w-fit",
-				p.Class,
-			),
+		if p.DateLib != "" {
+			data-templ-date-lib={ string(p.DateLib) }
 		}
 		{ p.Attributes... }
 	>
-		if p.Name != "" {
-			<input type="hidden" name={ p.Name } value={ selectedISO } aria-hidden="true" tabindex="-1"/>
-			if p.Mode == ModeRange {
-				<input type="hidden" name={ p.EndName } value={ endISO } aria-hidden="true" tabindex="-1"/>
-			}
-		}
-		<div class="relative flex flex-col gap-4 md:flex-row">
-			<nav aria-label="Navigation bar" class="absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1">
-					@button.Button(button.Props{
-						Variant: button.VariantGhost,
-						Class:   "size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
-						Attributes: templ.Attributes{
-							"aria-label": "Go to the previous month",
-						},
-					}) {
-						@icon.ChevronLeft(icon.Props{Class: "cn-rtl-flip size-4"})
-					}
-					@button.Button(button.Props{
-						Variant: button.VariantGhost,
-						Class:   "size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
-						Attributes: templ.Attributes{
-							"aria-label": "Go to the next month",
-						},
-					}) {
-						@icon.ChevronRight(icon.Props{Class: "cn-rtl-flip size-4"})
-					}
-			</nav>
-			for m := 0; m < months; m++ {
-				<div class="flex w-full flex-col gap-4">
-					<div class="flex h-(--cell-size) w-full items-center justify-center px-(--cell-size)">
-						if p.CaptionLayout == CaptionLayoutDropdown && months == 1 {
-						<div class="flex h-(--cell-size) w-full items-center justify-center gap-1.5 text-sm font-medium">
-							<div class="cn-calendar-dropdown-root relative rounded-(--cell-radius)">
-								<select
-									class="absolute inset-0 bg-popover opacity-0"
-									aria-label="Choose the month"
-								>
-									for i := 0; i < 12; i++ {
-										<option value={ strconv.Itoa(i) } selected?={ i == int(view.Month())-1 }>{ monthNames[i] }</option>
-									}
-								</select>
-								<span class="font-medium select-none cn-calendar-caption-label flex items-center gap-1 rounded-(--cell-radius) text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground" aria-hidden="true">
-									<span>{ monthNames[int(view.Month())-1] }</span>
-									@icon.ChevronDown(icon.Props{Class: "size-4"})
-								</span>
-							</div>
-							<div class="cn-calendar-dropdown-root relative rounded-(--cell-radius)">
-								<select
-									class="absolute inset-0 bg-popover opacity-0"
-									aria-label="Choose the year"
-								>
-									for year := time.Now().Year() - 100; year <= time.Now().Year(); year++ {
-										<option value={ strconv.Itoa(year) } selected?={ year == view.Year() }>{ strconv.Itoa(year) }</option>
-									}
-								</select>
-								<span class="font-medium select-none cn-calendar-caption-label flex items-center gap-1 rounded-(--cell-radius) text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground" aria-hidden="true">
-									<span>{ strconv.Itoa(view.Year()) }</span>
-									@icon.ChevronDown(icon.Props{Class: "size-4"})
-								</span>
-							</div>
-						</div>
-					} else {
-						<span class="font-medium select-none cn-calendar-caption text-sm">
-							{ view.AddDate(0, m, 0).Format("January 2006") }
-						</span>
-					}
-				</div>
-				<table class="w-full border-collapse">
-					<thead>
-						<tr class="flex"></tr>
-					</thead>
-					<tbody></tbody>
-				</table>
-			</div>
-			}
-		</div>
+		// The parts in calendar.js's order: Nav, CaptionLabel, the dropdown
+		// root, the dropdown's Chevron and CalendarDayButton.
 		<template>
+			<nav class="absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1 rdp-nav">
+				<button type="button" class={ navButton + " rdp-button_previous" }>
+					@icon.ChevronLeft(icon.Props{Class: "cn-rtl-flip size-4 rdp-chevron"})
+				</button>
+				<button type="button" class={ navButton + " rdp-button_next" }>
+					@icon.ChevronRight(icon.Props{Class: "cn-rtl-flip size-4 rdp-chevron"})
+				</button>
+			</nav>
+			<span class={ "font-medium select-none " + captionLabel + " rdp-caption_label" }></span>
+			<span class="cn-calendar-dropdown-root relative rounded-(--cell-radius) rdp-dropdown_root"></span>
+			@icon.ChevronDown(icon.Props{Class: "size-4 rdp-chevron", Size: 18})
 			@button.Button(button.Props{
 				Variant: button.VariantGhost,
 				Size:    button.SizeIcon,
-				Class:   "cn-calendar-day-button relative isolate z-10 flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 border-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70",
+				Class:   dayButtonClasses + " rdp-day rdp-day_button",
 			})
 		</template>
 	</div>
