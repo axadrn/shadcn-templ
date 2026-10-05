@@ -2,1261 +2,1363 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://shadcn-templ.com/</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/create</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/typeset</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/introduction</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/installation</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components-json</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/package-imports</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/theming</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/typeset</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/dark-mode</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/cli</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/monorepo</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/import-workflow</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/utils/scroll-fade</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/utils/shimmer</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/registry</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/registry/getting-started</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/registry/registry-json</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/registry/registry-item-json</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/2026-04-native-dialog</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/2026-04-range-slider</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/2026-05-calendar-range-selection</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/2026-06-hover-card</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/2026-08-templui-2-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/changelog/2026-09-component-script-bundle</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/changelog/2026-09-parity-attributes</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/changelog/2026-09-parity-runtime</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/changelog/2026-10-minified-script-bundle</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-100-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-101-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-20-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-20-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-20-2</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-20-3</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-20-4</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-20-5</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-20-6</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-20-7</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-20-8</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-21-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-21-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-22-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-22-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-23-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-24-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-25-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-26-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-26-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-27-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-27-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-28-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-28-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-28-2</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-28-3</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-29-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-29-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-29-2</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-30-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-31-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-32-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-33-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-34-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-35-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-36-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-37-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-38-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-39-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-40-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-41-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-42-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-43-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-44-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-50-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-51-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-52-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-53-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-53-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-60-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-61-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-62-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-63-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-64-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-70-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-71-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-72-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-72-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-73-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-73-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-73-2</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-74-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-74-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-74-2</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-75-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-75-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-75-2</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-75-3</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-75-4</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-75-5</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-75-6</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-75-7</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-80-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-80-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-80-2</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-81-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-81-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-82-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-83-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-83-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-84-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-85-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-86-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-87-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-87-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-90-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-91-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-92-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-93-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-94-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-95-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-96-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-97-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-98-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v0-99-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-0-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-0-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-1-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-1-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-10-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-10-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-11-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-11-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-11-2</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-12-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-2-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-3-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-4-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-5-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-6-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-7-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-7-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-8-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-8-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-9-0</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-9-1</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-9-2</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-9-3</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-9-4</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-9-5</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/changelog/v1-9-6</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/accordion</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/alert</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/alert-dialog</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/aspect-ratio</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/avatar</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/badge</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/breadcrumb</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/button</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/button-group</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/calendar</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/card</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/carousel</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/chart</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/checkbox</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/collapsible</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/combobox</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/command</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/date-picker</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/sheet</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/dropdown-menu</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/components/menubar</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/components/navigation-menu</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/components/questionnaire</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/icon</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/input</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/input-otp</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/label</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/components/direction</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/drawer</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/dialog</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/pagination</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/popover</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/hover-card</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/field</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/kbd</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/input-group</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/item</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/empty</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/spinner</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/toggle</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/toggle-group</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/context-menu</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/progress</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/radio-group</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/components/resizable</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/select</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/separator</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/sidebar</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/skeleton</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/slider</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/switch</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/table</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/tabs</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/textarea</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/toast</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/docs/components/tooltip</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/components/scroll-area</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/components/native-select</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/components/marker</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/components/message</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/components/message-scroller</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/components/attachment</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://shadcn-templ.com/docs/components/bubble</loc>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/charts/area</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/charts/bar</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/charts/line</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/charts/pie</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/charts/radar</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/charts/radial</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/charts/tooltip</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/blocks</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/blocks/authentication</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/blocks/dashboard</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/blocks/login</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/blocks/sidebar</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://shadcn-templ.com/blocks/signup</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
