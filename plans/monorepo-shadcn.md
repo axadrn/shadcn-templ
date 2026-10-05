@@ -2,7 +2,7 @@
 
 - **Planner**: Claude
 - **Executor**: Claude
-- **Status**: in progress
+- **Status**: done
 - **Branch**: `feat/monorepo-shadcn` from `main` at `v2.0.0-beta.11`, owner decision 2026-10-05 ("mache es einfach 1:1 shadcn pendantisch, skalierbar, idiomatisch, grug brain, clear statt clever")
 
 ## Context
@@ -106,4 +106,19 @@ Open:
 - The `.dark` block order in the CSS writer is random (above), from before this branch.
 - The scaffold's `task build` and Docker build need a shadcn-templ release that contains this branch; with beta.11 as the tool `bundle` still keys on `aliases.components`.
 
+Planner fixes after the executor's hand-back (main checkout, 2026-10-05): the single-app scaffold gets the same two fixes as the monorepo one (`golang:1.26`, `task dev` passes `PORT` and a free `PROXY_PORT` on), the CSS variables are written `:root` before `.dark` instead of in map order, and `init` stops with a clear error when its directory does not exist (preflight-init's `MISSING_DIR_OR_EMPTY_PROJECT`), instead of failing on `components.json`.
+
 ## Planner review
+
+
+### Review (Claude, 2026-10-05)
+
+Accepted. The model is shadcn's: two workspaces with their own `components.json`, the app's `ui` and `utils` aliases into `packages/ui`, `getWorkspaceConfig` by the closest `components.json`, ui files installed with the ui workspace's config, blocks in the app, one theme in `packages/ui/styles/globals.css`, the design settings propagated by `init` and `apply`. The deviations are Go's (no tsconfig, so `packages/ui` is found by convention; `registry:example` shares Go imports with the ui packages) and recorded in Decisions.
+
+Planner verification with a CLI built from this branch, registry on the local docs server, scaffolds outside the repository:
+- `init demo --monorepo`, `add button dialog combobox sidebar-07 --cwd apps/web`: ui components in `packages/ui/components`, the block in `apps/web/components/blocks/sidebar07` importing `demo/packages/ui/components/...`.
+- A second app exactly as the docs say (copy `apps/web`, rename the imports, `init --cwd apps/admin`, Taskfile include), `add popover --cwd apps/admin`: the three `components.json` match shadcn's (same style, the apps' `tailwind.css` at `../../packages/ui/styles/globals.css`), the same bundle in both apps.
+- `task build` for both apps; both binaries served, Chromium: the dialog opens and closes, the combobox selects `htmx` and keeps the focus in its input, the popover opens; no console, page or network error.
+- `task web:dev` and `task admin:dev` side by side while this repository's own dev stack holds 8090 and 7331: apps on 8091 and 8092, proxies on 7332 and 7333, the dialog and the popover open through both proxies without errors.
+- `docker build` of the monorepo scaffold: the container serves the page, the bundle and `output.css` (200).
+- Single app: `init app --template templ`, `add dialog combobox`, `task build`, `docker build` on `golang:1.26` (200), `task dev PORT=8301` serves on 8301 with a free proxy port.

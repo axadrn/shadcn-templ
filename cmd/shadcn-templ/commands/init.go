@@ -107,7 +107,12 @@ func RunInit(opts InitOptions) error {
 		scaffolded = true
 	}
 
-	// Preflight: a Go module is the shadcn-templ pendant of a framework project.
+	// Preflight: the target directory must exist (preflight-init's
+	// MISSING_DIR_OR_EMPTY_PROJECT), and a Go module is the shadcn-templ
+	// pendant of a framework project.
+	if info, err := os.Stat(cwd); err != nil || !info.IsDir() {
+		return fmt.Errorf("the path %s does not exist. Create the app first, a new app in a monorepo starts as a copy of apps/web", cwd)
+	}
 	moduleRoot, module, err := utils.FindModule(cwd)
 	if err != nil {
 		return err
