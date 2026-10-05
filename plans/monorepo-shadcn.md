@@ -54,7 +54,7 @@ shadcn's model (`apps/v4/content/docs/(root)/monorepo.mdx`, `templates/next-mono
 - [x] Done
 
 ### 5. Docs: monorepo page 1:1 with shadcn's sections and examples (Go)
-- [ ] Done
+- [x] Done
 
 ### 6. Verification
 - [ ] Done
@@ -80,5 +80,9 @@ Template `templ-monorepo`: `components/scripts.templ` moved to `packages/ui/comp
 ### Task 4
 
 `UpdateScripts` bundles `<ui dir>/*/*.js` and writes `scripts_bundle.go` into the ui components package (package name from `aliases.ui`). The apps it serves are config itself when it has scripts plus `GetSharedConfigs`, now keyed on `ResolvedPaths.UI` and leaving out library workspaces; run from `packages/ui` it bundles for the apps that use it and writes nothing into the ui package, with no app it does nothing. The `scripts.path` check compares all those apps and names `aliases.ui` in its error. `bundle --watch` and init's "components already carry scripts" check look at the ui dir. Single app and beta.11 apps: the ui dir is the components dir, so the walk, the bundle and the manifest are the same as before. `apps/web/Taskfile.yml` of the monorepo template: `FREE_PROXY_PORT` from 7331 up like `FREE_PORT` from 8090, `PROXY_PORT` overridable, passed as `--proxyport`. `TestInitMonorepoScaffold` gained the bundle checks: after `add` in `apps/web` the bundle holds `components/dialog/...` from `packages/ui`, the manifest is `packages/ui/components/scripts_bundle.go` naming it, nothing in `apps/web/components/scripts_bundle.go` or `packages/ui/assets`; `apps/admin` gets the same bundle on init; `add popover` from admin renews both apps' bundle and the manifest; `bundle --cwd packages/ui` passes without writing a scripts block or assets into the ui package. `go test ./cmd/shadcn-templ/...` green.
+
+### Task 5
+
+`monorepo.md` follows `(root)/monorepo.mdx` section by section: intro, Getting started (Create a new monorepo project with `init my-app --monorepo` and "two workspaces: `web` and `ui`", Add components to your project with shadcn's `button` and `login-01` examples on our paths, Importing components from `my-app/packages/ui/components/button` and `my-app/packages/ui/utils`), File Structure (apps/web plus packages/ui), Requirements 1 to 4 (a `components.json` per workspace; both configs as `init` writes them; same `style`, `iconLibrary`, `baseColor`, with what `init` and `apply` propagate; shadcn's Tailwind v4 point becomes the `@source` lines of the ui CSS) and the closing sentence. Kept as Go additions: an "Add another app" step (copy, `init --cwd apps/admin` joins `packages/ui`, one Taskfile include, ports picked per app), a callout on an app's own theme, and the Scripts section (one bundle from `packages/ui` into every app, same `scripts.path`). shadcn's `package.json#imports` section has no Go pendant and is left out. `components-json.md` gains `aliases.ui` (shadcn's wording), the `scripts.path`, `cli.md` and `installation.md` mentions say ui package. The page renders at `/docs/monorepo` with its TOC on a docs server built from this branch; `go test ./internal/...` green.
 
 ## Planner review
