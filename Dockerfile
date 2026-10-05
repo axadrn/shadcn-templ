@@ -40,6 +40,10 @@ RUN ./tailwindcss -i ./assets/css/globals.css -o ./assets/css/output.css --minif
 # Build the component JS asset before embedding assets in the application.
 RUN go run ./cmd/shadcn-templ bundle
 
+# Regenerate the sitemap before it is embedded: the highlight crawler only
+# visits sitemap pages, a stale one leaves new pages unhighlighted (#632).
+RUN go run ./cmd/sitemap/main.go --baseurl="https://shadcn-templ.com" --output="./static/sitemap.xml"
+
 # Build the application as a static binary. -p 2 caps compile parallelism
 # so small builders do not OOM, -s -w strips debug info from the binary.
 RUN CGO_ENABLED=0 GOOS=linux go build -p 2 -ldflags="-s -w" -o main ./cmd/docs/main.go
