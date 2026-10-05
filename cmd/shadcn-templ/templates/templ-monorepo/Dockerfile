@@ -1,4 +1,4 @@
-FROM golang:1.25 AS tools
+FROM golang:1.26 AS tools
 
 RUN ARCH=$(uname -m) && \
     case "$ARCH" in \

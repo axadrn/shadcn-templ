@@ -21,8 +21,9 @@ tasks:
     desc: Run templ with integrated server and hot reload
     cmds:
       # -path ../.. generates the whole module, the shared components are
-      # templ files in packages/ui. The app itself runs from here.
-      - go tool templ generate -path ../.. --watch --proxy="http://localhost:{{.PORT}}" --proxyport={{.PROXY_PORT}} --cmd="go run ." --open-browser=false
+      # templ files in packages/ui. templ runs --cmd in that path, so the
+      # app changes back into its own directory, where ./assets resolves.
+      - go tool templ generate -path ../.. --watch --proxy="http://localhost:{{.PORT}}" --proxyport={{.PROXY_PORT}} --cmd="cd '{{.TASKFILE_DIR}}' && go run ." --open-browser=false
     env:
       PORT: "{{.PORT}}"
 
@@ -49,4 +50,6 @@ tasks:
       SHADCN_TEMPL_DEV: "true"
     desc: Start development server with hot reload
     cmds:
-      - task --parallel tailwind scripts-watch templ
+      # The ports are picked once here and passed on, so the parallel run
+      # and an explicit 'task dev PORT=... PROXY_PORT=...' agree.
+      - task --parallel tailwind scripts-watch templ PORT={{.PORT}} PROXY_PORT={{.PROXY_PORT}}

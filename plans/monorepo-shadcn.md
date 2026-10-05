@@ -57,7 +57,7 @@ shadcn's model (`apps/v4/content/docs/(root)/monorepo.mdx`, `templates/next-mono
 - [x] Done
 
 ### 6. Verification
-- [ ] Done
+- [x] Done
 
 Unit tests per task. End to end with a CLI built from the branch against the local registry: `init demo --monorepo`, `add button dialog combobox sidebar-07 --cwd apps/web` (sidebar-07 is a block: it must land in `apps/web/components/blocks/` with imports into `packages/ui`), a second app `init --cwd apps/admin`, `add popover --cwd apps/admin`, `task build`, both apps served, each page checked in Chromium (dialog opens, combobox selects, popover opens, no console errors), `task dev` for both apps side by side on free ports, the Docker build. Single-app scaffold: `init`, `add`, `task build` unchanged.
 
@@ -84,5 +84,26 @@ Template `templ-monorepo`: `components/scripts.templ` moved to `packages/ui/comp
 ### Task 5
 
 `monorepo.md` follows `(root)/monorepo.mdx` section by section: intro, Getting started (Create a new monorepo project with `init my-app --monorepo` and "two workspaces: `web` and `ui`", Add components to your project with shadcn's `button` and `login-01` examples on our paths, Importing components from `my-app/packages/ui/components/button` and `my-app/packages/ui/utils`), File Structure (apps/web plus packages/ui), Requirements 1 to 4 (a `components.json` per workspace; both configs as `init` writes them; same `style`, `iconLibrary`, `baseColor`, with what `init` and `apply` propagate; shadcn's Tailwind v4 point becomes the `@source` lines of the ui CSS) and the closing sentence. Kept as Go additions: an "Add another app" step (copy, `init --cwd apps/admin` joins `packages/ui`, one Taskfile include, ports picked per app), a callout on an app's own theme, and the Scripts section (one bundle from `packages/ui` into every app, same `scripts.path`). shadcn's `package.json#imports` section has no Go pendant and is left out. `components-json.md` gains `aliases.ui` (shadcn's wording), the `scripts.path`, `cli.md` and `installation.md` mentions say ui package. The page renders at `/docs/monorepo` with its TOC on a docs server built from this branch; `go test ./internal/...` green.
+
+### Task 6
+
+Scratch `S=$CLAUDE_JOB_DIR/tmp/mshadcn`, `GOTMPDIR`/`TMPDIR` in the job dir. The main checkout's docs server on 8090 was not listening during the whole run (not touched), so the registry was a docs server built from this branch on 8198 (`PORT=8198 GO_ENV=production`, started and stopped by pid). CLI `go build -o $S/cli ./cmd/shadcn-templ`.
+
+Fixed during the run (this commit):
+- `apps/web/Taskfile.yml` of the monorepo template. templ runs `--cmd` in its `-path`, so `go run .` ran at the module root ("no Go files"); now `--cmd="cd '{{.TASKFILE_DIR}}' && go run ."`. `task dev PORT=...` did not reach the nested `task --parallel`, which picked its own ports (also 8090); the picked `PORT` and `PROXY_PORT` are now passed on. Both were already wrong in beta.11's monorepo template, which was never run with `task dev`.
+- The monorepo `Dockerfile` uses `golang:1.26`: `go mod tidy` raises the scaffold to `go 1.26.0` (shadcn-templ's own go.mod requires it, beta.11 too) and `golang:1.25` with `GOTOOLCHAIN=local` refuses that module.
+
+Results:
+- Single app against beta.11 (`$S/bin/shadcn-templ`, `go install ...@v2.0.0-beta.11`), same commands with both CLIs: `init single -t templ` plus `add button dialog combobox sidebar-07 popover`; a `go mod init` module with `init --preset vega`, `add button dialog sidebar-07`, `bundle`; the beta.11 layout `cmd/a` and `cmd/b` with `init`, `add`, `bundle`. 218 files including every command's output: identical, except `assets/css/globals.css` in two places, where only the position of the `.dark` block differs (same sorted lines). beta.11 itself writes either order run to run (`update_css.go` ranges over a map of `:root` and `.dark`), measured 2 of 4 runs each way; the branch CLI shows the same two variants. Single scaffold `task build` with the branch as tool: OK, the bundle hash unchanged.
+- Monorepo: `init demo --monorepo`, `add button dialog combobox sidebar-07 --cwd apps/web` (ui components in `packages/ui/components`, `sidebar07` in `apps/web/components/blocks/sidebar07` importing `demo/packages/ui/components/...`), `apps/admin` copied from `apps/web` without `components.json`, `components` and bundle, import paths changed, `init --cwd apps/admin` (joins `packages/ui`, its bundle written, `apps/web`'s renewed), `add popover --cwd apps/admin` (2 created, 15 skipped, both apps' bundle renewed), both configs as in the docs, the theme only in `packages/ui/styles/globals.css`. Pages: web renders a dialog and a combobox, `/sidebar` the sidebar-07 block, admin a popover. `go mod edit -replace github.com/axadrn/shadcn-templ/v2=<worktree>`, `go mod tidy`, root `task build` (web and admin: Tailwind from the ui CSS, 93457 bytes each, `bundle`, `templ generate -path ../..`, `go build`): OK.
+- Served `apps/web/bin/app` on 8197 and `apps/admin/bin/app` on 8199. Chromium (Playwright from `parity/node_modules`, the script in `$S` since this worktree cannot write into the main checkout): dialog opens with `data-open`, combobox selects `htmx`, the sidebar-07 block renders, popover opens, 0 console errors, 0 page errors. Stopped by pid.
+- `task dev` side by side: `apps/web` with `PORT=8197 PROXY_PORT=7397`, `apps/admin` with `PORT=8199` and the proxy port picked automatically (7332, since 7331 is taken). Both proxies serve, the same Chromium check against the two proxies passes with 0 errors. Both process groups stopped.
+- `docker build` of the monorepo scaffold (the branch CLI copied into the context as `_cli` with a replace, one extra `COPY _cli ./_cli` before `go mod download` in the test copy only): OK, `task web:build` inside; the container served `/`, the bundle and `output.css` with 200. Container and image removed.
+- `go build ./...`, `go vet ./cmd/shadcn-templ/...`, `go test ./cmd/shadcn-templ/... ./internal/...` green, `git diff --check` clean.
+
+Open:
+- The single-app scaffold's `Dockerfile` has the same `golang:1.25` problem after `go mod tidy`, and its `task dev PORT=...` does not reach the nested `task --parallel` either. Not changed here, single-app output stays byte for byte beta.11; a one-line fix each for the next release.
+- The `.dark` block order in the CSS writer is random (above), from before this branch.
+- The scaffold's `task build` and Docker build need a shadcn-templ release that contains this branch; with beta.11 as the tool `bundle` still keys on `aliases.components`.
 
 ## Planner review

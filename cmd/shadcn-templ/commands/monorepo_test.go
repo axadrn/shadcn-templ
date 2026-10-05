@@ -184,7 +184,7 @@ func TestInitMonorepoScaffold(t *testing.T) {
 		"packages/ui/components/scripts.templ": {"package components", "templ Scripts()"},
 		"packages/ui/styles/globals.css":       {`@source "../../../apps";`, `@source "..";`, "--background"},
 		"packages/ui/utils/shadcn-templ.go":    {"package utils"},
-		"apps/web/Taskfile.yml":                {"tailwindcss -i ../../packages/ui/styles/globals.css -o ./assets/css/output.css --minify", "go tool templ generate -path ../..", "--proxyport={{.PROXY_PORT}}", "go tool shadcn-templ bundle", "go build -o bin/app ."},
+		"apps/web/Taskfile.yml":                {"tailwindcss -i ../../packages/ui/styles/globals.css -o ./assets/css/output.css --minify", "go tool templ generate -path ../..", "--proxyport={{.PROXY_PORT}}", `--cmd="cd '{{.TASKFILE_DIR}}' && go run ."`, "templ PORT={{.PORT}} PROXY_PORT={{.PROXY_PORT}}", "go tool shadcn-templ bundle", "go build -o bin/app ."},
 		"apps/web/main.go":                     {`"mono/apps/web/assets"`, `"mono/apps/web/pages"`},
 		"apps/web/layouts/base.templ":          {`import "mono/packages/ui/components"`, "@components.Scripts()"},
 		"apps/web/pages/home.templ":            {`"mono/apps/web/layouts"`, `"mono/packages/ui/components/componentexample"`},
