@@ -71,6 +71,9 @@
         },
         "utils": {
           "type": "string"
+        },
+        "ui": {
+          "type": "string"
         }
       },
       "required": ["components", "utils"]

@@ -32,11 +32,13 @@ shadcn's model (`apps/v4/content/docs/(root)/monorepo.mdx`, `templates/next-mono
 - **Dev ports.** Each app's `task dev` picks a free app port (already) and a free templ proxy port (`--proxyport`), so two apps run side by side like shadcn's `turbo dev`.
 - **Single app unchanged.** No `ui` alias, no workspace lookup beyond the app itself: byte for byte the same files, configs and output as `v2.0.0-beta.11`.
 - **Migration from beta.11's model** is a release note: move `components/` and `utils/` into `packages/ui/`, add `packages/ui/components.json`, set the app aliases.
+- **The ui package has no `scripts` block** (Executor, task 1). shadcn's `packages/ui/components.json` has nothing app-like, and the ui package serves no bundle. A `components.json` with `aliases.ui` and without `scripts` is a library workspace: `Config.Scripts` stays nil, no defaults. Without `aliases.ui` a missing `scripts` block keeps getting the defaults (the beta.10 migration), so every existing config resolves as before.
+- **The workspace lookup stops at the module root and starts at the alias directory itself** (Executor, task 1). shadcn's `findPackageRoot` globs `package.json` below the common root; the Go pendant walks up from the alias directory to the closest `components.json`. The app itself, or no `components.json` up to the module root (a beta.11 app sharing root `components/`), means the app's own config, so single apps and beta.11 monorepos are their own workspace.
 
 ## Tasks
 
 ### 1. Config: ui alias and workspace configs
-- [ ] Done
+- [x] Done
 
 ### 2. add: route files and imports by workspace
 - [ ] Done
@@ -56,5 +58,11 @@ shadcn's model (`apps/v4/content/docs/(root)/monorepo.mdx`, `templates/next-mono
 Unit tests per task. End to end with a CLI built from the branch against the local registry: `init demo --monorepo`, `add button dialog combobox sidebar-07 --cwd apps/web` (sidebar-07 is a block: it must land in `apps/web/components/blocks/` with imports into `packages/ui`), a second app `init --cwd apps/admin`, `add popover --cwd apps/admin`, `task build`, both apps served, each page checked in Chromium (dialog opens, combobox selects, popover opens, no console errors), `task dev` for both apps side by side on free ports, the Docker build. Single-app scaffold: `init`, `add`, `task build` unchanged.
 
 ## Executor log
+
+### Task 1
+
+`utils.Aliases.UI` (`"ui,omitempty"`, so a config without it writes byte for byte as before), `RawConfig.UIAlias()` (ui, else components), `ResolvedPaths.UI`. `utils.WorkspaceConfig` {Components, UI, Utils} and `GetWorkspaceConfig`, the `getWorkspaceConfig` pendant: per alias directory the closest `components.json` at or above it up to the module root, loaded unless it is the app itself. A config with `aliases.ui` and no `scripts` is a library workspace (Decisions). `static/schema/components.json` gains `aliases.ui`. Test `TestGetWorkspaceConfig`: apps/web plus packages/ui resolve ui and utils to the ui config, components to the app, the ui config to itself and without scripts; a single app and a beta.11 app under `cmd/` are their own workspace with default scripts. `go test ./cmd/shadcn-templ/...` green.
+
+Environment: the branch `feat/monorepo-shadcn` is checked out in the main checkout, so this worktree works on `feat/monorepo-shadcn-exec` from `origin/feat/monorepo-shadcn`; it fast forwards onto `feat/monorepo-shadcn`.
 
 ## Planner review
