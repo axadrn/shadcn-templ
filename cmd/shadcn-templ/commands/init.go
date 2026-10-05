@@ -291,7 +291,7 @@ func RunInit(opts InitOptions) error {
 	// scripts needs its own copy of the bundle in its scripts.dir; add
 	// bundles only when it writes scripts.
 	if scripts, _ := filepath.Glob(filepath.Join(config.ResolvedPaths.UI, "*", "*.js")); len(scripts) > 0 {
-		bundlePaths, _, err := updaters.UpdateScripts(config)
+		bundlePaths, _, err := updaters.UpdateScripts(config, true)
 		if err != nil {
 			return err
 		}

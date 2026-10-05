@@ -249,7 +249,7 @@ func TestInitMonorepoScaffold(t *testing.T) {
 		return filepath.Base(matches[0])
 	}
 	webBundle := bundle(app)
-	if !strings.Contains(read(filepath.Join(app, "assets", "js", webBundle)), "// components/dialog/") {
+	if !strings.Contains(read(filepath.Join(app, "assets", "js", webBundle)), "window.templ.dialog={") {
 		t.Error("bundle lacks the packages/ui dialog script")
 	}
 	manifest := read(filepath.Join(ui, "components", "scripts_bundle.go"))

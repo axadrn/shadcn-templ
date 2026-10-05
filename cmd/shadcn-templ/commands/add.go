@@ -167,7 +167,7 @@ func addComponents(components []string, config *utils.Config, registryURL string
 	}
 	if needsBundle {
 		defaulted := config.ScriptsDefaulted
-		bundlePaths, _, err := updaters.UpdateScripts(config)
+		bundlePaths, _, err := updaters.UpdateScripts(config, true)
 		if err != nil {
 			return err
 		}

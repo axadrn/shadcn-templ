@@ -42,7 +42,7 @@ func RunBundle(opts BundleOptions) error {
 	}
 	build := func() error {
 		defaulted := config.ScriptsDefaulted
-		paths, written, err := updaters.UpdateScripts(config)
+		paths, written, err := updaters.UpdateScripts(config, !opts.Watch)
 		if err != nil {
 			return err
 		}

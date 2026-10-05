@@ -41,7 +41,7 @@ func TestUpdateScripts(t *testing.T) {
 	write("internal/design/own.js", "ignored")
 	write("internal/design/a/nested/x.js", "ignored")
 	write("assets/js/custom.js", "keep")
-	paths, written, err := UpdateScripts(config)
+	paths, written, err := UpdateScripts(config, false)
 	if err != nil || !written || len(paths) != 1 {
 		t.Fatalf("first build: paths=%v written=%v err=%v", paths, written, err)
 	}
@@ -73,7 +73,7 @@ func TestUpdateScripts(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	_, written, err = UpdateScripts(config)
+	_, written, err = UpdateScripts(config, false)
 	if err != nil || written {
 		t.Fatalf("second build: written=%v err=%v", written, err)
 	}
@@ -84,7 +84,7 @@ func TestUpdateScripts(t *testing.T) {
 		}
 	}
 	config.Scripts.Path = "https://cdn.example.com/app/js/"
-	_, written, err = UpdateScripts(config)
+	_, written, err = UpdateScripts(config, false)
 	if err != nil || !written {
 		t.Fatalf("URL change: written=%v err=%v", written, err)
 	}
@@ -93,7 +93,7 @@ func TestUpdateScripts(t *testing.T) {
 		t.Fatalf("manifest URL: %s", manifest)
 	}
 	write("internal/design/a/a.js", "changed")
-	next, _, err := UpdateScripts(config)
+	next, _, err := UpdateScripts(config, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func TestUpdateScriptsSharedComponents(t *testing.T) {
 	b := app("cmd/b", "web/static/js")
 	write("cmd/b/web/static/js/shadcn-templ-0000000000000000.js", "stale")
 
-	paths, written, err := UpdateScripts(a)
+	paths, written, err := UpdateScripts(a, false)
 	if err != nil || !written || len(paths) == 0 {
 		t.Fatalf("build: paths=%v written=%v err=%v", paths, written, err)
 	}
@@ -172,7 +172,7 @@ func TestUpdateScriptsSharedComponents(t *testing.T) {
 	}
 
 	// Bundling from the other app is a no-op: same bytes, same manifest.
-	if _, written, err := UpdateScripts(b); err != nil || written {
+	if _, written, err := UpdateScripts(b, false); err != nil || written {
 		t.Fatalf("second app: written=%v err=%v", written, err)
 	}
 
@@ -182,10 +182,70 @@ func TestUpdateScriptsSharedComponents(t *testing.T) {
 		t.Fatal(err)
 	}
 	write("components/a/a.js", "changed")
-	if _, _, err := UpdateScripts(a); err == nil || !strings.Contains(err.Error(), "scripts.path") {
+	if _, _, err := UpdateScripts(a, false); err == nil || !strings.Contains(err.Error(), "scripts.path") {
 		t.Fatalf("expected a scripts.path conflict, got %v", err)
 	}
 	if _, err := os.Stat(want[0]); err != nil {
 		t.Fatalf("conflict must not write anything: %v", err)
+	}
+}
+
+func TestUpdateScriptsMinify(t *testing.T) {
+	cwd := t.TempDir()
+	write := func(name, content string) {
+		t.Helper()
+		name = filepath.Join(cwd, name)
+		if err := os.MkdirAll(filepath.Dir(name), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(name, []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write("go.mod", "module example.com/app\n")
+	config, err := utils.ResolveConfigPaths(cwd, &utils.RawConfig{
+		Tailwind: utils.Tailwind{CSS: "assets/css/globals.css"},
+		Aliases:  utils.Aliases{Components: "example.com/app/components", Utils: "example.com/app/utils"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	write("components/baseui/block.js", "var templBlock = function (longName) {\n  // A comment.\n  return longName + 1;\n};\n")
+	write("components/a/a.js", "/*! @license kept */\n(function () {\n  const value = templBlock(1);\n  window.templ = { value: value };\n})()\n")
+	read := func(paths []string) string {
+		t.Helper()
+		data, err := os.ReadFile(paths[0])
+		if err != nil {
+			t.Fatal(err)
+		}
+		return string(data)
+	}
+	paths, _, err := UpdateScripts(config, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := read(paths)
+	want := "var templBlock=function(n){return n+1};\n/*! @license kept */(function(){const l=templBlock(1);window.templ={value:l}})();\n"
+	if got != want {
+		t.Fatalf("minified bundle:\n%s\nwant:\n%s", got, want)
+	}
+	// Deterministic: a second build writes nothing.
+	if _, written, err := UpdateScripts(config, true); err != nil || written {
+		t.Fatalf("rebuild: written=%v err=%v", written, err)
+	}
+	// Unminified, as the watcher writes it, the scripts stay as they are,
+	// under the same name: it hashes the sources, so the manifest stays put.
+	readable, written, err := UpdateScripts(config, false)
+	sources := read(readable)
+	if err != nil || !written || readable[0] != paths[0] || !strings.HasPrefix(sources, "// components/baseui/block.js\nvar templBlock = function (longName) {") {
+		t.Fatalf("unminified: paths=%v written=%v err=%v", readable, written, err)
+	}
+	sum := sha256.Sum256([]byte(sources))
+	if filepath.Base(paths[0]) != fmt.Sprintf("shadcn-templ-%x.js", sum[:8]) {
+		t.Fatalf("hash path=%s", paths[0])
+	}
+	write("components/z/z.js", "function broken( {\n")
+	if _, _, err := UpdateScripts(config, true); err == nil || !strings.HasPrefix(err.Error(), "components/z/z.js:2:1: ") {
+		t.Fatalf("syntax error: %v", err)
 	}
 }
