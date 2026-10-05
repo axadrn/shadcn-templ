@@ -302,7 +302,13 @@ func transformCssVars(doc *document, cssVars *registry.ItemVars, options CSSVars
 	}
 
 	// Light -> :root, dark -> .dark.
-	for selector, vars := range map[string]*registry.OrderedMap{":root": cssVars.Light, ".dark": cssVars.Dark} {
+	// :root before .dark, like shadcn's output; a map range would order
+	// them at random from run to run.
+	for _, block := range []struct {
+		selector string
+		vars     *registry.OrderedMap
+	}{{":root", cssVars.Light}, {".dark", cssVars.Dark}} {
+		selector, vars := block.selector, block.vars
 		if vars.Len() == 0 {
 			continue
 		}
