@@ -260,10 +260,10 @@ func presetURLOnly(presetArg string) string {
 }
 
 // installedComponents is the getProjectComponents pendant: the component
-// directories under the components dir, translated to registry item names
+// directories under the ui components dir, translated to registry item names
 // (the directory is flat "alertdialog", the item name "alert-dialog").
 func installedComponents(config *utils.Config, registryURL string) ([]string, error) {
-	entries, err := os.ReadDir(config.ResolvedPaths.Components)
+	entries, err := os.ReadDir(config.ResolvedPaths.UI)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil

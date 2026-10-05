@@ -33,6 +33,8 @@ shadcn's model (`apps/v4/content/docs/(root)/monorepo.mdx`, `templates/next-mono
 - **Single app unchanged.** No `ui` alias, no workspace lookup beyond the app itself: byte for byte the same files, configs and output as `v2.0.0-beta.11`.
 - **Migration from beta.11's model** is a release note: move `components/` and `utils/` into `packages/ui/`, add `packages/ui/components.json`, set the app aliases.
 - **The ui package has no `scripts` block** (Executor, task 1). shadcn's `packages/ui/components.json` has nothing app-like, and the ui package serves no bundle. A `components.json` with `aliases.ui` and without `scripts` is a library workspace: `Config.Scripts` stays nil, no defaults. Without `aliases.ui` a missing `scripts` block keeps getting the defaults (the beta.10 migration), so every existing config resolves as before.
+- **Routing by registry path** (Executor, task 2). shadcn routes by file type (`registry:ui` to ui, `registry:hook`/`registry:lib` to hooks/lib, the rest to components). Our registry paths say the same for every installable kind (`components/` holds `registry:ui` and the `scripts` lib item, `utils/` the utils lib, `blocks/` the block components and pages) except `registry:example` (`component-example`, `example`), which live under `components/` and import ui packages and each other as one tree of Go packages. So `components/` goes to the ui workspace, `utils/` and `registry:lib` to the utils workspace, file targets, `blocks/` and the rest to the app. Imports follow the same split, so a Go import never points into the wrong workspace.
+- **One tree, the ui workspace resolves it** (Executor, task 2). shadcn resolves the registry tree with the app config and transforms each file with its target config; its requirement 3 makes the style the same anyway. Our style, menu color and rtl are resolved by the registry at fetch time for the whole tree, so the tree is fetched with the ui workspace's config (the main target, like `mainTargetConfig` for the CSS). The shared components therefore always install in the ui package's style, whichever app runs `add`.
 - **The workspace lookup stops at the module root and starts at the alias directory itself** (Executor, task 1). shadcn's `findPackageRoot` globs `package.json` below the common root; the Go pendant walks up from the alias directory to the closest `components.json`. The app itself, or no `components.json` up to the module root (a beta.11 app sharing root `components/`), means the app's own config, so single apps and beta.11 monorepos are their own workspace.
 
 ## Tasks
@@ -41,7 +43,7 @@ shadcn's model (`apps/v4/content/docs/(root)/monorepo.mdx`, `templates/next-mono
 - [x] Done
 
 ### 2. add: route files and imports by workspace
-- [ ] Done
+- [x] Done
 
 ### 3. init: --monorepo scaffold as apps/web plus packages/ui, init in an app, design settings propagation
 - [ ] Done
@@ -64,5 +66,9 @@ Unit tests per task. End to end with a CLI built from the branch against the loc
 `utils.Aliases.UI` (`"ui,omitempty"`, so a config without it writes byte for byte as before), `RawConfig.UIAlias()` (ui, else components), `ResolvedPaths.UI`. `utils.WorkspaceConfig` {Components, UI, Utils} and `GetWorkspaceConfig`, the `getWorkspaceConfig` pendant: per alias directory the closest `components.json` at or above it up to the module root, loaded unless it is the app itself. A config with `aliases.ui` and no `scripts` is a library workspace (Decisions). `static/schema/components.json` gains `aliases.ui`. Test `TestGetWorkspaceConfig`: apps/web plus packages/ui resolve ui and utils to the ui config, components to the app, the ui config to itself and without scripts; a single app and a beta.11 app under `cmd/` are their own workspace with default scripts. `go test ./cmd/shadcn-templ/...` green.
 
 Environment: the branch `feat/monorepo-shadcn` is checked out in the main checkout, so this worktree works on `feat/monorepo-shadcn-exec` from `origin/feat/monorepo-shadcn`; it fast forwards onto `feat/monorepo-shadcn`.
+
+### Task 2
+
+`addComponents` loads `GetWorkspaceConfig` once; the ui workspace is the main target: its style, menu color and rtl resolve the tree, its `tailwind.css` takes the CSS and the vendored stylesheets land next to it. `UpdateFilesOptions.Workspace`; `targetConfig` (the `getTargetConfigKeyForFile` pendant, by registry path, see Decisions) picks the config per file, `resolveFilePath` and `transformContent` run with it: `components/` to `ResolvedPaths.UI`, imports of `components/...` to `aliases.ui`, `blocks/...` to `aliases.components` + `/blocks`, the ui root package name from `aliases.ui`. In a workspace install the summary prints paths relative to the module root, like shadcn's workspace root. `apply` lists installed components in the ui dir. A single app has every workspace equal to itself, so its files, imports and output are unchanged. Test `TestUpdateFilesWorkspace` (apps/web plus packages/ui): ui component, its JS, `scripts.templ` and utils in `packages/ui`, the sidebar07 page in `apps/web/components/blocks/sidebar07` importing `packages/ui/components/sidebar` and its own block package under `apps/web/components/blocks`, nothing at the module root. `go test ./cmd/shadcn-templ/...` green. The bundle is still keyed on `aliases.components` until task 4.
 
 ## Planner review

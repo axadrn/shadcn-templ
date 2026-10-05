@@ -1,8 +1,9 @@
 // The add command, the pendant of src/commands/add.ts, with the shared
 // install pipeline of src/utils/add-components.ts inlined below. One pipeline
-// covers addWorkspaceComponents too: in a Go module the import path aliases
-// already route shared files to the module root and page targets to the
-// app, so there is no second workspace config to load (see utils.Config).
+// covers addProjectComponents and addWorkspaceComponents: every file is
+// written with the config of the workspace that holds it
+// (utils.GetWorkspaceConfig), and the ui workspace is the main target for
+// the registry style and the CSS. In a single app all workspaces are the app.
 //
 // Dropped npm-only options: -y/--yes (this add never prompts), --dry-run/
 // --diff/--view (no pendant yet) and the interactive component multiselect.
@@ -113,20 +114,29 @@ type addComponentsOptions struct {
 // addComponents is the addComponents pendant: resolve the registry tree,
 // write the files and update the CSS last.
 func addComponents(components []string, config *utils.Config, registryURL string, options addComponentsOptions) error {
+	workspace, err := utils.GetWorkspaceConfig(config)
+	if err != nil {
+		return err
+	}
+	// The ui workspace is the main target (addWorkspaceComponents'
+	// mainTargetConfig): its style, menu and rtl settings resolve the tree,
+	// its CSS takes the theme. The shared components stay in one style.
+	ui := workspace.UI
+
 	logf(options.Silent, "Checking registry.\n")
 	// The config half of shadcn's install transformers (transform-menu.ts,
 	// transform-rtl.ts): sent along, resolved by the registry at serve time.
 	query := url.Values{}
-	if config.MenuColor != "" && config.MenuColor != "default" {
-		query.Set("menuColor", config.MenuColor)
+	if ui.MenuColor != "" && ui.MenuColor != "default" {
+		query.Set("menuColor", ui.MenuColor)
 	}
-	if config.RTL != nil && *config.RTL {
+	if ui.RTL != nil && *ui.RTL {
 		query.Set("rtl", "true")
 	}
-	if supportsFontHeading(config.ResolvedPaths.TailwindCSS) {
+	if supportsFontHeading(ui.ResolvedPaths.TailwindCSS) {
 		query.Set("fontHeading", "true")
 	}
-	tree, err := registry.ResolveTree(registryURL, config.Style, query, components)
+	tree, err := registry.ResolveTree(registryURL, ui.Style, query, components)
 	if err != nil {
 		return err
 	}
@@ -138,6 +148,7 @@ func addComponents(components []string, config *utils.Config, registryURL string
 		Overwrite: options.Overwrite,
 		Silent:    options.Silent,
 		Path:      options.Path,
+		Workspace: workspace,
 	})
 	if err != nil {
 		return err
@@ -163,7 +174,7 @@ func addComponents(components []string, config *utils.Config, registryURL string
 		for _, bundlePath := range bundlePaths {
 			logf(options.Silent, "Bundle: %s\n", utils.DisplayPath(config, bundlePath))
 		}
-		logf(options.Silent, "Render @%s.Scripts() once in your layout <head>.\n", path.Base(config.Aliases.Components))
+		logf(options.Silent, "Render @%s.Scripts() once in your layout <head>.\n", path.Base(config.UIAlias()))
 		if defaulted {
 			logf(options.Silent, "Serve %s at %s.\n", config.Scripts.Dir, config.Scripts.Path)
 		}
@@ -172,9 +183,9 @@ func addComponents(components []string, config *utils.Config, registryURL string
 	// CSS last, so a file watcher rebuild sees the finished component files.
 	overwriteCssVars := options.OverwriteCssVars || tree.HasThemeItem
 	if !tree.CSSVars.Empty() || tree.CSS.Len() > 0 {
-		relCSS := utils.DisplayPath(config, config.ResolvedPaths.TailwindCSS)
+		relCSS := utils.DisplayPath(config, ui.ResolvedPaths.TailwindCSS)
 		logf(options.Silent, "Updating %s.\n", relCSS)
-		vendored, err := updaters.UpdateCSS(config.ResolvedPaths.TailwindCSS, updaters.UpdateCSSOptions{
+		vendored, err := updaters.UpdateCSS(ui.ResolvedPaths.TailwindCSS, updaters.UpdateCSSOptions{
 			CSSVars:          tree.CSSVars,
 			CSS:              tree.CSS,
 			OverwriteCssVars: overwriteCssVars,
@@ -182,7 +193,7 @@ func addComponents(components []string, config *utils.Config, registryURL string
 		if err != nil {
 			return err
 		}
-		if err := vendorCSSImports(vendored, config, registryURL, options.Silent); err != nil {
+		if err := vendorCSSImports(vendored, config, ui.ResolvedPaths.TailwindCSS, registryURL, options.Silent); err != nil {
 			return err
 		}
 	}
@@ -214,8 +225,8 @@ func supportsFontHeading(path string) bool {
 // imports relatively (./tw-animate.css, ./shadcn-tailwind.css) and writes
 // them next to the Tailwind entry file. They are the pendants of the
 // tw-animate-css and shadcn/tailwind.css npm imports.
-func vendorCSSImports(names []string, config *utils.Config, registryURL string, silent bool) error {
-	cssDir := filepath.Dir(config.ResolvedPaths.TailwindCSS)
+func vendorCSSImports(names []string, config *utils.Config, tailwindCSS, registryURL string, silent bool) error {
+	cssDir := filepath.Dir(tailwindCSS)
 	for _, name := range names {
 		content, err := registry.FetchText(registryURL + "/assets/css/" + name)
 		if err != nil {
