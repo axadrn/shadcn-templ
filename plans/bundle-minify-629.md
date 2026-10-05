@@ -2,7 +2,7 @@
 
 - **Planner**: Claude
 - **Executor**: Claude
-- **Status**: in progress
+- **Status**: done
 
 ## Context
 
@@ -42,7 +42,7 @@ Checks: the docs pages render on the dev server.
 
 ### 3. Release
 
-- [ ] Done
+- [x] Done
 
 PR, merge, tag `v2.0.0-beta.13`, GitHub release in the beta.12 shape. The owner asked for the release on 2026-10-05.
 
@@ -62,4 +62,10 @@ Checks: `go test ./cmd/shadcn-templ/...`, `go vet`, `go build ./...` pass.
 
 `cli.md` (bundle section and the `--watch` option), `installation.md` (JavaScript: when the bundle is written, what is minified), the `--watch` flag help to match, and `changelog/2026-10-minified-script-bundle.md`. A docs server from this branch on port 8097 serves `/docs/cli`, `/docs/installation` and `/docs/changelog` with 200 and the new text.
 
+### Task 3 (Claude, 2026-10-05)
+
+`go test ./...` passes; `go vet ./...` reports only the existing unkeyed struct literals in generated example code. Smoke test with the CLI built from this branch against the local registry: `init -t templ`, `add dialog tooltip` writes a minified `assets/js/shadcn-templ-4e97eac0589b8c66.js` (140,215 bytes, `node --check` passes), `go build ./...` passes after the scratch project's own `templ generate`, `bundle` is a no-op, `bundle --watch` rewrites the same file name readable and leaves `scripts_bundle.go` unchanged. PR #630, merged, tagged `v2.0.0-beta.13`.
+
 ## Planner review
+
+All three tasks accepted. Task 1's deviation (hash the sources) is the right call: it keeps the committed manifest stable between `task dev` and `task build`, which hashing the minified output would have broken for every user.
