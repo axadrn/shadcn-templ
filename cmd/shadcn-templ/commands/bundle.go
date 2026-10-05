@@ -24,7 +24,7 @@ func NewBundleFlagSet(opts *BundleOptions) *flag.FlagSet {
 	fs := flag.NewFlagSet("bundle", flag.ContinueOnError)
 	fs.StringVar(&opts.Cwd, "cwd", ".", "the working directory")
 	fs.BoolVar(&opts.Silent, "silent", false, "mute output")
-	fs.BoolVar(&opts.Watch, "watch", false, "watch component scripts")
+	fs.BoolVar(&opts.Watch, "watch", false, "rebuild unminified when component scripts change")
 	return fs
 }
 

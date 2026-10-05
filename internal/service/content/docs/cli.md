@@ -94,7 +94,9 @@ Use `bundle` to build the component JavaScript asset and its generated Go URL ma
 shadcn-templ bundle
 ```
 
-`add` rebuilds the bundle when it writes component JavaScript. Run `bundle --watch` when editing scripts by hand. The watcher debounces changes by 100ms and writes only changed output. In a [monorepo](/docs/monorepo), `bundle` writes the bundle into every app that shares the ui package.
+The bundle is minified, like `next build` minifies shadcn's components. `--watch` writes it readable instead, like `next dev`, so stack traces point at your component sources. Both use the same file name, a hash of the sources, so `components/scripts_bundle.go` does not change between them. Your component files are never minified.
+
+`init` and `add` rebuild the bundle when they write component JavaScript. Run `bundle --watch` when editing scripts by hand. The watcher debounces changes by 100ms and writes only changed output. In a [monorepo](/docs/monorepo), `bundle` writes the bundle into every app that shares the ui package.
 
 The output location comes from [scripts](/docs/components-json#scripts) in `components.json`. Old hashed bundles in that directory are removed. Ignore the JS output and commit `components/scripts_bundle.go`. For production builds and Docker images, see [Build and Deploy](/docs/installation#build-and-deploy).
 
@@ -107,7 +109,7 @@ Usage:
 Options:
   --cwd <path>  the working directory (default ".")
   --silent      mute output
-  --watch       rebuild when component scripts change
+  --watch       rebuild unminified when component scripts change
 ```
 
 ## apply

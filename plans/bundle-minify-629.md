@@ -34,7 +34,7 @@ Checks: `go test ./cmd/shadcn-templ/...`, `go build ./...`, a minified bundle of
 
 ### 2. Docs and changelog
 
-- [ ] Done
+- [x] Done
 
 Done when: `cli.md`, `installation.md` and a changelog entry describe the minified bundle and the unminified watcher.
 
@@ -57,5 +57,9 @@ Done when: the release is published and #629 is closed by the PR.
 This repo's components: 966,893 bytes raw and 227,273 gzipped unminified, 386,898 and 119,596 minified. `node --check` passes; two runs give the same file. jsdom over 21 previews (dialog, sidebar, tooltip, select, combobox, dropdown menu, popover, drawer, slider, tabs, accordion, toast, navigation menu, context menu, hover card, input otp, carousel, resizable, menubar, chart, command dialog), same served HTML for both bundles: the `window.templ` API and every attribute after init are identical, no new error (command-dialog throws jsdom's missing `scrollIntoView` with both). Chromium and WebKit do not start on this machine (missing system libraries), so no Playwright run.
 
 Checks: `go test ./cmd/shadcn-templ/...`, `go vet`, `go build ./...` pass.
+
+### Task 2 (Claude, 2026-10-05)
+
+`cli.md` (bundle section and the `--watch` option), `installation.md` (JavaScript: when the bundle is written, what is minified), the `--watch` flag help to match, and `changelog/2026-10-minified-script-bundle.md`. A docs server from this branch on port 8097 serves `/docs/cli`, `/docs/installation` and `/docs/changelog` with 200 and the new text.
 
 ## Planner review
