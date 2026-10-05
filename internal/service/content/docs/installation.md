@@ -320,7 +320,7 @@ import "your-app/components"
 
 When you add a component with JavaScript, the CLI builds `assets/js/shadcn-templ-<hash>.js` and writes its URL to `components/scripts_bundle.go`. Serve the JS file with your other assets. There is no component-specific HTTP handler or runtime bundling.
 
-The bundle contains `*/*.js` from your configured components directory in lexical order (excluding `.min.js` files). Root-level scripts are not included. Change its output directory and public URL with [scripts.dir and scripts.path](/docs/components-json#scripts).
+The bundle contains `*/*.js` from your configured components directory in lexical order (excluding `.min.js` files). Root-level scripts are not included. It is built on your machine, never at runtime: by `init` and `add`, by the watcher during `task dev`, and by `bundle` in `task build`. `init`, `add` and `bundle` minify it, the watcher keeps it readable for debugging. Your component sources stay as they are. Change its output directory and public URL with [scripts.dir and scripts.path](/docs/components-json#scripts).
 
 While editing component scripts, run:
 

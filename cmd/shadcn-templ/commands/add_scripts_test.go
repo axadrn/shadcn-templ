@@ -129,7 +129,7 @@ func TestAddJavaScriptComponentBuildsBundleAtComponentsAlias(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(string(data), "// components/dialog/dialog.js") {
+		if !strings.Contains(string(data), "window.templ.dialog={") {
 			t.Fatal("migration bundle misses previously installed dialog")
 		}
 		assertFileContains("internal/design/scripts_bundle.go", filepath.Base(bundles[0]))
