@@ -184,7 +184,7 @@ func TestInitMonorepoScaffold(t *testing.T) {
 		"packages/ui/components/scripts.templ": {"package components", "templ Scripts()"},
 		"packages/ui/styles/globals.css":       {`@source "../../../apps";`, `@source "..";`, "--background"},
 		"packages/ui/utils/shadcn-templ.go":    {"package utils"},
-		"apps/web/Taskfile.yml":                {"tailwindcss -i ../../packages/ui/styles/globals.css -o ./assets/css/output.css --minify", "go tool templ generate -path ../..", "go tool shadcn-templ bundle", "go build -o bin/app ."},
+		"apps/web/Taskfile.yml":                {"tailwindcss -i ../../packages/ui/styles/globals.css -o ./assets/css/output.css --minify", "go tool templ generate -path ../..", "--proxyport={{.PROXY_PORT}}", "go tool shadcn-templ bundle", "go build -o bin/app ."},
 		"apps/web/main.go":                     {`"mono/apps/web/assets"`, `"mono/apps/web/pages"`},
 		"apps/web/layouts/base.templ":          {`import "mono/packages/ui/components"`, "@components.Scripts()"},
 		"apps/web/pages/home.templ":            {`"mono/apps/web/layouts"`, `"mono/packages/ui/components/componentexample"`},
@@ -238,6 +238,26 @@ func TestInitMonorepoScaffold(t *testing.T) {
 	}
 	absent(filepath.Join(app, "components", "sidebar"), filepath.Join(ui, "components", "blocks"), filepath.Join(root, "components"))
 
+	// The bundle is built from packages/ui's scripts, its manifest sits in
+	// the ui components package, the asset in the app's scripts.dir.
+	bundle := func(dir string) string {
+		t.Helper()
+		matches, _ := filepath.Glob(filepath.Join(dir, "assets", "js", "shadcn-templ-*.js"))
+		if len(matches) != 1 {
+			t.Fatalf("%s bundles %v", dir, matches)
+		}
+		return filepath.Base(matches[0])
+	}
+	webBundle := bundle(app)
+	if !strings.Contains(read(filepath.Join(app, "assets", "js", webBundle)), "// components/dialog/") {
+		t.Error("bundle lacks the packages/ui dialog script")
+	}
+	manifest := read(filepath.Join(ui, "components", "scripts_bundle.go"))
+	if !strings.Contains(manifest, "package components") || !strings.Contains(manifest, `"/assets/js/`+webBundle+`"`) {
+		t.Fatalf("manifest %s", manifest)
+	}
+	absent(filepath.Join(app, "components", "scripts_bundle.go"), filepath.Join(ui, "assets"))
+
 	// A second app joins the ui package: its own components, ui and utils
 	// from packages/ui, the shared CSS. Its design settings propagate to
 	// the ui workspace, its style does not.
@@ -265,11 +285,26 @@ func TestInitMonorepoScaffold(t *testing.T) {
 		t.Errorf("apps/web is not a workspace of apps/admin, its config changed: %+v", webRaw)
 	}
 	absent(filepath.Join(admin, "assets", "css", "globals.css"), filepath.Join(admin, "utils"))
+	if got := bundle(admin); got != webBundle {
+		t.Errorf("admin joined with bundle %s, want %s", got, webBundle)
+	}
 	if err := RunAdd([]string{"popover"}, AddOptions{Cwd: admin, Silent: true, Registry: registryURL}); err != nil {
 		t.Fatal(err)
 	}
 	read(filepath.Join(ui, "components", "popover", "popover.templ"))
 	absent(filepath.Join(admin, "components", "popover"))
+	// Both apps share packages/ui, so both get the new bundle.
+	if a, w := bundle(admin), bundle(app); a != w || a == webBundle || !strings.Contains(read(filepath.Join(ui, "components", "scripts_bundle.go")), a) {
+		t.Errorf("after add popover: admin %s, web %s, before %s", a, w, webBundle)
+	}
+	// bundle from the ui workspace itself bundles for its apps.
+	if err := RunBundle(BundleOptions{Cwd: ui, Silent: true}); err != nil {
+		t.Fatal(err)
+	}
+	absent(filepath.Join(ui, "assets"))
+	if raw, _ := utils.GetRawConfig(ui); raw.Scripts != nil {
+		t.Error("bundle wrote a scripts block into the ui workspace")
+	}
 
 	// apply in an app syncs its linked workspaces, the ui package.
 	if err := RunApply([]string{"vega"}, ApplyOptions{Cwd: app, Yes: true, Silent: true, Registry: registryURL}); err != nil {

@@ -312,12 +312,13 @@ func FindModule(dir string) (root, module string, err error) {
 }
 
 // GetSharedConfigs returns the configs of the other apps in config's module
-// whose aliases.components resolve to the same directory: the apps that
-// share one installed components package and its scripts_bundle.go. It
-// walks the module root for components.json, skipping what the go command
-// skips (dot and underscore directories, testdata), vendor, node_modules
-// and nested modules. A components.json that does not load or resolve
-// belongs to something else and is ignored.
+// whose ui alias resolves to the same directory: the apps that share one
+// installed ui components package and its scripts_bundle.go. Library
+// workspaces (no scripts) serve no bundle and are left out. It walks the
+// module root for components.json, skipping what the go command skips (dot
+// and underscore directories, testdata), vendor, node_modules and nested
+// modules. A components.json that does not load or resolve belongs to
+// something else and is ignored.
 func GetSharedConfigs(config *Config) ([]*Config, error) {
 	root := config.ResolvedPaths.ModuleRoot
 	var shared []*Config
@@ -347,7 +348,7 @@ func GetSharedConfigs(config *Config) ([]*Config, error) {
 			return nil
 		}
 		other, err := GetConfig(path)
-		if err != nil || other == nil || other.ResolvedPaths.Components != config.ResolvedPaths.Components {
+		if err != nil || other == nil || other.Scripts == nil || other.ResolvedPaths.UI != config.ResolvedPaths.UI {
 			return nil
 		}
 		shared = append(shared, other)
