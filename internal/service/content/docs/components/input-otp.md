@@ -154,40 +154,47 @@ To enable RTL support, see the [Direction](/docs/components/direction) component
 
 ### InputOTP
 
-The `InputOTP` component is the root that manages the slots and submits the combined value.
+The `InputOTP` component is the root that manages the slots. The real input receives `ID`, `Class`, `Attributes` and the input props, so a form field name goes in `Attributes`, e.g. `Attributes: templ.Attributes{"name": "code"}`, and the server reads the combined value from it.
 
-| Prop       | Type     | Default |
-| ---------- | -------- | ------- |
-| `Value`    | `string` | -       |
-| `Name`     | `string` | -       |
-| `Form`     | `string` | -       |
-| `Pattern`  | `string` | -       |
-| `Disabled` | `bool`   | `false` |
-| `Class`    | `string` | -       |
+| Prop           | Type               | Default |
+| -------------- | ------------------ | ------- |
+| `ID`           | `string`           | -       |
+| `Class`        | `string`           | -       |
+| `Attributes`   | `templ.Attributes` | -       |
+| `Value`        | `*string`          | -       |
+| `DefaultValue` | `string`           | -       |
+| `MaxLength`    | `int`              | -       |
+| `Pattern`      | `string`           | -       |
+| `Disabled`     | `bool`             | `false` |
+| `Required`     | `bool`             | `false` |
 
 ### Group
 
 The `inputotp.Group` component groups adjacent slots.
 
-| Prop    | Type     | Default |
-| ------- | -------- | ------- |
-| `Class` | `string` | -       |
+| Prop         | Type               | Default |
+| ------------ | ------------------ | ------- |
+| `ID`         | `string`           | -       |
+| `Class`      | `string`           | -       |
+| `Attributes` | `templ.Attributes` | -       |
 
 ### Slot
 
 The `inputotp.Slot` component is a single character cell.
 
-| Prop          | Type     | Default |
-| ------------- | -------- | ------- |
-| `Index`       | `int`    | -       |
-| `Placeholder` | `string` | -       |
-| `Disabled`    | `bool`   | `false` |
-| `Class`       | `string` | -       |
+| Prop         | Type               | Default |
+| ------------ | ------------------ | ------- |
+| `Index`      | `int`              | -       |
+| `ID`         | `string`           | -       |
+| `Class`      | `string`           | -       |
+| `Attributes` | `templ.Attributes` | -       |
 
 ### Separator
 
 The `inputotp.Separator` component divides slot groups.
 
-| Prop    | Type     | Default |
-| ------- | -------- | ------- |
-| `Class` | `string` | -       |
+| Prop         | Type               | Default |
+| ------------ | ------------------ | ------- |
+| `ID`         | `string`           | -       |
+| `Class`      | `string`           | -       |
+| `Attributes` | `templ.Attributes` | -       |

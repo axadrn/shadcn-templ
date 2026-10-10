@@ -340,6 +340,15 @@
     });
   }
 
+  // The NOSCRIPT_CSS_FALLBACK sits in a <noscript>. HTML parsed with scripting
+  // off (an htmx swap, a history restore) turns its <style> into a live one,
+  // and its !important rules would paint the real input. With JS running the
+  // fallback has no job, so it goes back to the inert text it is on first load.
+  function inertNoscript(root) {
+    const noscript = root.previousElementSibling;
+    if (noscript?.tagName === "NOSCRIPT" && noscript.firstElementChild) noscript.textContent = noscript.innerHTML;
+  }
+
   function init(root) {
     const input = inputOf(root);
     if (!input) return;
@@ -363,6 +372,7 @@
     if (document.activeElement === input) setFocused(input, true);
 
     insertStyles();
+    inertNoscript(root);
 
     // Track root height
     const updateRootHeight = () => root.style.setProperty("--root-height", `${input.clientHeight}px`);
