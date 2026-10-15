@@ -72,7 +72,9 @@
       const char = value[slotIdx] !== undefined ? value[slotIdx] : null;
       const hasFakeCaret = isActive && char === null;
       slot.setAttribute("data-active", String(isActive));
-      const caret = slot.querySelector(":scope > .cn-input-otp-caret");
+      // The caret is the slot's only element. Not found by its cn- class:
+      // the inliner flattens cn- classes in every string, selectors included.
+      const caret = slot.firstElementChild;
       if (slot.textContent !== (char ?? "") || !!caret !== hasFakeCaret) {
         slot.textContent = char ?? "";
         if (hasFakeCaret) {
