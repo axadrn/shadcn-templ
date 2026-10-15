@@ -500,7 +500,8 @@
       input.type = "hidden";
       input.name = name;
       input.value = v;
-      if (root.form) input.setAttribute("form", root.getAttribute("form") || "");
+      const form = root.getAttribute("form");
+      if (form) input.setAttribute("form", form);
       root.after(input);
     });
   }
