@@ -9,8 +9,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.templui.rule: Host(`templui.io`) || Host(`www.templui.io`)
-      traefik.http.routers.templui.entrypoints: websecure
-      traefik.http.routers.templui.tls.certresolver: letsencrypt
+      traefik.http.routers.templui.entrypoints: web
       traefik.http.routers.templui.middlewares: templui-www
       traefik.http.middlewares.templui-www.redirectregex.regex: ^https?://www\.templui\.io/(.*)
       traefik.http.middlewares.templui-www.redirectregex.replacement: https://templui.io/$${1}
