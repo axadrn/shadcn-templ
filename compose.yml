@@ -10,8 +10,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.shadcn-templ.rule: Host(`shadcn-templ.com`) || Host(`www.shadcn-templ.com`)
-      traefik.http.routers.shadcn-templ.entrypoints: websecure
-      traefik.http.routers.shadcn-templ.tls.certresolver: letsencrypt
+      traefik.http.routers.shadcn-templ.entrypoints: web
       traefik.http.routers.shadcn-templ.middlewares: shadcn-templ-www
       traefik.http.middlewares.shadcn-templ-www.redirectregex.regex: ^https?://www\.shadcn-templ\.com/(.*)
       traefik.http.middlewares.shadcn-templ-www.redirectregex.replacement: https://shadcn-templ.com/$${1}
