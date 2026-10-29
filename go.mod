@@ -4,13 +4,13 @@ go 1.26.0
 
 require (
 	github.com/Oudwins/tailwind-merge-go v0.2.2
-	github.com/a-h/templ v0.3.1070
+	github.com/a-h/templ v0.3.1100
 	github.com/evanw/esbuild v0.28.2
 	github.com/fogleman/gg v1.3.0
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/joho/godotenv v1.5.1
 	github.com/tdewolff/parse/v2 v2.8.16
-	github.com/yuin/goldmark v1.7.13
+	github.com/yuin/goldmark v1.8.6
 	go.abhg.dev/goldmark/frontmatter v0.2.0
 	golang.org/x/image v0.44.0
 )
@@ -18,7 +18,7 @@ require (
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/a-h/parse v0.0.0-20250122154542-74294addb73e // indirect
-	github.com/andybalholm/brotli v1.2.6 // indirect
+	github.com/andybalholm/brotli v1.2.7 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cli/browser v1.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
