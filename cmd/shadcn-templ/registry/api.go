@@ -14,12 +14,10 @@ import (
 	"time"
 )
 
-// DefaultRegistry is the REGISTRY_URL pendant. It points at the 2.0 beta
-// site until stable, then flips back to shadcn-templ.com.
+// DefaultRegistry is the REGISTRY_URL pendant.
 const DefaultRegistry = "https://shadcn-templ.com"
 
-// SiteURL is the SHADCN_URL pendant, used for docs and /create links. Beta
-// interim like DefaultRegistry.
+// SiteURL is the SHADCN_URL pendant, used for docs and /create links.
 const SiteURL = "https://shadcn-templ.com"
 
 // EnvRegistry is the environment variable that overrides the registry URL,
