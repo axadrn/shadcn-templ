@@ -97,7 +97,7 @@ templ Home() {
 }
 ```
 
-After adding components, run `templ generate` and `go mod tidy`.
+After adding components, run `go tool templ generate` and `go mod tidy`.
 
 </Steps>
 
@@ -167,7 +167,7 @@ templ Home() {
 }
 ```
 
-After adding components, run `templ generate` and `go mod tidy`.
+After adding components, run `go tool templ generate` and `go mod tidy`.
 
 </Steps>
 
@@ -188,10 +188,10 @@ go mod init myapp
 
 ### Configure templ, Tailwind CSS and Task
 
-If you're adding shadcn-templ to an existing templ app, make sure templ, Tailwind CSS and Task are installed first:
+If you're adding shadcn-templ to an existing templ app, pin templ as a Go tool in your `go.mod` (run it with `go tool templ`) and install Task:
 
 ```shell
-go install github.com/a-h/templ/cmd/templ@latest
+go get -tool github.com/a-h/templ/cmd/templ@v0.3.1100
 go install github.com/go-task/task/v3/cmd/task@latest
 ```
 
@@ -298,7 +298,7 @@ templ Home() {
 }
 ```
 
-After adding components, run `templ generate` and `go mod tidy`.
+After adding components, run `go tool templ generate` and `go mod tidy`.
 
 </Steps>
 
