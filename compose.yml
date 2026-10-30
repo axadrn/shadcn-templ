@@ -8,7 +8,7 @@ services:
       - proxy
     labels:
       traefik.enable: "true"
-      traefik.http.routers.templui.rule: Host(`templui.io`) || Host(`www.templui.io`)
+      traefik.http.routers.templui.rule: Host(`v1.shadcn-templ.com`) || Host(`templui.io`) || Host(`www.templui.io`)
       traefik.http.routers.templui.entrypoints: web
       traefik.http.routers.templui.middlewares: templui-www
       traefik.http.middlewares.templui-www.redirectregex.regex: ^https?://www\.templui\.io/(.*)
