@@ -121,3 +121,27 @@ templ TocAdCard() {
 		</div>
 	</a>
 }
+
+// TocOpsCard teases goilerplate Ops below the goilerplate card.
+templ TocOpsCard() {
+	<a
+		href="https://goilerplate.com/ops?ref=shadcn-templ-toc"
+		target="_blank"
+		rel="noopener"
+		class="relative block overflow-hidden rounded-2xl bg-foreground p-4 text-background shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+	>
+		<span class="inline-flex items-center gap-1.5 text-[10px] leading-none font-semibold tracking-[0.12em] uppercase opacity-70">
+			<span class="rounded-sm bg-background px-1 py-0.5 text-foreground">New</span>
+			goilerplate Ops · coming soon
+		</span>
+		<div class="mt-4 text-base leading-tight font-semibold tracking-tight text-balance">
+			Hosting, deploys, backups
+			<br/>
+			and your data. One tool.
+		</div>
+		<div class="mt-3 flex items-center gap-1.5 text-xs font-medium opacity-70">
+			Join the waitlist
+			@icon.ArrowUpRight(icon.Props{Class: "size-3.5"})
+		</div>
+	</a>
+}
