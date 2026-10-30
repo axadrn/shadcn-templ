@@ -1,5 +1,18 @@
 version: "3"
 
+vars:
+  # The next free ports from 8090, 7331 and 3000 up, so a second dev server
+  # (another repo or worktree) never collides. 'task dev PORT=8091' wins.
+  FREE_PORT:
+    sh: port=8090; while nc -z localhost $port >/dev/null 2>&1; do port=$((port+1)); done; echo $port
+  PORT: '{{.PORT | default .FREE_PORT}}'
+  FREE_PROXY_PORT:
+    sh: port=7331; while nc -z localhost $port >/dev/null 2>&1; do port=$((port+1)); done; echo $port
+  PROXY_PORT: '{{.PROXY_PORT | default .FREE_PROXY_PORT}}'
+  FREE_SHIKI_PORT:
+    sh: port=3000; while nc -z localhost $port >/dev/null 2>&1; do port=$((port+1)); done; echo $port
+  SHIKI_PORT: '{{.SHIKI_PORT | default .FREE_SHIKI_PORT}}'
+
 tasks:
   # Development Tools
   templ:
@@ -7,15 +20,19 @@ tasks:
     env:
       # Rebases every self-referencing shadcn-templ.com URL (docs, llms.txt,
       # sitemap, robots) onto the local origin, see shared.Rebase.
-      BASE_URL: http://localhost:8090
+      BASE_URL: http://localhost:{{.PORT}}
+      PORT: "{{.PORT}}"
+      SHIKI_URL: http://localhost:{{.SHIKI_PORT}}/highlight
     cmds:
       # templ binds its proxy to 127.0.0.1 by default; 0.0.0.0 makes the
       # live-reload proxy reachable from other machines (e.g. http://dev-01:7331).
-      - go tool templ generate --watch --proxy="http://localhost:8090" --proxybind="0.0.0.0" --cmd="go run ./cmd/docs/main.go" --open-browser=false --log-level=error
+      - go tool templ generate --watch --proxy="http://localhost:{{.PORT}}" --proxyport={{.PROXY_PORT}} --proxybind="0.0.0.0" --cmd="go run ./cmd/docs/main.go" --open-browser=false --log-level=error
 
   shiki-highlighter:
     desc: Start shiki syntax highlighter service
     dir: shiki
+    env:
+      PORT: "{{.SHIKI_PORT}}"
     cmds:
       - npm start
 
@@ -39,7 +56,8 @@ tasks:
     deps:
       - tailwind-clean
     cmds:
-      - task --parallel tailwind-watch scripts-watch templ shiki-highlighter
+      - 'echo "Open http://localhost:{{.PROXY_PORT}}"'
+      - task --parallel tailwind-watch scripts-watch templ shiki-highlighter PORT={{.PORT}} PROXY_PORT={{.PROXY_PORT}} SHIKI_PORT={{.SHIKI_PORT}}
 
   # Build & Validation
   templ-generate:
