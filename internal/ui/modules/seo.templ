@@ -12,16 +12,16 @@ templ SEO(title, description, path string) {
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 	// Author
 	<meta name="author" content="templUI"/>
-	// Robots Tags
-	<meta name="robots" content="index, follow"/>
+	// Robots Tags: v1 is archived at v1.shadcn-templ.com, shadcn-templ.com is the indexed home
+	<meta name="robots" content="noindex, follow"/>
 	// Canonical URL
-	<link rel="canonical" href={ "https://templui.io" + path }/>
+	<link rel="canonical" href={ "https://v1.shadcn-templ.com" + path }/>
 	// OpenGraph Tags
 	<meta property="og:title" content={ title }/>
 	<meta property="og:description" content={ description }/>
 	<meta property="og:type" content="website"/>
-	<meta property="og:url" content={ "https://templui.io" + path }/>
-	<meta property="og:image" content="https://templui.io/assets/img/social-preview.png"/>
+	<meta property="og:url" content={ "https://v1.shadcn-templ.com" + path }/>
+	<meta property="og:image" content="https://v1.shadcn-templ.com/assets/img/social-preview.png"/>
 	<meta property="og:image:width" content="1200"/>
 	<meta property="og:image:height" content="630"/>
 	<meta property="og:image:alt" content="templUI - Modern UI components for Go"/>
@@ -30,7 +30,7 @@ templ SEO(title, description, path string) {
 	<meta name="twitter:card" content="summary_large_image"/>
 	<meta name="twitter:title" content={ title }/>
 	<meta name="twitter:description" content={ description }/>
-	<meta name="twitter:image" content="https://templui.io/assets/img/social-preview.png"/>
+	<meta name="twitter:image" content="https://v1.shadcn-templ.com/assets/img/social-preview.png"/>
 	<meta name="twitter:image:alt" content="templUI - Modern UI components for Go"/>
 	// Favicon - Minimal but comprehensive support
 	// Note: Some files are served from root URLs (e.g., /favicon.ico) for Safari compatibility.

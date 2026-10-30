@@ -2,15 +2,14 @@ package modules
 
 import "github.com/templui/templui/components/icon"
 
-// AnnouncementBar carries the rebrand message, the inverse of the beta
-// site's switch-to-v1 bar. The goilerplate promo it replaces lives in
-// git history and returns after the 2.0 launch window.
+// AnnouncementBar marks the v1 docs as archived and sends readers to
+// shadcn-templ 2.0, the maintained successor.
 templ AnnouncementBar() {
-	<div class="relative z-50 flex items-center justify-center bg-muted border-b px-4 py-1 text-center">
-		<div class="inline-flex items-center gap-2 text-sm flex-wrap justify-center">
-			<span class="text-muted-foreground">templUI is now shadcn-templ. The 2.0 beta is available.</span>
-			<a href="https://shadcn-templ.com" class="group inline-flex items-center gap-1 font-semibold text-foreground transition-colors">
-				Try it
+	<div class="relative z-50 flex items-center justify-center bg-foreground px-4 py-1.5 text-center text-background">
+		<div class="inline-flex flex-wrap items-center justify-center gap-2 text-sm">
+			<span>You are viewing the archived templUI v1 docs. templUI is now shadcn-templ, and 2.0 is stable.</span>
+			<a href="https://shadcn-templ.com/?ref=templui-v1" class="group inline-flex items-center gap-1 font-semibold underline">
+				Go to shadcn-templ
 				@icon.ArrowRight(icon.Props{Class: "size-3.5 transition-transform group-hover:translate-x-0.5"})
 			</a>
 		</div>
