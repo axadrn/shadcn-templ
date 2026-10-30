@@ -5,7 +5,7 @@ import "github.com/axadrn/shadcn-templ/v2/components/icon"
 // AnnouncementBar is the v3.shadcn.com version banner ported 1:1: the
 // muted sticky strip above the shell, permanently visible (no dismiss).
 // It promotes goilerplate and keeps the link to the stable templUI v1
-// docs (templui.io stays the v1 home until stable).
+// docs (archived at v1.shadcn-templ.com).
 templ AnnouncementBar() {
 	<div class="bg-muted text-muted-foreground sticky top-0 z-[100] flex h-10 items-center justify-center gap-2 px-4 text-sm">
 		<span class="hidden sm:inline">Ship your Go SaaS with goilerplate. Auth, billing and teams already done.</span>
@@ -15,6 +15,6 @@ templ AnnouncementBar() {
 			@icon.ArrowRight(icon.Props{Class: "size-3"})
 		</a>
 		<span class="hidden md:inline">·</span>
-		<a class="hidden underline md:inline" href="https://templui.io">templUI v1 docs</a>
+		<a class="hidden underline md:inline" href="https://v1.shadcn-templ.com">templUI v1 docs</a>
 	</div>
 }
