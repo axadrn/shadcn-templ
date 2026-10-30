@@ -50,7 +50,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -p 2 -ldflags="-s -w" -o main ./cmd/docs/m
 RUN CGO_ENABLED=0 GOOS=linux go build -p 2 -ldflags="-s -w" -o highlight-gen ./cmd/highlight-gen/main.go
 
 # Shiki deps stage: install the highlighter service's node_modules once.
-FROM node:20-alpine AS shiki
+FROM node:24-alpine AS shiki
 WORKDIR /shiki
 COPY shiki/package*.json ./
 RUN npm ci --omit=dev
@@ -59,7 +59,7 @@ COPY shiki/server.js ./
 # Highlight stage (CREATE_1TO1_PLAN 2f): the only place node ever runs.
 # The crawler renders every sitemap page against the live shiki service and
 # bakes the resulting highlight cache into a file the runtime loads instead.
-FROM node:20-alpine AS highlight
+FROM node:24-alpine AS highlight
 WORKDIR /app
 COPY --from=shiki /shiki /app/shiki
 COPY --from=build /app/main /app/highlight-gen ./
@@ -73,7 +73,7 @@ RUN node /app/shiki/server.js & \
   ./highlight-gen -server http://localhost:8090 -out /app/highlight-cache.json.gz
 
 # Deploy-Stage
-FROM alpine:3.20.2
+FROM alpine:3.24
 WORKDIR /app
 
 RUN apk add --no-cache ca-certificates
