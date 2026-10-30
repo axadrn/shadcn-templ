@@ -1,3 +1,4 @@
+// Deprecated: templUI is now shadcn-templ. Use github.com/axadrn/shadcn-templ/v2 instead.
 module github.com/templui/templui
 
 go 1.26.0
