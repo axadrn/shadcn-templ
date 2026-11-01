@@ -15,7 +15,7 @@ templ BaseLayout(title, description string) {
 	// The header height lives on <html> like shadcn's app/layout.tsx: 14
 	// spacing units, 16 from lg up. Everything sticky (navbar, docs sidebar,
 	// toc) offsets against it.
-	<html lang="en" class="[--announcement-height:calc(var(--spacing)*10)] [--header-height:calc(var(--spacing)*14)] lg:[--header-height:calc(var(--spacing)*16)]">
+	<html lang="en" class="[--header-height:calc(var(--spacing)*14)] lg:[--header-height:calc(var(--spacing)*16)]">
 		<head>
 			// Google
 			<meta name="google-site-verification" content="lcKF60IRUofKfZpOIYKOD7xyvrL220KpjmGjJcflde4"/>

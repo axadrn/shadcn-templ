@@ -725,6 +725,7 @@
   }
   :root {
     --header-height: calc(var(--spacing) * 14);
+    --announcement-height: calc(var(--spacing) * 10);
   }
   /* Anchor jumps clear the sticky header; typeset's scroll-margin adds the
      air. No scroll-smooth, shadcn jumps instantly. */
