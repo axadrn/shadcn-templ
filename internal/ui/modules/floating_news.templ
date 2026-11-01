@@ -1,0 +1,32 @@
+package modules
+
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/badge"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
+
+// FloatingNews is the small news pill in the bottom left corner of every
+// page. Its close button hides it until the next page load.
+templ FloatingNews(id, href, label string) {
+	<div data-floating-news={ id } class="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))] z-40 flex items-center gap-0.5 rounded-full border bg-background/85 p-1 shadow-lg backdrop-blur">
+		@badge.Badge(badge.Props{Href: href, Variant: badge.VariantGhost, Class: "h-8 gap-2 pl-1 text-[13px]", Attributes: templ.Attributes{"target": "_blank", "rel": "noopener"}}) {
+			@badge.Badge(badge.Props{Class: "h-6 px-2.5"}) {
+				New
+			}
+			<span>{ label }</span>
+			@icon.ArrowRight(icon.Props{Class: "text-muted-foreground", Attributes: templ.Attributes{"data-icon": "inline-end"}})
+		}
+		@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeIconSm, Class: "size-7 rounded-full text-muted-foreground", Attributes: templ.Attributes{"aria-label": "Hide this news", "data-floating-news-close": id}}) {
+			@icon.X()
+		}
+	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		(function() {
+			const news = document.currentScript.previousElementSibling;
+			news.querySelector('[data-floating-news-close]').addEventListener('click', function() {
+				news.remove();
+			});
+		})();
+	</script>
+}
