@@ -1,20 +1,43 @@
 package pages
 
 import (
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/empty"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/layouts"
 	"github.com/axadrn/shadcn-templ/v2/internal/ui/modules"
 )
 
+// NotFound is the 404 page, built from the empty component: an icon, what
+// happened in words, the way back and the code as a small log line.
 templ NotFound() {
 	@layouts.AppLayout(
 		"404 - Page Not Found",
 		"The page you are looking for does not exist.",
 	) {
-		<div class="h-screen flex items-center justify-center">
-			<div class="text-center">
-				<h1 class="text-8xl font-bold text-muted-foreground/30 mb-4">404</h1>
-				<p class="text-xl text-muted-foreground">Page not found</p>
-			</div>
+		<div class="flex min-h-svh items-center justify-center px-5 py-20">
+			@empty.Empty() {
+				@empty.Header() {
+					@empty.Media(empty.MediaProps{Variant: empty.MediaVariantIcon}) {
+						@icon.SearchX()
+					}
+					@empty.Title() {
+						Page not found
+					}
+					@empty.Description() {
+						The address does not exist or has moved.
+					}
+				}
+				@empty.Content(empty.ContentProps{Class: "flex-row flex-wrap justify-center gap-2"}) {
+					@button.Button(button.Props{Href: "/docs"}) {
+						Back to docs
+					}
+					@button.Button(button.Props{Href: "/", Variant: button.VariantOutline}) {
+						Home
+					}
+				}
+				<p class="font-mono text-xs text-muted-foreground">404 Page not found</p>
+			}
 			<!-- Floating Theme Switcher -->
 			<div class="fixed bottom-4 right-4">
 				@modules.ThemeSwitcher()
