@@ -732,6 +732,11 @@
     scroll-padding-top: calc(var(--header-height) + var(--announcement-height, 0px));
     @apply overscroll-y-none;
   }
+  /* Without the announcement bar, closed or never there, nothing makes
+     room for it. */
+  html:not(:has([data-announcement])) {
+    --announcement-height: 0px;
+  }
   body {
     /* shadcn sets bg/text via layout.tsx className; we own it here. */
     @apply bg-background text-foreground;
