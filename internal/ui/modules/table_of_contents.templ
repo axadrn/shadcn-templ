@@ -95,53 +95,45 @@ templ TableOfContentsScript() {
 	</script>
 }
 
-// TocAdCard is a compact goilerplate card below the toc.
+// TocAdCard is the one news card below the toc: goilerplate is free and
+// open source now, and ops is out. Two links, so the card is a div and each
+// line is its own link.
 templ TocAdCard() {
-	<a
-		href="https://goilerplate.com/?ref=shadcn-templ-toc"
-		target="_blank"
-		rel="noopener"
-		class="relative block overflow-hidden rounded-2xl border bg-surface p-4 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-	>
-		<div class="relative flex items-start justify-between gap-3">
+	<div class="relative overflow-hidden rounded-2xl border bg-surface p-4 shadow-sm">
+		<div class="flex items-start justify-between gap-3">
 			<span class="mt-1 inline-flex items-center gap-1.5 text-[10px] leading-none font-semibold tracking-[0.12em] text-muted-foreground uppercase">
 				<span class="size-1.5 rounded-full bg-foreground"></span>
-				Go SaaS starter
+				New
 			</span>
 			<img src="/assets/img/goilerplate-mark.svg" alt="" width="64" height="84" class="h-11 w-auto shrink-0 dark:invert"/>
 		</div>
-		<div class="relative mt-4 text-base leading-tight font-semibold tracking-tight text-balance text-foreground">
-			Auth, billing, teams.
-			<br/>
-			Already done.
-		</div>
-		<div class="relative mt-3 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-			$99 until Dec 1, then $149
-			@icon.ArrowUpRight(icon.Props{Class: "size-3.5"})
-		</div>
-	</a>
-}
-
-// TocOpsCard teases goilerplate Ops below the goilerplate card.
-templ TocOpsCard() {
-	<a
-		href="https://goilerplate.com/ops?ref=shadcn-templ-toc"
-		target="_blank"
-		rel="noopener"
-		class="relative block overflow-hidden rounded-2xl bg-foreground p-4 text-background shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-	>
-		<span class="inline-flex items-center gap-1.5 text-[10px] leading-none font-semibold tracking-[0.12em] uppercase opacity-70">
-			<span class="rounded-sm bg-background px-1 py-0.5 text-foreground">New</span>
-			goilerplate Ops · coming soon
-		</span>
-		<div class="mt-4 text-base leading-tight font-semibold tracking-tight text-balance">
-			Hosting, deploys, backups
-			<br/>
-			and your data. One tool.
-		</div>
-		<div class="mt-3 flex items-center gap-1.5 text-xs font-medium opacity-70">
-			Join the waitlist
-			@icon.ArrowUpRight(icon.Props{Class: "size-3.5"})
-		</div>
-	</a>
+		<a
+			href="https://goilerplate.com/?ref=shadcn-templ-toc"
+			target="_blank"
+			rel="noopener"
+			class="mt-4 block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+		>
+			<span class="block text-base leading-tight font-semibold tracking-tight text-balance text-foreground">
+				goilerplate is now free and open source.
+			</span>
+			<span class="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
+				The Go SaaS starter, every line yours
+				@icon.ArrowUpRight(icon.Props{Class: "size-3.5"})
+			</span>
+		</a>
+		<a
+			href="https://ops.goilerplate.com/?ref=shadcn-templ-toc"
+			target="_blank"
+			rel="noopener"
+			class="mt-4 block rounded-md border-t pt-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+		>
+			<span class="block text-sm leading-tight font-semibold tracking-tight text-balance text-foreground">
+				ops is out.
+			</span>
+			<span class="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
+				Deploy to your own server, or try ops Hosted free for 30 days
+				@icon.ArrowUpRight(icon.Props{Class: "size-3.5 shrink-0"})
+			</span>
+		</a>
+	</div>
 }

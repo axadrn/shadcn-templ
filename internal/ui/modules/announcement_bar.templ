@@ -4,17 +4,22 @@ import "github.com/axadrn/shadcn-templ/v2/components/icon"
 
 // AnnouncementBar is the v3.shadcn.com version banner ported 1:1: the
 // muted sticky strip above the shell, permanently visible (no dismiss).
-// It promotes goilerplate and keeps the link to the stable templUI v1
-// docs (archived at v1.shadcn-templ.com).
+// It carries the news: goilerplate is free and open source now, and ops is
+// out. The templUI v1 docs link lives in the sidebar, like shadcn/ui keeps
+// its Legacy Docs link.
 templ AnnouncementBar() {
 	<div class="bg-muted text-muted-foreground sticky top-0 z-[100] flex h-10 items-center justify-center gap-2 px-4 text-sm">
-		<span class="hidden sm:inline">Ship your Go SaaS with goilerplate. New: goilerplate Ops is coming.</span>
-		<span class="sm:hidden">goilerplate for Go SaaS.</span>
-		<a class="text-primary flex items-center gap-1 font-medium underline" href="https://goilerplate.com/?ref=shadcn-templ-bar" target="_blank" rel="noopener">
-			$99 until Dec 1
+		<p class="hidden items-center gap-1 sm:flex">
+			<a class="text-primary font-medium underline" href="https://goilerplate.com/?ref=shadcn-templ-bar" target="_blank" rel="noopener">goilerplate is now free and open source</a>
+			and
+			<a class="text-primary flex items-center gap-1 font-medium underline" href="https://ops.goilerplate.com/?ref=shadcn-templ-bar" target="_blank" rel="noopener">
+				ops is out
+				@icon.ArrowRight(icon.Props{Class: "size-3"})
+			</a>
+		</p>
+		<a class="text-primary flex items-center gap-1 font-medium underline sm:hidden" href="https://goilerplate.com/?ref=shadcn-templ-bar" target="_blank" rel="noopener">
+			goilerplate is now open source
 			@icon.ArrowRight(icon.Props{Class: "size-3"})
 		</a>
-		<span class="hidden md:inline">·</span>
-		<a class="hidden underline md:inline" href="https://v1.shadcn-templ.com">templUI v1 docs</a>
 	</div>
 }

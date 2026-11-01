@@ -193,6 +193,12 @@ var Sections = []Section{
 				Text: "llms.txt",
 				Href: "/llms.txt",
 			},
+			// The archived templUI v1 docs, kept reachable like shadcn's
+			// Legacy Docs entry in their Get Started group.
+			{
+				Text: "templUI v1 Docs",
+				Href: "https://v1.shadcn-templ.com",
+			},
 		},
 	},
 	// Utilities before Registry, per shadcn's root meta.json section order
