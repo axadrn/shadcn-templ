@@ -99,41 +99,20 @@ templ TableOfContentsScript() {
 // open source now, and ops is out. Two links, so the card is a div and each
 // line is its own link.
 templ TocAdCard() {
-	<div class="relative overflow-hidden rounded-2xl border bg-surface p-4 shadow-sm">
-		<div class="flex items-start justify-between gap-3">
-			<span class="mt-1 inline-flex items-center gap-1.5 text-[10px] leading-none font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-				<span class="size-1.5 rounded-full bg-foreground"></span>
-				New
-			</span>
-			<img src="/assets/img/goilerplate-mark.svg" alt="" width="64" height="84" class="h-11 w-auto shrink-0 dark:invert"/>
+	<div class="rounded-xl bg-muted/50 p-4 text-sm">
+		<img src="/assets/img/goilerplate-mark.svg" alt="" width="64" height="84" class="h-7 w-auto dark:invert"/>
+		<p class="mt-3 leading-snug font-semibold text-balance text-foreground">goilerplate is now free and open source.</p>
+		<p class="mt-1 text-xs leading-relaxed text-muted-foreground">The Go SaaS starter, every line yours. Deploy it with ops, out now.</p>
+		<div class="mt-3 flex flex-col gap-1.5 text-xs font-medium">
+			@tocAdLink("https://goilerplate.com/?ref=shadcn-templ-toc", "goilerplate")
+			@tocAdLink("https://ops.goilerplate.com/?ref=shadcn-templ-toc", "ops")
 		</div>
-		<a
-			href="https://goilerplate.com/?ref=shadcn-templ-toc"
-			target="_blank"
-			rel="noopener"
-			class="mt-4 block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-		>
-			<span class="block text-base leading-tight font-semibold tracking-tight text-balance text-foreground">
-				goilerplate is now free and open source.
-			</span>
-			<span class="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
-				The Go SaaS starter, every line yours
-				@icon.ArrowUpRight(icon.Props{Class: "size-3.5"})
-			</span>
-		</a>
-		<a
-			href="https://ops.goilerplate.com/?ref=shadcn-templ-toc"
-			target="_blank"
-			rel="noopener"
-			class="mt-4 block rounded-md border-t pt-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-		>
-			<span class="block text-sm leading-tight font-semibold tracking-tight text-balance text-foreground">
-				ops is out.
-			</span>
-			<span class="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
-				Deploy to your own server, or try ops Hosted free for 30 days
-				@icon.ArrowUpRight(icon.Props{Class: "size-3.5 shrink-0"})
-			</span>
-		</a>
 	</div>
+}
+
+templ tocAdLink(href, label string) {
+	<a href={ templ.SafeURL(href) } target="_blank" rel="noopener" class="flex items-center gap-1 text-foreground hover:underline hover:underline-offset-4">
+		{ label }
+		@icon.ArrowUpRight(icon.Props{Class: "size-3.5 text-muted-foreground"})
+	</a>
 }

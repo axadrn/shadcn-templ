@@ -1,25 +1,42 @@
 package modules
 
-import "github.com/axadrn/shadcn-templ/v2/components/icon"
+import (
+	"github.com/axadrn/shadcn-templ/v2/components/badge"
+	"github.com/axadrn/shadcn-templ/v2/components/button"
+	"github.com/axadrn/shadcn-templ/v2/components/icon"
+)
 
-// AnnouncementBar is the v3.shadcn.com version banner ported 1:1: the
-// muted sticky strip above the shell, permanently visible (no dismiss).
-// It carries the news: goilerplate is free and open source now, and ops is
-// out. The templUI v1 docs link lives in the sidebar, like shadcn/ui keeps
-// its Legacy Docs link.
+// AnnouncementBar is the muted sticky strip above the shell. One quiet line
+// carries the news, a link for each: goilerplate is free and open source
+// now, and ops is out. Its close button hides it until the next page load.
+// The templUI v1 docs link lives in the sidebar, like shadcn/ui keeps its
+// Legacy Docs link.
 templ AnnouncementBar() {
-	<div class="bg-muted text-muted-foreground sticky top-0 z-[100] flex h-10 items-center justify-center gap-2 px-4 text-sm">
-		<p class="hidden items-center gap-1 sm:flex">
-			<a class="text-primary font-medium underline" href="https://goilerplate.com/?ref=shadcn-templ-bar" target="_blank" rel="noopener">goilerplate is now free and open source</a>
-			and
-			<a class="text-primary flex items-center gap-1 font-medium underline" href="https://ops.goilerplate.com/?ref=shadcn-templ-bar" target="_blank" rel="noopener">
+	<div data-announcement class="bg-muted sticky top-0 z-[100] flex h-10 items-center justify-center px-10 text-sm">
+		<p class="text-foreground flex min-w-0 items-center gap-2 font-medium">
+			@badge.Badge(badge.Props{Class: "h-5 px-2 text-[11px]"}) {
+				New
+			}
+			<a class="truncate hover:underline hover:underline-offset-4" href="https://goilerplate.com/?ref=shadcn-templ-bar" target="_blank" rel="noopener">
+				<span class="sm:hidden">goilerplate is free</span>
+				<span class="hidden sm:inline">goilerplate is free and open source</span>
+			</a>
+			<span class="text-muted-foreground" aria-hidden="true">·</span>
+			<a class="group flex shrink-0 items-center gap-1 hover:underline hover:underline-offset-4" href="https://ops.goilerplate.com/?ref=shadcn-templ-bar" target="_blank" rel="noopener">
 				ops is out
-				@icon.ArrowRight(icon.Props{Class: "size-3"})
+				@icon.ArrowRight(icon.Props{Class: "text-muted-foreground size-3.5 transition-transform group-hover:translate-x-0.5"})
 			</a>
 		</p>
-		<a class="text-primary flex items-center gap-1 font-medium underline sm:hidden" href="https://goilerplate.com/?ref=shadcn-templ-bar" target="_blank" rel="noopener">
-			goilerplate is now open source
-			@icon.ArrowRight(icon.Props{Class: "size-3"})
-		</a>
+		@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeIconSm, Class: "text-muted-foreground absolute right-2 size-7", Attributes: templ.Attributes{"aria-label": "Hide this news", "data-announcement-close": true}}) {
+			@icon.X()
+		}
 	</div>
+	<script nonce={ templ.GetNonce(ctx) }>
+		(function() {
+			const bar = document.currentScript.previousElementSibling;
+			bar.querySelector('[data-announcement-close]').addEventListener('click', function() {
+				bar.remove();
+			});
+		})();
+	</script>
 }
