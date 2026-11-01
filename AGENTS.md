@@ -16,3 +16,10 @@ The project prefix is `templ` everywhere: `window.templ` for the shared JS API, 
 
 ## Examples
 Every example is upstream's example 1:1 in structure, classes and DOM. Its people, avatars and texts stay in the Go and templ universe (`@templ`, `a-h`, `axadrn`, `joerdav` and their GitHub avatars) where upstream shows shadcn, Vercel or Next.js ones. Keep them, never swap in upstream's; the parity runs list them as accepted pixel differences (`plans/UPSTREAM.md`).
+
+## Commits and releases
+
+- Commits follow the convention in CONTRIBUTING.md (Conventional Commits): `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`, with an optional scope like `feat(cli):`. A short first line, then a sentence or two of why when it helps.
+- Commits and pull requests carry no AI attribution: no `Co-Authored-By` for a tool, no "Generated with" line.
+- Release notes have three sections, empty ones left out: `### New`, `### Fixed`, `### Upgrade` (how to update, one line). They come from the `feat:` and `fix:` commits.
+
