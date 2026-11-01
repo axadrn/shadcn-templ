@@ -448,6 +448,10 @@ func SetupAssetsRoutes(mux *http.ServeMux) {
 			w.Header().Set("Cache-Control", "no-store")
 		} else if strings.HasPrefix(strings.TrimPrefix(r.URL.Path, "/"), "js/shadcn-templ-") {
 			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		} else if strings.HasPrefix(strings.TrimPrefix(r.URL.Path, "/"), "fonts/") {
+			// Fonts load on every page; without a cache the text flashes in
+			// the fallback face on each visit.
+			w.Header().Set("Cache-Control", "public, max-age=31536000")
 		}
 
 		var fs http.Handler
