@@ -4,6 +4,10 @@ Thanks for your interest in contributing to shadcn-templ.com. We're happy to hav
 
 Please take a moment to review this document before submitting your first pull request. We also strongly recommend that you check for open issues and pull requests to see if someone else is working on something similar.
 
+## Issue first
+
+Open an issue before you write code. We agree there on what to build and how. Pull requests without an agreed issue get closed. Small fixes, like a typo or a broken link, are welcome anytime.
+
 If you need any help, feel free to reach out to [@axadrn](https://x.com/axadrn).
 
 ## About this repository
@@ -168,7 +172,7 @@ https://www.conventionalcommits.org/ or check out the
 
 ## Requests for new components
 
-If you have a request for a new component, please open a discussion on GitHub. We'll be happy to help you out.
+If you have a request for a new component, open an issue on GitHub. We'll be happy to help you out.
 
 ## CLI
 
