@@ -21,5 +21,8 @@ Every example is upstream's example 1:1 in structure, classes and DOM. Its peopl
 
 - Commits follow the convention in CONTRIBUTING.md (Conventional Commits): `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`, with an optional scope like `feat(cli):`. A short first line, then a sentence or two of why when it helps.
 - Commits and pull requests carry no AI attribution: no `Co-Authored-By` for a tool, no "Generated with" line.
-- Release notes have three sections, empty ones left out: `### New`, `### Fixed`, `### Upgrade` (how to update, one line). They come from the `feat:` and `fix:` commits.
+- Release notes follow one format, the same in shadcn-templ, ops and goilerplate, so the eye finds things fast. They are the GitHub release; the docs changelog stays announcements, like shadcn/ui's:
+  - First line: `**In short:**` and one sentence, what is new and why to update.
+  - Then these sections in this order, empty ones left out: `### New` (what you can do now), `### Changed` (what behaves differently; breaking changes start with **Breaking**), `### Fixed` (what was broken and works now), `### Removed` (what is gone, and what to use instead), `### Upgrade` (always there: how to update, the exact commands).
+  - One bullet per thing: `- **Name**: one sentence of what the user gets.` Commands in backticks. What the user sees, never internals or commit hashes.
 
