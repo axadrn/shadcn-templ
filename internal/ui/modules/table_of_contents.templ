@@ -96,7 +96,7 @@ templ TableOfContentsScript() {
 }
 
 // TocAdCard is the one news card below the toc: goilerplate is free and
-// open source now, and ops is out. Two links, so the card is a div and each
+// open source now, and moin deploys it. Two links, so the card is a div and each
 // line is its own link.
 templ TocAdCard() {
 	<div class="rounded-xl bg-muted/50 p-4 text-sm">
@@ -104,10 +104,10 @@ templ TocAdCard() {
 			<img src="/assets/img/goilerplate-mark.svg" alt="" width="64" height="84" class="h-[2lh] w-auto shrink-0 dark:invert"/>
 			<p class="leading-snug font-semibold text-balance text-foreground">goilerplate is now free and open source.</p>
 		</div>
-		<p class="mt-1 text-xs leading-relaxed text-muted-foreground">The Go SaaS starter, every line yours. Deploy it with ops, out now.</p>
+		<p class="mt-1 text-xs leading-relaxed text-muted-foreground">The Go SaaS starter, every line yours. Deploy it with moin and lose nothing.</p>
 		<div class="mt-3 flex flex-col gap-1.5 text-xs font-medium">
 			@tocAdLink("https://goilerplate.com/?ref=shadcn-templ-toc", "goilerplate")
-			@tocAdLink("https://ops.goilerplate.com/?ref=shadcn-templ-toc", "ops")
+			@tocAdLink("https://moin.run/?ref=shadcn-templ-toc", "moin")
 		</div>
 	</div>
 }

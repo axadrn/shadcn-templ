@@ -8,7 +8,7 @@ import (
 
 // AnnouncementBar is the muted sticky strip above the shell. One quiet line
 // carries the news, a link for each: goilerplate is free and open source
-// now, and ops is out. Its close button hides it until the next page load.
+// now, and moin deploys it. Its close button hides it until the next page load.
 // The templUI v1 docs link lives in the sidebar, like shadcn/ui keeps its
 // Legacy Docs link.
 templ AnnouncementBar() {
@@ -22,8 +22,8 @@ templ AnnouncementBar() {
 				<span class="hidden sm:inline">goilerplate is free and open source</span>
 			</a>
 			<span class="text-muted-foreground" aria-hidden="true">·</span>
-			<a class="group flex shrink-0 items-center gap-1 hover:underline hover:underline-offset-4" href="https://ops.goilerplate.com/?ref=shadcn-templ-bar" target="_blank" rel="noopener">
-				ops is out
+			<a class="group flex shrink-0 items-center gap-1 hover:underline hover:underline-offset-4" href="https://moin.run/?ref=shadcn-templ-bar" target="_blank" rel="noopener">
+				Deploy with moin
 				@icon.ArrowRight(icon.Props{Class: "text-muted-foreground size-3.5 transition-transform group-hover:translate-x-0.5"})
 			</a>
 		</p>
