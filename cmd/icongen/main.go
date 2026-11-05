@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"go/format"
 	"io"
 	"net/http"
 	"os"
@@ -147,10 +148,7 @@ func main() {
 	// Write icon_defs.go
 	sort.Strings(iconDefs[3:])
 	outputFileDefs := filepath.Join(outputDir, "icon_defs.go")
-	err = os.WriteFile(outputFileDefs, []byte(strings.Join(iconDefs, "")), 0644)
-	if err != nil {
-		panic(fmt.Errorf("failed to write icon_defs.go: %w", err))
-	}
+	writeGoFile(outputFileDefs, strings.Join(iconDefs, ""))
 	fmt.Printf("Generated %s successfully!\n", outputFileDefs)
 
 	// Write icon_data.go
@@ -174,10 +172,7 @@ func main() {
 	}
 	iconDataContent.WriteString("}\n")
 
-	err = os.WriteFile(outputFileData, []byte(iconDataContent.String()), 0644)
-	if err != nil {
-		panic(fmt.Errorf("failed to write icon_data.go: %w", err))
-	}
+	writeGoFile(outputFileData, iconDataContent.String())
 	fmt.Printf("Generated %s successfully!\n", outputFileData)
 
 	// Write icon.go
@@ -299,13 +294,22 @@ func getIconContent(name string) (string, error) {
 	return content, nil
 }
 `
-	err = os.WriteFile(outputFileIconGo, []byte(iconGoContent), 0644)
-	if err != nil {
-		panic(fmt.Errorf("failed to write icon.go: %w", err))
-	}
+	writeGoFile(outputFileIconGo, iconGoContent)
 	fmt.Printf("Generated %s successfully!\n", outputFileIconGo)
 
 	fmt.Println("Icon component files generated successfully in " + outputDir)
+}
+
+// writeGoFile writes Go source formatted like gofmt, so the generated
+// files stay gofmt clean in every project that copies them.
+func writeGoFile(path, src string) {
+	formatted, err := format.Source([]byte(src))
+	if err != nil {
+		panic(fmt.Errorf("failed to format %s: %w", path, err))
+	}
+	if err := os.WriteFile(path, formatted, 0644); err != nil {
+		panic(fmt.Errorf("failed to write %s: %w", path, err))
+	}
 }
 
 // toPascalCase converts a kebab-case string to PascalCase
