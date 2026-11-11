@@ -40,21 +40,25 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Connect to prod-01 through Tailscale
+      - name: Connect to the server through Tailscale
         uses: tailscale/github-action@v4
         with:
-          oauth-client-id: TA5fRdgvFU11CNTRL-kNv89UsXK811CNTRL
-          audience: api.tailscale.com/TA5fRdgvFU11CNTRL-kNv89UsXK811CNTRL
+          oauth-client-id: ${{ vars.TS_CLIENT_ID }}
+          audience: api.tailscale.com/${{ vars.TS_CLIENT_ID }}
           tags: tag:ci
-          ping: prod-01
+          ping: ${{ vars.DEPLOY_HOST }}
 
       - name: Sync Compose file
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
         run: |
-          tailscale ssh root@prod-01 \
+          tailscale ssh "root@${DEPLOY_HOST}" \
             'mkdir -p /opt/apps/shadcn-templ.com && cat > /opt/apps/shadcn-templ.com/compose.yml' \
             < compose.yml
 
       - name: Deploy and wait for health
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
         run: |
-          tailscale ssh root@prod-01 \
+          tailscale ssh "root@${DEPLOY_HOST}" \
             "cd /opt/apps/shadcn-templ.com && IMAGE_TAG=${GITHUB_SHA} docker compose up -d --pull always --wait --wait-timeout 120"
