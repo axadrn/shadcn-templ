@@ -1,3 +1,6 @@
+# Builds the image and hands it to moin, which deploys it: no way into the
+# server from here. The secret MOIN_DEPLOY_HOOK deploys only new tags of
+# this image. https://moin.run/docs/guides/ci
 name: deploy
 
 on:
@@ -8,7 +11,6 @@ on:
 permissions:
   contents: read
   packages: write
-  id-token: write
 
 concurrency:
   group: production-main
@@ -17,7 +19,6 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-24.04-arm
-    environment: production
     timeout-minutes: 30
 
     steps:
@@ -36,29 +37,13 @@ jobs:
           context: .
           platforms: linux/arm64
           push: true
-          tags: ghcr.io/axadrn/shadcn-templ:${{ github.sha }}
+          tags: |
+            ghcr.io/axadrn/shadcn-templ:${{ github.sha }}
+            ghcr.io/axadrn/shadcn-templ:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Connect to the server through Tailscale
-        uses: tailscale/github-action@v4
-        with:
-          oauth-client-id: ${{ vars.TS_CLIENT_ID }}
-          audience: api.tailscale.com/${{ vars.TS_CLIENT_ID }}
-          tags: tag:ci
-          ping: ${{ vars.DEPLOY_HOST }}
-
-      - name: Sync Compose file
+      - name: Deploy with moin
         env:
-          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
-        run: |
-          tailscale ssh "root@${DEPLOY_HOST}" \
-            'mkdir -p /opt/apps/shadcn-templ.com && cat > /opt/apps/shadcn-templ.com/compose.yml' \
-            < compose.yml
-
-      - name: Deploy and wait for health
-        env:
-          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
-        run: |
-          tailscale ssh "root@${DEPLOY_HOST}" \
-            "cd /opt/apps/shadcn-templ.com && IMAGE_TAG=${GITHUB_SHA} docker compose up -d --pull always --wait --wait-timeout 120"
+          MOIN_DEPLOY_HOOK: ${{ secrets.MOIN_DEPLOY_HOOK }}
+        run: curl -fsS -X POST "$MOIN_DEPLOY_HOOK?image=ghcr.io/axadrn/shadcn-templ:${GITHUB_SHA}"

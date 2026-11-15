@@ -1,22 +1,15 @@
+# shadcn-templ.com, run by moin: https://moin.run/docs/guides/config
+# CI builds the image and its deploy hook ships each new tag.
+x-moin:
+  app: shadcn-templ
+  port: 8090
+  health: /healthz
+  domains: [shadcn-templ.com, www.shadcn-templ.com, templui.io, www.templui.io, v1.shadcn-templ.com]
+  canonical: shadcn-templ.com
+
 services:
   app:
-    image: ghcr.io/axadrn/shadcn-templ:${IMAGE_TAG:?IMAGE_TAG is required}
-    restart: unless-stopped
+    image: ghcr.io/axadrn/shadcn-templ:latest
     environment:
       GO_ENV: production
       BASE_URL: https://shadcn-templ.com
-    networks:
-      - proxy
-    labels:
-      traefik.enable: "true"
-      traefik.http.routers.shadcn-templ.rule: Host(`shadcn-templ.com`) || Host(`www.shadcn-templ.com`)
-      traefik.http.routers.shadcn-templ.entrypoints: web
-      traefik.http.routers.shadcn-templ.middlewares: shadcn-templ-www
-      traefik.http.middlewares.shadcn-templ-www.redirectregex.regex: ^https?://www\.shadcn-templ\.com/(.*)
-      traefik.http.middlewares.shadcn-templ-www.redirectregex.replacement: https://shadcn-templ.com/$${1}
-      traefik.http.middlewares.shadcn-templ-www.redirectregex.permanent: "true"
-      traefik.http.services.shadcn-templ.loadbalancer.server.port: "8090"
-
-networks:
-  proxy:
-    external: true
