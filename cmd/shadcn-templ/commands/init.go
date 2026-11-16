@@ -5,11 +5,12 @@
 // new project from an embedded template first, like their init -t next.
 // --monorepo scaffolds the template's monorepo variant instead (one module
 // with the workspaces apps/web and packages/ui, like next-monorepo), writes
-// both components.json and continues init in the app. Run in an app below a
-// module with packages/ui/components.json, init joins that ui workspace:
-// the app's ui and utils aliases and its tailwind.css point into it, and
-// menuColor, menuAccent, rtl and iconLibrary propagate to it. See
-// /docs/monorepo.
+// both components.json and continues init in the app. In an existing
+// monorepo, init sets up one app (--cwd) on its own like shadcn's; a
+// workspace that shares packages/ui has the components.json /docs/monorepo
+// shows, and menuColor, menuAccent, rtl and iconLibrary propagate to the
+// workspaces its aliases point into. Run at a monorepo root, init lists the
+// workspaces to pass to --cwd.
 //
 // Dropped npm-only options, all without a Go pendant: --base (component
 // library selection; shadcn-templ ships one implementation), --no-monorepo
@@ -91,7 +92,7 @@ func RunInit(opts InitOptions) error {
 		// any parent holds go.mod) that pollutes the parent repo (and its
 		// embeds/builds).
 		if module, err := utils.ModulePath(cwd); err == nil {
-			return fmt.Errorf("refusing to scaffold inside the Go module %s; run this outside a module or pass a target with --cwd", module)
+			return fmt.Errorf("refusing to scaffold inside the Go module %s; scaffold outside a module, or run init without --template and --monorepo to set up an app of it", module)
 		}
 		projectName := opts.ProjectName
 		if projectName == "" {
@@ -117,14 +118,25 @@ func RunInit(opts InitOptions) error {
 	if err != nil {
 		return err
 	}
-	// The ui workspace of a monorepo, shadcn's packages/ui. An app below a
-	// module that has one joins it.
+	// The ui workspace of a scaffolded monorepo, shadcn's packages/ui.
 	uiDir := filepath.Join(moduleRoot, "packages", "ui")
 	monorepo := scaffolded && opts.Monorepo
 
 	existing, err := utils.GetRawConfig(cwd)
 	if err != nil {
 		return err
+	}
+	// A monorepo root is no app: init points at its workspaces, like
+	// shadcn's formatMonorepoMessage.
+	if existing == nil && cwd == moduleRoot {
+		if targets := monorepoTargets(moduleRoot); len(targets) > 0 {
+			var b strings.Builder
+			b.WriteString("it looks like you are running init from a monorepo root.\nTo use shadcn-templ in a specific workspace, use the --cwd flag:\n")
+			for _, target := range targets {
+				fmt.Fprintf(&b, "\n  shadcn-templ init --cwd %s", target)
+			}
+			return fmt.Errorf("%s", b.String())
+		}
 	}
 	if existing != nil && !opts.Force {
 		if !confirm("A components.json file already exists. Would you like to overwrite it?") {
@@ -193,32 +205,34 @@ func RunInit(opts InitOptions) error {
 		}
 	}
 
-	aliases := utils.Aliases{
-		Components: module + "/components",
-		Utils:      module + "/utils",
-	}
-	uiCSS := ""
-	if ui, err := joinUIWorkspace(cwd, uiDir); err != nil {
+	// The app's own packages, in the app like shadcn's @/components.
+	rel, err := filepath.Rel(moduleRoot, cwd)
+	if err != nil {
 		return err
-	} else if ui != nil {
-		// An app joining the ui workspace: its own components (blocks), the
-		// ui components and utils from the ui package, the ui package's CSS.
-		rel, err := filepath.Rel(moduleRoot, cwd)
+	}
+	appPath := module
+	if rel != "." {
+		appPath += "/" + filepath.ToSlash(rel)
+	}
+	aliases := utils.Aliases{
+		Components: appPath + "/components",
+		Utils:      appPath + "/utils",
+	}
+	css := resolveTailwindCSSPath(cwd, opts.CSS, existing)
+	if monorepo {
+		// The scaffolded app's config (the template's apps/web
+		// components.json in shadcn): ui components, utils and CSS from
+		// packages/ui.
+		aliases.Utils = module + "/packages/ui/utils"
+		aliases.UI = module + "/packages/ui/components"
+		uiCSS, err := filepath.Rel(cwd, filepath.Join(uiDir, "styles", "globals.css"))
 		if err != nil {
 			return err
 		}
-		aliases = utils.Aliases{
-			Components: module + "/" + filepath.ToSlash(rel) + "/components",
-			Utils:      ui.Aliases.Utils,
-			UI:         ui.UIAlias(),
-		}
-		if uiCSS, err = filepath.Rel(cwd, ui.ResolvedPaths.TailwindCSS); err != nil {
-			return err
-		}
-		uiCSS = filepath.ToSlash(uiCSS)
+		css = filepath.ToSlash(uiCSS)
 	}
 
-	raw := newConfig(resolveTailwindCSSPath(cwd, opts.CSS, existing, uiCSS), aliases)
+	raw := newConfig(css, aliases)
 	if existing != nil {
 		// Keep the user's paths on re-init.
 		if existing.Scripts != nil {
@@ -317,21 +331,31 @@ func RunInit(opts InitOptions) error {
 	return nil
 }
 
-// joinUIWorkspace returns the config of the module's ui workspace
-// (packages/ui with a components.json) for an app that joins it, or nil:
-// no ui workspace, or cwd is the ui workspace itself.
-func joinUIWorkspace(cwd, uiDir string) (*utils.Config, error) {
-	if cwd == uiDir {
-		return nil, nil
+// monorepoTargets is getMonorepoTargets for a Go module: the workspaces
+// init can set up, every directory under apps/ and each one under packages/
+// with a components.json. A module root with its own main.go is an app, not
+// a monorepo root.
+func monorepoTargets(moduleRoot string) []string {
+	if _, err := os.Stat(filepath.Join(moduleRoot, "main.go")); err == nil {
+		return nil
 	}
-	if _, err := os.Stat(filepath.Join(uiDir, utils.ConfigFileName)); err != nil {
-		return nil, nil
+	var targets []string
+	for _, dir := range []string{"apps", "packages"} {
+		entries, _ := os.ReadDir(filepath.Join(moduleRoot, dir))
+		for _, entry := range entries {
+			if !entry.IsDir() || strings.HasPrefix(entry.Name(), ".") {
+				continue
+			}
+			target := dir + "/" + entry.Name()
+			if dir == "packages" {
+				if _, err := os.Stat(filepath.Join(moduleRoot, target, utils.ConfigFileName)); err != nil {
+					continue
+				}
+			}
+			targets = append(targets, target)
+		}
 	}
-	ui, err := utils.GetConfig(uiDir)
-	if err != nil {
-		return nil, fmt.Errorf("could not load the workspace config in %s: %w", uiDir, err)
-	}
-	return ui, nil
+	return targets
 }
 
 // syncWorkspaceConfigs patches the components.json of every other
@@ -366,17 +390,13 @@ func syncWorkspaceConfigs(config *utils.Config, patch func(raw *utils.RawConfig)
 }
 
 // resolveTailwindCSSPath picks the Tailwind entry file: --css flag, existing
-// config, the ui workspace's CSS for an app joining one, detection, then the
-// default location.
-func resolveTailwindCSSPath(cwd, cssFlag string, existing *utils.RawConfig, uiCSS string) string {
+// config, detection, then the default location.
+func resolveTailwindCSSPath(cwd, cssFlag string, existing *utils.RawConfig) string {
 	if cssFlag != "" {
 		return filepath.ToSlash(cssFlag)
 	}
 	if existing != nil && existing.Tailwind.CSS != "" {
 		return existing.Tailwind.CSS
-	}
-	if uiCSS != "" {
-		return uiCSS
 	}
 	if found := utils.FindTailwindCSS(cwd); found != "" && !strings.Contains(found, "output") {
 		return found
