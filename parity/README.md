@@ -40,6 +40,8 @@ The Tailwind and script watchers of `task dev` must run as well.
 | `node a11y.mjs [engine]` | Accessibility checks on our docs pages. |
 | `node escape.mjs [engine]` | Escape and focus across nested overlays. |
 | `node htmx/htmx.mjs [engine]` | Overlays inside htmx swaps, against the fixture: `go run ./parity/htmx/server` from the repository root (port 8099, `HTMX_URL` to change). |
+| `node htmx/morph.mjs [engine]` | Every overlay through htmx's `innerMorph`, the swap Datastar and idiomorph do: unique ids, no stale portaled content, each overlay opens, highlights, posts and closes after a morph. Same fixture. |
+| `node htmx/boost.mjs [engine]` | Boosted page changes and history restores with a toast on screen: the page keeps painting, the old toaster leaves no observer or window listener. Same fixture. |
 
 Run one compare at a time: two in parallel make the reference app and the pixel checks flaky.
 
