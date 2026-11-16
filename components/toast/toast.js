@@ -719,6 +719,13 @@
     return r;
   }
 
+  // ToastContent's layout effect cleanup and ToastRoot's unmount.
+  function unmountToast(r) {
+    r.observers.forEach((o) => o.disconnect());
+    r.dragAbortController?.abort();
+    r.el.remove();
+  }
+
   function getDragStyles(r) {
     if (
       !r.isSwiping &&
@@ -940,7 +947,7 @@
     viewport.addEventListener("pointercancel", handlePointerEnd);
 
     // Listen globally for F6 so we can force-focus the viewport.
-    window.addEventListener("keydown", (event) => {
+    function handleF6(event) {
       if (selectors.isEmpty(store.state)) return;
       if (event.key === "F6" && event.target !== viewport) {
         event.preventDefault();
@@ -949,7 +956,8 @@
         store.pauseTimers();
         store.setFocused(true);
       }
-    });
+    }
+    window.addEventListener("keydown", handleF6);
 
     // The window and document listeners live while there are toasts.
     function handleWindowBlur(event) {
@@ -1031,9 +1039,7 @@
       const ids = new Set(state.toasts.map((t) => t.id));
       provider.toasts.forEach((r, id) => {
         if (ids.has(id)) return;
-        r.observers.forEach((o) => o.disconnect());
-        r.dragAbortController?.abort();
-        r.el.remove();
+        unmountToast(r);
         provider.toasts.delete(id);
       });
       const mounted = [];
@@ -1087,23 +1093,37 @@
     // A store update renders after the code that updated it, like React
     // renders after an event handler and runs the layout effects then.
     let scheduled = false;
+    let unmounted = false;
     provider.render = () => {
       if (scheduled) return;
       scheduled = true;
       queueMicrotask(() => {
         scheduled = false;
-        renderOnce();
+        if (!unmounted) renderOnce();
       });
     };
 
     // subscribeToToastManager
-    provider.unsubscribe = toastManager[" subscribe"](({ action, options }) => {
+    const unsubscribe = toastManager[" subscribe"](({ action, options }) => {
       const id = options.id;
       if (action === "promise" && options.promise) store.promiseToast(options.promise, options);
       else if (action === "update" && id) store.updateToast(id, options);
       else if (action === "close") store.closeToast(id);
       else store.addToast(options);
     });
+
+    // The cleanups of every effect above and of each toast, React's unmount
+    // of the provider with its viewport.
+    provider.destroy = () => {
+      unmounted = true;
+      unsubscribe();
+      store.clearTimers();
+      windowFocusTimeout.clear();
+      setListening(false);
+      window.removeEventListener("keydown", handleF6);
+      provider.toasts.forEach(unmountToast);
+      provider.toasts.clear();
+    };
     return provider;
   }
 
@@ -1114,10 +1134,8 @@
       viewport._templToastProvider = createProvider(viewport);
     },
     destroy(viewport) {
-      const provider = viewport._templToastProvider;
-      if (!provider) return;
-      provider.unsubscribe();
-      provider.store.clearTimers();
+      viewport._templToastProvider?.destroy();
+      viewport._templToastProvider = null;
     },
   });
 
