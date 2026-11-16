@@ -407,6 +407,8 @@ The final image contains the application binary with embedded assets and listens
 
 For an existing project, add the `build` task from [Create Taskfile](#create-taskfile), pin both Go tools as shown there, and adapt the Go build target and asset paths to your app. Copy the scaffold's [Dockerfile](https://github.com/axadrn/shadcn-templ/blob/main/cmd/shadcn-templ/templates/templ-app/Dockerfile) and [.dockerignore](https://github.com/axadrn/shadcn-templ/blob/main/cmd/shadcn-templ/templates/templ-app/.dockerignore) for container builds, keeping their `bin/app` output path aligned with your task.
 
+This site deploys with [moin](https://moin.run/?ref=shadcn-templ-docs): CI builds the image, moin runs it on your own server.
+
 ## Component Props
 
 Every component accepts three universal props that are left out of the per-component API tables:
