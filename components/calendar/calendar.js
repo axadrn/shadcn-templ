@@ -733,6 +733,11 @@
     return date.toLocaleString(s.props.locale, { month: "short" });
   }
 
+  function formatWeekdayName(s, weekday) {
+    if (s.formatters.formatWeekdayName) return s.formatters.formatWeekdayName(weekday);
+    return s.dateLib.format(weekday, "cccccc");
+  }
+
   function dropdown(s, p, { className, ariaLabel, options, value }) {
     const selectedOption = options?.find((o) => o.value === value);
     const select = el(
@@ -840,7 +845,7 @@
       const headRow = el("tr", { class: CLASS.weekdays }, [
         props.showWeekNumber && el("th", { "aria-label": "Week Number", class: CLASS.weekNumberHeader, scope: "col" }),
         ...weekdays.map((weekday) =>
-          el("th", { "aria-label": dateLib.format(weekday, "cccc"), class: CLASS.weekday, scope: "col" }, [dateLib.format(weekday, "cccccc")]),
+          el("th", { "aria-label": dateLib.format(weekday, "cccc"), class: CLASS.weekday, scope: "col" }, [formatWeekdayName(s, weekday)]),
         ),
       ]);
       const tbody = el(
