@@ -17,6 +17,7 @@ Moving the pin is its own plan.
 - **Scheduling.** In `select-demo`, upstream's first outside focus guard misses `data-base-ui-inert` for one frame after the click (a render that has not committed yet); ours sets it at once.
 - **Go and templ content.** The examples' people, avatars and texts stay in the Go and templ universe by the owner's decision on 2026-10-04 (`AGENTS.md`): `avatar-demo`, `empty-avatar-group`, `hover-card-demo`, `item-group`, under 0.4 % of the pixels.
 - **Stacked radial charts.** Recharts 3.8.0 (shadcn's version, unchanged on Recharts main at 3.11 canary) leaves a `RadialBar` stack out of the angle axis domain and then clips the stacked segments to it: the demo's 570 and 1260 render 81.4 and 98.6 degrees, a third segment past the largest value no path at all. Ours spans the stack total like Recharts 2.15 (PR #618, owner's decision on 2026-10-04): 56.1 and 123.9 degrees.
+- **Calendar locales.** react-day-picker formats with the date-fns locale object a page passes. Ours takes `Locale` as a code and carries date-fns' data for `en-US`, `ar-SA` and `fa-IR` only; every other locale formats through `Intl` (`lun.` where date-fns' `fr` writes `lu`). react-day-picker's `formatWeekdayName` and `formatMonthDropdown` formatters change the labels (issue #659).
 - **Lucide for tabler.** Where upstream renders `@tabler/icons-react` icons, ours renders the nearest lucide icon, by the owner's decision on 2026-10-04 (for now).
 
 ## Final run

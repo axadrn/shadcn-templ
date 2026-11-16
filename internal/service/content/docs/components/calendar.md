@@ -187,4 +187,16 @@ The `Calendar` component displays a month grid for selecting a date or a range o
 
 ### Events and API
 
-The calendar keeps its selection and dispatches `calendar-select` (`detail.selected`, `detail.triggerDate`), react-day-picker's `onSelect`. A navigation dispatches `calendar-month-change` (`detail.month`); with `Month` set the calendar moves only when the page calls `window.templ.calendar.setMonth(calendar, month)`. `window.templ.calendar.setSelected(calendar, selected)` sets the selection, `window.templ.calendar.update(calendar, { formatters, components })` takes react-day-picker's `formatMonthDropdown` formatter and a `DayButton(button, { day, modifiers })` component.
+The calendar keeps its selection and dispatches `calendar-select` (`detail.selected`, `detail.triggerDate`), react-day-picker's `onSelect`. A navigation dispatches `calendar-month-change` (`detail.month`); with `Month` set the calendar moves only when the page calls `window.templ.calendar.setMonth(calendar, month)`. `window.templ.calendar.setSelected(calendar, selected)` sets the selection, `window.templ.calendar.update(calendar, { formatters, components })` takes react-day-picker's `formatMonthDropdown(month)` and `formatWeekdayName(weekday)` formatters and a `DayButton(button, { day, modifiers })` component.
+
+`Locale` formats with date-fns' data for `en-US`, `ar-SA` and the Persian calendar's `fa-IR` and with the browser's `Intl` for every other locale, so a weekday reads `lun.` where date-fns writes `lu`. Pass `formatWeekdayName` for other labels:
+
+```js
+const calendar = document.querySelector('[data-slot="calendar"]');
+window.templ.calendar.update(calendar, {
+  formatters: {
+    formatWeekdayName: (weekday) =>
+      weekday.toLocaleDateString("fr-FR", { weekday: "short" }).slice(0, 2),
+  },
+});
+```
