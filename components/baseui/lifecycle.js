@@ -9,13 +9,21 @@
   const components = [];
 
   // A portaled subtree lives as long as its declaration site (portal owner),
-  // like React unmounts a portal with the component that rendered it.
+  // like React unmounts a portal with the component that rendered it. An
+  // owner declares one portal node: a re-render that puts a new one in its
+  // place (a morph that keeps the owner) unmounts the one portaled before.
   function mounted(el) {
     if (!el.isConnected) return false;
     for (let node = el; node; node = node.parentElement) {
-      if (node._templPortalOwner && !mounted(node._templPortalOwner)) return false;
+      const owner = node._templPortalOwner;
+      if (owner && (!mounted(owner) || replaced(node, owner))) return false;
     }
     return true;
+  }
+
+  function replaced(node, owner) {
+    const declared = owner.querySelector(":scope > [data-base-ui-portal]");
+    return !!declared && declared !== node;
   }
 
   function sync(component) {

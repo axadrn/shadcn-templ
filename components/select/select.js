@@ -769,15 +769,16 @@
     }
   }
 
-  // Shows the selected item's label in the trigger (server only knows the
-  // value, the label lives in the item).
-  window.templ.lifecycle.register(TRIGGER, {
-    init(trigger) {
-      const content = contentFor(trigger);
-      if (!isPositioner(content)) return;
+  // A content mounts with its popup and unmounts with its portal owner: a
+  // portaled one is removed from <body> then.
+  window.templ.lifecycle.register(POPUP, {
+    init(popup) {
+      const content = popup.parentElement;
+      const trigger = isPositioner(content) && triggerFor(content);
+      if (!trigger) return;
       startListNavigation(content, trigger);
       // SelectPopup leaves aria-orientation out once it has a list.
-      popupFor(content).removeAttribute("aria-orientation");
+      popup.removeAttribute("aria-orientation");
       wireGroups(content);
       // Server-side open state (Base UI open or defaultOpen). A server open
       // has no pointer, so it is programmatic.
@@ -785,10 +786,6 @@
         open(content, trigger, "programmatic");
       }
     },
-  });
-  // A content unmounts with its portal owner: a portaled one is removed from
-  // <body> then.
-  window.templ.lifecycle.register(POPUP, {
     destroy(popup) {
       const content = popup.parentElement;
       if (!isPositioner(content)) return;
