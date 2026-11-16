@@ -24,6 +24,8 @@ func main() {
 	mux.Handle("/fragment", templ.Handler(Fragment()))
 	mux.Handle("/open", templ.Handler(OpenPage()))
 	mux.Handle("/fragment-open", templ.Handler(OpenModal()))
+	mux.Handle("/boost/a", templ.Handler(BoostPage("a", "/boost/b")))
+	mux.Handle("/boost/b", templ.Handler(BoostPage("b", "/boost/a")))
 	mux.HandleFunc("POST /hit/{id}", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("hit %s", r.PathValue("id"))
 		w.WriteHeader(http.StatusNoContent)

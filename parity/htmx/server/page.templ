@@ -13,6 +13,7 @@ import (
  "github.com/axadrn/shadcn-templ/v2/components/alertdialog"
  "github.com/axadrn/shadcn-templ/v2/components/sheet"
  "github.com/axadrn/shadcn-templ/v2/components/drawer"
+ "github.com/axadrn/shadcn-templ/v2/components/toast"
 )
 
 templ Hit(name string) {
@@ -129,6 +130,19 @@ templ Page() {
  @Fragment()
  </div>
  <button id="swap" hx-get="/fragment" hx-target="#slot" hx-swap="innerHTML">swap</button>
+ <button id="morph" hx-get="/fragment" hx-target="#slot" hx-swap="innerMorph">morph</button>
+ </body></html>
+}
+
+// A boosted page with the toaster: a link swaps the body, the toaster with it.
+templ BoostPage(name, next string) {
+ <!DOCTYPE html>
+ <html><head><title>{ name }</title><script src="/htmx.js"></script>
+ @components.Scripts()
+ </head><body hx-boost:inherited="true">
+ <h1 id="page">{ name }</h1>
+ <a id="next" href={ templ.SafeURL(next) }>Other page</a>
+ @toast.Toaster()
  </body></html>
 }
 
