@@ -63,13 +63,13 @@ import "my-app/packages/ui/utils"
 
 ### Add another app
 
-Copy `apps/web` to `apps/admin` without its `components.json`, change the import paths from `my-app/apps/web/...` to `my-app/apps/admin/...`, and run `init` in it. It finds `packages/ui` and joins it.
+Copy `apps/web` to `apps/admin` with its `components.json`, and change `my-app/apps/web` to `my-app/apps/admin` in the import paths and in the `components` alias. Then give it the bundle:
 
 ```shell
-shadcn-templ init --cwd apps/admin
+shadcn-templ bundle --cwd apps/admin
 ```
 
-Then add it to the root `Taskfile.yml` next to `web`:
+Add it to the root `Taskfile.yml` next to `web`:
 
 ```yaml title="Taskfile.yml"
 includes:
@@ -84,6 +84,16 @@ includes:
 Each app's `task dev` picks a free app port and a free templ proxy port, so both run side by side.
 
 </Steps>
+
+## Existing monorepo
+
+`init` sets up one app at a time. Run at the module root, it lists the workspaces to pass to `--cwd`:
+
+```shell
+shadcn-templ init --cwd apps/web
+```
+
+The app gets its own `components` and `utils` packages, like a single project. To share one ui package between apps instead, write the two `components.json` files from the [requirements](#requirements) by hand, with your module path and directories, and point the ui package's CSS at the apps (requirement 4). Then run `shadcn-templ add` in an app as usual.
 
 ## File Structure
 
@@ -167,7 +177,7 @@ Taskfile.yml
 }
 ```
 
-3. Ensure you have the same `style`, `iconLibrary` and `baseColor` in both `components.json` files. `init` in an app copies its `iconLibrary`, `menuColor`, `menuAccent` and `rtl` to `packages/ui`, `apply` also its `style` and `baseColor`. `add` installs the ui components in the style of `packages/ui`.
+3. Ensure you have the same `style`, `iconLibrary` and `baseColor` in both `components.json` files. `init` in an app whose aliases point into `packages/ui` copies its `iconLibrary`, `menuColor`, `menuAccent` and `rtl` there, `apply` also its `style` and `baseColor`. `add` installs the ui components in the style of `packages/ui`.
 
 4. The ui package's CSS must point Tailwind at the apps and at itself. Each app builds it with `tailwindcss -i ../../packages/ui/styles/globals.css`, and Tailwind only scans the app on its own.
 

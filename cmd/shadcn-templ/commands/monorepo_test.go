@@ -15,7 +15,8 @@ import (
 
 // TestMonorepoAppsShareComponents is issue #623: one go.mod at the root,
 // two apps under cmd/ with their own components.json, CSS and scripts dir,
-// one shared components package.
+// one shared components package. init sets up each app on its own like
+// shadcn's (#640); sharing is the components.json the apps carry.
 func TestMonorepoAppsShareComponents(t *testing.T) {
 	t.Setenv("GO_ENV", "production")
 
@@ -58,14 +59,43 @@ func TestMonorepoAppsShareComponents(t *testing.T) {
 		t.Fatal("scaffolding inside a module must be refused")
 	}
 
+	// init installs into the app, never at the module root.
 	if err := RunInit(InitOptions{Cwd: appA, Preset: "nova", Silent: true, Registry: server.URL}); err != nil {
+		t.Fatal(err)
+	}
+	if raw, _ := utils.GetRawConfig(appA); raw.Aliases != (utils.Aliases{Components: "example.com/mono/cmd/servicea/components", Utils: "example.com/mono/cmd/servicea/utils"}) {
+		t.Fatalf("app a aliases %+v", raw.Aliases)
+	}
+	read(filepath.Join(appA, "utils", "shadcn-templ.go"))
+	for _, dir := range []string{"components", "utils"} {
+		if _, err := os.Stat(filepath.Join(root, dir)); !os.IsNotExist(err) {
+			t.Fatalf("init wrote %s at the module root", dir)
+		}
+	}
+	// The module root has no apps/ or packages/: init there is a project.
+	if targets := monorepoTargets(root); targets != nil {
+		t.Fatalf("targets %v", targets)
+	}
+
+	// Sharing the root packages: both apps alias them in components.json.
+	if err := os.RemoveAll(filepath.Join(appA, "utils")); err != nil {
+		t.Fatal(err)
+	}
+	rawA, _ := utils.GetRawConfig(appA)
+	rawA.Aliases = utils.Aliases{Components: "example.com/mono/components", Utils: "example.com/mono/utils"}
+	if err := utils.WriteConfig(appA, rawA); err != nil {
 		t.Fatal(err)
 	}
 	if err := RunAdd([]string{"dialog"}, AddOptions{Cwd: appA, Silent: true, Registry: server.URL}); err != nil {
 		t.Fatal(err)
 	}
-	// The second app joins after components exist: init gives it its bundle.
-	if err := RunInit(InitOptions{Cwd: appB, Preset: "vega", Silent: true, Registry: server.URL}); err != nil {
+	// The second app carries the same aliases: init keeps them and gives it
+	// its bundle, as components exist.
+	rawB := *rawA
+	if err := utils.WriteConfig(appB, &rawB); err != nil {
+		t.Fatal(err)
+	}
+	if err := RunInit(InitOptions{Cwd: appB, Preset: "vega", Force: true, Silent: true, Registry: server.URL}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -258,14 +288,46 @@ func TestInitMonorepoScaffold(t *testing.T) {
 	}
 	absent(filepath.Join(app, "components", "scripts_bundle.go"), filepath.Join(ui, "assets"))
 
-	// A second app joins the ui package: its own components, ui and utils
-	// from packages/ui, the shared CSS. Its design settings propagate to
-	// the ui workspace, its style does not.
+	// At the module root init lists the workspaces instead (#640).
+	if err := RunInit(InitOptions{Cwd: root, Silent: true, Registry: registryURL}); err == nil ||
+		!strings.Contains(err.Error(), "shadcn-templ init --cwd apps/web") || !strings.Contains(err.Error(), "shadcn-templ init --cwd packages/ui") {
+		t.Fatalf("init at the monorepo root: %v", err)
+	}
+	absent(filepath.Join(root, utils.ConfigFileName))
+
+	// A new app without a config is set up on its own, it joins nothing.
+	solo := filepath.Join(root, "apps", "solo")
+	if err := os.MkdirAll(solo, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := RunInit(InitOptions{Cwd: solo, Silent: true, Registry: registryURL}); err != nil {
+		t.Fatal(err)
+	}
+	if raw, _ := utils.GetRawConfig(solo); raw.Aliases != (utils.Aliases{Components: "mono/apps/solo/components", Utils: "mono/apps/solo/utils"}) || raw.Tailwind.CSS != "assets/css/globals.css" {
+		t.Errorf("apps/solo config %+v", raw)
+	}
+	read(filepath.Join(solo, "utils", "shadcn-templ.go"))
+	if err := os.RemoveAll(solo); err != nil {
+		t.Fatal(err)
+	}
+
+	// A second app is a copy of apps/web with its own components alias:
+	// ui components, utils and CSS from packages/ui. init in it keeps the
+	// aliases; its design settings propagate to the ui workspace, its style
+	// does not.
 	admin := filepath.Join(root, "apps", "admin")
 	if err := os.MkdirAll(admin, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := RunInit(InitOptions{Cwd: admin, Preset: "maia", Silent: true, Registry: registryURL}); err != nil {
+	webConfig, _ := utils.GetRawConfig(app)
+	webConfig.Aliases.Components = "mono/apps/admin/components"
+	if err := utils.WriteConfig(admin, webConfig); err != nil {
+		t.Fatal(err)
+	}
+	if err := RunBundle(BundleOptions{Cwd: admin, Silent: true}); err != nil {
+		t.Fatal(err)
+	}
+	if err := RunInit(InitOptions{Cwd: admin, Preset: "maia", Force: true, Silent: true, Registry: registryURL}); err != nil {
 		t.Fatal(err)
 	}
 	adminRaw, err := utils.GetRawConfig(admin)

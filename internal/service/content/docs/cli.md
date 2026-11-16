@@ -14,7 +14,7 @@ go install github.com/axadrn/shadcn-templ/v2/cmd/shadcn-templ@latest
 
 Use the `init` command to initialize configuration and dependencies for an existing project.
 
-The `init` command writes `components.json`, adds the shared `utils` package, merges the theme CSS variables into your Tailwind entry file and vendors the shared stylesheets next to it. A `go.mod` is required, in this directory or a parent directory; run `init` in each app of a [monorepo](/docs/monorepo).
+The `init` command writes `components.json`, adds the shared `utils` package, merges the theme CSS variables into your Tailwind entry file and vendors the shared stylesheets next to it. A `go.mod` is required, in this directory or a parent directory. In a [monorepo](/docs/monorepo), run it for one app with `--cwd apps/web`.
 
 ```shell
 shadcn-templ init
@@ -40,7 +40,7 @@ shadcn-templ init my-app --monorepo
 
 ```shell
 Usage:
-  shadcn-templ init [name] [--template <templ>] [--monorepo] [--preset <code|url|name>] [--base-color <color>] [--css <path>] [--force] [--silent] [--registry <url>]
+  shadcn-templ init [name] [--template <templ>] [--monorepo] [--preset <code|url|name>] [--base-color <color>] [--css <path>] [--cwd <path>] [--force] [--silent] [--registry <url>]
 
 Arguments:
   name                          the project name for --template and --monorepo (default templ-app, templ-monorepo)
