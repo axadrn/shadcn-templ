@@ -169,6 +169,12 @@ To enable RTL support, see the [Direction](/docs/components/direction) component
 
 The `selectcomp.Select` component is the root that carries the selection and the form value.
 
+Picking an item dispatches a cancelable `select-change` event on the trigger,
+Base UI's `onValueChange`. Its detail contains `value` and `label`. With `Value`
+set, the page commits the value with `window.templ.select.setValue(trigger, value)`;
+otherwise the Select commits it, and its hidden input fires a bubbling `change`
+like a native select.
+
 The `select-open-change` event detail contains `open` and `openMethod`.
 `openMethod` is `null` when the event requests that the Select close. A Select
 the server renders open counts as opened programmatically.
