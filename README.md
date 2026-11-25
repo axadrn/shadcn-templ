@@ -14,6 +14,10 @@ Visit https://shadcn-templ.com/docs to view the documentation.
 
 Please read the [contributing guide](/CONTRIBUTING.md).
 
+## Ship it
+
+Built something with shadcn-templ? Deploy it to a server you own with [moin](https://moin.run), by the same author.
+
 ## License
 
 Licensed under the [MIT license](./LICENSE).
