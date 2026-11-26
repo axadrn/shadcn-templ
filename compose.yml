@@ -1,15 +1,9 @@
-# shadcn-templ.com, run by moin: https://moin.run/docs/guides/config
+# shadcn-templ.com, run by moin: https://moin.run/docs/guides/compose
 # CI builds the image and its deploy hook ships each new tag.
-x-moin:
-  app: shadcn-templ
-  port: 8090
-  health: /healthz
-  domains: [shadcn-templ.com, www.shadcn-templ.com, templui.io, www.templui.io, v1.shadcn-templ.com]
-  canonical: shadcn-templ.com
-
 services:
   app:
     image: ghcr.io/axadrn/shadcn-templ:latest
+    expose: ["8090"]
     environment:
       GO_ENV: production
       BASE_URL: https://shadcn-templ.com
